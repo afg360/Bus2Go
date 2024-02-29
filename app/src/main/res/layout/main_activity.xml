@@ -7,15 +7,20 @@
     android:background="@color/dark">
 
 
-    <SearchView
-        android:id="@+id/search_bar"
-        android:layout_width="368dp"
-        android:layout_height="61dp"
-        android:layout_marginTop="15dp"
-        android:background="@drawable/search_box"
-        android:iconifiedByDefault="false"
-
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <SearchView
+            android:id="@+id/search_bar"
+            android:layout_width="370dp"
+            android:layout_height="60dp"
+            android:layout_marginTop="15dp"
+            android:background="@drawable/search_box" />
+    </com.google.android.material.appbar.AppBarLayout>
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

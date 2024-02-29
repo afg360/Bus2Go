@@ -9,6 +9,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
+    boolean submitted;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -21,18 +22,20 @@ public class MainActivity extends AppCompatActivity {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                if (query != null){
+                if (query != null && !submitted){
                     Log.d("Query:", query);
+                    submitted = true;
+                    Intent intent = new Intent(getApplicationContext(), Search.class);
+                    intent.putExtra("query", query);
+                    startActivity(intent);
                     return true;
                 }
-                return false; // Return true if the query has been handled, false otherwise.
+                return false;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                // This method is called whenever the text in the search field changes.
-                // newText contains the new text entered by the user.
-                // Here you can perform actions such as filtering data based on the new query.
+
                 return false; // Return true if the query has been handled, false otherwise.
             }
         });
