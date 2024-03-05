@@ -2,6 +2,7 @@ package dev.mainhq.schedules;
 
 import android.content.Context;
 
+import androidx.test.core.app.ActivityScenario;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
@@ -23,4 +24,13 @@ public class ExampleInstrumentedTest {
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         assertEquals("dev.mainhq.schedules", appContext.getPackageName());
     }
+
+    @Test
+    public void checkFileOpening(){
+        ActivityScenario.launch(MainActivity.class).onActivity(
+                activity -> {
+           // assertNotNull(activity.readTextFileFromAssets("stm_data_info/routes.txt"));
+        });
+    }
+
 }
