@@ -1,5 +1,7 @@
 package dev.mainhq.schedules;
 
+import dev.mainhq.schedules.utils.Parser;
+
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -9,15 +11,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.lang.String;
 import java.lang.Character;
 import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Set;
 
@@ -54,7 +52,8 @@ public class Search extends AppCompatActivity {
 
     @Nullable
     private ArrayList<String[]> setup(String filepath){
-        Hashtable<String[], String> busInfo = readTextFileFromAssets(filepath);
+        InputStream inputStream = Parser.makeInputStream(this, filepath);
+        Hashtable<String[], String> busInfo = Parser.readTextFileFromAssets(inputStream);
         if (this.query != null){
             QueryType type = getType(this.query);
             Set<String[]> busInfoKeys = busInfo.keySet();
@@ -110,7 +109,7 @@ public class Search extends AppCompatActivity {
     }
     private QueryType getType(String str){
         //process str first
-        str = toParsable(str);
+        str = Parser.toParsable(str);
         //we could also make like a dictionary that stores common mistakes
         //for typical typos when searching?
         boolean isDigitOnly = true;
@@ -125,47 +124,6 @@ public class Search extends AppCompatActivity {
                                         QueryType.MIXED;
     }
 
-    private Hashtable<String[], String> readTextFileFromAssets(String fileName) {
-        Hashtable<String[], String> list = new Hashtable<>();
-        try {
-            InputStream inputStream = this.getAssets().open(fileName);
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            String line = bufferedReader.readLine();
-            //should skip first 5 lines
-            while (line != null) {
-                //could color depending on express, night or normal
-                String[] vals = line.split(",");
-                String num = vals[0];
-                String name = vals[3];
-                name = toParsable(name);
-                //map modified string to real string
-                list.put(new String[] {num, name}, vals[3]);
-                line = bufferedReader.readLine();
-            }
-            bufferedReader.close();
-            inputStream.close();
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
-
-    private static String toParsable(String str){
-        str = str.toLowerCase();
-        str = str.replace("'", "");
-        str = str.replace("-", "");
-        str = str.replace(" ", "");
-        str = str.replace("/", "");
-        str = str.replace("é", "e");
-        str = str.replace("è", "e");
-        str = str.replace("ê", "e");
-        str = str.replace("ç", "c");
-        str = str.replace("î", "i");
-        str = str.replace("ô", "o");
-        str = str.replace("û", "u");
-        return str;
-    }
     private enum QueryType{
         NUM_ONLY,ALPHA_ONLY,MIXED,UNKNOWN
     }
