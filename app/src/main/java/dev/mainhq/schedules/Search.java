@@ -6,6 +6,8 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,14 +15,16 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.String;
 import java.lang.Character;
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Set;
 
 public class Search extends AppCompatActivity {
     //processed query
-    String query;
-    //we tmp removed busingo hashtable gotten from main
+    private String query;
+    //we tmp removed busInfo hashtable gotten from main
     //bcz doesnt work yet so duplicate code...
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -31,47 +35,15 @@ public class Search extends AppCompatActivity {
         if (extras != null) {
             this.query = extras.getString("query");
             String routesFile = "stm_data_info/routes.txt";
-            Hashtable<String[], String> busInfo = readTextFileFromAssets(routesFile);
-            if (this.query != null){
-                QueryType type = getType(this.query);
-                Set<String[]> busInfoKeys = busInfo.keySet();
-                switch(type){
-                    //if query is in first part of the actual name\
-                    //also consider!
-                    case NUM_ONLY:
-                        boolean found = false;
-                        for (String[] arr : busInfoKeys){
-                            if (arr[0].equals(this.query)) {
-                                Log.d("FOUND VAL", arr[1]);
-                                found = true;
-                            }
-                            if (found) break;
-                        }
-                        if (!found) Log.e("Mistype", "coudlnt find res for query");
-                        break;
-                    case ALPHA_ONLY:
-                        boolean pres = false;
-                        for (String[] arr : busInfoKeys){
-                            //for now print all possible combinations
-                            //must also work if mispell (using dicts?, regex?)
-                            if (arr[1].contains(query)) {
-                                Log.d("Query substring", Objects.requireNonNull(busInfo.get(arr))
-                                        + "\nBus: " + arr[0]);
-                                pres = true;
-                            }
-                        }
-                        if (!pres) Log.d("Substring Error", "No substring found");
-                        break;
-                    case MIXED:
-                        break;
-                    case UNKNOWN:
-                        break;
-                    default:
-                        //throw an exception
-                        break;
-                }
-            }
-            else Log.e("Error", "An error occurred retrieving query");
+            ArrayList<String[]> dataQueried = setup(routesFile);
+            //if null, display "Sorry, no matches made"
+            //if (dataQueried == null) //todo;
+            //else
+            RecyclerView recyclerView = this.findViewById(R.id.search_recycle_view);
+            LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+            layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+            recyclerView.setLayoutManager(layoutManager);
+            recyclerView.setAdapter(new BusListElemsAdapter(dataQueried));
         }
         else Log.d("Query", "None");
     }
@@ -80,6 +52,62 @@ public class Search extends AppCompatActivity {
         this.finish();
     }
 
+    @Nullable
+    private ArrayList<String[]> setup(String filepath){
+        Hashtable<String[], String> busInfo = readTextFileFromAssets(filepath);
+        if (this.query != null){
+            QueryType type = getType(this.query);
+            Set<String[]> busInfoKeys = busInfo.keySet();
+            ArrayList<String[]> list = new ArrayList<>(0);
+            switch(type){
+                //if query is in first part of the actual name\
+                //also consider!
+                case NUM_ONLY:
+                    boolean found = false;
+                    for (String[] arr : busInfoKeys){
+                        if (arr[0].contains(this.query)) {
+                            Log.d("FOUND VAL", Objects.requireNonNull(busInfo.get(arr))
+                                    + "\nBus: " + arr[0]);
+                            list.add(new String[]{arr[0], busInfo.get(arr)});
+                            found = true;
+                        }
+                    }
+                    if (!found) Log.e("Mistype", "coudlnt find res for query");
+                    break;
+                case ALPHA_ONLY:
+                    boolean pres = false;
+                    for (String[] arr : busInfoKeys){
+                        //for now print all possible combinations
+                        //must also work if mispell (using dicts?, regex?)
+                        if (arr[1].contains(this.query)) {
+                            Log.d("Query substring", Objects.requireNonNull(busInfo.get(arr))
+                                    + "\nBus: " + arr[0]);
+                            list.add(new String[]{arr[0], busInfo.get(arr)});
+                            pres = true;
+                        }
+                    }
+                    if (!pres) Log.d("Substring Error", "No substring found");
+                    break;
+                case MIXED:
+                    //TODO
+                    break;
+                case UNKNOWN:
+                    Log.e("UNKNOWN TYPE ERROR", "Cannot process that data...");
+                    this.finish();
+                    break;
+                default:
+                    //throw an exception
+                    break;
+            }
+            if (list.size() < 1) return null;
+            return list;
+        }
+        else {
+            Log.e("Error", "An error occurred retrieving query");
+            return null;
+        }
+
+    }
     private QueryType getType(String str){
         //process str first
         str = toParsable(str);
