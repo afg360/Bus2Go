@@ -7,8 +7,5 @@
         <!-- actionBar color -->
         <item name="colorPrimaryDark">@color/dark</item>
         <item name="colorAccent">@color/dark</item>
-        <item name="actionBarTheme">
-            @id/toolbar
-        </item>
     </style>
 </resources>

@@ -3,8 +3,10 @@ package dev.mainhq.schedules;
 import dev.mainhq.schedules.utils.Parser;
 
 import android.os.Bundle;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -28,20 +30,24 @@ public class Search extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.search);
-        this.setSupportActionBar(this.findViewById(R.id.toolbar));
+
         Bundle extras = this.getIntent().getExtras();
         if (extras != null) {
             this.query = extras.getString("query");
             String routesFile = "stm_data_info/routes.txt";
             ArrayList<String[]> dataQueried = setup(routesFile);
             //if null, display "Sorry, no matches made"
-            //if (dataQueried == null) //todo;
-            //else
-            RecyclerView recyclerView = this.findViewById(R.id.search_recycle_view);
-            LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-            layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-            recyclerView.setLayoutManager(layoutManager);
-            recyclerView.setAdapter(new BusListElemsAdapter(dataQueried));
+            if (dataQueried == null) {
+                String empty = "No Matches Found";
+                TextView txtview = new TextView(this.getApplicationContext());
+            }
+            else{
+                RecyclerView recyclerView = this.findViewById(R.id.search_recycle_view);
+                LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+                layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+                recyclerView.setLayoutManager(layoutManager);
+                recyclerView.setAdapter(new BusListElemsAdapter(dataQueried));
+            }
         }
         else Log.d("Query", "None");
     }
@@ -98,14 +104,12 @@ public class Search extends AppCompatActivity {
                     //throw an exception
                     break;
             }
-            if (list.size() < 1) return null;
-            return list;
+            return (list.size() < 1) ? null : list;
         }
         else {
             Log.e("Error", "An error occurred retrieving query");
             return null;
         }
-
     }
     private QueryType getType(String str){
         //process str first
@@ -126,5 +130,11 @@ public class Search extends AppCompatActivity {
 
     private enum QueryType{
         NUM_ONLY,ALPHA_ONLY,MIXED,UNKNOWN
+    }
+
+    public void chooseBus(View view){
+        TextView bus = (TextView) view.findViewById(R.id.busDir);
+        TextView busNum = (TextView) view.findViewById(R.id.busNum);
+
     }
 }

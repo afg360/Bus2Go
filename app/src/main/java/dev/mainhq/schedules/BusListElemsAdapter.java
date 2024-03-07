@@ -12,9 +12,13 @@ import java.util.ArrayList;
 
 public class BusListElemsAdapter extends RecyclerView.Adapter<BusListElemsAdapter.ViewHolder> {
 
-    private ArrayList<String[]> busData;
-
-    BusListElemsAdapter(ArrayList<String[]> data){
+    @NonNull
+    private final ArrayList<String[]> busData;
+    //when doing bus num - 400, if > 0, then color = green
+    // if - 300 > 0, then color = black
+    // else blue
+    // if 700, then green (but same as 400)
+    BusListElemsAdapter(@NonNull ArrayList<String[]> data){
         super();
         this.busData = data;
     }

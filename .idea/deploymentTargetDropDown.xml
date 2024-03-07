@@ -8,6 +8,12 @@
       <entry key="checkFileOpening()">
         <State />
       </entry>
+      <entry key="checkFragmentButton()">
+        <State />
+      </entry>
+      <entry key="checkQuery()">
+        <State />
+      </entry>
     </value>
   </component>
 </project>

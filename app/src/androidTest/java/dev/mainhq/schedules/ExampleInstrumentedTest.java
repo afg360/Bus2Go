@@ -1,8 +1,13 @@
 package dev.mainhq.schedules;
 
 import android.content.Context;
+import android.graphics.drawable.ColorDrawable;
+import android.view.View;
+import android.widget.SearchView;
 
 import androidx.test.core.app.ActivityScenario;
+import androidx.test.core.app.ApplicationProvider;
+import androidx.test.espresso.Espresso;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
@@ -10,6 +15,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static org.junit.Assert.*;
+
+import java.io.InputStream;
+
+import dev.mainhq.schedules.utils.Parser;
 
 /**
  * Instrumented test, which will execute on an Android device.
@@ -24,13 +33,25 @@ public class ExampleInstrumentedTest {
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         assertEquals("dev.mainhq.schedules", appContext.getPackageName());
     }
-
     @Test
     public void checkFileOpening(){
         ActivityScenario.launch(MainActivity.class).onActivity(
                 activity -> {
-           // assertNotNull(activity.readTextFileFromAssets("stm_data_info/routes.txt"));
+                    InputStream inputStream = Parser.makeInputStream(activity, "stm_data_info/routes.txt");
+                    assertNotNull(Parser.readTextFileFromAssets(inputStream));
         });
+    }
+    @Test
+    public void checkQuery(){
+        String query1 = "mon";
+        ActivityScenario.launch(MainActivity.class).onActivity(
+                activity ->{
+                    SearchView sv = activity.findViewById(R.id.search_widget);
+                    sv.setQuery(query1, true);
+                    assertEquals(query1, sv.getQuery().toString());
+                }
+        );
+        //Espresso.
     }
 
 }
