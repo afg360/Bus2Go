@@ -1,12 +1,12 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Theme.Schedules" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+    <style name="Theme.Schedules" parent="Theme.AppCompat">
         <!-- Primary brand color. -->
+        <!-- appBar color-->
         <item name="colorPrimary">@color/basic_blue</item>
-        <item name="colorPrimaryVariant">@color/purple_700</item>
-        <item name="colorOnPrimary">@color/black</item>
-        <!-- Status bar color. -->
-        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
-        <!-- Customize your theme here. -->
+        <item name="editTextColor">@color/light</item>
+        <!-- actionBar color -->
+        <item name="colorPrimaryDark">@color/dark</item>
+        <item name="colorAccent">@color/dark</item>
     </style>
 </resources>

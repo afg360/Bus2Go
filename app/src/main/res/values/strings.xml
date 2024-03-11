@@ -9,4 +9,7 @@
     <string name="french">French</string>
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
+    <string name="choose_a_direction">Choose a direction</string>
+    <string name="search">Search</string>
+    <string name="settings">Settings</string>
 </resources>

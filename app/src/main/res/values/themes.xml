@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 <!-- Can customise the action bar, etc.-->
-    <style name="Theme.Schedules" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="Theme.Schedules" parent="Theme.AppCompat.Light">
         <!-- appBar color-->
         <item name="colorPrimary">@color/basic_blue</item>
         <item name="editTextColor">@color/light</item>

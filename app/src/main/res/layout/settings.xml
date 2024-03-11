@@ -6,8 +6,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/dark"
     >
-    <include android:id="@+id/settingsAppBar"
-        layout="@layout/action_bar"/>
     <LinearLayout
         android:id="@+id/settingsChoices"
         android:layout_width="match_parent"
@@ -29,7 +27,6 @@
             android:textSize="25sp"
             android:layout_margin="10dp"
             android:fontFamily="sans-serif-medium"
-            android:onClick="onClickLanguage"
             android:paddingVertical="5dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
