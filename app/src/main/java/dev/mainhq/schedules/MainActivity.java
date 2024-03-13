@@ -9,23 +9,18 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ActionMenuView;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.SearchView;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.view.MenuItemCompat;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentContainerView;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.Objects;
-import java.util.zip.Inflater;
 
 public class MainActivity extends AppCompatActivity {
     @Override
@@ -38,9 +33,6 @@ public class MainActivity extends AppCompatActivity {
         String routesFile = "stm_data_info/routes.txt";
 
         this.setContentView(R.layout.main_activity);
-        //this.listenSearchQuery();
-        //this.listenSettings();
-        //this.chooseBus();
     }
 
     @Override
@@ -99,6 +91,26 @@ public class MainActivity extends AppCompatActivity {
                         LinearLayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
                         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
                         recyclerView.setLayoutManager(layoutManager);
+                        recyclerView.addOnItemTouchListener(new RecyclerViewItemListener(getApplicationContext(), recyclerView, new RecyclerViewItemListener.ClickListener() {
+                            @Override
+                            public void onClick(View view, int position) {
+                                Intent intent = new Intent(getApplicationContext(), ChooseBus.class);
+                                //works, but seems to get the data more than once (4 times)
+                                //i.e. waste for some reason
+                                ConstraintLayout layout = (ConstraintLayout) view;
+                                String busName = ((TextView) layout.getChildAt(0)).getText().toString();
+                                String busNum = ((TextView) layout.getChildAt(1)).getText().toString();
+                                //Log.d("Bus name selected", busName);
+                                //Log.d("Bus number selected", busNum);
+                                intent.putExtra("busName", busName);
+                                intent.putExtra("busNum", busNum);
+                                startActivity(intent);
+                            }
+                            @Override
+                            public void onLongClick(View view, int position) {
+                            }
+
+                        }));
                         recyclerView.setAdapter(new BusListElemsAdapter(dataQueried));
                         searchView.addTouchables(recyclerView.getTouchables());
                     }
@@ -111,14 +123,5 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
-    }
-    public void chooseBus(){
-        View view = findViewById(R.id.bus_elem);
-        if (view != null) {
-            view.setOnClickListener(v -> {
-                Intent intent = new Intent(this, ChooseBus.class);
-                startActivity(intent);
-            });
-        }
     }
 }

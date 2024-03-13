@@ -2,6 +2,7 @@ package dev.mainhq.schedules;
 
 import dev.mainhq.schedules.utils.Parser;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -39,6 +40,16 @@ public class SearchBus extends AppCompatActivity {
                 LinearLayoutManager layoutManager = new LinearLayoutManager(this);
                 layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
                 recyclerView.setLayoutManager(layoutManager);
+                recyclerView.addOnItemTouchListener(new RecyclerViewItemListener(getApplicationContext(), recyclerView, new RecyclerViewItemListener.ClickListener() {
+                    @Override
+                    public void onClick(View view, int position) {
+                        Intent intent = new Intent(getApplicationContext(), ChooseBus.class);
+                        startActivity(intent);
+                    }
+                    @Override
+                    public void onLongClick(View view, int position) {
+                    }
+                }));
                 recyclerView.setAdapter(new BusListElemsAdapter(dataQueried));
             }
         }

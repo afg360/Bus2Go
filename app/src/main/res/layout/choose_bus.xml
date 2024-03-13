@@ -8,31 +8,29 @@
 
     <!-- menu items -->
 
-    <LinearLayout
-        android:layout_width="216dp"
-        android:layout_height="95dp"
-        android:layout_margin="30dp"
-        android:orientation="horizontal"
-        android:padding="10dp"
-        app:layout_constraintEnd_toEndOf="parent"
+    <TextView
+        android:id="@+id/chooseBusDir"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="60dp"
+        android:textColor="@color/light"
+        android:textSize="20sp"
+        android:text="test1"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_margin="100dp"
+        />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginEnd="60dp"
-            android:text="bus"
-            android:textColor="@color/light"
-            android:textSize="20sp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginStart="60dp"
-            android:text="num"
-            android:textColor="@color/light"
-            android:textSize="20sp" />
-    </LinearLayout>
+    <TextView
+        android:id="@+id/chooseBusNum"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="60dp"
+        android:textColor="@color/light"
+        android:textSize="20sp"
+        android:text="test2"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_margin="100dp"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

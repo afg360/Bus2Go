@@ -100,8 +100,8 @@ public final class Parser {
                             //for now print all possible combinations
                             //must also work if mispell (using dicts?, regex?)
                             if (arr[1].contains(query)) {
-                                Log.d("Query substring", Objects.requireNonNull(busInfo.get(arr))
-                                        + "\nBus: " + arr[0]);
+                                //Log.d("Query substring", Objects.requireNonNull(busInfo.get(arr))
+                                  //      + "\nBus: " + arr[0]);
                                 list.add(new String[]{arr[0], busInfo.get(arr)});
                                 pres = true;
                             }

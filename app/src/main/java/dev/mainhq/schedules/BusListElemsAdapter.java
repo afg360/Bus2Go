@@ -1,13 +1,18 @@
 package dev.mainhq.schedules;
 
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
@@ -17,10 +22,15 @@ import java.util.ArrayList;
 public class BusListElemsAdapter extends RecyclerView.Adapter<BusListElemsAdapter.ViewHolder> {
     @NonNull
     private final ArrayList<String[]> busData;
+
     //when doing bus num >= 400, then color = green
     // if  >= 300, then color = black
     // else blue
     // if 700, then green (but same as 400)
+
+    private interface Listener{
+        void onClickListener();
+    }
     BusListElemsAdapter(@NonNull ArrayList<String[]> data){
         super();
         this.busData = data;
