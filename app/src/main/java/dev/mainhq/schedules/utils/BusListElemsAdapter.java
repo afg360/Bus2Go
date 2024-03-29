@@ -1,21 +1,17 @@
-package dev.mainhq.schedules;
+package dev.mainhq.schedules.utils;
 
-import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-
-import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+
+import dev.mainhq.schedules.R;
+
 //TODO
 //could add view/ontouchlistener to handle touch holding, etc.
 //may need to use a recycler view, but implement a base adapter instead...?
@@ -31,7 +27,7 @@ public class BusListElemsAdapter extends RecyclerView.Adapter<BusListElemsAdapte
     private interface Listener{
         void onClickListener();
     }
-    BusListElemsAdapter(@NonNull ArrayList<String[]> data){
+    public BusListElemsAdapter(@NonNull ArrayList<String[]> data){
         super();
         this.busData = data;
     }

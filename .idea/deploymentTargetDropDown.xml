@@ -2,16 +2,22 @@
 <project version="4">
   <component name="deploymentTargetDropDown">
     <value>
-      <entry key="app">
+      <entry key="DatabaseTest">
         <State />
       </entry>
-      <entry key="checkFileOpening()">
+      <entry key="app">
         <State />
       </entry>
       <entry key="checkFragmentButton()">
         <State />
       </entry>
       <entry key="checkQuery()">
+        <State />
+      </entry>
+      <entry key="getRoutes()">
+        <State />
+      </entry>
+      <entry key="getTrips()">
         <State />
       </entry>
     </value>

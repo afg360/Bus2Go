@@ -1,4 +1,4 @@
-package dev.mainhq.schedules;
+package dev.mainhq.schedules.utils;
 
 import android.content.Context;
 import android.view.GestureDetector;
@@ -7,7 +7,8 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
+//if we can replace with onclicklistener do that instead...
+//errors may have been bcz of dumb code errors
 public class RecyclerViewItemListener implements RecyclerView.OnItemTouchListener {
     private final GestureDetector gestureDetector;
     private final ClickListener clickListener;

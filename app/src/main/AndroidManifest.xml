@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -14,7 +16,12 @@
         android:versionCode="1"
         android:versionName="0.1-alpha"
         tools:targetApi="31">
-        <!-- Need to change the android:theme attr-->
+        <activity
+            android:name=".ChooseTime"
+            android:exported="false"
+            android:label="@string/title_activity_choose_time"
+            android:theme="@style/Theme.Schedules.NoActionBar" />
+        <!-- Need to change the android:theme attr -->
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -46,17 +53,18 @@
             android:name=".Settings"
             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ChooseBus"
+        <activity
+            android:name=".ChooseBus"
             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
     </application>

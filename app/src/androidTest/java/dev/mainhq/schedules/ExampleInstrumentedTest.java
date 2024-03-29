@@ -1,13 +1,9 @@
 package dev.mainhq.schedules;
 
 import android.content.Context;
-import android.graphics.drawable.ColorDrawable;
-import android.view.View;
 import android.widget.SearchView;
 
 import androidx.test.core.app.ActivityScenario;
-import androidx.test.core.app.ApplicationProvider;
-import androidx.test.espresso.Espresso;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
@@ -38,7 +34,7 @@ public class ExampleInstrumentedTest {
         ActivityScenario.launch(MainActivity.class).onActivity(
                 activity -> {
                     InputStream inputStream = Parser.makeInputStream(activity, "stm_data_info/routes.txt");
-                    assertNotNull(Parser.readTextFileFromAssets(inputStream));
+                    assertNotNull(Parser.readBusRoutesFromAssets(inputStream));
         });
     }
     @Test
@@ -46,7 +42,7 @@ public class ExampleInstrumentedTest {
         String query1 = "mon";
         ActivityScenario.launch(MainActivity.class).onActivity(
                 activity ->{
-                    SearchView sv = activity.findViewById(R.id.search_widget);
+                    SearchView sv = activity.findViewById(R.id.app_bar_search_icon);
                     sv.setQuery(query1, true);
                     assertEquals(query1, sv.getQuery().toString());
                 }

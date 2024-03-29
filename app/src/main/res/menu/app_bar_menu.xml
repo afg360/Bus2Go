@@ -13,4 +13,8 @@
         app:actionViewClass="android.widget.SearchView"
         app:showAsAction="ifRoom|collapseActionView"
         />
+    <!--
+    Add a home menu icon for activities further away from
+    home, to kill them all fast and come back to home menu?
+    -->
 </menu>

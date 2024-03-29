@@ -1,5 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-<!-- Can customise the action bar, etc.-->
+    <!-- Can customise the action bar, etc.-->
     <style name="Theme.Schedules" parent="Theme.AppCompat.Light">
         <!-- appBar color-->
         <item name="colorPrimary">@color/basic_blue</item>
@@ -8,4 +8,13 @@
         <item name="colorPrimaryDark">@color/dark</item>
         <item name="colorAccent">@color/dark</item>
     </style>
+
+    <style name="Theme.Schedules.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="Theme.Schedules.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="Theme.Schedules.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>

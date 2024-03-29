@@ -1,6 +1,7 @@
 package dev.mainhq.schedules;
 
-import dev.mainhq.schedules.utils.Parser;
+import dev.mainhq.schedules.utils.BusListElemsAdapter;
+import dev.mainhq.schedules.utils.RecyclerViewItemListener;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,15 +11,19 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.io.Serializable;
 import java.lang.String;
 import java.util.ArrayList;
+
 //instead of creating a new intent, just redo the list if search done in this activity
 public class SearchBus extends AppCompatActivity {
     //processed query
-    private String query;
+    private Serializable queryResult;
+    private Serializable dataType;
     //we tmp removed busInfo hashtable gotten from main
     //bcz doesnt work yet so duplicate code...
     @Override
@@ -27,11 +32,16 @@ public class SearchBus extends AppCompatActivity {
         this.setContentView(R.layout.search_bus);
         Bundle extras = this.getIntent().getExtras();
         if (extras != null) {
-            this.query = extras.getString("query");
+            //this.query = extras.getString("query");
+            this.queryResult = extras.getSerializable("STMBusData");
+            assert this.queryResult != null;
+            if (! (queryResult instanceof ArrayList)) throw new IllegalStateException();
+            //Object test = extras.get("STMBusData");
+            /*
             String routesFile = "stm_data_info/routes.txt";
             ArrayList<String[]> dataQueried = Parser.setup(this, Parser.DataType.busList, this.query);
-            //if null, display "Sorry, no matches made"
-            if (dataQueried == null) {
+            //TODO if null, display "Sorry, no matches made"*/
+            if (this.queryResult == null) {
                 String empty = "No Matches Found";
                 TextView txtview = new TextView(this.getApplicationContext());
             }
@@ -44,13 +54,19 @@ public class SearchBus extends AppCompatActivity {
                     @Override
                     public void onClick(View view, int position) {
                         Intent intent = new Intent(getApplicationContext(), ChooseBus.class);
+                        ConstraintLayout layout = (ConstraintLayout) view;
+                        String busName = ((TextView) layout.getChildAt(0)).getText().toString();
+                        String busNum = ((TextView) layout.getChildAt(1)).getText().toString();
+                        intent.putExtra("busName", busName);
+                        intent.putExtra("busNum", busNum);
                         startActivity(intent);
                     }
                     @Override
                     public void onLongClick(View view, int position) {
                     }
                 }));
-                recyclerView.setAdapter(new BusListElemsAdapter(dataQueried));
+                //need to improve that code to make it more safe
+                recyclerView.setAdapter(new BusListElemsAdapter((ArrayList<String[]>) this.queryResult));
             }
         }
         else Log.d("Query", "None");
