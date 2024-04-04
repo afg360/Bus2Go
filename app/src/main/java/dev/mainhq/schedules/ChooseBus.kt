@@ -49,7 +49,6 @@ class ChooseBus : AppCompatActivity() {
                 //Log.d("Headsign", routes[0])
                 //Log.d("ghol", routes.getAll().toString())
                 setListeners(routes)
-
             }
         }
     }

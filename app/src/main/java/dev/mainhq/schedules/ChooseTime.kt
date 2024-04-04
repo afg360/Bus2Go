@@ -18,7 +18,7 @@ class ChooseTime : AppCompatActivity() {
 
         lifecycleScope.launch {
             val stopTimes = db.stopTimesDao()
-            val arrivalTimes = stopTimes.getArrivalTimes()//busLine)
+            val arrivalTimes = stopTimes.getArrivalTimes(busLine)//busLine)
             if (arrivalTimes.isNotEmpty())
                 Log.d("ARRIVALS", arrivalTimes.toString())
             else

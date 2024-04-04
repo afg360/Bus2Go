@@ -41,7 +41,7 @@ class DatabaseTest {
     @Test
     @Throws(Exception::class)
     fun nonEmptyTrips() = runBlocking {
-        val res = tripsDao.getTripHeadsigns()
+        val res = tripsDao.getTripHeadsigns(6)
         Log.d("Res", res.toString())
         assert(res.isNotEmpty())
         //assertThat(res.get(0), equalTo("5"))
