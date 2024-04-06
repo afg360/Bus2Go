@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".ChooseTime"
-    tools:showIn="@layout/choose_time">
+    tools:showIn="@layout/choose_stop">
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="840dp"

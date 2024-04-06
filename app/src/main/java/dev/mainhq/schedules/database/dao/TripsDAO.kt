@@ -9,10 +9,10 @@ import dev.mainhq.schedules.database.entities.Trips;
 
 @Dao
 interface TripsDAO {
-    @Query("SELECT DISTINCT trip_headsign FROM Trips WHERE routeid = (:routeid);")
-    suspend fun getTripHeadsigns(routeid : Int) : List<String>;
+    @Query("SELECT DISTINCT trip_headsign FROM Trips WHERE route_id = (:routeId);")
+    suspend fun getTripHeadsigns(routeId : Int) : List<String>;
 
-    @Query("SELECT DISTINCT routeid FROM Trips;")
+    @Query("SELECT DISTINCT route_id FROM Trips;")
     suspend fun getRouteId() : List<Int>;
     @Query("SELECT * FROM Trips WHERE id < 11;")
     suspend fun getAll() : List<Trips>;

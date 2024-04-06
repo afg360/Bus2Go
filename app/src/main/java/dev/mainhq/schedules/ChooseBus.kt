@@ -35,20 +35,21 @@ class ChooseBus : AppCompatActivity() {
         setButtons(busNum)
     }
 
-    @SuppressLint("SetTextI18n")
     private fun setButtons(busNum : String){
         if (busNum.toInt() <= 5){
             //todo
             Log.e("Dir Error", "No available buttons for the moment")
         }
         else{
-            val db = databaseBuilder(applicationContext, AppDatabase::class.java, "stm_info")
-                .createFromAsset("database/stm_info.db").build()
+
             lifecycleScope.launch {
+                val db = databaseBuilder(applicationContext, AppDatabase::class.java, "stm_info")
+                    .createFromAsset("database/stm_info.db").build()
                 val routes = db.tripsDao().getTripHeadsigns(busNum.toInt())
                 //Log.d("Headsign", routes[0])
                 //Log.d("ghol", routes.getAll().toString())
                 setListeners(routes)
+                db.close()
             }
         }
     }
@@ -58,9 +59,8 @@ class ChooseBus : AppCompatActivity() {
             val leftButton : Button = findViewById(R.id.route_0)
             val rightButton : Button = findViewById(R.id.route_1)
             val orientation : Orientation
-            //Log.d("Letter", routes[0].last().toString())
-
             if (routes[0].last() == 'E' || routes[0].last() == 'O') {
+                //todo depends on language!!
                 leftButton.text = "West"
                 rightButton.text = "East"
                 orientation = Orientation.HORIZONTAL
@@ -91,11 +91,8 @@ class ChooseBus : AppCompatActivity() {
                         }
                     }
                 }
-                val intent = Intent(applicationContext, ChooseTime::class.java)
-                intent.putExtra(
-                    "BusLine",
-                    toSearch ?: throw IllegalArgumentException("Couldnt find busline!")
-                )
+                val intent = Intent(applicationContext, ChooseStop::class.java)
+                intent.putExtra("BusLine", toSearch ?: throw IllegalArgumentException("Couldnt find busline!"))
                 startActivity(intent)
             }
             rightButton.setOnClickListener{
@@ -116,7 +113,7 @@ class ChooseBus : AppCompatActivity() {
                         }
                     }
                 }
-                val intent = Intent(applicationContext, ChooseTime::class.java)
+                val intent = Intent(applicationContext, ChooseStop::class.java)
                 intent.putExtra("BusLine", toSearch ?: throw IllegalArgumentException("Couldnt find busline"))
                 startActivity(intent)
             }

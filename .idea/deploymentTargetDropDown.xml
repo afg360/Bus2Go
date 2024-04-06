@@ -5,19 +5,19 @@
       <entry key="DatabaseTest">
         <State />
       </entry>
+      <entry key="TimeClassTest">
+        <State />
+      </entry>
       <entry key="app">
         <State />
       </entry>
-      <entry key="checkFragmentButton()">
+      <entry key="test()">
         <State />
       </entry>
-      <entry key="checkQuery()">
+      <entry key="testSub1()">
         <State />
       </entry>
-      <entry key="getRoutes()">
-        <State />
-      </entry>
-      <entry key="getTrips()">
+      <entry key="testSub2()">
         <State />
       </entry>
     </value>
