@@ -7,7 +7,7 @@
     tools:context=".ChooseStop">
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/time_recycle_view"
+        android:id="@+id/stop_recycle_view"
         android:layout_width="match_parent"
         android:layout_height="675dp"
 

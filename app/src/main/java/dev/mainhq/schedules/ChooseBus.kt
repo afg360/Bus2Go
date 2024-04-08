@@ -92,7 +92,7 @@ class ChooseBus : AppCompatActivity() {
                     }
                 }
                 val intent = Intent(applicationContext, ChooseStop::class.java)
-                intent.putExtra("BusLine", toSearch ?: throw IllegalArgumentException("Couldnt find busline!"))
+                intent.putExtra("headsign", toSearch ?: throw IllegalArgumentException("Couldnt find busline!"))
                 startActivity(intent)
             }
             rightButton.setOnClickListener{
@@ -114,7 +114,7 @@ class ChooseBus : AppCompatActivity() {
                     }
                 }
                 val intent = Intent(applicationContext, ChooseStop::class.java)
-                intent.putExtra("BusLine", toSearch ?: throw IllegalArgumentException("Couldnt find busline"))
+                intent.putExtra("headsign", toSearch ?: throw IllegalArgumentException("Couldnt find busline"))
                 startActivity(intent)
             }
         }

@@ -20,7 +20,9 @@
             android:name=".ChooseStop"
             android:exported="false"
             android:label="@string/title_activity_choose_time"
-            android:theme="@style/Theme.Schedules.NoActionBar" />
+            android:theme="@style/Theme.Schedules.NoActionBar">
+
+        </activity>
         <activity android:name=".Times"
             android:exported="false"
             android:label="Times"
@@ -38,38 +40,18 @@
         <activity
             android:name=".Config"
             android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".SearchBus"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            android:exported="false">
         </activity>
         <activity
             android:name=".Settings"
             android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".ChooseBus"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            android:exported="false">
         </activity>
     </application>
 

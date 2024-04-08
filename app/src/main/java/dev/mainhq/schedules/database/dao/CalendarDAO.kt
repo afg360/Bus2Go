@@ -6,6 +6,6 @@ import dev.mainhq.schedules.database.entities.Calendar
 
 @Dao
 interface CalendarDAO {
-    @Query("SELECT * FROm Calendar;")
+    @Query("SELECT * FROM Calendar;")
     suspend fun getAllCalendarInfo() : List<Calendar>
 }

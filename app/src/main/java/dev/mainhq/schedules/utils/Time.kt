@@ -6,15 +6,17 @@ class Time(private var hour : Int, private var min : Int, private var sec : Int)
 
     constructor(time : String) : this(0,0,0){
         //format = HH:MM:SS
-        val list : List<String> = time.split(":")
-        try {
-            this.hour = list[0].toInt()
-            this.min = list[1].toInt()
-            this.sec = list[2].toInt()
-        }
-        catch (ie : IndexOutOfBoundsException){
-            Log.e("TIME INIT","The input str must be of the form HH:MM:SS")
-            throw Exception()
+        if (time.isNotEmpty()){
+            val list : List<String> = time.split(":")
+            try {
+                this.hour = list[0].toInt() % 24
+                this.min = list[1].toInt()
+                this.sec = list[2].toInt()
+            }
+            catch (ie : IndexOutOfBoundsException){
+                Log.e("TIME INIT","The input str must be of the form HH:MM:SS")
+                throw Exception()
+            }
         }
     }
 

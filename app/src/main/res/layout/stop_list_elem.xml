@@ -9,21 +9,18 @@
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent"
     >
-
     <TextView
-        android:id="@+id/time"
+        android:id="@+id/stop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center_vertical|end"
-        android:text="HH:MM:SS"
         android:textAlignment="textEnd"
-        android:textColor="@color/basic_blue"
+        android:text="STOP"
+        android:textColor="@color/dark"
         android:textSize="32sp"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.773"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

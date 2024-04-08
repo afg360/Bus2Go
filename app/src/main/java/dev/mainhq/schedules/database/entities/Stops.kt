@@ -5,8 +5,7 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(indices = [Index(value = ["stop_id"], unique = true)])
-//@TypeConverters(Converters::class)
+@Entity(indices = [])
 data class Stops (
     @PrimaryKey @ColumnInfo(name="id") val id : Int,
     @ColumnInfo(name="stop_id") val stopId : String,

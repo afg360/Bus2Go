@@ -2,22 +2,18 @@ package dev.mainhq.schedules
 
 import android.content.Context
 import android.util.Log
-import androidx.media3.test.utils.TestUtil
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
-import androidx.test.espresso.matcher.ViewMatchers.assertThat
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import dev.mainhq.schedules.database.AppDatabase
 import dev.mainhq.schedules.database.dao.RoutesDAO
 import dev.mainhq.schedules.database.dao.StopTimesDAO
 import dev.mainhq.schedules.database.dao.TripsDAO
 import kotlinx.coroutines.runBlocking
-import org.hamcrest.CoreMatchers.equalTo
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.io.IOException
 
 @RunWith(AndroidJUnit4::class)
 class DatabaseTest {
@@ -52,7 +48,7 @@ class DatabaseTest {
 
     @Test
     fun test(): Unit = runBlocking {
-        val stops = stoptimesDao.getArrivalTimesFromBusNumNow("103-E")
+        val stops = stoptimesDao.getStopInfoFromBusNum("103-E")
         Log.d("TEST STOPS", stops.toString())
         assert(stops.isNotEmpty())
     }
