@@ -27,7 +27,7 @@ object Parser {
         val db = Room.databaseBuilder(activity.applicationContext, AppDatabase::class.java, "stm_info")
             .createFromAsset("database/stm_info.db").build()
         val routes = db.routesDao()
-        val list = routes.getBusRouteInfo(query)
+        val list = routes.getBusRouteInfo(FuzzyQuery(query))
         displayBuses(list, activity, searchView, color)
         db.close()
     }
@@ -37,33 +37,14 @@ object Parser {
         //todo
         //need to handle queries where french accents are needed
         //val parsable = Parser.toParsable(query)
+        //todo need to implement fuzzyquery
         withContext(Dispatchers.Main){
-            val recyclerView = activity.findViewById<RecyclerView>(R.id.search_recycle_view)
+            val recyclerView : RecyclerView = activity.findViewById(R.id.search_recycle_view)
             val layoutManager = LinearLayoutManager(activity.applicationContext)
             color?.let { recyclerView.setBackgroundColor(activity.resources.getColor(it, null)) }
             recyclerView.adapter = BusListElemsAdapter(list)
             layoutManager.orientation = LinearLayoutManager.VERTICAL
             recyclerView.layoutManager = layoutManager
-            recyclerView.addOnItemTouchListener(
-                RecyclerViewItemListener(activity.applicationContext, recyclerView,
-                    object : RecyclerViewItemListener.ClickListener {
-                        override fun onClick(view: View?, position: Int) {
-                            val layout = view as ConstraintLayout
-                            val intent = Intent(activity.applicationContext, ChooseBus::class.java)
-                            intent.putExtra("busName", (layout.getChildAt(0) as TextView)
-                                .text.toString())
-                            intent.putExtra("busNum", (layout.getChildAt(1) as TextView)
-                                .text.toString())
-                            activity.startActivity(intent)
-                        }
-                        override fun onLongClick(view: View?, position: Int) {
-                            TODO("Not yet implemented")
-                        }
-
-                    }
-                )
-            )
-            searchView?.addTouchables(recyclerView.touchables)
         }
     }
 

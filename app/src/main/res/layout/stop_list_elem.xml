@@ -17,7 +17,7 @@
         android:textAlignment="textEnd"
         android:text="STOP"
         android:textColor="@color/dark"
-        android:textSize="32sp"
+        android:textSize="55sp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

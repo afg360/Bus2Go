@@ -1,21 +1,16 @@
 package dev.mainhq.schedules
 
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
 import dev.mainhq.schedules.database.AppDatabase
-import dev.mainhq.schedules.utils.RecyclerViewItemListener
 import dev.mainhq.schedules.utils.Time
-import dev.mainhq.schedules.utils.adapters.StopListElemsAdapter
 import dev.mainhq.schedules.utils.adapters.TimeListElemsAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -25,14 +20,19 @@ import java.util.Calendar
 //todo
 //must be careful when dealing with hours AFTER 23:59:59
 //since they may be considered in a new day in android, but not for stm
+//todo add a home button to go back to the main activity
 class Times : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.times)
         val stopName = intent.getStringExtra("stopName")!!
-        assert (stopName != "")
+        assert (stopName.isNotEmpty())
         val headsign = intent.getStringExtra("headsign")!!
         lifecycleScope.launch {
+            //check if connected to internet
+            //if yes, make a web request
+
+            //if not connected to internet, then below
             setup(stopName, headsign)
         }
     }
@@ -66,17 +66,6 @@ class Times : AppCompatActivity() {
             val layoutManager = LinearLayoutManager(applicationContext)
             layoutManager.orientation = LinearLayoutManager.VERTICAL
             recyclerView.layoutManager = layoutManager
-            recyclerView.addOnItemTouchListener(
-                RecyclerViewItemListener(
-                    applicationContext, recyclerView,
-                    object : RecyclerViewItemListener.ClickListener {
-                        override fun onClick(view: View?, position: Int) {
-                            Toast.makeText(applicationContext, "You touched me!", Toast.LENGTH_SHORT).show()
-                        }
-
-                        override fun onLongClick(view: View?, position: Int) {}
-                    })
-            )
             //need to improve that code to make it more safe
             recyclerView.adapter = TimeListElemsAdapter(list)
         }

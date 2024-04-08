@@ -2,8 +2,10 @@ package dev.mainhq.schedules.utils.adapters
 
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.OnClickListener
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import dev.mainhq.schedules.R
 import dev.mainhq.schedules.utils.Time
@@ -23,15 +25,24 @@ class TimeListElemsAdapter(private val timeData: List<Time>)
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val time : Time = timeData[position]
         holder.timeTextView.text = time.toString()
+        holder.onClick(holder.itemView)
     }
 
-    override fun getItemCount(): Int { return timeData.size }
+    override fun getItemCount(): Int {
+        return timeData.size
+    }
 
-    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view), OnClickListener{
         val timeTextView: TextView
 
         init {
             timeTextView = view.findViewById(R.id.time)
+        }
+
+        override fun onClick(view: View?) {
+            view?.setOnClickListener{
+                Toast.makeText(it.context, "You touched me!", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 }

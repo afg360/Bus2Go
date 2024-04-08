@@ -2,31 +2,17 @@ package dev.mainhq.schedules
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import android.widget.SearchView
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.room.Room
-import dev.mainhq.schedules.database.AppDatabase
-import dev.mainhq.schedules.database.dao.BusRouteInfo
 import dev.mainhq.schedules.utils.Parser
-import dev.mainhq.schedules.utils.RecyclerViewItemListener
-import dev.mainhq.schedules.utils.RecyclerViewItemListener.ClickListener
 import dev.mainhq.schedules.utils.adapters.BusListElemsAdapter
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.io.IOException
 import java.lang.ref.WeakReference
-import java.util.Arrays
-import java.util.Objects
 
 /*TODO bug to fix for recyclerOnClickListener:
 //for some reason, 4 activities made on top of each other when clicking
@@ -75,11 +61,8 @@ class MainActivity : AppCompatActivity() {
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
 
             override fun onQueryTextSubmit(query: String): Boolean {
-                //todo we will do db operations on next activity
-                //val dataQueried = Parser.setupBusRoutes(curr, Parser.DataType.busList, query)
                 val intent = Intent(applicationContext, SearchBus::class.java)
                 intent.putExtra("query", query)
-                //intent.putExtra("STMBusData", dataQueried)
                 startActivity(intent)
                 searchView.clearFocus()
                 return true
@@ -94,6 +77,9 @@ class MainActivity : AppCompatActivity() {
                     recyclerView.layoutManager = layoutManager
                 }
                 else {
+                    //todo
+                    //a new onclick is made everytime this method is called
+                    //which is a bug
                     lifecycleScope.launch {
                         curActivity.get()?.let{Parser.setup(newText, it, searchView, R.color.white)}
                     }

@@ -1,10 +1,14 @@
 package dev.mainhq.schedules.utils.adapters
 
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.OnClickListener
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
+import dev.mainhq.schedules.ChooseBus
 import dev.mainhq.schedules.R
 import dev.mainhq.schedules.database.dao.BusRouteInfo
 
@@ -17,9 +21,6 @@ class BusListElemsAdapter(private val busData: List<BusRouteInfo>) :
     // if  >= 300, then color = black
     // else blue
     // if 700, then green (but same as 400)
-    private interface Listener {
-        fun onClickListener()
-    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
@@ -32,19 +33,36 @@ class BusListElemsAdapter(private val busData: List<BusRouteInfo>) :
         val data = busData[position]
         holder.busNumView.text = data.routeId.toString()
         holder.busDirView.text = data.routeName
+        holder.onClick(holder.itemView)
     }
 
     override fun getItemCount(): Int {
         return busData.size
     }
 
-    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view), OnClickListener {
         val busDirView: TextView
         val busNumView: TextView
-
         init {
             busDirView = view.findViewById(R.id.busDir)
             busNumView = view.findViewById(R.id.busNum)
+        }
+
+        override fun onClick(view: View?) {
+            view?.setOnClickListener {
+                val layout = it as ConstraintLayout
+                val intent = Intent(it.context, ChooseBus::class.java)
+                intent.putExtra(
+                    "busName",
+                    (layout.getChildAt(0) as TextView).text.toString()
+                )
+                intent.putExtra(
+                    "busNum",
+                    (layout.getChildAt(1) as TextView).text.toString()
+                )
+                it.context.startActivity(intent)
+                it.clearFocus()
+            }
         }
     }
 }
