@@ -25,7 +25,7 @@ import kotlinx.coroutines.withContext
 //instead of doing a huge query on getting the time, we could first retrieve
 //all the possible stations (ordered by id, and prob based on localisation? -> not privacy friendly
 //and once the user clicks, either new activity OR new fragment? -> in the latter case need to implement onback
-
+//todo add possibility of searching amongst all the stops
 class ChooseStop : AppCompatActivity() {
     private lateinit var headsign : String
 
@@ -35,7 +35,6 @@ class ChooseStop : AppCompatActivity() {
         headsign = intent.getStringExtra("headsign").toString()
 
         lifecycleScope.launch {
-            //val stops = getBusInfo(busLine)
             val db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "stm_info")
                 .createFromAsset("database/stm_info.db").build()
             val stopInfo = db.stopsInfoDao()
