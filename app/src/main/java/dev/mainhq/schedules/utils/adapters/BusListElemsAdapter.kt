@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
-import dev.mainhq.schedules.ChooseBus
+import dev.mainhq.schedules.ChooseDirection
 import dev.mainhq.schedules.R
 import dev.mainhq.schedules.database.dao.BusRouteInfo
 
@@ -51,7 +51,7 @@ class BusListElemsAdapter(private val busData: List<BusRouteInfo>) :
         override fun onClick(view: View?) {
             view?.setOnClickListener {
                 val layout = it as ConstraintLayout
-                val intent = Intent(it.context, ChooseBus::class.java)
+                val intent = Intent(it.context, ChooseDirection::class.java)
                 intent.putExtra(
                     "busName",
                     (layout.getChildAt(0) as TextView).text.toString()

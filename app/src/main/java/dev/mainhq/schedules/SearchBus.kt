@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import dev.mainhq.schedules.utils.Parser
+import dev.mainhq.schedules.utils.setup
 import kotlinx.coroutines.launch
 import java.lang.IllegalStateException
 import java.lang.ref.WeakReference
@@ -19,7 +19,7 @@ class SearchBus : AppCompatActivity() {
         val ref = WeakReference(this)
         //todo optimisation possible by using the results from mainActivity database query
         lifecycleScope.launch {
-            ref.get()?.let { Parser.setup(query, it, null, null) }
+            ref.get()?.let { setup(query, it, null, null) }
         }
         onClickBack()
     }

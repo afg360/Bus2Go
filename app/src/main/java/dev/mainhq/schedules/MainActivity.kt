@@ -2,6 +2,7 @@ package dev.mainhq.schedules
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.SearchView
@@ -9,8 +10,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import dev.mainhq.schedules.utils.Parser
+import dev.mainhq.schedules.utils.*
 import dev.mainhq.schedules.utils.adapters.BusListElemsAdapter
+import dev.mainhq.schedules.utils.web.WebRequest
 import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
 
@@ -31,6 +33,9 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
         setContentView(R.layout.main_activity)
+        lifecycleScope.launch {
+            //WebRequest.getResponse()
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -81,7 +86,7 @@ class MainActivity : AppCompatActivity() {
                     //a new onclick is made everytime this method is called
                     //which is a bug
                     lifecycleScope.launch {
-                        curActivity.get()?.let{Parser.setup(newText, it, searchView, R.color.white)}
+                        curActivity.get()?.let{setup(newText, it, searchView, R.color.white)}
                     }
                 }
                 return true

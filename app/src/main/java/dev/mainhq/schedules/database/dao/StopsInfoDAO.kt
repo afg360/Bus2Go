@@ -12,7 +12,7 @@ interface StopsInfoDAO {
             "WHERE trip_headsign = (:headsign) ORDER BY stop_seq")
     suspend fun getStopNames(headsign : String) : List<String>
 
-    //todo check if i really need trip_headsign
+    //TODO check if i really need trip_headsign
     @Query("SELECT DISTINCT arrival_time FROM StopsInfo " +
             "WHERE stop_name = (:stopName) AND days LIKE '%' || (:day) || '%' " +
             "AND arrival_time >= (:time) AND trip_headsign = (:headsign) " +

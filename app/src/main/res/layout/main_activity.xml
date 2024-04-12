@@ -16,5 +16,11 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
 
+    <!-- TODO recycler view listing all selected buslines-->
+    <!-- TODO these are swippable (for either the left or right choice, so chosen by their stop sequence in the busline) -->
+    <androidx.fragment.app.FragmentContainerView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

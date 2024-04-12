@@ -1,33 +1,29 @@
 package dev.mainhq.schedules;
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.room.Room.databaseBuilder
 import dev.mainhq.schedules.database.AppDatabase
-import dev.mainhq.schedules.database.entities.Trips
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.ArrayList
 
 //todo
 //change appbar to be only a back button
 //todo may make it a swapable ui instead of choosing button0 or 1
-class ChooseBus : AppCompatActivity() {
-    override fun onCreate(savedInstanceState : Bundle?) : Unit{
+class ChooseDirection : AppCompatActivity() {
+    override fun onCreate(savedInstanceState : Bundle?) {
         super.onCreate(savedInstanceState);
         val extras : Bundle = this.intent.extras ?: throw AssertionError("Assertion failed");
         val busName = extras.getString("busName") ?: throw AssertionError("busName is Null");
         val busNum = extras.getString("busNum") ?: throw AssertionError("busNum is Null");
         //set a loading screen first before displaying the correct buttons
-        this.setContentView(R.layout.choose_bus);
+        this.setContentView(R.layout.choose_direction);
         val busNumView: TextView = findViewById(R.id.chooseBusNum);
         val busNameView: TextView = findViewById(R.id.chooseBusDir);
         busNumView.text = busNum;

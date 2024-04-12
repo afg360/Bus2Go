@@ -9,15 +9,18 @@
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent"
     >
+    <!-- TODO FOR NICER UI ADD SEPARATIONS FOR EACH TEXT VIEW (line above and below, light grey) -->
     <TextView
         android:id="@+id/stop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:padding="5dp"
         android:gravity="center_vertical|end"
         android:textAlignment="textEnd"
         android:text="STOP"
-        android:textColor="@color/dark"
-        android:textSize="55sp"
+        android:textColor="@color/light_blue"
+        android:textSize="45sp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

@@ -1,11 +1,20 @@
 package dev.mainhq.schedules.utils
 
+import android.icu.util.Calendar
 import android.util.Log
 
-class Time(private var hour : Int, private var min : Int, private var sec : Int) : Comparable<Time>{
+class Time(hour : Int, min : Int, sec : Int) : Comparable<Time>{
+    private var hour : Int
+    var min : Int
+    private var sec : Int
 
-    constructor(time : String) : this(0,0,0){
-        //format = HH:MM:SS
+    init {
+        this.sec = sec % 60
+        this.min = (min + this.sec / 60) % 60
+        this.hour = (hour + this.min / 60)  % 24
+    }
+    /** Format must be = HH:MM:SS */
+    constructor(time : String) : this(0,0,0) {
         if (time.isNotEmpty()){
             val list : List<String> = time.split(":")
             try {
@@ -18,6 +27,12 @@ class Time(private var hour : Int, private var min : Int, private var sec : Int)
                 throw Exception()
             }
         }
+    }
+
+    constructor(calendar : Calendar) : this(0,0,0){
+        this.hour = calendar.get(Calendar.HOUR_OF_DAY)
+        this.min = calendar.get(Calendar.MINUTE)
+        this.sec = calendar.get(Calendar.SECOND)
     }
 
     fun subtract(time : Time) : Time?{
@@ -57,5 +72,12 @@ class Time(private var hour : Int, private var min : Int, private var sec : Int)
             return this.hour == tmp.hour && this.min == tmp.min && this.sec == this.sec
         }
         return false
+    }
+
+    override fun hashCode(): Int {
+        var result = hour
+        result = 31 * result + min
+        result = 31 * result + sec
+        return result
     }
 }
