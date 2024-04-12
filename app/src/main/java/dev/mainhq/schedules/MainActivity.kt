@@ -10,20 +10,18 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import dev.mainhq.schedules.fragments.Favourites
 import dev.mainhq.schedules.utils.*
 import dev.mainhq.schedules.utils.adapters.BusListElemsAdapter
 import dev.mainhq.schedules.utils.web.WebRequest
 import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
 
-/*TODO bug to fix for recyclerOnClickListener:
-//for some reason, 4 activities made on top of each other when clicking
-//so going back comes back to same activity
 //TODO
 //when updating the app (especially for new stm txt files), will need
 //to show to user storing favourites of "deprecated buses" that it has changed
 //to another bus (e.g. 435 -> 465)
-*/
+
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,9 +31,12 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
         setContentView(R.layout.main_activity)
-        lifecycleScope.launch {
-            //WebRequest.getResponse()
-        }
+        /*lifecycleScope.launch {
+            WebRequest.getResponse()
+        }*/
+        val fragmentFactory = supportFragmentManager
+        fragmentFactory.beginTransaction()
+            .replace(R.id.favouritesFragmentContainer, Favourites()).commit()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -74,6 +75,8 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onQueryTextChange(newText: String): Boolean {
+                //bring on top of other stuff
+                searchView.bringToFront()
                 if (newText.isEmpty()){
                     val recyclerView = findViewById<RecyclerView>(R.id.search_recycle_view)
                     val layoutManager = LinearLayoutManager(applicationContext)
@@ -82,9 +85,6 @@ class MainActivity : AppCompatActivity() {
                     recyclerView.layoutManager = layoutManager
                 }
                 else {
-                    //todo
-                    //a new onclick is made everytime this method is called
-                    //which is a bug
                     lifecycleScope.launch {
                         curActivity.get()?.let{setup(newText, it, searchView, R.color.white)}
                     }

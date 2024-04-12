@@ -4,6 +4,7 @@ plugins {
     id 'com.google.protobuf' version '0.9.4'
     id 'kotlin-android'
     id 'kotlin-kapt'
+    id 'org.jetbrains.kotlin.plugin.serialization'
 }
 
 android {
@@ -119,6 +120,11 @@ dependencies {
     implementation "androidx.datastore:datastore-preferences:1.0.0"
     //proto datastore
     implementation "androidx.datastore:datastore:1.0.0"
+
+    //kotlin serializable
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2"
+    implementation "org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.5"
+
 
     def room_version = "2.6.1"
     implementation "androidx.room:room-runtime:$room_version"

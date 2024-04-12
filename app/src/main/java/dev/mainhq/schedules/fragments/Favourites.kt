@@ -1,53 +1,61 @@
 package dev.mainhq.schedules.fragments
 
 import android.content.Context
-import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.preferencesDataStore
+import androidx.datastore.dataStore
 import androidx.fragment.app.Fragment
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import dev.mainhq.schedules.R
-import dev.mainhq.schedules.preferences.settingsDataStore
-import kotlinx.coroutines.flow.*
+import dev.mainhq.schedules.preferences.BusInfo
+import dev.mainhq.schedules.preferences.Favourites
+import dev.mainhq.schedules.preferences.SettingsSerializer
+import dev.mainhq.schedules.utils.adapters.FavouritesListElemsAdapter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-val Context.dataStore : DataStore<Preferences> by preferencesDataStore(name="settings")
+val Context.dataStore : DataStore<Favourites> by dataStore(
+    fileName = "favourites.json",
+    serializer = SettingsSerializer
+)
 
 class Favourites : Fragment(R.layout.fragment_favourites) {
     //first get user favourites data
     //then make the recycler adapter with that data (either that or display 'no favourites'
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        val foo = stringPreferencesKey( "")
-        //val bar = this.context?.getSharedPreferences("favourites", Context.MODE_PRIVATE)
-    }
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?): View? {
-        val foo = ""
-        return super.onCreateView(inflater, container, savedInstanceState)
-    }
 
-/*
-    fun readFavourites() : Flow<Int> {
-        //FIXME FOR NOW USE ASYNC INSTEAD OF MULTIPROCESS... NEED IT TO WORK
-        val favourites: Flow<Int> = context?.settingsDataStore?.data?.map {
-            settings ->
-                // The exampleCounter property is generated from the proto schema.
-                settings.busStop
-                settings.busNum
-            } ?: TODO("No data found")
-        return favourites
-    }
-
-    suspend fun writeFavourites(busNum : Int, busStop : String) {
-        context?.settingsDataStore?.updateData { currentSettings ->
-            currentSettings.toBuilder().setBusNum(currentSettings.busNum).build()
-            currentSettings.toBuilder().setBusStop(currentSettings.busStop).build()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        lifecycleScope.launch {
+            val list =  context?.dataStore?.data?.first()?.list?.toList()
+            if (list == null){
+                TODO("TO IMPLEMENT")
+            }
+            else if (list.isEmpty()){
+                val viewGroup = view as ViewGroup
+                viewGroup.removeView(view.findViewById(R.id.favourites_text_view))
+                viewGroup.removeView(view.findViewById(R.id.favouritesRecyclerView))
+            }
+            else setBus(list, view)
         }
     }
-*/
+
+
+    private suspend fun setBus(list : List<BusInfo>, view : View) {
+        withContext(Dispatchers.Main){
+            val layoutManager = LinearLayoutManager(view.context)
+            layoutManager.orientation = LinearLayoutManager.VERTICAL
+            val recyclerView : RecyclerView = view.findViewById(R.id.favouritesRecyclerView)
+            recyclerView.layoutManager = layoutManager
+            //need to improve that code to make it more safe
+            recyclerView.adapter = FavouritesListElemsAdapter(list)
+        }
+    }
 }

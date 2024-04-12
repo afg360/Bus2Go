@@ -3,6 +3,7 @@ package dev.mainhq.schedules.utils
 import android.icu.util.Calendar
 import android.util.Log
 
+/** Allows to do operations more easily on time based formats */
 class Time(hour : Int, min : Int, sec : Int) : Comparable<Time>{
     private var hour : Int
     var min : Int
