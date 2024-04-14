@@ -2,7 +2,6 @@ package dev.mainhq.schedules.database.dao
 
 import androidx.room.Dao
 import androidx.room.Query
-import androidx.room.TypeConverter
 import dev.mainhq.schedules.utils.Time
 
 @Dao

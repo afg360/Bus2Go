@@ -15,6 +15,6 @@
     <string name="title_activity_choose_time">ChooseTime</string>
     <string name="action_settings">Settings</string>
     <string name="favourites">Favourite Bus Lines</string>
-    <string name="no_favourites">No favourites made</string>
+    <string name="no_favourites">No favourites made yet</string>
     <string name="large_text">THIS IS LARGE TEXT WRITTEN FOR LARGE TEXT</string>
 </resources>

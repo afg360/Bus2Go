@@ -9,18 +9,7 @@
         android:id="@+id/favourites_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/favourites"
-        android:textColor="@color/grey"
-        android:textSize="20sp"
-        android:layout_margin="20dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        />
-    <TextView
-        android:id="@+id/empty_favourites_text_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/no_favourites"
+        android:text=""
         android:textColor="@color/grey"
         android:textSize="20sp"
         android:layout_margin="20dp"
@@ -30,7 +19,7 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/favouritesRecyclerView"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

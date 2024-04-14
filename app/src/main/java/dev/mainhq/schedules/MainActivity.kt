@@ -34,8 +34,7 @@ class MainActivity : AppCompatActivity() {
         /*lifecycleScope.launch {
             WebRequest.getResponse()
         }*/
-        val fragmentFactory = supportFragmentManager
-        fragmentFactory.beginTransaction()
+        supportFragmentManager.beginTransaction()
             .replace(R.id.favouritesFragmentContainer, Favourites()).commit()
     }
 
