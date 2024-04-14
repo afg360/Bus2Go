@@ -9,7 +9,7 @@
         android:id="@+id/favourites_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text=""
+        android:text="hello"
         android:textColor="@color/grey"
         android:textSize="20sp"
         android:layout_margin="20dp"

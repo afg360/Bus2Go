@@ -12,17 +12,17 @@
         android:layout_height="wrap_content"
         android:text="TRIPHEADSIGN"
         android:textColor="@color/grey"
-        android:textSize="20sp"
+        android:textSize="30sp"
         android:layout_margin="20dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         />
     <TextView
-        android:id="@+id/favouritesBusNumTextView"
+        android:id="@+id/favouritesBusTimeTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="BUSNUM"
+        android:text="BUSTIME"
         android:textColor="@color/basic_blue"
         android:textSize="30sp"
         android:layout_margin="20dp"
@@ -31,14 +31,15 @@
         app:layout_constraintBottom_toBottomOf="parent"
         />
     <TextView
-        android:id="@+id/favouritesBusDirTextView"
+        android:id="@+id/favouritesStopNameTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="BUSDIR"
+        android:text="Stop Name"
         android:textColor="@color/grey"
         android:textSize="17sp"
-        android:layout_margin="20dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/favouritesBusNumTextView"
+        android:layout_marginStart="20dp"
+        android:padding="5dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/favouritesTripheadsignTextView"
         />
 </androidx.constraintlayout.widget.ConstraintLayout>

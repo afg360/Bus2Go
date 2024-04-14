@@ -7,6 +7,8 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.SearchView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -31,11 +33,16 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
         setContentView(R.layout.main_activity)
+        lifecycle.addObserver(object : DefaultLifecycleObserver{
+            override fun onResume(owner: LifecycleOwner) {
+                super.onResume(owner)
+                supportFragmentManager.beginTransaction()
+                    .replace(R.id.favouritesFragmentContainer, Favourites()).commit()
+            }
+        })
         /*lifecycleScope.launch {
             WebRequest.getResponse()
         }*/
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.favouritesFragmentContainer, Favourites()).commit()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -92,5 +99,4 @@ class MainActivity : AppCompatActivity() {
             }
         })
     }
-
 }

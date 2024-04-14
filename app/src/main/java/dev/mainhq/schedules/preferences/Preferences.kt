@@ -25,7 +25,7 @@ data class Favourites(
 
 @Serializable
 data class BusInfo(
-    val busLine : String,
+    val stopName : String,
     val tripHeadsign : String,
 )
 
