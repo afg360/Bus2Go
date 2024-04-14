@@ -11,12 +11,20 @@ import androidx.recyclerview.widget.RecyclerView
 import dev.mainhq.schedules.R
 import dev.mainhq.schedules.fragments.FavouriteBusInfo
 
-class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>)
+class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, private val recyclerView: RecyclerView)
     : RecyclerView.Adapter<FavouritesListElemsAdapter.ViewHolder>() {
 
+        //we may introduce a private field to set the mode of selection
+        private var MODE = "unselected"
+
+        //FIXME shitty implementation for now... using a direct reference
+        //could use that field above instead...
+
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        //FIXME check if parent can provide me the recyclerview instead
         return ViewHolder(LayoutInflater.from(parent.context)
-            .inflate(R.layout.favourites_list_elem, parent, false)
+            .inflate(R.layout.favourites_list_elem, parent, false), recyclerView //see if other way...
         )
     }
 
@@ -35,7 +43,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>)
         //create an onclick also if one is already selected to choose multiple from the favourites list
     }
 
-    class ViewHolder(view : View) : RecyclerView.ViewHolder(view), OnClickListener, OnLongClickListener{
+    class ViewHolder(view : View, private val recyclerView: RecyclerView) : RecyclerView.ViewHolder(view), OnClickListener, OnLongClickListener{
         val tripHeadsignTextView : TextView
         val stopNameTextView : TextView
         val arrivalTimeTextView : TextView
@@ -45,17 +53,27 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>)
             arrivalTimeTextView = view.findViewById(R.id.favouritesBusTimeTextView)
         }
 
+        //fixme not working properly
         //create a mode for the entire recycler view, then change behaviour on onclick/onlongclick for each item
         override fun onClick(v: View?) {
             Log.d("CLICKED", "setting on click listener")
             v?.setOnClickListener{
                 if (v.tag != null){
                     if (v.tag == "selected"){
-                        Log.d("SELECTED TAG", "Tag is selected")
-                        v.setOnClickListener{
-                            v.resources?.getColor(R.color.dark, null)?.let { v.setBackgroundColor(it) }
-                            v.tag = "unselected"
+                        unselect(it)
+                    }
+                    else if (v.tag == "unselected"){
+                        if (recyclerView.tag != null){
+                            if (recyclerView.tag == "selected"){
+                                select(it)
+                            }
                         }
+                    }
+
+                }
+                else if (recyclerView.tag != null){
+                    if (recyclerView.tag == "selected"){
+                        select(it)
                     }
                 }
             }
@@ -65,19 +83,31 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>)
             //todo allow to select the view, so that we can remove from favourites
             //todo goes through a selection checkbox mode
             //if we cancel the selection, then restore normal view
-
             v?.setOnLongClickListener{
                 if (it.tag == null) {
-                    v.resources?.getColor(R.color.white, null)?.let { v.setBackgroundColor(it) }
-                    v.tag = "selected"
+                    select(it)
                 }
                 else if (it.tag != "selected") {
-                        v.resources?.getColor(R.color.white, null)?.let { v.setBackgroundColor(it) }
-                        v.tag = "selected"
+                    select(it)
+                    (v.parent as RecyclerView).tag = "selected"
                 }
                 true
             }
             return false
+        }
+
+        fun select(view : View){
+            view.resources?.getColor(R.color.white, null)?.let { view.setBackgroundColor(it) }
+            view.tag = "selected"
+        }
+
+        fun unselect(view : View){
+            view.resources?.getColor(R.color.dark, null)?.let { view.setBackgroundColor(it) }
+            view.tag = "unselected"
+        }
+
+        private fun selectionMode(){
+            TODO("Not Implemented Yet")
         }
     }
 }

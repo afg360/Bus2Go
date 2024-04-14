@@ -8,6 +8,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
+import androidx.core.view.children
+import androidx.core.view.get
 import androidx.datastore.core.DataStore
 import androidx.datastore.dataStore
 import androidx.fragment.app.Fragment
@@ -32,7 +35,7 @@ val Context.dataStore : DataStore<Favourites> by dataStore(
     serializer = SettingsSerializer
 )
 
-class Favourites : Fragment() {
+class Favourites : Fragment(R.layout.fragment_favourites) {
     //first get user favourites data
     //then make the recycler adapter with that data (either that or display 'no favourites'
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,6 +56,20 @@ class Favourites : Fragment() {
             else if (list.isEmpty()) setEmpty(view)
             else setBus(list, view)
         }
+        val callback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                val recyclerView : RecyclerView = view.findViewById(R.id.favouritesRecyclerView)
+                if (recyclerView.tag != null){
+                    if (recyclerView.tag == "selected"){
+                        for (i in 0 until recyclerView.childCount){
+                            val child = recyclerView[i] as ViewGroup
+                            //child.
+                        }
+                    }
+                }
+            }
+        }
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)
     }
 
     private suspend fun setEmpty(view : View){
@@ -90,9 +107,10 @@ class Favourites : Fragment() {
             val recyclerView : RecyclerView? = view.findViewById(R.id.favouritesRecyclerView)
             recyclerView?.layoutManager = layoutManager
             //need to improve that code to make it more safe
-            recyclerView?.adapter = FavouritesListElemsAdapter(times)
+            recyclerView?.adapter = recyclerView?.let { FavouritesListElemsAdapter(times, it) }
         }
     }
+
 }
 
 data class FavouriteBusInfo(val busInfo: BusInfo, val arrivalTime : Time)
