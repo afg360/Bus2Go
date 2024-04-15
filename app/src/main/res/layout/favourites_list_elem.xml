@@ -23,7 +23,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="BusTimeRemaining"
-        android:textColor="@color/stm_blue"
+        android:textColor="@color/basic_blue"
         android:textSize="30sp"
         android:layout_margin="20dp"
         app:layout_constraintTop_toTopOf="parent"
