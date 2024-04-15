@@ -10,6 +10,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import dev.mainhq.schedules.R
 import dev.mainhq.schedules.fragments.FavouriteBusInfo
+import dev.mainhq.schedules.utils.Time
 
 class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, private val recyclerView: RecyclerView)
     : RecyclerView.Adapter<FavouritesListElemsAdapter.ViewHolder>() {
@@ -37,6 +38,12 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
         holder.tripHeadsignTextView.text = info.busInfo.tripHeadsign
         holder.stopNameTextView.text = info.busInfo.stopName
         holder.arrivalTimeTextView.text = info.arrivalTime.toString()
+        val remainingTime = info.arrivalTime.timeRemaining() ?: Time(0,0,0) //todo replace that for better handling
+        val timeString : String =
+            if (remainingTime.hour > 0) "In ${remainingTime.hour} h, ${remainingTime.min} min"
+            else "In ${remainingTime.min} min"
+
+        holder.timeRemainingTextView.text = timeString
         holder.onLongClick(holder.itemView)
         //holder.itemView.seton
         holder.onClick(holder.itemView)
@@ -47,25 +54,26 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
         val tripHeadsignTextView : TextView
         val stopNameTextView : TextView
         val arrivalTimeTextView : TextView
+        val timeRemainingTextView : TextView
         init{
             tripHeadsignTextView = view.findViewById(R.id.favouritesTripheadsignTextView)
             stopNameTextView = view.findViewById(R.id.favouritesStopNameTextView)
             arrivalTimeTextView = view.findViewById(R.id.favouritesBusTimeTextView)
+            timeRemainingTextView = view.findViewById(R.id.favouritesBusTimeRemainingTextView)
         }
 
         //fixme not working properly
         //create a mode for the entire recycler view, then change behaviour on onclick/onlongclick for each item
         override fun onClick(v: View?) {
-            Log.d("CLICKED", "setting on click listener")
             v?.setOnClickListener{
                 if (v.tag != null){
                     if (v.tag == "selected"){
-                        unselect(it)
+                        unselect(v)
                     }
                     else if (v.tag == "unselected"){
                         if (recyclerView.tag != null){
                             if (recyclerView.tag == "selected"){
-                                select(it)
+                                select(v)
                             }
                         }
                     }
@@ -73,7 +81,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
                 }
                 else if (recyclerView.tag != null){
                     if (recyclerView.tag == "selected"){
-                        select(it)
+                        select(v)
                     }
                 }
             }
@@ -84,13 +92,9 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
             //todo goes through a selection checkbox mode
             //if we cancel the selection, then restore normal view
             v?.setOnLongClickListener{
-                if (it.tag == null) {
-                    select(it)
-                }
-                else if (it.tag != "selected") {
-                    select(it)
-                    (v.parent as RecyclerView).tag = "selected"
-                }
+                if (v.tag == null) select(v)
+                else if (v.tag != "selected") select(v)
+                (v.parent as RecyclerView).tag = "selected"
                 true
             }
             return false

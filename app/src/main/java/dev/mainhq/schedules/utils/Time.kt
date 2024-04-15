@@ -5,9 +5,9 @@ import android.util.Log
 
 /** Allows to do operations more easily on time based formats */
 class Time(hour : Int, min : Int, sec : Int) : Comparable<Time>{
-    private var hour : Int
+    var hour : Int
     var min : Int
-    private var sec : Int
+    var sec : Int
 
     init {
         this.sec = sec % 60
@@ -44,6 +44,10 @@ class Time(hour : Int, min : Int, sec : Int) : Comparable<Time>{
         val hour = total / 3600
         val min = (total - hour * 3600) / 60
         return Time(hour, min, total % 60)
+    }
+
+    fun timeRemaining() : Time? {
+        return this.subtract(Time(Calendar.getInstance()))
     }
 
     override fun compareTo(other : Time): Int {

@@ -2,8 +2,10 @@
 <resources>
     <color name="purple_500">#FF6200EE</color>
     <color name="purple_700">#FF3700B3</color>
-    <color name="basic_blue">#051BE5</color>
-    <color name="light_blue">#5E92F1</color>
+    <color name="dark_blue">#FF051BE5</color>
+    <!-- <color name="stm_blue">#FF008BCB</color>  TODO TO DELETE -->
+    <color name="basic_blue">#FF0a5af2</color>
+    <color name="light_blue">#FF5E92F1</color>
     <color name="teal_200">#FF03DAC5</color>
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>

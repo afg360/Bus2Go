@@ -2,7 +2,7 @@
     <!-- Can customise the action bar, etc.-->
     <style name="Theme.Schedules" parent="Theme.AppCompat.Light">
         <!-- appBar color-->
-        <item name="colorPrimary">@color/basic_blue</item>
+        <item name="colorPrimary">@color/dark_blue</item>
         <item name="editTextColor">@color/light</item>
         <!-- actionBar color -->
         <item name="colorPrimaryDark">@color/dark</item>

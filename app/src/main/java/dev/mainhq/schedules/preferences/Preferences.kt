@@ -17,6 +17,8 @@ import java.io.InputStream
 import java.io.OutputStream
 import java.lang.Exception
 
+//TODO eventually encrypt all the data to make it safe from other apps in case unwanted access happens
+
 @Serializable
 data class Favourites(
     @Serializable(with = MyPersistentListSerializer::class)
