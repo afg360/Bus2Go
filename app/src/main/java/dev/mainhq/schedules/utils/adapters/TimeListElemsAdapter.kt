@@ -36,7 +36,8 @@ class TimeListElemsAdapter(private val timeData: List<Time>)
             val curTime = Time(Calendar.getInstance())
             val remainingTime = time.subtract(curTime)
             if (remainingTime != null) {
-                holder.timeLeftTextView.text = "In ${remainingTime.min} min"
+                if (remainingTime.hour == 0) holder.timeLeftTextView.text = "In ${remainingTime.min} min"
+                else holder.timeLeftTextView.text = "TODO"
             }
         }
 
