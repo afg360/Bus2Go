@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.core.view.children
+import androidx.core.view.forEach
 import androidx.core.view.get
 import androidx.datastore.core.DataStore
 import androidx.datastore.dataStore
@@ -61,11 +62,15 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
                 val recyclerView : RecyclerView = view.findViewById(R.id.favouritesRecyclerView)
                 if (recyclerView.tag != null){
                     if (recyclerView.tag == "selected"){
-                        for (i in 0 until recyclerView.childCount){
-                            val child = recyclerView[i] as ViewGroup
-                            //child.
+                        recyclerView.forEach {
+                            val viewGroup = it as ViewGroup
+                            (recyclerView.adapter as FavouritesListElemsAdapter).unSelect(viewGroup)
                         }
+                        recyclerView.tag = "unselected"
                     }
+                }
+                else{
+                    super.handleOnBackCancelled()
                 }
             }
         }

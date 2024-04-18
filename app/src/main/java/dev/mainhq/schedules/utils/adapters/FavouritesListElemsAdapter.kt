@@ -29,6 +29,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
         )
     }
 
+
     override fun getItemCount(): Int {
         return list.size
     }
@@ -50,6 +51,12 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
         //create an onclick also if one is already selected to choose multiple from the favourites list
     }
 
+    fun unSelect(view : View){
+        val tmp = view as ViewGroup
+        tmp.resources?.getColor(R.color.dark, null)?.let { view.setBackgroundColor(it) }
+        tmp.tag = "unselected"
+    }
+
     class ViewHolder(view : View, private val recyclerView: RecyclerView) : RecyclerView.ViewHolder(view), OnClickListener, OnLongClickListener{
         val tripHeadsignTextView : TextView
         val stopNameTextView : TextView
@@ -68,7 +75,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
             v?.setOnClickListener{
                 if (v.tag != null){
                     if (v.tag == "selected"){
-                        unselect(v)
+                        unSelect(v)
                     }
                     else if (v.tag == "unselected"){
                         if (recyclerView.tag != null){
@@ -105,7 +112,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
             view.tag = "selected"
         }
 
-        fun unselect(view : View){
+        fun unSelect(view : View){
             view.resources?.getColor(R.color.dark, null)?.let { view.setBackgroundColor(it) }
             view.tag = "unselected"
         }

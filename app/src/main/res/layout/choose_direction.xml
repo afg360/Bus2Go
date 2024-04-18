@@ -7,19 +7,18 @@
     android:background="@color/dark">
 
     <!-- menu items -->
-
     <TextView
         android:id="@+id/chooseBusDir"
-        android:layout_width="wrap_content"
+        android:layout_width="245dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="100dp"
         android:text="line"
+        android:textAlignment="center"
         android:textColor="@color/light"
         android:textSize="40sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/chooseBusNum"
-        />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/chooseBusNum"
