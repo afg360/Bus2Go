@@ -26,7 +26,6 @@ class TimeListElemsAdapter(private val timeData: List<Time>)
     }
 
     //todo for now ignore harcoded text warnings
-    @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val time : Time = timeData[position]
         holder.timeTextView.text = time.toString()
@@ -37,9 +36,11 @@ class TimeListElemsAdapter(private val timeData: List<Time>)
             val remainingTime = time.subtract(curTime)
             if (remainingTime != null) {
                 if (remainingTime.hour == 0) holder.timeLeftTextView.text = "In ${remainingTime.min} min"
-                else holder.timeLeftTextView.text = "TODO"
+                else holder.timeLeftTextView.text = "TODO"//todo
             }
         }
+        /** NOTE a VIEWHOLDER can be recycled, which would mean that all of its attributes would be reused!!*/
+        else holder.timeLeftTextView.text = ""
 
         holder.onClick(holder.itemView)
     }
