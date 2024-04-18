@@ -30,6 +30,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 val Context.dataStore : DataStore<Favourites> by dataStore(
     fileName = "favourites.json",
@@ -49,6 +51,7 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         lifecycleScope.launch {
             val list =  context?.dataStore?.data?.first()?.list?.toList()
             if (list == null){
@@ -75,6 +78,17 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
             }
         }
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)
+        val executor = Executors.newSingleThreadScheduledExecutor()
+
+        // Schedule a task to update the TextView every 10 seconds
+        executor.scheduleAtFixedRate({
+            lifecycleScope.launch{
+                val list = context?.dataStore?.data?.first()?.list?.toList() ?: TODO("Not Yet Implemented")
+                if (list.isNotEmpty()) setBus(list, view)
+                else setEmpty(view)
+            }
+
+        }, 0, 5, TimeUnit.SECONDS) //TODO need it to be for android or java????
     }
 
     private suspend fun setEmpty(view : View){

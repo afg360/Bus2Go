@@ -6,11 +6,7 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.SearchView
-import android.window.OnBackInvokedDispatcher
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentContainer
-import androidx.fragment.app.FragmentContainerView
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -22,6 +18,8 @@ import dev.mainhq.schedules.utils.adapters.BusListElemsAdapter
 import dev.mainhq.schedules.utils.web.WebRequest
 import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 //TODO
 //when updating the app (especially for new stm txt files), will need
