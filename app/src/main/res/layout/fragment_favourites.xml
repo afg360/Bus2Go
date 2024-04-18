@@ -35,7 +35,6 @@
                 app:layout_constraintTop_toBottomOf="@+id/favourites_text_view" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-
     </androidx.core.widget.NestedScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

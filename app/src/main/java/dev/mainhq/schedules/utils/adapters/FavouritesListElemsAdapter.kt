@@ -1,15 +1,20 @@
 package dev.mainhq.schedules.utils.adapters
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnClickListener
 import android.view.View.OnLongClickListener
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.get
+import androidx.fragment.app.FragmentContainerView
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.checkbox.MaterialCheckBox
 import dev.mainhq.schedules.R
 import dev.mainhq.schedules.fragments.FavouriteBusInfo
+import dev.mainhq.schedules.fragments.Favourites
+import dev.mainhq.schedules.fragments.SelectedFavourites
 import dev.mainhq.schedules.utils.Time
 
 class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, private val recyclerView: RecyclerView)
@@ -52,12 +57,17 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
     }
 
     fun unSelect(view : View){
-        val tmp = view as ViewGroup
-        tmp.resources?.getColor(R.color.dark, null)?.let { view.setBackgroundColor(it) }
-        tmp.tag = "unselected"
+        val viewGroup = view as ViewGroup
+        viewGroup.resources?.getColor(R.color.dark, null)?.let { view.setBackgroundColor(it) }
+        viewGroup.tag = "unselected"
+        //val fragmentfoo = viewGroup.findViewById<FragmentContainerView>(R.id.fragment_selected_checkbox)
+        //val fragment = SelectedFavourites()
+        //fragmentfoo.supportFragmentManager.beginTransaction()
+        //    .replace(R.id.favouritesFragmentContainer, Favourites()).commit()
     }
 
     class ViewHolder(view : View, private val recyclerView: RecyclerView) : RecyclerView.ViewHolder(view), OnClickListener, OnLongClickListener{
+        var checkBoxView : ConstraintLayout?
         val tripHeadsignTextView : TextView
         val stopNameTextView : TextView
         val arrivalTimeTextView : TextView
@@ -67,6 +77,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
             stopNameTextView = view.findViewById(R.id.favouritesStopNameTextView)
             arrivalTimeTextView = view.findViewById(R.id.favouritesBusTimeTextView)
             timeRemainingTextView = view.findViewById(R.id.favouritesBusTimeRemainingTextView)
+            checkBoxView = null
         }
 
         //fixme not working properly
@@ -115,6 +126,10 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
         fun unSelect(view : View){
             view.resources?.getColor(R.color.dark, null)?.let { view.setBackgroundColor(it) }
             view.tag = "unselected"
+        }
+
+        fun toCheckBox(view : View){
+
         }
 
         private fun selectionMode(){

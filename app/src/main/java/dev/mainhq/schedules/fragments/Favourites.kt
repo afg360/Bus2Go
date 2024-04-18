@@ -83,11 +83,11 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
         // Schedule a task to update the TextView every 10 seconds
         executor.scheduleAtFixedRate({
             lifecycleScope.launch{
+                //todo could add some incertitude, and web requests here too
                 val list = context?.dataStore?.data?.first()?.list?.toList() ?: TODO("Not Yet Implemented")
                 if (list.isNotEmpty()) setBus(list, view)
                 else setEmpty(view)
             }
-
         }, 0, 5, TimeUnit.SECONDS) //TODO need it to be for android or java????
     }
 
@@ -129,6 +129,10 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
             recyclerView?.adapter = recyclerView?.let { FavouritesListElemsAdapter(times, it) }
         }
     }
+
+}
+
+class SelectedFavourites : Fragment(R.layout.selected_favourites_checkbox){
 
 }
 
