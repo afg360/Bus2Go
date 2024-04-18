@@ -48,14 +48,17 @@
 
     <TextView
         android:id="@+id/description_route_0"
-        android:layout_width="wrap_content"
+        android:layout_width="175dp"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
+        android:padding="10dp"
         android:text="description route 0"
         android:textColor="@color/grey"
         android:textSize="20sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/route_0" />
+        app:layout_constraintTop_toBottomOf="@id/route_0"
+        app:layout_constraintEnd_toStartOf="@+id/description_route_1"
+        />
 
     <!-- TODO Set a description for left button e.g. first stop to last stop in the direction -->
     <Button
@@ -71,13 +74,15 @@
 
     <TextView
         android:id="@+id/description_route_1"
-        android:layout_width="wrap_content"
+        android:layout_width="175dp"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
         android:text="description route 1"
         android:textColor="@color/grey"
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/route_1" />
+        app:layout_constraintTop_toBottomOf="@id/route_1"
+        app:layout_constraintStart_toEndOf="@+id/description_route_0"
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

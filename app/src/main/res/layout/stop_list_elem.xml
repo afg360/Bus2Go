@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/timeElem"
     android:layout_width="match_parent"
-    android:layout_height="75dp"
+    android:layout_height="wrap_content"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent"
@@ -14,19 +14,18 @@
     <!-- TODO FOR NICER UI ADD SEPARATIONS FOR EACH TEXT VIEW (line above and below, light grey) -->
     <TextView
         android:id="@+id/stop"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_width="320dp"
+        android:layout_height="wrap_content"
         android:layout_margin="7dp"
-        android:padding="2dp"
         android:gravity="center_vertical|end"
-        android:textAlignment="textEnd"
+        android:padding="2dp"
         android:text="STOP"
+        android:textAlignment="textEnd"
         android:textColor="@color/basic_blue"
         android:textSize="23sp"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
         android:id="@+id/favourite_star_selection"

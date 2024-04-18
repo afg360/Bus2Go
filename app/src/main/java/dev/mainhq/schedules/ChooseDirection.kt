@@ -7,11 +7,17 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.room.Room
 import androidx.room.Room.databaseBuilder
 import dev.mainhq.schedules.database.AppDatabase
+import dev.mainhq.schedules.utils.adapters.StopListElemsAdapter
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.ArrayList
 
 //todo
 //change appbar to be only a back button
@@ -28,6 +34,7 @@ class ChooseDirection : AppCompatActivity() {
         val busNameView: TextView = findViewById(R.id.chooseBusDir);
         busNumView.text = busNum;
         busNameView.text = busName;
+
         setButtons(busNum)
     }
 
@@ -37,84 +44,62 @@ class ChooseDirection : AppCompatActivity() {
             Log.e("Dir Error", "No available buttons for the moment")
         }
         else{
-
             lifecycleScope.launch {
                 val db = databaseBuilder(applicationContext, AppDatabase::class.java, "stm_info")
                     .createFromAsset("database/stm_info.db").build()
-                val routes = db.tripsDao().getTripHeadsigns(busNum.toInt())
-                //Log.d("Headsign", routes[0])
-                //Log.d("ghol", routes.getAll().toString())
-                setListeners(routes)
+                val dirs = async {db.tripsDao().getTripHeadsigns(busNum.toInt())}.await()
+                val dir0 = async { db.stopsInfoDao().getStopNames(dirs[0])}.await()
+                val dir1 = async { db.stopsInfoDao().getStopNames(dirs.last()) }.await()
+                val orientation = if (dirs[0].last() == 'E' || dirs[0].last() == 'O') Orientation.HORIZONTAL
+                                    else Orientation.VERTICAL
+                val headsign0 = dirs[0]
+                val headsign1 = dirs[1]
+                setListeners(orientation, dir0, dir1, headsign0, headsign1)
                 db.close()
             }
         }
     }
 
-    private suspend fun setListeners(routes : List<String>){
+    private suspend fun setListeners(orientation: Orientation, dir0 : List<String>, dir1 : List<String>,
+                        headsign0 : String, headsign1: String){
         withContext(Dispatchers.Main){
             val leftButton : Button = findViewById(R.id.route_0)
+            val leftDescr : TextView = findViewById(R.id.description_route_0)
             val rightButton : Button = findViewById(R.id.route_1)
-            val orientation : Orientation
-            if (routes[0].last() == 'E' || routes[0].last() == 'O') {
-                //todo depends on language!!
-                leftButton.text = "West"
-                rightButton.text = "East"
-                orientation = Orientation.HORIZONTAL
+            val rightDescr : TextView = findViewById(R.id.description_route_1)
+            val intent = Intent(applicationContext, ChooseStop::class.java)
+            when (orientation){
+                Orientation.HORIZONTAL -> {
+                    leftButton.text = "West"
+                    rightButton.text = "East"
+
+                }
+                Orientation.VERTICAL -> {
+                    leftButton.text = "North"
+                    rightButton.text = "South"
+                }
+            }
+            if (dir0[0].last() == 'W' || dir0[0].last() == 'N') {
+                leftDescr.text = "From ${dir0[0]} to ${dir0.last()}"
+                rightDescr.text = "From ${dir1[0]} to ${dir1.last()}"
             }
             else{
-                leftButton.text = "North"
-                rightButton.text = "South"
-                orientation = Orientation.VERTICAL
+                leftDescr.text = "From ${dir1[0]} to ${dir1.last()}"
+                rightDescr.text = "From ${dir0[0]} to ${dir0.last()}"
             }
-            //need to send other data
             leftButton.setOnClickListener {
-                //todo get stop-times data where time is greater than
-                //now and id is the same as this id
-                var toSearch: String? = null
-                if (orientation == Orientation.HORIZONTAL) {
-                    for (route in routes) {
-                        //ouest vs west
-                        if (route.contains("O")) {
-                            toSearch = route
-                            break
-                        }
-                    }
-                } else {
-                    for (route in routes) {
-                        if (route.contains("N")) {
-                            toSearch = route
-                            break
-                        }
-                    }
-                }
-                val intent = Intent(applicationContext, ChooseStop::class.java)
-                intent.putExtra("headsign", toSearch ?: throw IllegalArgumentException("Couldnt find busline!"))
+                intent.putStringArrayListExtra("stops", dir0 as ArrayList<String>)
+                intent.putExtra("headsign", headsign0)
                 startActivity(intent)
             }
-            rightButton.setOnClickListener{
-                var toSearch : String? = null
-                if (orientation == Orientation.HORIZONTAL) {
-                    for (route in routes){
-                        if (route.contains("E")) {
-                            toSearch = route
-                            break
-                        }
-                    }
-                }
-                else {
-                    for (route in routes){
-                        if (route.contains("S")) {
-                            toSearch = route
-                            break
-                        }
-                    }
-                }
-                val intent = Intent(applicationContext, ChooseStop::class.java)
-                intent.putExtra("headsign", toSearch ?: throw IllegalArgumentException("Couldnt find busline"))
+            rightButton.setOnClickListener {
+                intent.putStringArrayListExtra("stops", dir1 as ArrayList<String>)
+                intent.putExtra("headsign", headsign1)
                 startActivity(intent)
             }
         }
     }
+
     private enum class Orientation{
         HORIZONTAL,VERTICAL
     }
