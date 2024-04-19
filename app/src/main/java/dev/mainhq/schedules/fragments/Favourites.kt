@@ -7,15 +7,19 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.core.view.children
 import androidx.core.view.forEach
 import androidx.core.view.get
+import androidx.core.view.size
 import androidx.datastore.core.DataStore
 import androidx.datastore.dataStore
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.findViewTreeViewModelStoreOwner
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.withCreated
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
@@ -27,10 +31,12 @@ import dev.mainhq.schedules.preferences.SettingsSerializer
 import dev.mainhq.schedules.utils.Time
 import dev.mainhq.schedules.utils.adapters.FavouritesListElemsAdapter
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 
 val Context.dataStore : DataStore<Favourites> by dataStore(
@@ -39,11 +45,7 @@ val Context.dataStore : DataStore<Favourites> by dataStore(
 )
 
 class Favourites : Fragment(R.layout.fragment_favourites) {
-    //first get user favourites data
-    //then make the recycler adapter with that data (either that or display 'no favourites'
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
+    var executor : ScheduledExecutorService? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_favourites, container, false)
@@ -55,14 +57,18 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
         lifecycleScope.launch {
             val list =  context?.dataStore?.data?.first()?.list?.toList()
             if (list == null){
-                TODO("TO IMPLEMENT")
+                TODO("")
+            } else if (list.isEmpty()) {
+                setEmpty(view)
+            } else {
+                val mutableList = setBus(list, view)
+                recyclerViewDisplay(view, mutableList)
             }
-            else if (list.isEmpty()) setEmpty(view)
-            else setBus(list, view)
+
         }
         val callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                val recyclerView : RecyclerView = view.findViewById(R.id.favouritesRecyclerView)
+                val recyclerView = view.findViewById<RecyclerView>(R.id.favouritesRecyclerView)
                 if (recyclerView.tag != null){
                     if (recyclerView.tag == "selected"){
                         recyclerView.forEach {
@@ -78,17 +84,42 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
             }
         }
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)
-        val executor = Executors.newSingleThreadScheduledExecutor()
 
-        // Schedule a task to update the TextView every 10 seconds
-        executor.scheduleAtFixedRate({
-            lifecycleScope.launch{
-                //todo could add some incertitude, and web requests here too
-                val list = context?.dataStore?.data?.first()?.list?.toList() ?: TODO("Not Yet Implemented")
-                if (list.isNotEmpty()) setBus(list, view)
-                else setEmpty(view)
+        val recyclerView : RecyclerView = requireView().findViewById(R.id.favouritesRecyclerView)
+        recyclerView.viewTreeObserver?.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                // Remove the listener to prevent multiple calls
+                recyclerView.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                executor = Executors.newSingleThreadScheduledExecutor()
+                val copy = executor!!
+                // Once RecyclerView is laid out, update its contents
+                // Schedule a task to update the TextView every 10 seconds
+                copy.scheduleAtFixedRate({
+                    lifecycleScope.launch {
+                        //todo could add some incertitude, and web requests here too
+                        val tmpList = context?.dataStore?.data?.first()?.list?.toList()
+                            ?: listOf()
+                        if (tmpList.isNotEmpty()) {
+                            //FIXME we only want to change the time left data, NOT the background colors etc
+                            val mutableList = setBus(tmpList, requireView())
+                            withContext(Dispatchers.Main){
+                                val favouritesListElemsAdapter = recyclerView.adapter as FavouritesListElemsAdapter
+                                for (i in 0 until recyclerView.size) {
+                                    favouritesListElemsAdapter.updateTime(recyclerView[i] as ViewGroup, mutableList[i])
+                                }
+                            }
+                        }
+                        //FIXME WE COULD REMOVE THAT LINE OF CODE
+                        else setEmpty(requireView())
+                    }
+                }, 0, 1, TimeUnit.SECONDS) //TODO need it to be for android or java????
             }
-        }, 0, 5, TimeUnit.SECONDS) //TODO need it to be for android or java????
+        })
+    }
+
+    override fun onPause() {
+        super.onPause()
+        executor!!.shutdown()
     }
 
     private suspend fun setEmpty(view : View){
@@ -97,7 +128,7 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
         }
     }
 
-    private suspend fun setBus(list : List<BusInfo>, view : View) {
+    private suspend fun setBus(list : List<BusInfo>, view : View) : MutableList<FavouriteBusInfo> {
         //todo find the first time data for every bus on the list
         val stopsInfoDAO = context?.applicationContext?.let {
             Room.databaseBuilder(it, AppDatabase::class.java, "stm_info.db")
@@ -119,14 +150,28 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
             stopsInfoDAO?.getFavouriteStopTime(busInfo.stopName, dayString, Time(calendar).toString(), busInfo.tripHeadsign)
                 ?.let { time -> times.add(FavouriteBusInfo(busInfo, time)) }
         }
-        withContext(Dispatchers.Main){
+        return times
+    }
+
+    private suspend fun recyclerViewDisplay(view : View, times : MutableList<FavouriteBusInfo>,
+                                            recyclerView: RecyclerView? = null){
+        return withContext(Dispatchers.Main){
             view.findViewById<TextView>(R.id.favourites_text_view).text = getText(R.string.favourites)
             val layoutManager = LinearLayoutManager(view.context)
             layoutManager.orientation = LinearLayoutManager.VERTICAL
-            val recyclerView : RecyclerView? = view.findViewById(R.id.favouritesRecyclerView)
-            recyclerView?.layoutManager = layoutManager
+            val recyclerViewTmp : RecyclerView? = view.findViewById(R.id.favouritesRecyclerView)
+            recyclerViewTmp?.layoutManager = layoutManager
             //need to improve that code to make it more safe
-            recyclerView?.adapter = recyclerView?.let { FavouritesListElemsAdapter(times, it) }
+            recyclerViewTmp?.adapter = recyclerViewTmp?.let { FavouritesListElemsAdapter(times, it) }
+            //return@withContext recyclerView
+            /*
+            else{
+                //FIXME the task is being run async so error...
+                val favouritesListElemsAdapter = recyclerView.adapter as FavouritesListElemsAdapter
+                for (i in 0 until recyclerView.size){
+                    favouritesListElemsAdapter.updateTime(recyclerView[i] as ViewGroup, times[i])
+                }
+            }*/
         }
     }
 

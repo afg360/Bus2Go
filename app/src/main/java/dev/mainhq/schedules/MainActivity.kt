@@ -18,8 +18,6 @@ import dev.mainhq.schedules.utils.adapters.BusListElemsAdapter
 import dev.mainhq.schedules.utils.web.WebRequest
 import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 
 //TODO
 //when updating the app (especially for new stm txt files), will need

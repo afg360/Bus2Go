@@ -8,13 +8,9 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.get
-import androidx.fragment.app.FragmentContainerView
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.checkbox.MaterialCheckBox
 import dev.mainhq.schedules.R
 import dev.mainhq.schedules.fragments.FavouriteBusInfo
-import dev.mainhq.schedules.fragments.Favourites
-import dev.mainhq.schedules.fragments.SelectedFavourites
 import dev.mainhq.schedules.utils.Time
 
 class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, private val recyclerView: RecyclerView)
@@ -44,16 +40,25 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
         holder.tripHeadsignTextView.text = info.busInfo.tripHeadsign
         holder.stopNameTextView.text = info.busInfo.stopName
         holder.arrivalTimeTextView.text = info.arrivalTime.toString()
-        val remainingTime = info.arrivalTime.timeRemaining() ?: Time(0,0,0) //todo replace that for better handling
-        val timeString : String =
-            if (remainingTime.hour > 0) "In ${remainingTime.hour} h, ${remainingTime.min} min"
-            else "In ${remainingTime.min} min"
+        holder.timeRemainingTextView.text = getTimeRemaining(info.arrivalTime)
 
-        holder.timeRemainingTextView.text = timeString
         holder.onLongClick(holder.itemView)
         //holder.itemView.seton
         holder.onClick(holder.itemView)
         //create an onclick also if one is already selected to choose multiple from the favourites list
+    }
+
+    fun updateTime(viewGroup : ViewGroup, favouritesBusInfo: FavouriteBusInfo){
+        //arrivalTimeTextView
+        (viewGroup[3] as TextView).text = favouritesBusInfo.arrivalTime.toString()
+        //timeRemainingTextView
+        (viewGroup[2] as TextView).text = getTimeRemaining(favouritesBusInfo.arrivalTime)
+    }
+
+    private fun getTimeRemaining(arrivalTime: Time): String {
+        val remainingTime = arrivalTime.timeRemaining() ?: Time(0, 0, 0) //todo replace that for better handling
+        return if (remainingTime.hour > 0) "In ${remainingTime.hour} h, ${remainingTime.min} min"
+                else "In ${remainingTime.min} min"
     }
 
     fun unSelect(view : View){
@@ -67,7 +72,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
     }
 
     class ViewHolder(view : View, private val recyclerView: RecyclerView) : RecyclerView.ViewHolder(view), OnClickListener, OnLongClickListener{
-        var checkBoxView : ConstraintLayout?
+        //var checkBoxView : ConstraintLayout?
         val tripHeadsignTextView : TextView
         val stopNameTextView : TextView
         val arrivalTimeTextView : TextView
@@ -77,7 +82,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
             stopNameTextView = view.findViewById(R.id.favouritesStopNameTextView)
             arrivalTimeTextView = view.findViewById(R.id.favouritesBusTimeTextView)
             timeRemainingTextView = view.findViewById(R.id.favouritesBusTimeRemainingTextView)
-            checkBoxView = null
+            //checkBoxView = null
         }
 
         //fixme not working properly
