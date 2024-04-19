@@ -4,23 +4,22 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnClickListener
 import android.view.View.OnLongClickListener
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.forEach
 import androidx.core.view.get
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.checkbox.MaterialCheckBox
 import dev.mainhq.schedules.R
 import dev.mainhq.schedules.fragments.FavouriteBusInfo
 import dev.mainhq.schedules.utils.Time
 
 class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, private val recyclerView: RecyclerView)
-    : RecyclerView.Adapter<FavouritesListElemsAdapter.ViewHolder>() {
-
-        //we may introduce a private field to set the mode of selection
-        private var MODE = "unselected"
+    : RecyclerView.Adapter<FavouritesListElemsAdapter.ViewHolder>(){
 
         //FIXME shitty implementation for now... using a direct reference
-        //could use that field above instead...
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -29,7 +28,6 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
             .inflate(R.layout.favourites_list_elem, parent, false), recyclerView //see if other way...
         )
     }
-
 
     override fun getItemCount(): Int {
         return list.size
@@ -72,7 +70,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
     }
 
     class ViewHolder(view : View, private val recyclerView: RecyclerView) : RecyclerView.ViewHolder(view), OnClickListener, OnLongClickListener{
-        //var checkBoxView : ConstraintLayout?
+        var checkBoxView : MaterialCheckBox
         val tripHeadsignTextView : TextView
         val stopNameTextView : TextView
         val arrivalTimeTextView : TextView
@@ -82,7 +80,8 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
             stopNameTextView = view.findViewById(R.id.favouritesStopNameTextView)
             arrivalTimeTextView = view.findViewById(R.id.favouritesBusTimeTextView)
             timeRemainingTextView = view.findViewById(R.id.favouritesBusTimeRemainingTextView)
-            //checkBoxView = null
+            checkBoxView = view.findViewById(R.id.favourites_check_box)
+            checkBoxView.visibility = View.INVISIBLE
         }
 
         //fixme not working properly
@@ -92,11 +91,13 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
                 if (v.tag != null){
                     if (v.tag == "selected"){
                         unSelect(v)
+                        checkBoxView.isChecked = false
                     }
                     else if (v.tag == "unselected"){
                         if (recyclerView.tag != null){
                             if (recyclerView.tag == "selected"){
                                 select(v)
+                                checkBoxView.isChecked = true
                             }
                         }
                     }
@@ -105,6 +106,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
                 else if (recyclerView.tag != null){
                     if (recyclerView.tag == "selected"){
                         select(v)
+                        checkBoxView.isChecked = true
                     }
                 }
             }
@@ -115,7 +117,15 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
             //todo goes through a selection checkbox mode
             //if we cancel the selection, then restore normal view
             v?.setOnLongClickListener{
-                if (v.tag == null) select(v)
+                if (v.tag == null) {
+                    select(v)
+                    //FIXME need to spawn instead of hide
+                    recyclerView.forEach {
+                        val viewGroup = it as ViewGroup
+                        (viewGroup[0] as MaterialCheckBox).visibility = VISIBLE
+                    }
+                    checkBoxView.isChecked = true
+                }
                 else if (v.tag != "selected") select(v)
                 (v.parent as RecyclerView).tag = "selected"
                 true
@@ -131,14 +141,6 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
         fun unSelect(view : View){
             view.resources?.getColor(R.color.dark, null)?.let { view.setBackgroundColor(it) }
             view.tag = "unselected"
-        }
-
-        fun toCheckBox(view : View){
-
-        }
-
-        private fun selectionMode(){
-            TODO("Not Implemented Yet")
         }
     }
 }

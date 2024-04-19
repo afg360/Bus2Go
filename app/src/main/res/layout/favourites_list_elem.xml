@@ -4,10 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <!-- TODO SUPPOSED TO INSTEAD SHOWCASE THE ARRIVALTIME, NOT
-    TODO ONLY THE BUS ITSELF-->
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/fragment_selected_checkbox"
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/favourites_check_box"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"

@@ -23,6 +23,7 @@ import androidx.lifecycle.withCreated
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
+import com.google.android.material.checkbox.MaterialCheckBox
 import dev.mainhq.schedules.R
 import dev.mainhq.schedules.database.AppDatabase
 import dev.mainhq.schedules.preferences.BusInfo
@@ -35,6 +36,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.internal.addHeaderLenient
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
@@ -73,7 +75,9 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
                     if (recyclerView.tag == "selected"){
                         recyclerView.forEach {
                             val viewGroup = it as ViewGroup
-                            (recyclerView.adapter as FavouritesListElemsAdapter).unSelect(viewGroup)
+                            val adapter = recyclerView.adapter as FavouritesListElemsAdapter
+                            adapter.unSelect(viewGroup)
+                            viewGroup.findViewById<MaterialCheckBox>(R.id.favourites_check_box).visibility = View.INVISIBLE
                         }
                         recyclerView.tag = "unselected"
                     }
@@ -88,12 +92,9 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
         val recyclerView : RecyclerView = requireView().findViewById(R.id.favouritesRecyclerView)
         recyclerView.viewTreeObserver?.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
-                // Remove the listener to prevent multiple calls
                 recyclerView.viewTreeObserver.removeOnGlobalLayoutListener(this)
                 executor = Executors.newSingleThreadScheduledExecutor()
                 val copy = executor!!
-                // Once RecyclerView is laid out, update its contents
-                // Schedule a task to update the TextView every 10 seconds
                 copy.scheduleAtFixedRate({
                     lifecycleScope.launch {
                         //todo could add some incertitude, and web requests here too
@@ -119,6 +120,7 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
 
     override fun onPause() {
         super.onPause()
+        //Prevents an IllegalArgumentException when coming back to the activity
         executor!!.shutdown()
     }
 
@@ -163,15 +165,6 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
             recyclerViewTmp?.layoutManager = layoutManager
             //need to improve that code to make it more safe
             recyclerViewTmp?.adapter = recyclerViewTmp?.let { FavouritesListElemsAdapter(times, it) }
-            //return@withContext recyclerView
-            /*
-            else{
-                //FIXME the task is being run async so error...
-                val favouritesListElemsAdapter = recyclerView.adapter as FavouritesListElemsAdapter
-                for (i in 0 until recyclerView.size){
-                    favouritesListElemsAdapter.updateTime(recyclerView[i] as ViewGroup, times[i])
-                }
-            }*/
         }
     }
 
