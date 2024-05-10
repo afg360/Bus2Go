@@ -1,5 +1,6 @@
 package dev.mainhq.schedules.utils.adapters
 
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnClickListener
@@ -13,6 +14,7 @@ import androidx.core.view.get
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.checkbox.MaterialCheckBox
 import dev.mainhq.schedules.R
+import dev.mainhq.schedules.Times
 import dev.mainhq.schedules.fragments.FavouriteBusInfo
 import dev.mainhq.schedules.utils.Time
 
@@ -87,27 +89,42 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
         //fixme not working properly
         //create a mode for the entire recycler view, then change behaviour on onclick/onlongclick for each item
         override fun onClick(v: View?) {
+            //FIXME Refactor code to have less lines taken
             v?.setOnClickListener{
-                if (v.tag != null){
-                    if (v.tag == "selected"){
-                        unSelect(v)
-                        checkBoxView.isChecked = false
-                    }
-                    else if (v.tag == "unselected"){
-                        if (recyclerView.tag != null){
-                            if (recyclerView.tag == "selected"){
-                                select(v)
-                                checkBoxView.isChecked = true
+                if (it.tag != null){
+                    when(it.tag){
+                        "selected" -> {
+                            unSelect(it)
+                            checkBoxView.isChecked = false
+                        }
+                        "unselected" -> {
+                            recyclerView.tag?.let{tag ->
+                                when(tag){
+                                    "selected" -> {
+                                        select(it)
+                                        checkBoxView.isChecked = true
+                                    }
+                                    "unselected" -> {
+                                        startTimes(v)
+                                    }
+                                }
                             }
                         }
                     }
-
                 }
                 else if (recyclerView.tag != null){
-                    if (recyclerView.tag == "selected"){
-                        select(v)
-                        checkBoxView.isChecked = true
+                    when(recyclerView.tag){
+                        "selected" -> {
+                            select(it)
+                            checkBoxView.isChecked = true
+                        }
+                        "unselected" -> {
+                            startTimes(v)
+                        }
                     }
+                }
+                else{
+                    startTimes(v)
                 }
             }
         }
@@ -131,6 +148,14 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
                 true
             }
             return false
+        }
+
+        private fun startTimes(view : View){
+            val intent = Intent(view.context, Times::class.java)
+            intent.putExtra("stopName", stopNameTextView.text as String)
+            intent.putExtra("headsign", tripHeadsignTextView.text as String)
+            view.context.startActivity(intent)
+            view.clearFocus()
         }
 
         fun select(view : View){
