@@ -66,7 +66,6 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
                 val mutableList = setBus(list, view)
                 recyclerViewDisplay(view, mutableList)
             }
-
         }
         val callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {

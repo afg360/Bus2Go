@@ -17,7 +17,6 @@
             android:layout_height="wrap_content"
             android:gravity="start|center_vertical"
             android:text="Direction"
-            android:textColor="@color/light"
             android:textSize="22sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"

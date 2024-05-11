@@ -34,7 +34,7 @@ private suspend fun displayBuses(list : List<BusRouteInfo>, activity : AppCompat
     withContext(Dispatchers.Main){
         val recyclerView : RecyclerView = activity.findViewById(R.id.search_recycle_view)
         val layoutManager = LinearLayoutManager(activity.applicationContext)
-        color?.let { recyclerView.setBackgroundColor(activity.resources.getColor(it, null)) }
+        //color?.let { recyclerView.setBackgroundColor(activity.resources.getColor(it, null)) }
         recyclerView.adapter = BusListElemsAdapter(list)
         layoutManager.orientation = LinearLayoutManager.VERTICAL
         recyclerView.layoutManager = layoutManager
