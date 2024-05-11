@@ -19,7 +19,7 @@ class SearchBus : AppCompatActivity() {
         val ref = WeakReference(this)
         //todo optimisation possible by using the results from mainActivity database query
         lifecycleScope.launch {
-            ref.get()?.let { setup(query, it, null, null) }
+            ref.get()?.let { setup(query, it, null) }
         }
         onClickBack()
     }

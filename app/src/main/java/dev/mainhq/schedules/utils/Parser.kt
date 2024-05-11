@@ -17,17 +17,16 @@ import java.util.Locale
 //todo may use db operations instead
 
 /** Sets up the activity data from the database to be displayed for the user **/
-suspend fun setup(query : String, activity: AppCompatActivity, searchView: SearchView?, color : Int?){
+suspend fun setup(query : String, activity: AppCompatActivity, color : Int?){
     val db = Room.databaseBuilder(activity.applicationContext, AppDatabase::class.java, "stm_info")
         .createFromAsset("database/stm_info.db").build()
     val routes = db.routesDao()
     val list = routes.getBusRouteInfo(FuzzyQuery(query))
-    displayBuses(list, activity, searchView, color)
+    displayBuses(list, activity, color)
     db.close()
 }
 
-private suspend fun displayBuses(list : List<BusRouteInfo>, activity : AppCompatActivity,
-                                 searchView : SearchView?, color : Int?){
+private suspend fun displayBuses(list : List<BusRouteInfo>, activity : AppCompatActivity, color : Int?){
     //todo
     //need to handle queries where french accents are needed
     //val parsable = Parser.toParsable(query)

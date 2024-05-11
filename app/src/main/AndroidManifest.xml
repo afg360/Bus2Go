@@ -20,7 +20,7 @@
             android:name=".ChooseStop"
             android:exported="false"
             android:label="@string/title_activity_choose_time"
-            android:theme="@style/Theme.Schedules.NoActionBar">
+            android:theme="@style/Theme.Schedules">
 
         </activity>
         <activity android:name=".Times"

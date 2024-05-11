@@ -1,20 +1,11 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Can customise the action bar, etc.-->
-    <style name="Theme.Schedules" parent="Theme.AppCompat.Light">
-        <!-- appBar color-->
+    <style name="Theme.Schedules" parent="Theme.Material3.Light.NoActionBar">
         <item name="colorPrimary">@color/dark_blue</item>
         <item name="editTextColor">@color/light</item>
-        <!-- actionBar color -->
-        <item name="colorPrimaryDark">@color/dark</item>
-        <item name="colorAccent">@color/dark</item>
+
+        <item name="colorPrimaryDark">@android:color/transparent</item>
+        <item name="colorAccent">@color/basic_blue</item>
     </style>
 
-    <style name="Theme.Schedules.NoActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-    </style>
-
-    <style name="Theme.Schedules.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-
-    <style name="Theme.Schedules.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>

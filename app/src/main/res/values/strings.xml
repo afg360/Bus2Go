@@ -10,7 +10,7 @@
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
     <string name="choose_a_direction">Choose a direction</string>
-    <string name="search">Search</string>
+    <string name="search">Search for bus lines or bus numbers</string>
     <string name="settings">Settings</string>
     <string name="title_activity_choose_time">ChooseTime</string>
     <string name="action_settings">Settings</string>

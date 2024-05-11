@@ -2,16 +2,22 @@ package dev.mainhq.schedules
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
+import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.SearchView
+import android.view.inputmethod.EditorInfo
+import android.widget.TextView
+import android.window.OnBackInvokedDispatcher
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.search.SearchView
 import dev.mainhq.schedules.fragments.Favourites
 import dev.mainhq.schedules.utils.*
 import dev.mainhq.schedules.utils.adapters.BusListElemsAdapter
@@ -27,11 +33,12 @@ import java.lang.ref.WeakReference
 class MainActivity : AppCompatActivity() {
 
     //todo could use a favourites list here to use in other methods
+    private lateinit var searchView : SearchView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //todo
-        if (false) { //check if config file exists
+        if (false) { //TODO check if config file exists
             val intent = Intent(this.applicationContext, Config::class.java)
             startActivity(intent)
         }
@@ -43,49 +50,11 @@ class MainActivity : AppCompatActivity() {
                     .replace(R.id.favouritesFragmentContainer, Favourites()).commit()
             }
         })
-        /*lifecycleScope.launch {
-            WebRequest.getResponse()
-        }*/
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        val inflater = this.menuInflater
-        inflater.inflate(R.menu.app_bar_menu, menu)
-        val searchItem = menu.findItem(R.id.app_bar_search_icon)
-        val searchView = searchItem.actionView as SearchView
-        //set attr so that on back removes the recycler view
-        //searchView.on
-        listenSearchQuery(searchView)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        val itemID = item.itemId
-        return if (itemID == R.id.settingsIcon) {
-            val intent = Intent(this, Settings::class.java)
-            startActivity(intent)
-            return true
-        }
-        else super.onOptionsItemSelected(item)
-    }
-
-    //could put this in a generic class
-    private fun listenSearchQuery(searchView: SearchView) {
-        val curActivity = WeakReference(this)
-        searchView.queryHint = "Search for bus lines, bus nums, etc."
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-
-            override fun onQueryTextSubmit(query: String): Boolean {
-                val intent = Intent(applicationContext, SearchBus::class.java)
-                intent.putExtra("query", query)
-                startActivity(intent)
-                searchView.clearFocus()
-                return true
-            }
-
-            override fun onQueryTextChange(newText: String): Boolean {
-                //bring on top of other stuff
-                searchView.bringToFront()
+        val weakReference : WeakReference<AppCompatActivity> = WeakReference(this)
+        searchView = findViewById(R.id.main_search_view)
+        searchView.editText.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(editable: Editable?) {
+                val newText = editable.toString()
                 if (newText.isEmpty()){
                     val recyclerView = findViewById<RecyclerView>(R.id.search_recycle_view)
                     val layoutManager = LinearLayoutManager(applicationContext)
@@ -95,11 +64,29 @@ class MainActivity : AppCompatActivity() {
                 }
                 else {
                     lifecycleScope.launch {
-                        curActivity.get()?.let{setup(newText, it, searchView, R.color.white)}
+                        weakReference.get()?.let{setup(newText, it, R.color.white)}
                     }
                 }
-                return true
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                //Not needed for our purposes
+            }
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                //Not needed for our purposes
             }
         })
+        searchView.editText.setOnEditorActionListener { textView : TextView, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                val submittedText = textView.text.toString()
+                val intent = Intent(applicationContext, SearchBus::class.java)
+                intent.putExtra("query", submittedText)
+                startActivity(intent)
+                true
+            }
+            else {
+                false
+            }
+        }
     }
 }
