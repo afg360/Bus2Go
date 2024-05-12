@@ -1,16 +1,14 @@
 package dev.mainhq.schedules.utils.adapters
 
-import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnClickListener
 import android.view.ViewGroup
-import android.widget.TextView
 import android.widget.Toast
-import androidx.core.graphics.scaleMatrix
 import androidx.recyclerview.widget.RecyclerView
 import dev.mainhq.schedules.R
 import android.icu.util.Calendar
+import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.schedules.utils.Time
 
 //TODO
@@ -53,8 +51,8 @@ class TimeListElemsAdapter(private val timeData: List<Time>)
     }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view), OnClickListener{
-        val timeTextView: TextView
-        var timeLeftTextView: TextView
+        val timeTextView: MaterialTextView
+        var timeLeftTextView: MaterialTextView
         init {
             timeTextView = view.findViewById(R.id.time)
             timeLeftTextView = view.findViewById(R.id.time_left)

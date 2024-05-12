@@ -5,9 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
-import android.view.Menu
-import android.view.MenuItem
 import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 import android.window.OnBackInvokedDispatcher
@@ -17,12 +14,12 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomappbar.BottomAppBar
 import com.google.android.material.search.SearchBar
 import com.google.android.material.search.SearchView
 import dev.mainhq.schedules.fragments.Favourites
 import dev.mainhq.schedules.utils.*
 import dev.mainhq.schedules.utils.adapters.BusListElemsAdapter
-import dev.mainhq.schedules.utils.web.WebRequest
 import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
 
@@ -95,7 +92,7 @@ class MainActivity : AppCompatActivity() {
                     searchView.hide()
             }
         }
-        val searchBar : SearchBar = findViewById(R.id.main_search_bar)
+        val searchBar : SearchBar = findViewById(R.id.mainSearchBar)
         searchBar.inflateMenu(R.menu.app_bar_menu)
         searchBar.setOnMenuItemClickListener {
             val itemID = it.itemId
@@ -106,6 +103,9 @@ class MainActivity : AppCompatActivity() {
             }
             else super.onOptionsItemSelected(it)
         }
+
+        val bottomAppBar : BottomAppBar = findViewById(R.id.mainBottomAppBar)
+        bottomAppBar.inflateMenu(R.menu.bottom_nav_bar)
     }
 
     @SuppressLint("MissingSuperCall")

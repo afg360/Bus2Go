@@ -11,7 +11,7 @@
     app:layout_constraintTop_toTopOf="parent"
     >
     <!-- TODO The below text view could instead be a fragment -->
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/time_left"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -25,7 +25,7 @@
         app:layout_constraintTop_toTopOf="parent"
         />
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -37,5 +37,12 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.divider.MaterialDivider
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        app:layout_constraintTop_toBottomOf="@id/time"
+        android:layout_marginVertical="5dp"
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

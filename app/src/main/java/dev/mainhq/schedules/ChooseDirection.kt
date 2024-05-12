@@ -3,14 +3,14 @@ package dev.mainhq.schedules;
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.widget.Button
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
 import androidx.room.Room.databaseBuilder
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.schedules.database.AppDatabase
 import dev.mainhq.schedules.utils.adapters.StopListElemsAdapter
 import kotlinx.coroutines.Dispatchers
@@ -30,8 +30,8 @@ class ChooseDirection : AppCompatActivity() {
         val busNum = extras.getString("busNum") ?: throw AssertionError("busNum is Null");
         //set a loading screen first before displaying the correct buttons
         this.setContentView(R.layout.choose_direction);
-        val busNumView: TextView = findViewById(R.id.chooseBusNum);
-        val busNameView: TextView = findViewById(R.id.chooseBusDir);
+        val busNumView: MaterialTextView = findViewById(R.id.chooseBusNum);
+        val busNameView: MaterialTextView = findViewById(R.id.chooseBusDir);
         busNumView.text = busNum;
         busNameView.text = busName;
 
@@ -63,10 +63,10 @@ class ChooseDirection : AppCompatActivity() {
     private suspend fun setListeners(orientation: Orientation, dir0 : List<String>, dir1 : List<String>,
                         headsign0 : String, headsign1: String){
         withContext(Dispatchers.Main){
-            val leftButton : Button = findViewById(R.id.route_0)
-            val leftDescr : TextView = findViewById(R.id.description_route_0)
-            val rightButton : Button = findViewById(R.id.route_1)
-            val rightDescr : TextView = findViewById(R.id.description_route_1)
+            val leftButton : MaterialButton = findViewById(R.id.route_0)
+            val leftDescr : MaterialTextView = findViewById(R.id.description_route_0)
+            val rightButton : MaterialButton = findViewById(R.id.route_1)
+            val rightDescr : MaterialTextView = findViewById(R.id.description_route_1)
             val intent = Intent(applicationContext, ChooseStop::class.java)
             when (orientation){
                 Orientation.HORIZONTAL -> {

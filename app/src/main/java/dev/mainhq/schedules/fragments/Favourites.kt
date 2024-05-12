@@ -101,9 +101,10 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
                             //FIXME we only want to change the time left data, NOT the background colors etc
                             val mutableList = setBus(tmpList, requireView())
                             withContext(Dispatchers.Main){
-                                val favouritesListElemsAdapter = recyclerView.adapter as FavouritesListElemsAdapter
+                                //FIXME bug is at line 105
+                                val favouritesListElemsAdapter = recyclerView.adapter as FavouritesListElemsAdapter?
                                 for (i in 0 until recyclerView.size) {
-                                    favouritesListElemsAdapter.updateTime(recyclerView[i] as ViewGroup, mutableList[i])
+                                    favouritesListElemsAdapter?.updateTime(recyclerView[i] as ViewGroup, mutableList[i])
                                 }
                             }
                         }

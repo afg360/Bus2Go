@@ -6,10 +6,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.TextView
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.schedules.R
 import dev.mainhq.schedules.Times
 import dev.mainhq.schedules.fragments.dataStore
@@ -74,12 +74,12 @@ class StopListElemsAdapter(private val data: List<String>, private val list: Lis
 
     class ViewHolder(view: View, private val headsign : String) : RecyclerView.ViewHolder(view) {
         //TODO INSTEAD ADD A COLUMN IN DATABASE TO SET AS FAVOURITE A CERTAIN STOP, AND AFFICHER ONLY THE NEXT STOP
-        val stopNameTextView: TextView
+        val stopNameTextView: MaterialTextView
         val favouriteSelectedView : ImageView
         init {
             stopNameTextView = view.findViewById(R.id.stop)
             stopNameTextView.setOnClickListener{
-                val stopName = (it as TextView).text as String
+                val stopName = (it as MaterialTextView).text as String
                 val intent = Intent(view.context, Times::class.java)
                 intent.putExtra("stopName", stopName)
                 intent.putExtra("headsign", headsign)
