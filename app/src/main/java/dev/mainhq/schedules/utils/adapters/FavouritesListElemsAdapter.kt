@@ -7,12 +7,11 @@ import android.view.View.OnClickListener
 import android.view.View.OnLongClickListener
 import android.view.View.VISIBLE
 import android.view.ViewGroup
-import android.widget.TextView
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.forEach
 import androidx.core.view.get
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.checkbox.MaterialCheckBox
+import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.schedules.R
 import dev.mainhq.schedules.Times
 import dev.mainhq.schedules.fragments.FavouriteBusInfo
@@ -50,9 +49,9 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
 
     fun updateTime(viewGroup : ViewGroup, favouritesBusInfo: FavouriteBusInfo){
         //arrivalTimeTextView
-        (viewGroup[3] as TextView).text = favouritesBusInfo.arrivalTime.toString()
+        (viewGroup[3] as MaterialTextView).text = favouritesBusInfo.arrivalTime.toString()
         //timeRemainingTextView
-        (viewGroup[2] as TextView).text = getTimeRemaining(favouritesBusInfo.arrivalTime)
+        (viewGroup[2] as MaterialTextView).text = getTimeRemaining(favouritesBusInfo.arrivalTime)
     }
 
     private fun getTimeRemaining(arrivalTime: Time): String {
@@ -73,10 +72,10 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
 
     class ViewHolder(view : View, private val recyclerView: RecyclerView) : RecyclerView.ViewHolder(view), OnClickListener, OnLongClickListener{
         var checkBoxView : MaterialCheckBox
-        val tripHeadsignTextView : TextView
-        val stopNameTextView : TextView
-        val arrivalTimeTextView : TextView
-        val timeRemainingTextView : TextView
+        val tripHeadsignTextView : MaterialTextView
+        val stopNameTextView : MaterialTextView
+        val arrivalTimeTextView : MaterialTextView
+        val timeRemainingTextView : MaterialTextView
         init{
             tripHeadsignTextView = view.findViewById(R.id.favouritesTripheadsignTextView)
             stopNameTextView = view.findViewById(R.id.favouritesStopNameTextView)

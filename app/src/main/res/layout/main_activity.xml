@@ -20,11 +20,13 @@
                 android:layout_height="wrap_content"
                 app:layout_constraintTop_toTopOf="parent"
                 >
+
                 <com.google.android.material.search.SearchBar
                     android:id="@+id/main_search_bar"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/search"
+
                     />
             </com.google.android.material.appbar.AppBarLayout>
 

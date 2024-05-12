@@ -17,6 +17,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.search.SearchBar
 import com.google.android.material.search.SearchView
 import dev.mainhq.schedules.fragments.Favourites
 import dev.mainhq.schedules.utils.*
@@ -93,6 +94,17 @@ class MainActivity : AppCompatActivity() {
                 if (searchView.isShowing)
                     searchView.hide()
             }
+        }
+        val searchBar : SearchBar = findViewById(R.id.main_search_bar)
+        searchBar.inflateMenu(R.menu.app_bar_menu)
+        searchBar.setOnMenuItemClickListener {
+            val itemID = it.itemId
+            if (itemID == R.id.settingsIcon) {
+                val intent = Intent(this, Settings::class.java)
+                startActivity(intent)
+                true
+            }
+            else super.onOptionsItemSelected(it)
         }
     }
 

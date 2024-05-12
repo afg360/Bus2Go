@@ -16,7 +16,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_margin="5dp"
         />
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/favouritesTripheadsignTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -27,7 +27,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         />
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/favouritesBusTimeRemainingTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -39,7 +39,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         />
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/favouritesBusTimeTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -52,7 +52,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         />
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/favouritesStopNameTextView"
         android:layout_width="202dp"
         android:layout_height="wrap_content"

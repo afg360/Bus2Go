@@ -8,7 +8,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
-import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.core.view.forEach
 import androidx.core.view.get
@@ -21,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
 import com.google.android.material.checkbox.MaterialCheckBox
+import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.schedules.R
 import dev.mainhq.schedules.database.AppDatabase
 import dev.mainhq.schedules.preferences.BusInfo
@@ -124,7 +124,7 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
 
     private suspend fun setEmpty(view : View){
         withContext(Dispatchers.Main){
-            view.findViewById<TextView>(R.id.favourites_text_view).text = getText(R.string.no_favourites)
+            view.findViewById<MaterialTextView>(R.id.favourites_text_view).text = getText(R.string.no_favourites)
         }
     }
 
@@ -156,7 +156,7 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
     private suspend fun recyclerViewDisplay(view : View, times : MutableList<FavouriteBusInfo>,
                                             recyclerView: RecyclerView? = null){
         return withContext(Dispatchers.Main){
-            view.findViewById<TextView>(R.id.favourites_text_view).text = getText(R.string.favourites)
+            view.findViewById<MaterialTextView>(R.id.favourites_text_view).text = getText(R.string.favourites)
             val layoutManager = LinearLayoutManager(view.context)
             layoutManager.orientation = LinearLayoutManager.VERTICAL
             val recyclerViewTmp : RecyclerView? = view.findViewById(R.id.favouritesRecyclerView)
