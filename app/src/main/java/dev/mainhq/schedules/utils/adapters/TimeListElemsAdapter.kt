@@ -36,7 +36,10 @@ class TimeListElemsAdapter(private val timeData: List<Time>)
             val remainingTime = time.subtract(curTime)
             if (remainingTime != null) {
                 if (remainingTime.hour == 0) holder.timeLeftTextView.text = "In ${remainingTime.min} min"
-                else holder.timeLeftTextView.text = "TODO"//todo
+                else holder.timeLeftTextView.text = "In >> 1h"//todo
+            }
+            else{
+                holder.timeLeftTextView.text = "Passed bus???"
             }
         }
         /** NOTE a VIEWHOLDER can be recycled, which would mean that all of its attributes would be reused!!*/

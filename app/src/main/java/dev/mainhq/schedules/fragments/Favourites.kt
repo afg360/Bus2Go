@@ -10,16 +10,13 @@ import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
-import androidx.core.view.children
 import androidx.core.view.forEach
 import androidx.core.view.get
 import androidx.core.view.size
 import androidx.datastore.core.DataStore
 import androidx.datastore.dataStore
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.findViewTreeViewModelStoreOwner
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.withCreated
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
@@ -32,15 +29,15 @@ import dev.mainhq.schedules.preferences.SettingsSerializer
 import dev.mainhq.schedules.utils.Time
 import dev.mainhq.schedules.utils.adapters.FavouritesListElemsAdapter
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.internal.addHeaderLenient
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 
+/** The datastore of favourites refers to favourites defined in the preferences file, at dev.mainhq.schedules.preferences,
+ *  NOT THIS FRAGMENT */
 val Context.dataStore : DataStore<Favourites> by dataStore(
     fileName = "favourites.json",
     serializer = SettingsSerializer
@@ -67,6 +64,7 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
                 recyclerViewDisplay(view, mutableList)
             }
         }
+        /** This part allows us to press the back button when in selection mode of favourites to get out of it*/
         val callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 val recyclerView = view.findViewById<RecyclerView>(R.id.favouritesRecyclerView)
@@ -89,6 +87,7 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)
 
         val recyclerView : RecyclerView = requireView().findViewById(R.id.favouritesRecyclerView)
+        /** This part allows us to update each recyclerview item from favourites in "real time" */
         recyclerView.viewTreeObserver?.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
                 recyclerView.viewTreeObserver.removeOnGlobalLayoutListener(this)
@@ -97,8 +96,7 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
                 copy.scheduleAtFixedRate({
                     lifecycleScope.launch {
                         //todo could add some incertitude, and web requests here too
-                        val tmpList = context?.dataStore?.data?.first()?.list?.toList()
-                            ?: listOf()
+                        val tmpList = context?.dataStore?.data?.first()?.list?.toList() ?: listOf()
                         if (tmpList.isNotEmpty()) {
                             //FIXME we only want to change the time left data, NOT the background colors etc
                             val mutableList = setBus(tmpList, requireView())
@@ -119,8 +117,9 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
 
     override fun onPause() {
         super.onPause()
+        //FIXME DOES NOT SEEM TO PREVENT THE BELOW
         //Prevents an IllegalArgumentException when coming back to the activity
-        executor!!.shutdown()
+        executor?.shutdown()
     }
 
     private suspend fun setEmpty(view : View){
@@ -134,22 +133,22 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
         val stopsInfoDAO = context?.applicationContext?.let {
             Room.databaseBuilder(it, AppDatabase::class.java, "stm_info.db")
                     .createFromAsset("database/stm_info.db").build() }?.stopsInfoDao()
-        val times : MutableList<FavouriteBusInfo> = mutableListOf()
-        val calendar = Calendar.getInstance()
-        val dayString = when (calendar.get(Calendar.DAY_OF_WEEK)) {
-            Calendar.SUNDAY -> "d"
-            Calendar.MONDAY -> "m"
-            Calendar.TUESDAY -> "t"
-            Calendar.WEDNESDAY -> "w"
-            Calendar.THURSDAY -> "y"
-            Calendar.FRIDAY -> "f"
-            Calendar.SATURDAY -> "s"
-            else -> null
-        }
-        dayString ?: throw IllegalStateException("Cannot have a non day of the week!")
-        list.forEach {busInfo ->
-            stopsInfoDAO?.getFavouriteStopTime(busInfo.stopName, dayString, Time(calendar).toString(), busInfo.tripHeadsign)
-                ?.let { time -> times.add(FavouriteBusInfo(busInfo, time)) }
+            val times : MutableList<FavouriteBusInfo> = mutableListOf()
+            val calendar = Calendar.getInstance()
+            val dayString = when (calendar.get(Calendar.DAY_OF_WEEK)) {
+                Calendar.SUNDAY -> "d"
+                Calendar.MONDAY -> "m"
+                Calendar.TUESDAY -> "t"
+                Calendar.WEDNESDAY -> "w"
+                Calendar.THURSDAY -> "y"
+                Calendar.FRIDAY -> "f"
+                Calendar.SATURDAY -> "s"
+                else -> null
+            }
+            dayString ?: throw IllegalStateException("Cannot have a non day of the week!")
+            list.forEach {busInfo ->
+                stopsInfoDAO?.getFavouriteStopTime(busInfo.stopName, dayString, Time(calendar).toString(), busInfo.tripHeadsign)
+                    ?.let { time -> times.add(FavouriteBusInfo(busInfo, time)) }
         }
         return times
     }
@@ -166,10 +165,6 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
             recyclerViewTmp?.adapter = recyclerViewTmp?.let { FavouritesListElemsAdapter(times, it) }
         }
     }
-
-}
-
-class SelectedFavourites : Fragment(R.layout.selected_favourites_checkbox){
 
 }
 

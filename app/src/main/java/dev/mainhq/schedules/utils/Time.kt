@@ -38,7 +38,11 @@ class Time(hour : Int, min : Int, sec : Int) : Comparable<Time>{
 
     fun subtract(time : Time) : Time?{
         val rel = this.compareTo(time)
-        if (rel == -1) return null //todo unavailable
+        if (rel == -1) {
+            //TODO if the time is between midnight and 3, + 24
+            if (hour in 0..3) hour += 24
+            else return null
+        } //todo unavailable
         else if (rel == 0) return Time(0,0,0)
         val total = this.hour * 3600 + this.min * 60 + this.sec - (time.hour * 3600 + time.min * 60 + time.sec)
         val hour = total / 3600

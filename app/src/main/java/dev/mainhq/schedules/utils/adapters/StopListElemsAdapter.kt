@@ -18,7 +18,8 @@ import kotlinx.collections.immutable.mutate
 import kotlinx.coroutines.launch
 
 
-class StopListElemsAdapter(private val data: List<String>, private val headsign: String)
+class StopListElemsAdapter(private val data: List<String>, private val list: List<BusInfo>,
+                           private val headsign: String)
     : RecyclerView.Adapter<StopListElemsAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -32,12 +33,17 @@ class StopListElemsAdapter(private val data: List<String>, private val headsign:
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val data = this.data[position]
         holder.stopNameTextView.text = data
-        holder.favouriteSelectedView.setOnClickListener{ view ->
+        /** Initialise the right type of favourite button */
+        if (list.contains(BusInfo(holder.stopNameTextView.text.toString(), headsign))){
+            holder.favouriteSelectedView.tag = "on"
+            holder.favouriteSelectedView.setBackgroundResource(R.drawable.favourite_drawable_on)
+        }
+        holder.favouriteSelectedView.setOnClickListener { view ->
             if (view.tag.equals("off")) {
                 view.setBackgroundResource(R.drawable.favourite_drawable_on)
                 view.tag = "on"
                 view.findViewTreeLifecycleOwner()!!.lifecycleScope.launch {
-                    view.context.dataStore.updateData{favourites ->
+                    view.context.dataStore.updateData { favourites ->
                         favourites.copy(list = favourites.list.mutate {
                             //maybe add a tripid or some identifier so that it is a unique thing deleted
                             it.add(BusInfo(data, headsign))
@@ -51,7 +57,7 @@ class StopListElemsAdapter(private val data: List<String>, private val headsign:
                 view.tag = "off"
                 //todo add to favourites
                 view.findViewTreeLifecycleOwner()!!.lifecycleScope.launch {
-                    view.context.dataStore.updateData {favourites ->
+                    view.context.dataStore.updateData { favourites ->
                         favourites.copy(list = favourites.list.mutate {
                             it.remove(BusInfo(data, headsign))
                             Log.d("FAVOURITES", "CLICKED TO REMOVE A FAVOURITE!")
@@ -81,7 +87,6 @@ class StopListElemsAdapter(private val data: List<String>, private val headsign:
                 it.clearFocus()
             }
             favouriteSelectedView = view.findViewById(R.id.favourite_star_selection)
-            //fixme check in datastore if the data references this. if yes, then set tag as "on" instead, and drawable also
             favouriteSelectedView.setBackgroundResource(R.drawable.favourite_drawable_off)
             favouriteSelectedView.tag = "off"
         }
