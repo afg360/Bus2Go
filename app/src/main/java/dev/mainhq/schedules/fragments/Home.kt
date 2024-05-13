@@ -1,6 +1,5 @@
 package dev.mainhq.schedules.fragments
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
@@ -8,9 +7,7 @@ import android.text.TextWatcher
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.TextView
-import android.window.OnBackInvokedDispatcher
-import androidx.activity.addCallback
-import androidx.activity.findViewTreeOnBackPressedDispatcherOwner
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -19,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.search.SearchBar
 import com.google.android.material.search.SearchView
+import com.google.android.material.search.SearchView.TransitionState
 import dev.mainhq.schedules.R
 import dev.mainhq.schedules.SearchBus
 import dev.mainhq.schedules.Settings
@@ -26,6 +24,7 @@ import dev.mainhq.schedules.utils.adapters.BusListElemsAdapter
 import dev.mainhq.schedules.utils.setup
 import kotlinx.coroutines.launch
 
+//FIXME CANNOT SUPPORT VERY FAST CHANGES BETWEEN THIS FRAG AND THE OTHERS -> APP CRASHES BECAUSE NO VIEW IS RETURNED
 class Home : Fragment(R.layout.home_fragment) {
 
     //todo could use a favourites list here to use in other methods
@@ -79,16 +78,20 @@ class Home : Fragment(R.layout.home_fragment) {
                 false
             }
         }
-
+        searchView.addTransitionListener { searchView, previousState, newState ->
+            if (previousState == TransitionState.HIDDEN && newState == TransitionState.SHOWING){
+                activity?.findViewById<CoordinatorLayout>(R.id.bottomNavCoordLayout)?.visibility = View.INVISIBLE
+            }
+            else if (previousState == TransitionState.SHOWN && newState == TransitionState.HIDING){
+                activity?.findViewById<CoordinatorLayout>(R.id.bottomNavCoordLayout)?.visibility = View.VISIBLE
+            }
+        }
         //if (android.os.Build.VERSION.SDK_INT >= 33) {
         //    activity?.onBackInvokedDispatcher?.registerOnBackInvokedCallback(OnBackInvokedDispatcher.PRIORITY_DEFAULT) {
         //        if (searchView.isShowing)
         //            searchView.hide()
         //    }
         //}
-        view.findViewTreeOnBackPressedDispatcherOwner()?.onBackPressedDispatcher?.addCallback {
-            if (searchView.isShowing) searchView.hide()
-        }
 
 
         val searchBar : SearchBar = view.findViewById(R.id.mainSearchBar)
