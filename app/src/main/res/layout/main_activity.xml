@@ -6,80 +6,100 @@
     android:layout_height="match_parent"
     >
 
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/mainFragmentContainer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        />
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/bottomNavCoordLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        >
+        <com.google.android.material.bottomappbar.BottomAppBar
+            android:id="@+id/mainBottomAppBar"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <com.google.android.material.appbar.AppBarLayout
-                android:id="@+id/mainAppBar"
+            android:layout_height="50dp"
+            >
+            <LinearLayout
+                android:id="@+id/bottomNavLinearLayout"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_constraintTop_toTopOf="parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:gravity="center"
                 >
+                <LinearLayout
+                    android:id="@+id/homeScreenButton"
+                    android:layout_width="75dp"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:background="?attr/selectableItemBackground"
+                    android:layout_marginHorizontal="10dp"
+                    android:paddingTop="2dp"
+                    >
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/home_screen"
+                        />
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Home"
+                        />
+                </LinearLayout>
 
-                <com.google.android.material.search.SearchBar
-                    android:id="@+id/mainSearchBar"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/search"
+                <!-- Could instead use fragments?? -->
+                <LinearLayout
+                    android:id="@+id/mapButton"
+                    android:layout_width="75dp"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:background="?attr/selectableItemBackground"
+                    android:layout_marginHorizontal="10dp"
+                    android:paddingTop="2dp"
+                    >
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/home_screen"
+                        />
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Map"
+                        />
+                </LinearLayout>
 
-                    />
-            </com.google.android.material.appbar.AppBarLayout>
+                <LinearLayout
+                    android:id="@+id/alarmsButton"
+                    android:layout_width="75dp"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:background="?attr/selectableItemBackground"
+                    android:layout_marginHorizontal="10dp"
+                    android:paddingTop="2dp"
+                    >
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/outline_alarm_24"
+                        />
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Alarms"
+                        />
+                </LinearLayout>
 
-            <androidx.core.widget.NestedScrollView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@+id/mainAppBar"
-                app:layout_behavior="@string/searchbar_scrolling_view_behavior"
-                >
-                <!-- Screen content goes here. -->
-                <!-- TODO recycler view listing all selected buslines-->
-                <!-- TODO these are swippable (for either the left or right choice, so chosen by their stop sequence in the busline) -->
-                <androidx.fragment.app.FragmentContainerView
-                    android:id="@+id/favouritesFragmentContainer"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/mainSearchBar" />
-            </androidx.core.widget.NestedScrollView>
-
-            <androidx.coordinatorlayout.widget.CoordinatorLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_constraintBottom_toBottomOf="parent"
-                >
-                <com.google.android.material.bottomappbar.BottomAppBar
-                    android:id="@+id/mainBottomAppBar"
-                    android:layout_width="match_parent"
-                    android:layout_height="45dp"
-                    />
-            </androidx.coordinatorlayout.widget.CoordinatorLayout>
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <com.google.android.material.search.SearchView
-            android:id="@+id/main_search_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:hint="@string/search"
-            app:layout_anchor="@id/mainSearchBar">
-            <!-- Search suggestions/results go here (ScrollView, RecyclerView, etc.). -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/search_recycle_view"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/main_search_view"/>
-        </com.google.android.material.search.SearchView>
-
-
-
+            </LinearLayout>
+        </com.google.android.material.bottomappbar.BottomAppBar>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
 

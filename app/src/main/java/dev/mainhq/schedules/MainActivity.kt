@@ -1,27 +1,14 @@
 package dev.mainhq.schedules
 
-import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
-import android.view.inputmethod.EditorInfo
-import android.widget.TextView
-import android.window.OnBackInvokedDispatcher
+import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.bottomappbar.BottomAppBar
-import com.google.android.material.search.SearchBar
-import com.google.android.material.search.SearchView
 import dev.mainhq.schedules.fragments.Favourites
-import dev.mainhq.schedules.utils.*
-import dev.mainhq.schedules.utils.adapters.BusListElemsAdapter
-import kotlinx.coroutines.launch
-import java.lang.ref.WeakReference
+import dev.mainhq.schedules.fragments.Home
 
 //TODO
 //when updating the app (especially for new stm txt files), will need
@@ -30,8 +17,7 @@ import java.lang.ref.WeakReference
 
 class MainActivity : AppCompatActivity() {
 
-    //todo could use a favourites list here to use in other methods
-    private lateinit var searchView : SearchView
+    private lateinit var activityType : ActivityType
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,78 +27,65 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
         setContentView(R.layout.main_activity)
-        lifecycle.addObserver(object : DefaultLifecycleObserver{
-            override fun onResume(owner: LifecycleOwner) {
-                super.onResume(owner)
-                supportFragmentManager.beginTransaction()
-                    .replace(R.id.favouritesFragmentContainer, Favourites()).commit()
-            }
-        })
-        val weakReference : WeakReference<AppCompatActivity> = WeakReference(this)
-        searchView = findViewById(R.id.main_search_view)
-        searchView.editText.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(editable: Editable?) {
-                val newText = editable.toString()
-                if (newText.isEmpty()){
-                    val recyclerView = findViewById<RecyclerView>(R.id.search_recycle_view)
-                    val layoutManager = LinearLayoutManager(applicationContext)
-                    recyclerView.setBackgroundColor(resources.getColor(R.color.dark, null))
-                    recyclerView.adapter = BusListElemsAdapter(ArrayList())
-                    recyclerView.layoutManager = layoutManager
-                }
-                else {
-                    lifecycleScope.launch {
-                        weakReference.get()?.let{setup(newText, it, R.color.white)}
-                    }
-                }
-            }
-
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-                //Not needed for our purposes
-            }
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                //Not needed for our purposes
-            }
-        })
-        searchView.editText.setOnEditorActionListener { textView : TextView, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                val submittedText = textView.text.toString()
-                val intent = Intent(applicationContext, SearchBus::class.java)
-                intent.putExtra("query", submittedText)
-                startActivity(intent)
-                true
-            }
-            else {
-                false
-            }
-        }
-        if (android.os.Build.VERSION.SDK_INT >= 33) {
-            onBackInvokedDispatcher.registerOnBackInvokedCallback(OnBackInvokedDispatcher.PRIORITY_DEFAULT) {
-                if (searchView.isShowing)
-                    searchView.hide()
-            }
-        }
-        val searchBar : SearchBar = findViewById(R.id.mainSearchBar)
-        searchBar.inflateMenu(R.menu.app_bar_menu)
-        searchBar.setOnMenuItemClickListener {
-            val itemID = it.itemId
-            if (itemID == R.id.settingsIcon) {
-                val intent = Intent(this, Settings::class.java)
-                startActivity(intent)
-                true
-            }
-            else super.onOptionsItemSelected(it)
-        }
-
-        val bottomAppBar : BottomAppBar = findViewById(R.id.mainBottomAppBar)
-        bottomAppBar.inflateMenu(R.menu.bottom_nav_bar)
+        activityType = ActivityType.HOME
+        setFragment()
+        setBackground()
+        setButtons()
     }
 
-    @SuppressLint("MissingSuperCall")
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        if (searchView.isShowing)
-            searchView.hide()
-        super.onBackPressedDispatcher.onBackPressed()
+    private fun setFragment(){
+        when(activityType){
+            ActivityType.HOME -> {
+                val home = Home()
+                supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer, Home()).commit()
+            }
+            ActivityType.MAP -> {
+                supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer, Home()).commit()
+            }
+            ActivityType.ALARMS -> {
+                supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer, Home()).commit()
+            }
+        }
     }
+
+    private fun setButtons(){
+        findViewById<LinearLayout>(R.id.homeScreenButton).setOnClickListener {
+            if (activityType != ActivityType.HOME){
+                activityType = ActivityType.HOME
+                supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer, Home()).commit()
+                setBackground()
+            }
+        }
+        findViewById<LinearLayout>(R.id.mapButton).setOnClickListener {
+            setBackground()
+        }
+        findViewById<LinearLayout>(R.id.alarmsButton).setOnClickListener {
+            setBackground()
+        }
+    }
+
+    private fun setBackground(){
+        setDefaultBackgroundColors()
+        when(activityType){
+            ActivityType.HOME -> {
+                findViewById<LinearLayout>(R.id.homeScreenButton).setBackgroundColor(com.google.android.material.R.attr.colorControlHighlight)
+            }
+            ActivityType.MAP -> {
+                findViewById<LinearLayout>(R.id.mapButton).setBackgroundColor(com.google.android.material.R.attr.colorControlHighlight)
+            }
+            ActivityType.ALARMS -> {
+                findViewById<LinearLayout>(R.id.alarmsButton).setBackgroundColor(com.google.android.material.R.attr.colorControlHighlight)
+            }
+        }
+    }
+
+    private fun setDefaultBackgroundColors(){
+        findViewById<LinearLayout>(R.id.homeScreenButton).setBackgroundColor(Color.TRANSPARENT)
+        findViewById<LinearLayout>(R.id.mapButton).setBackgroundColor(Color.TRANSPARENT)
+        findViewById<LinearLayout>(R.id.alarmsButton).setBackgroundColor(Color.TRANSPARENT)
+    }
+}
+
+enum class ActivityType{
+    HOME, MAP, ALARMS
 }
