@@ -1,14 +1,23 @@
 package dev.mainhq.schedules
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.util.TypedValue
+import android.view.View
 import android.widget.LinearLayout
+import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.fragment.app.FragmentContainerView
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import com.google.android.material.bottomappbar.BottomAppBar
+import dev.mainhq.schedules.fragments.Alarms
 import dev.mainhq.schedules.fragments.Favourites
 import dev.mainhq.schedules.fragments.Home
+import dev.mainhq.schedules.fragments.Map
 
 //TODO
 //when updating the app (especially for new stm txt files), will need
@@ -37,7 +46,13 @@ class MainActivity : AppCompatActivity() {
         when(activityType){
             ActivityType.HOME -> {
                 val home = Home()
-                supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer, Home()).commit()
+                //make home method to hide the bottom nav bar when searchview is expanded
+                //FIXME for testing
+                //findViewById<CoordinatorLayout>(R.id.bottomNavCoordLayout).visibility = View.GONE
+                supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer, home).commit()
+                //onBackPressedDispatcher.addCallback {
+                //    home.onBackPressed()
+                //}
             }
             ActivityType.MAP -> {
                 supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer, Home()).commit()
@@ -57,10 +72,18 @@ class MainActivity : AppCompatActivity() {
             }
         }
         findViewById<LinearLayout>(R.id.mapButton).setOnClickListener {
-            setBackground()
+            if (activityType != ActivityType.MAP){
+                activityType = ActivityType.MAP
+                supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer, Map()).commit()
+                setBackground()
+            }
         }
         findViewById<LinearLayout>(R.id.alarmsButton).setOnClickListener {
-            setBackground()
+            if (activityType != ActivityType.ALARMS){
+                activityType = ActivityType.ALARMS
+                supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer, Alarms()).commit()
+                setBackground()
+            }
         }
     }
 
@@ -80,9 +103,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setDefaultBackgroundColors(){
-        findViewById<LinearLayout>(R.id.homeScreenButton).setBackgroundColor(Color.TRANSPARENT)
-        findViewById<LinearLayout>(R.id.mapButton).setBackgroundColor(Color.TRANSPARENT)
-        findViewById<LinearLayout>(R.id.alarmsButton).setBackgroundColor(Color.TRANSPARENT)
+        val typedValue = TypedValue()
+        theme.resolveAttribute(androidx.appcompat.R.attr.selectableItemBackground, typedValue, true)
+        findViewById<LinearLayout>(R.id.homeScreenButton).setBackgroundResource(typedValue.resourceId)
+        findViewById<LinearLayout>(R.id.mapButton).setBackgroundResource(typedValue.resourceId)
+        findViewById<LinearLayout>(R.id.alarmsButton).setBackgroundResource(typedValue.resourceId)
     }
 }
 

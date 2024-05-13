@@ -1,5 +1,6 @@
 package dev.mainhq.schedules.fragments
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
@@ -7,6 +8,9 @@ import android.text.TextWatcher
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.TextView
+import android.window.OnBackInvokedDispatcher
+import androidx.activity.addCallback
+import androidx.activity.findViewTreeOnBackPressedDispatcherOwner
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -75,15 +79,18 @@ class Home : Fragment(R.layout.home_fragment) {
                 false
             }
         }
-        /*
-        if (android.os.Build.VERSION.SDK_INT >= 33) {
-            onBackInvokedDispatcher.registerOnBackInvokedCallback(OnBackInvokedDispatcher.PRIORITY_DEFAULT) {
-                if (searchView.isShowing)
-                    searchView.hide()
-            }
+
+        //if (android.os.Build.VERSION.SDK_INT >= 33) {
+        //    activity?.onBackInvokedDispatcher?.registerOnBackInvokedCallback(OnBackInvokedDispatcher.PRIORITY_DEFAULT) {
+        //        if (searchView.isShowing)
+        //            searchView.hide()
+        //    }
+        //}
+        view.findViewTreeOnBackPressedDispatcherOwner()?.onBackPressedDispatcher?.addCallback {
+            if (searchView.isShowing) searchView.hide()
         }
 
-         */
+
         val searchBar : SearchBar = view.findViewById(R.id.mainSearchBar)
         searchBar.setOnMenuItemClickListener {
             val itemID = it.itemId
@@ -96,15 +103,10 @@ class Home : Fragment(R.layout.home_fragment) {
         }
 
     }
-/*
-    @SuppressLint("MissingSuperCall")
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        if (searchView.isShowing)
-            searchView.hide()
-        super.onBackPressedDispatcher.onBackPressed()
-    }
 
- */
-
+    //fun onBackPressed() {
+    //    if (searchView.isShowing)
+    //        searchView.hide()
+    //    activity?.onBackPressedDispatcher?.onBackPressed()
+    //}
 }

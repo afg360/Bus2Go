@@ -46,17 +46,13 @@ val Context.dataStore : DataStore<Favourites> by dataStore(
 class Favourites : Fragment(R.layout.fragment_favourites) {
     var executor : ScheduledExecutorService? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_favourites, container, false)
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         lifecycleScope.launch {
             val list =  context?.dataStore?.data?.first()?.list?.toList()
             if (list == null){
-                TODO("")
+                TODO("List from datastore is null!")
             } else if (list.isEmpty()) {
                 setEmpty(view)
             } else {
