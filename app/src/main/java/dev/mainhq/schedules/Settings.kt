@@ -9,6 +9,7 @@ import android.widget.PopupMenu
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.MenuProvider
 import dev.mainhq.schedules.R
+import dev.mainhq.schedules.fragments.SettingsPreferences
 
 //TODO
 //NEED TO CHANGE APPBAR
@@ -19,17 +20,11 @@ class Settings : AppCompatActivity(), MenuProvider {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.settings)
-        showLanguageMenu()
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.preferencesFragmentContainer, SettingsPreferences()).commit()
+
     }
 
-    private fun showLanguageMenu() {
-        val langView = findViewById<View>(R.id.language_view)
-        langView.setOnClickListener { innerView: View? ->
-            val langMenu = PopupMenu(applicationContext, innerView)
-            langMenu.menuInflater.inflate(R.menu.language_menu, langMenu.menu)
-            langMenu.show()
-        }
-    }
 
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
         menuInflater.inflate(R.menu.back_menu, menu)

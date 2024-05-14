@@ -26,6 +26,7 @@
         android:layout_height="1dp"
         app:layout_constraintTop_toBottomOf="@id/settingsToolBar"
         />
+    <!--
     <LinearLayout
         android:id="@+id/settingsChoices"
         android:layout_width="match_parent"
@@ -37,7 +38,7 @@
         android:layout_marginHorizontal="50dp"
         android:layout_marginTop="90dp"
         >
-        <!-- Add image next to each for better -->
+
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/language_view"
             android:layout_width="match_parent"
@@ -108,12 +109,13 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 />
     </LinearLayout>
+-->
 
     <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/bottomNavSettingsFragmentContainer"
+        android:id="@+id/preferencesFragmentContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/settingsToolBar"
         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

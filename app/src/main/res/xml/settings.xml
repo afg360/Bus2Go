@@ -1,0 +1,50 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        app:title="General Settings"
+        >
+        <ListPreference
+            app:key="language"
+            app:title="Language"
+            app:entries="@array/langs"
+            android:entryValues="@array/langs"
+            app:summary="Choose the main language of the app"
+            />
+        <PreferenceScreen
+            app:key="theme"
+            app:title="Theme"
+            app:summary="System Default"
+            >
+        </PreferenceScreen>
+        <SwitchPreferenceCompat
+            app:key="notifications"
+            app:title="Enable update notifications"
+            android:summary="Toggle to activate/deactivate update related notifications."
+            />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:title="Internet Settings"
+        >
+        <SwitchPreferenceCompat
+            app:key="real-time-update"
+            app:title="Real time updates"
+            android:summary="Toggle on or off to activate internet connectivity, enabling real time data"
+            />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:title="Support"
+        >
+        <Preference
+            app:key="donate"
+            app:title="Donate"
+            app:summary="Donate to support the contributors of the app"
+            />
+        <Preference
+            app:key="feedback"
+            app:title="Send feedback"
+            app:summary="Report technical issues or suggest new features"/>
+    </PreferenceCategory>
+
+</PreferenceScreen>
