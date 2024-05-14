@@ -67,7 +67,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
 
     fun unSelect(view : View){
         val viewGroup = view as ViewGroup
-        viewGroup.resources?.getColor(R.color.dark, null)?.let { view.setBackgroundColor(it) }
+        //viewGroup.resources?.getColor(R.color.dark, null)?.let { view.setBackgroundColor(it) }
         viewGroup.tag = "unselected"
         //val fragmentfoo = viewGroup.findViewById<FragmentContainerView>(R.id.fragment_selected_checkbox)
         //val fragment = SelectedFavourites()
@@ -136,30 +136,26 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
             //todo allow to select the view, so that we can remove from favourites
             //todo goes through a selection checkbox mode
             //if we cancel the selection, then restore normal view
+            //TODO is v : View only the item clicked, or the whole thing? may need to retrieve the whole parent and set its tag only
             v?.setOnLongClickListener{
-                if (v.tag == null) {
-                    select(v)
-                    //FIXME need to spawn instead of hide
-                    recyclerView.forEach {
-                        val viewGroup = (it as ViewGroup)[0] as ViewGroup
-                        (viewGroup[0] as MaterialCheckBox).visibility = VISIBLE
-                        val constraintLayout = viewGroup[1] as ConstraintLayout
-                        for (i in 0..<constraintLayout.size){
-                            val materialTextView = constraintLayout[i] as MaterialTextView
-                            if (i == 0 || i == 3){
-                                (materialTextView.layoutParams as ViewGroup.MarginLayoutParams)
-                                    .setMargins(10, 0, 0, 0)
-                            }
-                            else if (i == 1 || i == 2){
-                                (materialTextView.layoutParams as ViewGroup.MarginLayoutParams)
-                                    .setMargins(0, 0, 15, 0)
-                            }
+                val tmpRecyclerView = v.parent as RecyclerView
+                if (tmpRecyclerView.tag == null || tmpRecyclerView.tag == "unselected"){
+                    if (v.tag == null || v.tag == "unselected") {
+                        select(v)
+                        //FIXME need to spawn instead of hide
+                        recyclerView.forEach {
+                            val viewGroup = (it as ViewGroup)[0] as ViewGroup
+                            (viewGroup[0] as MaterialCheckBox).visibility = VISIBLE
+                            val constraintLayout = viewGroup[1] as ConstraintLayout
+                            setMargins(constraintLayout, 10, 15)
                         }
+                        checkBoxView.isChecked = true
                     }
-                    checkBoxView.isChecked = true
+                    tmpRecyclerView.tag = "selected"
                 }
-                else if (v.tag != "selected") select(v)
-                (v.parent as RecyclerView).tag = "selected"
+                /** if recycler is already selected then simply select the view */
+                else select(v)
+
                 true
             }
             return false
@@ -174,13 +170,30 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
         }
 
         fun select(view : View){
-            view.resources?.getColor(R.color.white, null)?.let { view.setBackgroundColor(it) }
+            //view.resources?.getColor(R.color.white, null)?.let { view.setBackgroundColor(it) }
             view.tag = "selected"
         }
 
         fun unSelect(view : View){
-            view.resources?.getColor(R.color.dark, null)?.let { view.setBackgroundColor(it) }
+            //view.resources?.getColor(R.color.dark, null)?.let { view.setBackgroundColor(it) }
             view.tag = "unselected"
+        }
+
+    }
+}
+fun setMargins(constraintLayout : ConstraintLayout, left : Int, right : Int){
+    /** This function is used to set the margins for the left margin for the left most items
+     *  and the right margin for the right most items inside the recycler view
+     */
+    for (i in 0..<constraintLayout.size){
+        val materialTextView = constraintLayout[i] as MaterialTextView
+        if (i == 0 || i == 3){
+            (materialTextView.layoutParams as ViewGroup.MarginLayoutParams)
+                .setMargins(left, 0, 0, 0)
+        }
+        else if (i == 1 || i == 2){
+            (materialTextView.layoutParams as ViewGroup.MarginLayoutParams)
+                .setMargins(0, 0, right, 0)
         }
     }
 }

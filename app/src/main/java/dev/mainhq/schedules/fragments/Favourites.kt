@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import androidx.activity.OnBackPressedCallback
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.forEach
 import androidx.core.view.get
 import androidx.core.view.size
@@ -28,6 +29,7 @@ import dev.mainhq.schedules.preferences.Favourites
 import dev.mainhq.schedules.preferences.SettingsSerializer
 import dev.mainhq.schedules.utils.Time
 import dev.mainhq.schedules.utils.adapters.FavouritesListElemsAdapter
+import dev.mainhq.schedules.utils.adapters.setMargins
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -64,24 +66,24 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
         val callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 val recyclerView = view.findViewById<RecyclerView>(R.id.favouritesRecyclerView)
-                if (recyclerView.tag != null){
-                    if (recyclerView.tag == "selected"){
+                recyclerView.tag?.let {
+                    val tag = it as String
+                    if (tag == "selected"){
                         recyclerView.forEach {
+                            /** Establish original layout */
                             val viewGroup = it as ViewGroup
                             val adapter = recyclerView.adapter as FavouritesListElemsAdapter
                             adapter.unSelect(viewGroup)
-                            viewGroup.findViewById<MaterialCheckBox>(R.id.favourites_check_box).visibility = View.INVISIBLE
+                            viewGroup.findViewById<MaterialCheckBox>(R.id.favourites_check_box).visibility = View.GONE
+                            setMargins(viewGroup.findViewById(R.id.favouritesDataContainer), 20, 20)
                         }
                         recyclerView.tag = "unselected"
                     }
                 }
-                else{
-                    super.handleOnBackCancelled()
-                }
             }
         }
         //activity?. instead???
-        //requireActivity().onBackPressedDispatcher.addCallback(callback)
+        requireActivity().onBackPressedDispatcher.addCallback(callback)
 
         val recyclerView : RecyclerView = requireView().findViewById(R.id.favouritesRecyclerView)
         /** This part allows us to update each recyclerview item from favourites in "real time" */

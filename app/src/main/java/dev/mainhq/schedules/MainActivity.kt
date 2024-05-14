@@ -23,7 +23,7 @@ class MainActivity() : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //todo
+
         if (false) { //TODO check if config file exists
             val intent = Intent(this.applicationContext, Config::class.java)
             startActivity(intent)
