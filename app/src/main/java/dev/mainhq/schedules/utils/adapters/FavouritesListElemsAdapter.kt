@@ -61,11 +61,6 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
                 else "In ${remainingTime.min} min"
     }
 
-    fun unSelect(view : View){
-        val viewGroup = view as ViewGroup
-        viewGroup.tag = "unselected"
-    }
-
     class ViewHolder(view : View, private val recyclerView: RecyclerView) : RecyclerView.ViewHolder(view), OnClickListener, OnLongClickListener{
         var checkBoxView : MaterialCheckBox
         val tripHeadsignTextView : MaterialTextView
@@ -174,10 +169,20 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
 
     }
 }
+
+/** This function is used with configuring the back button callbacks to deselect everything inside the container
+ *  containing the favourite element when the back button is pressed */
+fun unSelect(/** Outer view group layout, containing the linear layout (at the moment) for the other components */
+             viewGroup : ViewGroup){
+    viewGroup.tag = "unselected"
+    /** Deselect the checkbox so that next time doesnt need to press twice to deselect it */
+    ((viewGroup[0] as ViewGroup)[0] as MaterialCheckBox).isChecked = false
+}
+
+/** Set the margins for the left margin for the left most items
+ *  and the right margin for the right most items inside the recycler view
+ */
 fun setMargins(constraintLayout : ConstraintLayout, left : Int, right : Int){
-    /** Set the margins for the left margin for the left most items
-     *  and the right margin for the right most items inside the recycler view
-     */
     for (i in 0..<constraintLayout.size){
         val materialTextView = constraintLayout[i] as MaterialTextView
         if (i == 0 || i == 3){

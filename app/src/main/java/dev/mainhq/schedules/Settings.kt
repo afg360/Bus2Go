@@ -19,16 +19,6 @@ class Settings : AppCompatActivity(), MenuProvider {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.settings)
-        showLanguageMenu()
-    }
-
-    private fun showLanguageMenu() {
-        val langView = findViewById<View>(R.id.language_view)
-        langView.setOnClickListener { innerView: View? ->
-            val langMenu = PopupMenu(applicationContext, innerView)
-            langMenu.menuInflater.inflate(R.menu.language_menu, langMenu.menu)
-            langMenu.show()
-        }
     }
 
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {

@@ -8,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import androidx.activity.OnBackPressedCallback
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.forEach
 import androidx.core.view.get
 import androidx.core.view.size
@@ -27,8 +26,7 @@ import dev.mainhq.schedules.preferences.BusInfo
 import dev.mainhq.schedules.preferences.Favourites
 import dev.mainhq.schedules.preferences.SettingsSerializer
 import dev.mainhq.schedules.utils.Time
-import dev.mainhq.schedules.utils.adapters.FavouritesListElemsAdapter
-import dev.mainhq.schedules.utils.adapters.setMargins
+import dev.mainhq.schedules.utils.adapters.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -62,20 +60,18 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
             }
         }
         //TODO replace the topappbar when in selection mode (by seeing the tag of recyclerView)
-        /** This part allows us to press the back button when in selection mode of favourites to get out of it*/
+        /** This part allows us to press the back button when in selection mode of favourites to get out of it */
         val callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 val recyclerView = view.findViewById<RecyclerView>(R.id.favouritesRecyclerView)
-                recyclerView.tag?.let {
-                    val tag = it as String
+                recyclerView.tag?.let {recTag ->
+                    val tag = recTag as String
                     /** Establish original layout (i.e. margins) */
                     if (tag == "selected"){
                         recyclerView.forEach {
-                            val viewGroup = it as ViewGroup
-                            val adapter = recyclerView.adapter as FavouritesListElemsAdapter
-                            adapter.unSelect(viewGroup)
-                            viewGroup.findViewById<MaterialCheckBox>(R.id.favourites_check_box).visibility = View.GONE
-                            setMargins(viewGroup.findViewById(R.id.favouritesDataContainer), 20, 20)
+                            unSelect(it as ViewGroup)
+                            it.findViewById<MaterialCheckBox>(R.id.favourites_check_box).visibility = View.GONE
+                            setMargins(it.findViewById(R.id.favouritesDataContainer), 20, 20)
                         }
                         recyclerView.tag = "unselected"
                     }
@@ -86,7 +82,8 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
         requireActivity().onBackPressedDispatcher.addCallback(callback)
 
         val recyclerView : RecyclerView = requireView().findViewById(R.id.favouritesRecyclerView)
-        /** This part allows us to update each recyclerview item from favourites in "real time" */
+        /** This part allows us to update each recyclerview item from favourites in "real time", i.e. the user can see
+         *  an updated time left displayed */
         recyclerView.viewTreeObserver?.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
                 recyclerView.viewTreeObserver.removeOnGlobalLayoutListener(this)
