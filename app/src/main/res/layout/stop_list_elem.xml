@@ -23,6 +23,7 @@
         android:textAlignment="textEnd"
         android:textColor="@color/basic_blue"
         android:textSize="23sp"
+        android:fontFamily="@font/goli_medium"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

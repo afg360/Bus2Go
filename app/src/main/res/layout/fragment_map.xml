@@ -12,6 +12,7 @@
         android:text="Coming soon...
         Maps"
         android:textSize="100sp"
+        android:fontFamily="@font/goli_medium"
         android:textAlignment="center"
         android:gravity="center"
         />

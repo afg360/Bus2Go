@@ -16,7 +16,7 @@
 
             <!-- TODO Need some sort of title/search view to make it more pretty -->
 
-            <TextView
+            <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/chooseStopTitleTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -24,7 +24,7 @@
                 android:textAlignment="center"
                 android:layout_margin="20dp"
                 android:textSize="20sp"
-                android:textColor="@color/light"
+                android:fontFamily="@font/goli_medium"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintBottom_toTopOf="@+id/stop_recycle_view"
