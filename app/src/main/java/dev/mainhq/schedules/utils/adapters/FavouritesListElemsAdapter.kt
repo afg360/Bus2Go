@@ -46,16 +46,12 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
         holder.timeRemainingTextView.text = getTimeRemaining(info.arrivalTime)
 
         holder.onLongClick(holder.itemView)
-        //holder.itemView.seton
         holder.onClick(holder.itemView)
-        //create an onclick also if one is already selected to choose multiple from the favourites list
     }
 
     fun updateTime(viewGroup : ViewGroup, favouritesBusInfo: FavouriteBusInfo){
-        //arrivalTimeTextView
         val container = viewGroup[0] as ViewGroup
         ((container[1] as ViewGroup)[2] as MaterialTextView).text = favouritesBusInfo.arrivalTime.toString()
-        //timeRemainingTextView
         ((container[1] as ViewGroup)[1] as MaterialTextView).text = getTimeRemaining(favouritesBusInfo.arrivalTime)
     }
 
@@ -67,12 +63,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
 
     fun unSelect(view : View){
         val viewGroup = view as ViewGroup
-        //viewGroup.resources?.getColor(R.color.dark, null)?.let { view.setBackgroundColor(it) }
         viewGroup.tag = "unselected"
-        //val fragmentfoo = viewGroup.findViewById<FragmentContainerView>(R.id.fragment_selected_checkbox)
-        //val fragment = SelectedFavourites()
-        //fragmentfoo.supportFragmentManager.beginTransaction()
-        //    .replace(R.id.favouritesFragmentContainer, Favourites()).commit()
     }
 
     class ViewHolder(view : View, private val recyclerView: RecyclerView) : RecyclerView.ViewHolder(view), OnClickListener, OnLongClickListener{
@@ -91,6 +82,8 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
 
         //fixme not working properly
         //create a mode for the entire recycler view, then change behaviour on onclick/onlongclick for each item
+        /** This onClick either serves to check the remaining times if not in selection mode, or to select/unselect an item of the
+         *  recycler view if in selection mode (see onLongClick for more detail on the selection mode) */
         override fun onClick(v: View?) {
             //FIXME Refactor code to have less lines taken
             v?.setOnClickListener{
@@ -132,17 +125,17 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
             }
         }
 
+        /** This onLongClick function serves as a selection interface (entering selection mode) for the recycler view items, so that
+         * we can perform operations on them. */
         override fun onLongClick(v: View?): Boolean {
             //todo allow to select the view, so that we can remove from favourites
-            //todo goes through a selection checkbox mode
-            //if we cancel the selection, then restore normal view
             //TODO is v : View only the item clicked, or the whole thing? may need to retrieve the whole parent and set its tag only
             v?.setOnLongClickListener{
                 val tmpRecyclerView = v.parent as RecyclerView
+                /** if recycler has never been long clicked/has been backed, check if the view is not selected and select it */
                 if (tmpRecyclerView.tag == null || tmpRecyclerView.tag == "unselected"){
                     if (v.tag == null || v.tag == "unselected") {
                         select(v)
-                        //FIXME need to spawn instead of hide
                         recyclerView.forEach {
                             val viewGroup = (it as ViewGroup)[0] as ViewGroup
                             (viewGroup[0] as MaterialCheckBox).visibility = VISIBLE
@@ -182,7 +175,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
     }
 }
 fun setMargins(constraintLayout : ConstraintLayout, left : Int, right : Int){
-    /** This function is used to set the margins for the left margin for the left most items
+    /** Set the margins for the left margin for the left most items
      *  and the right margin for the right most items inside the recycler view
      */
     for (i in 0..<constraintLayout.size){

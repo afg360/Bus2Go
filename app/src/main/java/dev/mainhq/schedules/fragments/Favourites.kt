@@ -4,7 +4,6 @@ import android.content.Context
 import android.icu.util.Calendar
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
@@ -62,15 +61,16 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
                 recyclerViewDisplay(view, mutableList)
             }
         }
+        //TODO replace the topappbar when in selection mode (by seeing the tag of recyclerView)
         /** This part allows us to press the back button when in selection mode of favourites to get out of it*/
         val callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 val recyclerView = view.findViewById<RecyclerView>(R.id.favouritesRecyclerView)
                 recyclerView.tag?.let {
                     val tag = it as String
+                    /** Establish original layout (i.e. margins) */
                     if (tag == "selected"){
                         recyclerView.forEach {
-                            /** Establish original layout */
                             val viewGroup = it as ViewGroup
                             val adapter = recyclerView.adapter as FavouritesListElemsAdapter
                             adapter.unSelect(viewGroup)
@@ -82,7 +82,7 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
                 }
             }
         }
-        //activity?. instead???
+        //FIXME activity?. instead???
         requireActivity().onBackPressedDispatcher.addCallback(callback)
 
         val recyclerView : RecyclerView = requireView().findViewById(R.id.favouritesRecyclerView)
@@ -161,7 +161,7 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
             layoutManager.orientation = LinearLayoutManager.VERTICAL
             val recyclerViewTmp : RecyclerView? = view.findViewById(R.id.favouritesRecyclerView)
             recyclerViewTmp?.layoutManager = layoutManager
-            //need to improve that code to make it more safe
+            //TODO need to improve that code to make it more safe
             recyclerViewTmp?.adapter = recyclerViewTmp?.let { FavouritesListElemsAdapter(times, it) }
         }
     }
