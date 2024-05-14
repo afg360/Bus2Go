@@ -51,7 +51,7 @@ class ChooseDirection : AppCompatActivity() {
                 val dir0 = async { db.stopsInfoDao().getStopNames(dirs[0])}.await()
                 val dir1 = async { db.stopsInfoDao().getStopNames(dirs.last()) }.await()
                 val orientation = if (dirs[0].last() == 'E' || dirs[0].last() == 'O') Orientation.HORIZONTAL
-                                    else Orientation.VERTICAL
+                                  else Orientation.VERTICAL
                 val headsign0 = dirs[0]
                 val headsign1 = dirs[1]
                 setListeners(orientation, dir0, dir1, headsign0, headsign1)
@@ -72,7 +72,6 @@ class ChooseDirection : AppCompatActivity() {
                 Orientation.HORIZONTAL -> {
                     leftButton.text = "West"
                     rightButton.text = "East"
-
                 }
                 Orientation.VERTICAL -> {
                     leftButton.text = "North"
@@ -82,20 +81,30 @@ class ChooseDirection : AppCompatActivity() {
             if (dir0[0].last() == 'W' || dir0[0].last() == 'N') {
                 leftDescr.text = "From ${dir0[0]} to ${dir0.last()}"
                 rightDescr.text = "From ${dir1[0]} to ${dir1.last()}"
+                leftButton.setOnClickListener {
+                    intent.putStringArrayListExtra("stops", dir0 as ArrayList<String>)
+                    intent.putExtra("headsign", headsign0)
+                    startActivity(intent)
+                }
+                rightButton.setOnClickListener {
+                    intent.putStringArrayListExtra("stops", dir1 as ArrayList<String>)
+                    intent.putExtra("headsign", headsign1)
+                    startActivity(intent)
+                }
             }
             else{
                 leftDescr.text = "From ${dir1[0]} to ${dir1.last()}"
                 rightDescr.text = "From ${dir0[0]} to ${dir0.last()}"
-            }
-            leftButton.setOnClickListener {
-                intent.putStringArrayListExtra("stops", dir0 as ArrayList<String>)
-                intent.putExtra("headsign", headsign0)
-                startActivity(intent)
-            }
-            rightButton.setOnClickListener {
-                intent.putStringArrayListExtra("stops", dir1 as ArrayList<String>)
-                intent.putExtra("headsign", headsign1)
-                startActivity(intent)
+                leftButton.setOnClickListener {
+                    intent.putStringArrayListExtra("stops", dir1 as ArrayList<String>)
+                    intent.putExtra("headsign", headsign1)
+                    startActivity(intent)
+                }
+                rightButton.setOnClickListener {
+                    intent.putStringArrayListExtra("stops", dir0 as ArrayList<String>)
+                    intent.putExtra("headsign", headsign0)
+                    startActivity(intent)
+                }
             }
         }
     }

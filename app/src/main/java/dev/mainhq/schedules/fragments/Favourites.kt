@@ -80,7 +80,8 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
                 }
             }
         }
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)
+        //activity?. instead???
+        //requireActivity().onBackPressedDispatcher.addCallback(callback)
 
         val recyclerView : RecyclerView = requireView().findViewById(R.id.favouritesRecyclerView)
         /** This part allows us to update each recyclerview item from favourites in "real time" */
@@ -97,7 +98,7 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
                             //FIXME we only want to change the time left data, NOT the background colors etc
                             val mutableList = setBus(tmpList, requireView())
                             withContext(Dispatchers.Main){
-                                //FIXME bug is at line 105
+                                //FIXME bug is at line below
                                 val favouritesListElemsAdapter = recyclerView.adapter as FavouritesListElemsAdapter?
                                 for (i in 0 until recyclerView.size) {
                                     favouritesListElemsAdapter?.updateTime(recyclerView[i] as ViewGroup, mutableList[i])

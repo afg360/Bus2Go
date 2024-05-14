@@ -1,21 +1,14 @@
 package dev.mainhq.schedules
 
-import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
 import android.util.TypedValue
-import android.view.View
 import android.widget.LinearLayout
+import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
-import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.fragment.app.FragmentContainerView
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.LifecycleOwner
-import com.google.android.material.bottomappbar.BottomAppBar
 import dev.mainhq.schedules.fragments.Alarms
-import dev.mainhq.schedules.fragments.Favourites
 import dev.mainhq.schedules.fragments.Home
 import dev.mainhq.schedules.fragments.Map
 
@@ -24,7 +17,7 @@ import dev.mainhq.schedules.fragments.Map
 //to show to user storing favourites of "deprecated buses" that it has changed
 //to another bus (e.g. 435 -> 465)
 
-class MainActivity : AppCompatActivity() {
+class MainActivity() : AppCompatActivity() {
 
     private lateinit var activityType : ActivityType
 
@@ -37,31 +30,22 @@ class MainActivity : AppCompatActivity() {
         }
         setContentView(R.layout.main_activity)
         activityType = ActivityType.HOME
-        setFragment()
+
+        val home = Home()
+        supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer, home).commit()
         setBackground()
         setButtons()
+
+        onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true){
+            override fun handleOnBackPressed() {
+                //Toast.makeText(this@MainActivity, "First back", Toast.LENGTH_SHORT).show()
+                if (activityType == ActivityType.HOME) {
+                    home.onBackPressed()
+                }
+            }
+        })
     }
 
-    private fun setFragment(){
-        when(activityType){
-            ActivityType.HOME -> {
-                val home = Home()
-                //make home method to hide the bottom nav bar when searchview is expanded
-                //FIXME for testing
-                //findViewById<CoordinatorLayout>(R.id.bottomNavCoordLayout).visibility = View.GONE
-                supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer, home).commit()
-                //onBackPressedDispatcher.addCallback {
-                //    home.onBackPressed()
-                //}
-            }
-            ActivityType.MAP -> {
-                supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer, Home()).commit()
-            }
-            ActivityType.ALARMS -> {
-                supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer, Home()).commit()
-            }
-        }
-    }
 
     private fun setButtons(){
         findViewById<LinearLayout>(R.id.homeScreenButton).setOnClickListener {
@@ -109,8 +93,9 @@ class MainActivity : AppCompatActivity() {
         findViewById<LinearLayout>(R.id.mapButton).setBackgroundResource(typedValue.resourceId)
         findViewById<LinearLayout>(R.id.alarmsButton).setBackgroundResource(typedValue.resourceId)
     }
+
+    private enum class ActivityType{
+        HOME, MAP, ALARMS
+    }
 }
 
-enum class ActivityType{
-    HOME, MAP, ALARMS
-}

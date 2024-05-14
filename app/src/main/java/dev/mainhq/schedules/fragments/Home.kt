@@ -7,6 +7,7 @@ import android.text.TextWatcher
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.TextView
+import android.widget.Toast
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -33,6 +34,7 @@ class Home : Fragment(R.layout.home_fragment) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        //TODO check wtf this code does again... the refreshing seems to get fucked when the bus just passed (which is why it shows 0min even for the new bus)
         lifecycle.addObserver(object : DefaultLifecycleObserver {
             override fun onResume(owner: LifecycleOwner) {
                 super.onResume(owner)
@@ -78,21 +80,23 @@ class Home : Fragment(R.layout.home_fragment) {
                 false
             }
         }
-        searchView.addTransitionListener { searchView, previousState, newState ->
+        /** This part hides the bottom navigation bar when expanding the search bar to the search view */
+        searchView.addTransitionListener { _, previousState, newState ->
             if (previousState == TransitionState.HIDDEN && newState == TransitionState.SHOWING){
+                //can add an animation
                 activity?.findViewById<CoordinatorLayout>(R.id.bottomNavCoordLayout)?.visibility = View.INVISIBLE
             }
             else if (previousState == TransitionState.SHOWN && newState == TransitionState.HIDING){
                 activity?.findViewById<CoordinatorLayout>(R.id.bottomNavCoordLayout)?.visibility = View.VISIBLE
             }
         }
+
         //if (android.os.Build.VERSION.SDK_INT >= 33) {
         //    activity?.onBackInvokedDispatcher?.registerOnBackInvokedCallback(OnBackInvokedDispatcher.PRIORITY_DEFAULT) {
         //        if (searchView.isShowing)
         //            searchView.hide()
         //    }
         //}
-
 
         val searchBar : SearchBar = view.findViewById(R.id.mainSearchBar)
         searchBar.setOnMenuItemClickListener {
@@ -107,9 +111,9 @@ class Home : Fragment(R.layout.home_fragment) {
 
     }
 
-    //fun onBackPressed() {
-    //    if (searchView.isShowing)
-    //        searchView.hide()
-    //    activity?.onBackPressedDispatcher?.onBackPressed()
-    //}
+    fun onBackPressed() {
+        if (searchView.currentTransitionState == TransitionState.SHOWN){
+            searchView.hide()
+        }
+    }
 }
