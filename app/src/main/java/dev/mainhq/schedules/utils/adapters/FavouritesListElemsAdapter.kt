@@ -7,8 +7,12 @@ import android.view.View.OnClickListener
 import android.view.View.OnLongClickListener
 import android.view.View.VISIBLE
 import android.view.ViewGroup
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.forEach
 import androidx.core.view.get
+import androidx.core.view.marginStart
+import androidx.core.view.setMargins
+import androidx.core.view.size
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.textview.MaterialTextView
@@ -49,9 +53,10 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
 
     fun updateTime(viewGroup : ViewGroup, favouritesBusInfo: FavouriteBusInfo){
         //arrivalTimeTextView
-        (viewGroup[3] as MaterialTextView).text = favouritesBusInfo.arrivalTime.toString()
+        val container = viewGroup[0] as ViewGroup
+        ((container[1] as ViewGroup)[2] as MaterialTextView).text = favouritesBusInfo.arrivalTime.toString()
         //timeRemainingTextView
-        (viewGroup[2] as MaterialTextView).text = getTimeRemaining(favouritesBusInfo.arrivalTime)
+        ((container[1] as ViewGroup)[1] as MaterialTextView).text = getTimeRemaining(favouritesBusInfo.arrivalTime)
     }
 
     private fun getTimeRemaining(arrivalTime: Time): String {
@@ -82,7 +87,6 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
             arrivalTimeTextView = view.findViewById(R.id.favouritesBusTimeTextView)
             timeRemainingTextView = view.findViewById(R.id.favouritesBusTimeRemainingTextView)
             checkBoxView = view.findViewById(R.id.favourites_check_box)
-            checkBoxView.visibility = View.INVISIBLE
         }
 
         //fixme not working properly
@@ -137,8 +141,20 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
                     select(v)
                     //FIXME need to spawn instead of hide
                     recyclerView.forEach {
-                        val viewGroup = it as ViewGroup
+                        val viewGroup = (it as ViewGroup)[0] as ViewGroup
                         (viewGroup[0] as MaterialCheckBox).visibility = VISIBLE
+                        val constraintLayout = viewGroup[1] as ConstraintLayout
+                        for (i in 0..<constraintLayout.size){
+                            val materialTextView = constraintLayout[i] as MaterialTextView
+                            if (i == 0 || i == 3){
+                                (materialTextView.layoutParams as ViewGroup.MarginLayoutParams)
+                                    .setMargins(10, 0, 0, 0)
+                            }
+                            else if (i == 1 || i == 2){
+                                (materialTextView.layoutParams as ViewGroup.MarginLayoutParams)
+                                    .setMargins(0, 0, 15, 0)
+                            }
+                        }
                     }
                     checkBoxView.isChecked = true
                 }
