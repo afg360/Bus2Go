@@ -6,15 +6,4 @@
         android:title="@string/settings"
         app:showAsAction="always"
         />
-
-    <item android:id="@+id/app_bar_search_icon"
-        android:title="@string/search"
-        android:icon="@android:drawable/ic_menu_search"
-        app:actionViewClass="android.widget.SearchView"
-        app:showAsAction="ifRoom|collapseActionView"
-        />
-    <!--
-    Add a home menu icon for activities further away from
-    home, to kill them all fast and come back to home menu?
-    -->
 </menu>

@@ -4,13 +4,29 @@
     android:id="@+id/timeElem"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="5dp"
+    android:layout_margin="15dp"
+    android:padding="5dp"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent"
     >
+    <!-- TODO The below text view could instead be a fragment -->
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/time_left"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical|start"
+        android:text=""
+        android:textAlignment="textStart"
+        android:textSize="30sp"
+        android:fontFamily="@font/goli_medium"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintHorizontal_bias="0.773"
+        app:layout_constraintTop_toTopOf="parent"
+        />
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -18,12 +34,17 @@
         android:text="HH:MM:SS"
         android:textAlignment="textEnd"
         android:textColor="@color/basic_blue"
-        android:textSize="32sp"
+        android:textSize="30sp"
+        android:fontFamily="@font/goli_medium"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.773"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.divider.MaterialDivider
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        app:layout_constraintTop_toBottomOf="@id/time"
+        android:layout_marginVertical="5dp"
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

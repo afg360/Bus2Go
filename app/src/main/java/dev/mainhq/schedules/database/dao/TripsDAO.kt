@@ -14,7 +14,4 @@ interface TripsDAO {
 
     @Query("SELECT DISTINCT route_id FROM Trips;")
     suspend fun getRouteId() : List<Int>;
-    @Query("SELECT * FROM Trips WHERE id < 11;")
-    suspend fun getAll() : List<Trips>;
-    //todo this is tmp before fixing db
 }

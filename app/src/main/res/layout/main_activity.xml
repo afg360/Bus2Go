@@ -4,17 +4,107 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/dark"
     >
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/search_recycle_view"
-        android:layout_width="277dp"
-        android:layout_height="219dp"
-        android:background="@color/dark"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/mainFragmentContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/bottomNavCoordLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        >
+        <com.google.android.material.bottomappbar.BottomAppBar
+            android:id="@+id/mainBottomAppBar"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            >
+            <LinearLayout
+                android:id="@+id/bottomNavLinearLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:gravity="center"
+                >
+                <LinearLayout
+                    android:id="@+id/homeScreenButton"
+                    android:layout_width="75dp"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:background="?attr/selectableItemBackground"
+                    android:layout_marginHorizontal="10dp"
+                    android:paddingTop="2dp"
+                    >
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/home_screen"
+                        />
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Home"
+                        android:fontFamily="@font/goli_regular"
+                        />
+                </LinearLayout>
+
+                <!-- Could instead use fragments?? -->
+                <LinearLayout
+                    android:id="@+id/mapButton"
+                    android:layout_width="75dp"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:background="?attr/selectableItemBackground"
+                    android:layout_marginHorizontal="10dp"
+                    android:paddingTop="2dp"
+                    >
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/home_screen"
+                        />
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Map"
+                        android:fontFamily="@font/goli_regular"
+                        />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/alarmsButton"
+                    android:layout_width="75dp"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:background="?attr/selectableItemBackground"
+                    android:layout_marginHorizontal="10dp"
+                    android:paddingTop="2dp"
+                    >
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/outline_alarm_24"
+                        />
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Alarms"
+                        android:fontFamily="@font/goli_regular"
+                        />
+                </LinearLayout>
+
+            </LinearLayout>
+        </com.google.android.material.bottomappbar.BottomAppBar>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

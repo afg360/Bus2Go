@@ -6,13 +6,39 @@
     android:layout_height="match_parent"
     tools:context=".ChooseStop">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/stop_recycle_view"
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="675dp"
+        android:layout_height="match_parent">
 
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <!-- TODO Need some sort of title/search view to make it more pretty -->
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/chooseStopTitleTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Choose one of the available stops"
+                android:textAlignment="center"
+                android:layout_margin="20dp"
+                android:textSize="20sp"
+                android:fontFamily="@font/goli_medium"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toTopOf="@+id/stop_recycle_view"
+                />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/stop_recycle_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@+id/chooseStopTitleTextView"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

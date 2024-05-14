@@ -2,91 +2,100 @@ package dev.mainhq.schedules
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
-import android.widget.SearchView
+import android.util.TypedValue
+import android.widget.LinearLayout
+import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import dev.mainhq.schedules.utils.Parser
-import dev.mainhq.schedules.utils.adapters.BusListElemsAdapter
-import kotlinx.coroutines.launch
-import java.lang.ref.WeakReference
+import dev.mainhq.schedules.fragments.Alarms
+import dev.mainhq.schedules.fragments.Home
+import dev.mainhq.schedules.fragments.Map
 
-/*TODO bug to fix for recyclerOnClickListener:
-//for some reason, 4 activities made on top of each other when clicking
-//so going back comes back to same activity
 //TODO
 //when updating the app (especially for new stm txt files), will need
 //to show to user storing favourites of "deprecated buses" that it has changed
 //to another bus (e.g. 435 -> 465)
-*/
-class MainActivity : AppCompatActivity() {
+
+class MainActivity() : AppCompatActivity() {
+
+    private lateinit var activityType : ActivityType
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //todo
-        if (false) { //check if config file exists
+
+        if (false) { //TODO check if config file exists
             val intent = Intent(this.applicationContext, Config::class.java)
             startActivity(intent)
         }
         setContentView(R.layout.main_activity)
-    }
+        activityType = ActivityType.HOME
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        val inflater = this.menuInflater
-        inflater.inflate(R.menu.app_bar_menu, menu)
-        val searchItem = menu.findItem(R.id.app_bar_search_icon)
-        val searchView = searchItem.actionView as SearchView
-        //set attr so that on back removes the recycler view
-        //searchView.on
-        listenSearchQuery(searchView)
-        return true
-    }
+        val home = Home()
+        supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer, home).commit()
+        setBackground()
+        setButtons()
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        val itemID = item.itemId
-        return if (itemID == R.id.settingsIcon) {
-            val intent = Intent(this, Settings::class.java)
-            startActivity(intent)
-            return true
-        }
-        else super.onOptionsItemSelected(item)
-    }
-
-    //could put this in a generic class
-    private fun listenSearchQuery(searchView: SearchView) {
-        val curActivity = WeakReference(this)
-        searchView.queryHint = "Search for bus lines, bus nums, etc."
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-
-            override fun onQueryTextSubmit(query: String): Boolean {
-                val intent = Intent(applicationContext, SearchBus::class.java)
-                intent.putExtra("query", query)
-                startActivity(intent)
-                searchView.clearFocus()
-                return true
-            }
-
-            override fun onQueryTextChange(newText: String): Boolean {
-                if (newText.isEmpty()){
-                    val recyclerView = findViewById<RecyclerView>(R.id.search_recycle_view)
-                    val layoutManager = LinearLayoutManager(applicationContext)
-                    recyclerView.setBackgroundColor(resources.getColor(R.color.dark, null))
-                    recyclerView.adapter = BusListElemsAdapter(ArrayList())
-                    recyclerView.layoutManager = layoutManager
+        onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true){
+            override fun handleOnBackPressed() {
+                //Toast.makeText(this@MainActivity, "First back", Toast.LENGTH_SHORT).show()
+                if (activityType == ActivityType.HOME) {
+                    home.onBackPressed()
                 }
-                else {
-                    //todo
-                    //a new onclick is made everytime this method is called
-                    //which is a bug
-                    lifecycleScope.launch {
-                        curActivity.get()?.let{Parser.setup(newText, it, searchView, R.color.white)}
-                    }
-                }
-                return true
             }
         })
     }
 
+
+    private fun setButtons(){
+        findViewById<LinearLayout>(R.id.homeScreenButton).setOnClickListener {
+            if (activityType != ActivityType.HOME){
+                activityType = ActivityType.HOME
+                supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer, Home()).commit()
+                setBackground()
+            }
+        }
+        findViewById<LinearLayout>(R.id.mapButton).setOnClickListener {
+            if (activityType != ActivityType.MAP){
+                activityType = ActivityType.MAP
+                supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer, Map()).commit()
+                setBackground()
+            }
+        }
+        findViewById<LinearLayout>(R.id.alarmsButton).setOnClickListener {
+            if (activityType != ActivityType.ALARMS){
+                activityType = ActivityType.ALARMS
+                supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer, Alarms()).commit()
+                setBackground()
+            }
+        }
+    }
+
+    private fun setBackground(){
+        setDefaultBackgroundColors()
+        when(activityType){
+            ActivityType.HOME -> {
+                findViewById<LinearLayout>(R.id.homeScreenButton).setBackgroundColor(com.google.android.material.R.attr.colorControlHighlight)
+            }
+            ActivityType.MAP -> {
+                findViewById<LinearLayout>(R.id.mapButton).setBackgroundColor(com.google.android.material.R.attr.colorControlHighlight)
+            }
+            ActivityType.ALARMS -> {
+                findViewById<LinearLayout>(R.id.alarmsButton).setBackgroundColor(com.google.android.material.R.attr.colorControlHighlight)
+            }
+        }
+    }
+
+    private fun setDefaultBackgroundColors(){
+        val typedValue = TypedValue()
+        theme.resolveAttribute(androidx.appcompat.R.attr.selectableItemBackground, typedValue, true)
+        findViewById<LinearLayout>(R.id.homeScreenButton).setBackgroundResource(typedValue.resourceId)
+        findViewById<LinearLayout>(R.id.mapButton).setBackgroundResource(typedValue.resourceId)
+        findViewById<LinearLayout>(R.id.alarmsButton).setBackgroundResource(typedValue.resourceId)
+    }
+
+    private enum class ActivityType{
+        HOME, MAP, ALARMS
+    }
 }
+

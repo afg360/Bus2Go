@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".fragments.Map">
+
+    <!-- TODO: Update blank fragment layout -->
+    <com.google.android.material.textview.MaterialTextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="Coming soon...
+        Maps"
+        android:textSize="100sp"
+        android:fontFamily="@font/goli_medium"
+        android:textAlignment="center"
+        android:gravity="center"
+        />
+
+</FrameLayout>

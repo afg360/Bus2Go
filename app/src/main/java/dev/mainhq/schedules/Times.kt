@@ -15,7 +15,7 @@ import dev.mainhq.schedules.utils.adapters.TimeListElemsAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.Calendar
+import android.icu.util.Calendar
 
 //todo
 //must be careful when dealing with hours AFTER 23:59:59
@@ -31,7 +31,6 @@ class Times : AppCompatActivity() {
         lifecycleScope.launch {
             //check if connected to internet
             //if yes, make a web request
-
             //if not connected to internet, then below
             setup(stopName, headsign)
         }
@@ -42,8 +41,7 @@ class Times : AppCompatActivity() {
             .createFromAsset("database/stm_info.db").build()
         val stopsInfo = db.stopsInfoDao()
         val calendar : Calendar = Calendar.getInstance()
-        val curTime = Time(calendar.get(Calendar.HOUR_OF_DAY),
-            calendar.get(Calendar.MINUTE), calendar.get(Calendar.SECOND))
+        val curTime = Time(calendar)
         Log.d("CURRENT TIME", curTime.toString())
         val dayString = when (calendar.get(Calendar.DAY_OF_WEEK)) {
             Calendar.SUNDAY -> "d"
@@ -57,10 +55,10 @@ class Times : AppCompatActivity() {
         }
         dayString ?: throw IllegalStateException("Cannot have a non day of the week!")
         val stopTimes = stopsInfo.getStopTimes(stopName, dayString, curTime.toString(), headsign)
-        display(stopTimes, headsign)
+        display(stopTimes)
     }
 
-    private suspend fun display(list : List<Time>, headsign: String){
+    private suspend fun display(list : List<Time>){
         withContext(Dispatchers.Main){
             val recyclerView : RecyclerView = findViewById(R.id.time_recycle_view)
             val layoutManager = LinearLayoutManager(applicationContext)

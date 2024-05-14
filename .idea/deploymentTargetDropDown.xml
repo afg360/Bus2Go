@@ -11,13 +11,13 @@
       <entry key="app">
         <State />
       </entry>
+      <entry key="httpRequest()">
+        <State />
+      </entry>
       <entry key="test()">
         <State />
       </entry>
       <entry key="testSub1()">
-        <State />
-      </entry>
-      <entry key="testSub2()">
         <State />
       </entry>
     </value>

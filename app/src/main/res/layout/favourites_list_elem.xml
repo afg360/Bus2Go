@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="?attr/selectableItemBackground"
+    >
+    <LinearLayout
+        android:id="@+id/favouritesLinearContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center|start"
+        app:layout_constraintTop_toTopOf="parent"
+        >
+        <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/favourites_check_box"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/favouritesDataContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+            <!-- Add a textview where n/s/e/w mean something (from where to where), before map implementation comes in-->
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/favouritesTripheadsignTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TRIPHEADSIGN"
+                android:fontFamily="@font/goli_medium"
+                android:textSize="30sp"
+                android:layout_marginStart="10dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                />
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/favouritesBusTimeRemainingTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="BusTimeRemaining"
+                android:fontFamily="@font/goli_medium"
+                android:textColor="@color/basic_blue"
+                android:textSize="30sp"
+                android:layout_marginEnd="20dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                />
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/favouritesBusTimeTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="BUSTIME"
+                android:fontFamily="@font/goli_regular"
+                android:textColor="@color/basic_blue"
+                android:textSize="20sp"
+                android:layout_marginEnd="20dp"
+                app:layout_constraintTop_toBottomOf="@+id/favouritesBusTimeRemainingTextView"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/favouritesStopNameTextView"
+                android:layout_width="202dp"
+                android:layout_height="wrap_content"
+                android:text="Stop Name"
+                android:textSize="15sp"
+                android:layout_marginStart="10dp"
+                android:fontFamily="@font/goli_regular"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/favouritesTripheadsignTextView" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
+    <com.google.android.material.divider.MaterialDivider
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        app:layout_constraintTop_toBottomOf="@id/favouritesLinearContainer"
+        android:layout_margin="5dp"
+        />
+</androidx.constraintlayout.widget.ConstraintLayout>
