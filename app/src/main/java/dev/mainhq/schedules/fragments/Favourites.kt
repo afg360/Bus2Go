@@ -8,16 +8,19 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import androidx.activity.OnBackPressedCallback
+import androidx.core.view.children
 import androidx.core.view.forEach
 import androidx.core.view.get
 import androidx.core.view.size
 import androidx.datastore.core.DataStore
 import androidx.datastore.dataStore
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentContainerView
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
+import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.schedules.R
@@ -50,11 +53,9 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
 
         lifecycleScope.launch {
             val list =  context?.dataStore?.data?.first()?.list?.toList()
-            if (list == null){
-                TODO("List from datastore is null!")
-            } else if (list.isEmpty()) {
-                setEmpty(view)
-            } else {
+            if (list == null) TODO("List from datastore is null!")
+            else if (list.isEmpty()) setEmpty(view)
+            else {
                 val mutableList = setBus(list, view)
                 recyclerViewDisplay(view, mutableList)
             }
@@ -62,12 +63,12 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
         //TODO replace the topappbar when in selection mode (by seeing the tag of recyclerView)
         /** This part allows us to press the back button when in selection mode of favourites to get out of it */
         val callback = object : OnBackPressedCallback(true) {
+            /** Hides all the checkboxes of the items in the recyclerview, deselects them, and puts back the searchbar as the nav bar */
             override fun handleOnBackPressed() {
                 val recyclerView = view.findViewById<RecyclerView>(R.id.favouritesRecyclerView)
-                recyclerView.tag?.let {recTag ->
-                    val tag = recTag as String
+                recyclerView.tag?.also {recTag ->
                     /** Establish original layout (i.e. margins) */
-                    if (tag == "selected"){
+                    if (recTag as String == "selected"){
                         recyclerView.forEach {
                             unSelect(it as ViewGroup)
                             it.findViewById<MaterialCheckBox>(R.id.favourites_check_box).visibility = View.GONE
@@ -75,6 +76,15 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
                         }
                         recyclerView.tag = "unselected"
                     }
+                }
+                (this@Favourites.parentFragment as Home).view?.findViewById<AppBarLayout>(R.id.mainAppBar)
+                    ?.apply {
+                        //TODO deselect the material checkbox
+                        children.elementAt(1).also{
+                            it.findViewById<MaterialCheckBox>(R.id.selectAllCheckbox).isChecked = false
+                            it.visibility = View.GONE
+                        }
+                        children.elementAt(0).visibility = View.VISIBLE
                 }
             }
         }
@@ -105,11 +115,12 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
                             }
                         }
                         //FIXME WE COULD REMOVE THAT LINE OF CODE
-                        else setEmpty(requireView())
+                        else setEmpty(view)
                     }
                 }, 0, 1, TimeUnit.SECONDS) //TODO need it to be for android or java????
             }
         })
+        selectAllFavourites(recyclerView)
     }
 
     override fun onPause() {
@@ -117,9 +128,13 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
         //FIXME DOES NOT SEEM TO PREVENT THE BELOW
         //Prevents an IllegalArgumentException when coming back to the activity
         executor?.shutdown()
+
+        //TODO go back to normal mode if was in selection mode
     }
 
+
     private suspend fun setEmpty(view : View){
+        //FIXME seems that changing too many times/too fast the fragment causes it to fuck up the context? -> crash because not attached?
         withContext(Dispatchers.Main){
             view.findViewById<MaterialTextView>(R.id.favourites_text_view).text = getText(R.string.no_favourites)
         }
@@ -163,6 +178,31 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
         }
     }
 
+
+    //TODO could add an onclick listener on the "all" textview to make it better
+    /** Add an onclicklistener to the material checkbox of the selection part of nav bar */
+    private fun selectAllFavourites(recyclerView: RecyclerView){
+        (parentFragment as Home).view?.findViewById<MaterialCheckBox>(R.id.selectAllCheckbox)
+            ?.addOnCheckedStateChangedListener { _, state ->
+                /** Check all the items inside the recyclerview */
+                recyclerView.apply {
+                    if (state == MaterialCheckBox.STATE_CHECKED) {
+                        forEach {
+                            select(it as ViewGroup)
+                        }
+                    }
+                    else {
+                        forEach {
+                            unSelect(it as ViewGroup)
+                        }
+                    }
+                }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+    }
 }
 
 data class FavouriteBusInfo(val busInfo: BusInfo, val arrivalTime : Time)

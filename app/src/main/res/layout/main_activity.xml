@@ -100,11 +100,8 @@
                         android:fontFamily="@font/goli_regular"
                         />
                 </LinearLayout>
-
             </LinearLayout>
         </com.google.android.material.bottomappbar.BottomAppBar>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
-
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

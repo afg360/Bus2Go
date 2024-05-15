@@ -3,22 +3,26 @@ package dev.mainhq.schedules.utils.adapters
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
 import android.view.View.OnClickListener
 import android.view.View.OnLongClickListener
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.children
 import androidx.core.view.forEach
 import androidx.core.view.get
-import androidx.core.view.marginStart
-import androidx.core.view.setMargins
 import androidx.core.view.size
+import androidx.fragment.app.FragmentContainerView
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.textview.MaterialTextView
+import dev.mainhq.schedules.MainActivity
 import dev.mainhq.schedules.R
 import dev.mainhq.schedules.Times
 import dev.mainhq.schedules.fragments.FavouriteBusInfo
+import dev.mainhq.schedules.fragments.Home
 import dev.mainhq.schedules.utils.Time
 
 class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, private val recyclerView: RecyclerView)
@@ -95,9 +99,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
                                         select(it)
                                         checkBoxView.isChecked = true
                                     }
-                                    "unselected" -> {
-                                        startTimes(v)
-                                    }
+                                    "unselected" -> startTimes(v)
                                 }
                             }
                         }
@@ -109,14 +111,10 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
                             select(it)
                             checkBoxView.isChecked = true
                         }
-                        "unselected" -> {
-                            startTimes(v)
-                        }
+                        "unselected" -> startTimes(v)
                     }
                 }
-                else{
-                    startTimes(v)
-                }
+                else startTimes(v)
             }
         }
 
@@ -125,14 +123,23 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
         override fun onLongClick(v: View?): Boolean {
             //todo allow to select the view, so that we can remove from favourites
             //TODO is v : View only the item clicked, or the whole thing? may need to retrieve the whole parent and set its tag only
+            /** This next line will attemp to change the appbar do allow deletions */
+            //method: try to get smoothly to the home fragment. retrieve appnavbar and change it
+
             v?.setOnLongClickListener{
+                ((it.context as MainActivity).findViewById<FragmentContainerView>(R.id.mainFragmentContainer)
+                    .getFragment() as Home).view?.findViewById<AppBarLayout>(R.id.mainAppBar)
+                    ?.apply{
+                        children.elementAt(0).visibility = GONE
+                        children.elementAt(1).visibility = VISIBLE
+                    }
                 val tmpRecyclerView = v.parent as RecyclerView
                 /** if recycler has never been long clicked/has been backed, check if the view is not selected and select it */
                 if (tmpRecyclerView.tag == null || tmpRecyclerView.tag == "unselected"){
                     if (v.tag == null || v.tag == "unselected") {
                         select(v)
-                        recyclerView.forEach {
-                            val viewGroup = (it as ViewGroup)[0] as ViewGroup
+                        recyclerView.forEach {view ->
+                            val viewGroup = (view as ViewGroup)[0] as ViewGroup
                             (viewGroup[0] as MaterialCheckBox).visibility = VISIBLE
                             val constraintLayout = viewGroup[1] as ConstraintLayout
                             setMargins(constraintLayout, 10, 15)
@@ -170,13 +177,21 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
     }
 }
 
-/** This function is used with configuring the back button callbacks to deselect everything inside the container
- *  containing the favourite element when the back button is pressed */
+/** This function is used to deselect everything inside the container
+ *  containing the favourite element when the back button is pressed.
+ *  Mainly used with configuring the back button callbacks  */
 fun unSelect(/** Outer view group layout, containing the linear layout (at the moment) for the other components */
              viewGroup : ViewGroup){
     viewGroup.tag = "unselected"
     /** Deselect the checkbox so that next time doesnt need to press twice to deselect it */
     ((viewGroup[0] as ViewGroup)[0] as MaterialCheckBox).isChecked = false
+}
+
+fun select(/** Outer view group layout, containing the linear layout (at the moment) for the other components */
+             viewGroup : ViewGroup){
+    viewGroup.tag = "selected"
+    /** Deselect the checkbox so that next time doesnt need to press twice to deselect it */
+    ((viewGroup[0] as ViewGroup)[0] as MaterialCheckBox).isChecked = true
 }
 
 /** Set the margins for the left margin for the left most items

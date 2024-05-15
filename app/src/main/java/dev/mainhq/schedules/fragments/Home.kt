@@ -9,12 +9,14 @@ import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 import android.widget.Toast
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.search.SearchBar
 import com.google.android.material.search.SearchView
 import com.google.android.material.search.SearchView.TransitionState
@@ -46,19 +48,21 @@ class Home : Fragment(R.layout.home_fragment) {
         searchView = view.findViewById(R.id.main_search_view)
         searchView.editText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(editable: Editable?) {
-                val newText = editable.toString()
-                if (newText.isEmpty()){
-                    val recyclerView = view.findViewById<RecyclerView>(R.id.search_recycle_view)
-                    val layoutManager = LinearLayoutManager(this@Home.context)
-                    recyclerView.setBackgroundColor(resources.getColor(R.color.dark, null))
-                    recyclerView.adapter = BusListElemsAdapter(ArrayList())
-                    recyclerView.layoutManager = layoutManager
-                }
-                else {
-                    lifecycleScope.launch {
-                        setup(newText, this@Home, R.color.white)
+                editable.toString().also{
+                    if (it.isEmpty()){
+                        val recyclerView = view.findViewById<RecyclerView>(R.id.search_recycle_view)
+                        val layoutManager = LinearLayoutManager(this@Home.context)
+                        recyclerView.setBackgroundColor(resources.getColor(R.color.dark, null))
+                        recyclerView.adapter = BusListElemsAdapter(ArrayList())
+                        recyclerView.layoutManager = layoutManager
+                    }
+                    else {
+                        lifecycleScope.launch {
+                            setup(it, this@Home, R.color.white)
+                        }
                     }
                 }
+
             }
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
@@ -108,12 +112,19 @@ class Home : Fragment(R.layout.home_fragment) {
             }
             else super.onOptionsItemSelected(it)
         }
-
     }
 
     fun onBackPressed() {
         if (searchView.currentTransitionState == TransitionState.SHOWN){
             searchView.hide()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        view?.findViewById<AppBarLayout>(R.id.mainAppBar)?.apply {
+            children.elementAt(0).visibility = View.VISIBLE
+            children.elementAt(1).visibility = View.GONE
         }
     }
 }
