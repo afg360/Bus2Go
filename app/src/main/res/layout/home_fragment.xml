@@ -71,6 +71,31 @@
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
                         />
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_margin="15dp"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        >
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/baseline_delete_24"
+                            android:contentDescription="Tap to delete selected items"
+                            />
+                        <com.google.android.material.textview.MaterialTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Delete"
+                            android:textSize="15sp"
+                            android:fontFamily="@font/goli_regular"
+                            />
+                    </LinearLayout>
+
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
             </com.google.android.material.appbar.AppBarLayout>
@@ -102,7 +127,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:hint="@string/search"
-            app:layout_anchor="@id/mainAppBar">
+            app:layout_anchor="@id/mainSearchBar">
             <!-- Search suggestions/results go here (ScrollView, RecyclerView, etc.). -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/search_recycle_view"

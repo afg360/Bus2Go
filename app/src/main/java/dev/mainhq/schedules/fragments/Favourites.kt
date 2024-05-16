@@ -121,6 +121,7 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
             }
         })
         selectAllFavourites(recyclerView)
+        //TODO setup the garbage can image and its action, alongside numbers dynamically changing when user selects/deselects items to delete
     }
 
     override fun onPause() {

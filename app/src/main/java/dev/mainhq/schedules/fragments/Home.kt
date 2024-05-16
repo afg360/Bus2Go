@@ -62,7 +62,6 @@ class Home : Fragment(R.layout.home_fragment) {
                         }
                     }
                 }
-
             }
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
@@ -103,6 +102,7 @@ class Home : Fragment(R.layout.home_fragment) {
         //}
 
         val searchBar : SearchBar = view.findViewById(R.id.mainSearchBar)
+
         searchBar.setOnMenuItemClickListener {
             val itemID = it.itemId
             if (itemID == R.id.settingsIcon) {
