@@ -6,18 +6,22 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.search.SearchBar
 import com.google.android.material.search.SearchView
 import com.google.android.material.search.SearchView.TransitionState
+import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.schedules.R
 import dev.mainhq.schedules.SearchBus
 import dev.mainhq.schedules.Settings
@@ -27,7 +31,6 @@ import kotlinx.coroutines.launch
 
 //FIXME CANNOT SUPPORT VERY FAST CHANGES BETWEEN THIS FRAG AND THE OTHERS -> APP CRASHES BECAUSE NO VIEW IS RETURNED
 class Home : Fragment(R.layout.home_fragment) {
-
     //todo could use a favourites list here to use in other methods
     private lateinit var searchView : SearchView
 
@@ -46,17 +49,18 @@ class Home : Fragment(R.layout.home_fragment) {
         searchView = view.findViewById(R.id.main_search_view)
         searchView.editText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(editable: Editable?) {
-                val newText = editable.toString()
-                if (newText.isEmpty()){
-                    val recyclerView = view.findViewById<RecyclerView>(R.id.search_recycle_view)
-                    val layoutManager = LinearLayoutManager(this@Home.context)
-                    recyclerView.setBackgroundColor(resources.getColor(R.color.dark, null))
-                    recyclerView.adapter = BusListElemsAdapter(ArrayList())
-                    recyclerView.layoutManager = layoutManager
-                }
-                else {
-                    lifecycleScope.launch {
-                        setup(newText, this@Home, R.color.white)
+                editable.toString().also{
+                    if (it.isEmpty()){
+                        val recyclerView = view.findViewById<RecyclerView>(R.id.search_recycle_view)
+                        val layoutManager = LinearLayoutManager(this@Home.context)
+                        recyclerView.setBackgroundColor(resources.getColor(R.color.dark, null))
+                        recyclerView.adapter = BusListElemsAdapter(ArrayList())
+                        recyclerView.layoutManager = layoutManager
+                    }
+                    else {
+                        lifecycleScope.launch {
+                            setup(it, this@Home, R.color.white)
+                        }
                     }
                 }
             }
@@ -99,6 +103,7 @@ class Home : Fragment(R.layout.home_fragment) {
         //}
 
         val searchBar : SearchBar = view.findViewById(R.id.mainSearchBar)
+
         searchBar.setOnMenuItemClickListener {
             val itemID = it.itemId
             if (itemID == R.id.settingsIcon) {
@@ -108,12 +113,19 @@ class Home : Fragment(R.layout.home_fragment) {
             }
             else super.onOptionsItemSelected(it)
         }
-
     }
 
     fun onBackPressed() {
         if (searchView.currentTransitionState == TransitionState.SHOWN){
             searchView.hide()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        view?.findViewById<AppBarLayout>(R.id.mainAppBar)?.apply {
+            children.elementAt(0).visibility = View.VISIBLE
+            children.elementAt(1).visibility = View.GONE
         }
     }
 }

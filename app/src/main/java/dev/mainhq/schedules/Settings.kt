@@ -25,7 +25,6 @@ class Settings : AppCompatActivity(), MenuProvider {
 
     }
 
-
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
         menuInflater.inflate(R.menu.back_menu, menu)
     }
