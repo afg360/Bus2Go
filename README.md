@@ -1,0 +1,1 @@
+This application allows users to access data such as bus arrivals with minimal internet connectivity, with a big focus on user privacy.
