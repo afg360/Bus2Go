@@ -53,16 +53,14 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
         super.onViewCreated(view, savedInstanceState)
 
         lifecycleScope.launch {
-            val list =  context?.dataStore?.data?.first()?.list?.toList()
-            if (list == null) TODO("List from datastore is null!")
-            else if (list.isEmpty()) setEmpty(view)
+            val list =  context?.dataStore?.data?.first()?.list?.toList() ?: listOf()
+            if (list.isEmpty()) setEmpty(view)
             else {
-                val mutableList = setBus(list)
+                val mutableList = toFavouriteBusInfoList(list)
                 recyclerViewDisplay(view, mutableList)
             }
         }
         val appBar = (parentFragment as Home).view?.findViewById<AppBarLayout>(R.id.mainAppBar)
-        //TODO replace the topappbar when in selection mode (by seeing the tag of recyclerView)
         /** This part allows us to press the back button when in selection mode of favourites to get out of it */
         val callback = object : OnBackPressedCallback(true) {
             /** Hides all the checkboxes of the items in the recyclerview, deselects them, and puts back the searchbar as the nav bar */
@@ -99,16 +97,16 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
                         val tmpList = context?.dataStore?.data?.first()?.list?.toList() ?: listOf()
                         if (tmpList.isNotEmpty()) {
                             //FIXME we only want to change the time left data, NOT the background colors etc
-                            val mutableList = setBus(tmpList)
+                            val mutableList = toFavouriteBusInfoList(tmpList)
                             withContext(Dispatchers.Main){
-                                //FIXME bug is at line below
+                                //FIXME nullPointerException bug is at line below
                                 val favouritesListElemsAdapter = recyclerView.adapter as FavouritesListElemsAdapter?
                                 for (i in 0 until recyclerView.size) {
                                     favouritesListElemsAdapter?.updateTime(recyclerView[i] as ViewGroup, mutableList[i])
                                 }
                             }
                         }
-                        //FIXME WE COULD REMOVE THAT LINE OF CODE
+                        //FIXME WE COULD REMOVE THAT LINE OF CODE?
                         else setEmpty(view)
                     }
                 }, 0, 1, TimeUnit.SECONDS) //TODO need it to be for android or java????
@@ -137,7 +135,7 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
                                 })
                             }
                             withContext(Dispatchers.Main){
-                                recyclerViewDisplay(view, setBus(context.dataStore.data.first().list.toList()))
+                                recyclerViewDisplay(view, toFavouriteBusInfoList(context.dataStore.data.first().list.toList()))
                                 appBar?.apply { changeAppBar(this) }
                                 dialog.cancel()
                             }
@@ -165,7 +163,8 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
         }
     }
 
-    private suspend fun setBus(list : List<BusInfo>) : MutableList<FavouriteBusInfo> {
+    /** Used to get the required data to make a list of favouriteBusInfo, adding dates to busInfo elements */
+    private suspend fun toFavouriteBusInfoList(list : List<BusInfo>) : MutableList<FavouriteBusInfo> {
         //todo find the first time data for every bus on the list
         val stopsInfoDAO = context?.applicationContext?.let {
             Room.databaseBuilder(it, AppDatabase::class.java, "stm_info.db")
