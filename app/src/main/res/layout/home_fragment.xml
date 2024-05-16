@@ -61,10 +61,11 @@
                             />
                     </LinearLayout>
                     <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/selectedNumsOfFavourites"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:textSize="20sp"
-                        android:text="Select favourites to delete"
+                        android:text="@string/select_favourites_to_delete"
                         android:fontFamily="@font/goli_medium"
                         android:layout_marginStart="10dp"
                         app:layout_constraintStart_toEndOf="@id/selectAllCheckboxLinearLayout"
@@ -72,6 +73,7 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         />
                     <LinearLayout
+                        android:id="@+id/deleteItemsWidget"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:layout_margin="15dp"

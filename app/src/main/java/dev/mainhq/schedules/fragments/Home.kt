@@ -6,6 +6,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -20,6 +21,7 @@ import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.search.SearchBar
 import com.google.android.material.search.SearchView
 import com.google.android.material.search.SearchView.TransitionState
+import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.schedules.R
 import dev.mainhq.schedules.SearchBus
 import dev.mainhq.schedules.Settings
@@ -112,6 +114,7 @@ class Home : Fragment(R.layout.home_fragment) {
             }
             else super.onOptionsItemSelected(it)
         }
+
     }
 
     fun onBackPressed() {

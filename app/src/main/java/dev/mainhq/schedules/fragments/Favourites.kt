@@ -70,7 +70,7 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
                     /** Establish original layout (i.e. margins) */
                     if (recTag as String == "selected"){
                         recyclerView.forEach {
-                            unSelect(it as ViewGroup)
+                            (recyclerView.adapter as FavouritesListElemsAdapter).unSelect(it as ViewGroup)
                             it.findViewById<MaterialCheckBox>(R.id.favourites_check_box).visibility = View.GONE
                             setMargins(it.findViewById(R.id.favouritesDataContainer), 20, 20)
                         }
@@ -79,7 +79,6 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
                 }
                 (this@Favourites.parentFragment as Home).view?.findViewById<AppBarLayout>(R.id.mainAppBar)
                     ?.apply {
-                        //TODO deselect the material checkbox
                         children.elementAt(1).also{
                             it.findViewById<MaterialCheckBox>(R.id.selectAllCheckbox).isChecked = false
                             it.visibility = View.GONE
@@ -189,16 +188,19 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
                 recyclerView.apply {
                     if (state == MaterialCheckBox.STATE_CHECKED) {
                         forEach {
-                            select(it as ViewGroup)
+                            (adapter as FavouritesListElemsAdapter).select(it as ViewGroup)
                         }
                     }
                     else {
                         forEach {
-                            unSelect(it as ViewGroup)
+                            (adapter as FavouritesListElemsAdapter).unSelect(it as ViewGroup)
                         }
                     }
+                    (parentFragment as Home).view?.findViewById<MaterialTextView>(R.id.selectedNumsOfFavourites)
+                        ?.text = (adapter as FavouritesListElemsAdapter).numSelected.toString()
                 }
-        }
+            }
+
     }
 
     override fun onDestroy() {

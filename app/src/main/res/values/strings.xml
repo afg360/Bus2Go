@@ -17,4 +17,5 @@
     <string name="favourites">Favourite Bus Lines</string>
     <string name="no_favourites">No favourites made yet</string>
     <string name="large_text">THIS IS LARGE TEXT WRITTEN FOR LARGE TEXT</string>
+    <string name="select_favourites_to_delete">Select favourites to delete</string>
 </resources>
