@@ -1,26 +1,24 @@
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
     <PreferenceCategory
         app:title="General Settings"
         >
         <ListPreference
             app:key="language"
             app:title="Language"
+            app:icon="@drawable/baseline_language_24"
             app:entries="@array/langs"
-            android:entryValues="@array/langs"
+            app:entryValues="@array/langs"
             app:summary="Choose the main language of the app"
             />
         <PreferenceScreen
             app:key="theme"
             app:title="Theme"
+            app:icon="@drawable/baseline_theme_24"
             app:summary="System Default"
             >
         </PreferenceScreen>
-        <SwitchPreferenceCompat
-            app:key="notifications"
-            app:title="Enable update notifications"
-            android:summary="Toggle to activate/deactivate update related notifications."
-            />
     </PreferenceCategory>
 
     <PreferenceCategory
@@ -29,7 +27,20 @@
         <SwitchPreferenceCompat
             app:key="real-time-update"
             app:title="Real time updates"
-            android:summary="Toggle on or off to activate internet connectivity, enabling real time data"
+            app:summary="Toggle on or off to enable real time data updates (uses internet)"
+            />
+        <SwitchPreferenceCompat
+            app:key="search-for-updates"
+            app:title="Automatic updates"
+            app:icon="@drawable/baseline_update_24"
+            app:summary="Toggle on or off to enable the app to periodically look for new releases of the application"
+            />
+        <SwitchPreferenceCompat
+            app:key="update-notifications"
+            app:title="Update notifications"
+            app:icon="@drawable/baseline_notifications_24"
+            app:summary="Toggle on/off to activate/deactivate notifications for new updates of the application"
+            app:dependency="search-for-updates"
             />
     </PreferenceCategory>
 
@@ -39,11 +50,13 @@
         <Preference
             app:key="donate"
             app:title="Donate"
+            app:icon="@drawable/baseline_heart_border_24"
             app:summary="Donate to support the contributors of the app"
             />
         <Preference
             app:key="feedback"
             app:title="Send feedback"
+            app:icon="@drawable/baseline_feedback_24"
             app:summary="Report technical issues or suggest new features"/>
     </PreferenceCategory>
 

@@ -5,117 +5,40 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     >
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/settingsToolBar"
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/settingsAppBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
         >
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/settingsTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/settings"
-            android:textSize="25sp"
-            android:layout_margin="5dp"
-            android:padding="5dp"
-            />
-    </com.google.android.material.appbar.MaterialToolbar>
-    <com.google.android.material.divider.MaterialDivider
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        app:layout_constraintTop_toBottomOf="@id/settingsToolBar"
-        />
-    <!--
-    <LinearLayout
-        android:id="@+id/settingsChoices"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginHorizontal="50dp"
-        android:layout_marginTop="90dp"
-        >
-
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/language_view"
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/settingsToolBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/language"
-            android:textSize="25sp"
-            android:layout_margin="10dp"
-            android:fontFamily="sans-serif-medium"
-            android:paddingVertical="5dp"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            />
-        <View
-            android:id="@+id/sep_1"
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:background="@drawable/list_elem_separator"
-            />
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:orientation="horizontal">
+            >
             <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/theme"
+                android:id="@+id/settingsTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/theme"
+                android:text="@string/settings"
                 android:textSize="25sp"
-                android:layout_margin="10dp"
-                android:fontFamily="sans-serif-medium"
-                android:onClick="onClickTheme"
-                android:paddingVertical="5dp"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentStart="true"
+                android:layout_margin="5dp"
+                android:padding="5dp"
                 />
+        </com.google.android.material.appbar.MaterialToolbar>
+        <com.google.android.material.divider.MaterialDivider
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            app:layout_constraintTop_toBottomOf="@id/settingsToolBar"
+            />
 
-                <com.google.android.material.switchmaterial.SwitchMaterial
-                    android:id="@+id/theme_switch"
-                    android:onClick="onClickTheme"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Dark"
-                    android:textSize="20sp"
-                    android:layout_alignParentTop="true"
-                    android:layout_alignParentBottom="true"
-                    android:layout_alignParentEnd="true"
-                    />
-        </RelativeLayout>
-            <View
-                android:id="@+id/sep_2"
-                android:layout_width="match_parent"
-                android:layout_height="2dp"
-                android:background="@drawable/list_elem_separator"
-                />
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/rand"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="random"
-                android:textSize="25sp"
-                android:layout_margin="10dp"
-                android:fontFamily="sans-serif-medium"
-                android:paddingVertical="5dp"
-                app:layout_constraintTop_toBottomOf="@id/theme"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                />
-    </LinearLayout>
--->
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/preferencesFragmentContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />
+    </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/preferencesFragmentContainer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/settingsToolBar"
-        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

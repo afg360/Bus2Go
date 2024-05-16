@@ -44,7 +44,7 @@
                     <ImageView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/home_screen"
+                        android:background="@drawable/outline_home_24"
                         />
                     <com.google.android.material.textview.MaterialTextView
                         android:layout_width="wrap_content"
@@ -68,7 +68,7 @@
                     <ImageView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/home_screen"
+                        android:background="@drawable/outline_map_24"
                         />
                     <com.google.android.material.textview.MaterialTextView
                         android:layout_width="wrap_content"
