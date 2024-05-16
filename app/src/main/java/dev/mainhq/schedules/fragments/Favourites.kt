@@ -61,6 +61,7 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
                 recyclerViewDisplay(view, mutableList)
             }
         }
+        val appBar = (parentFragment as Home).view?.findViewById<AppBarLayout>(R.id.mainAppBar)
         //TODO replace the topappbar when in selection mode (by seeing the tag of recyclerView)
         /** This part allows us to press the back button when in selection mode of favourites to get out of it */
         val callback = object : OnBackPressedCallback(true) {
@@ -78,14 +79,7 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
                         recyclerView.tag = "unselected"
                     }
                 }
-                (this@Favourites.parentFragment as Home).view?.findViewById<AppBarLayout>(R.id.mainAppBar)
-                    ?.apply {
-                        children.elementAt(1).also{
-                            it.findViewById<MaterialCheckBox>(R.id.selectAllCheckbox).isChecked = false
-                            it.visibility = View.GONE
-                        }
-                        children.elementAt(0).visibility = View.VISIBLE
-                }
+                appBar?.apply { changeAppBar(this) }
             }
         }
         //FIXME activity?. instead???
@@ -144,7 +138,7 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
                             }
                             withContext(Dispatchers.Main){
                                 recyclerViewDisplay(view, setBus(context.dataStore.data.first().list.toList()))
-                                //TODO update appBar
+                                appBar?.apply { changeAppBar(this) }
                                 dialog.cancel()
                             }
                         }
@@ -240,6 +234,15 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
                     }
                 }
             }
+    }
+
+    /** Hides the selection mode appBar and comes back to main bar (searchBar) */
+    private fun changeAppBar(appBar : AppBarLayout){
+        appBar.children.elementAt(1).also{
+            it.findViewById<MaterialCheckBox>(R.id.selectAllCheckbox).isChecked = false
+            it.visibility = View.GONE
+        }
+        appBar.children.elementAt(0).visibility = View.VISIBLE
     }
 
     private fun busInfoFromView(view : ViewGroup) : BusInfo{
