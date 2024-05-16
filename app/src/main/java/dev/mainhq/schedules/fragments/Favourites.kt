@@ -62,7 +62,9 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
         }
         val appBar = (parentFragment as Home).view?.findViewById<AppBarLayout>(R.id.mainAppBar)
         /** This part allows us to press the back button when in selection mode of favourites to get out of it */
-        val callback = object : OnBackPressedCallback(true) {
+
+        //FIXME activity?. instead???
+        requireActivity().onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
             /** Hides all the checkboxes of the items in the recyclerview, deselects them, and puts back the searchbar as the nav bar */
             override fun handleOnBackPressed() {
                 val recyclerView = view.findViewById<RecyclerView>(R.id.favouritesRecyclerView)
@@ -79,9 +81,7 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
                 }
                 appBar?.apply { changeAppBar(this) }
             }
-        }
-        //FIXME activity?. instead???
-        requireActivity().onBackPressedDispatcher.addCallback(callback)
+        })
 
         val recyclerView : RecyclerView = requireView().findViewById(R.id.favouritesRecyclerView)
         /** This part allows us to update each recyclerview item from favourites in "real time", i.e. the user can see
@@ -155,7 +155,6 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
         //TODO go back to normal mode if was in selection mode
     }
 
-
     private suspend fun setEmpty(view : View){
         //FIXME seems that changing too many times/too fast the fragment causes it to fuck up the context? -> crash because not attached?
         withContext(Dispatchers.Main){
@@ -201,14 +200,12 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
         }
     }
 
-
     //TODO CODE REPETITION IS SHITTY (same at dev.mainhq.utils.adapters.FavouritesListElemsAdapter)
     /** Add an onclicklistener to the material checkbox of the selection part of nav bar */
     private fun selectAllFavourites(recyclerView: RecyclerView){
         (parentFragment as Home).view?.findViewById<MaterialCheckBox>(R.id.selectAllCheckbox)
             ?.setOnClickListener {
                 recyclerView.apply {
-                    /** If user clicks when it is not already checked*/
                     if ((it as MaterialCheckBox).isChecked) {
                         forEach {
                             (adapter as FavouritesListElemsAdapter).select(it as ViewGroup)

@@ -177,8 +177,8 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
         /** This onLongClick function serves as a selection interface (entering selection mode) for the recycler view items, so that
          * we can perform operations on them. */
         override fun onLongClick(v: View?): Boolean {
-            //todo allow to select the view, so that we can remove from favourites
             //TODO is v : View only the item clicked, or the whole thing? may need to retrieve the whole parent and set its tag only
+            //FIXME need to update the select all button ONLY IF one item in the list
             /** This next line will attempt to change the appbar to allow deletions */
             val parent = (recyclerView.parent.parent.parent.parent.parent.parent as ViewGroup)
             v?.setOnLongClickListener{
@@ -195,7 +195,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
                 /** if recycler has never been long clicked/has been backed, check if the view is not selected and select it */
                 if (tmpRecyclerView.tag == null || tmpRecyclerView.tag == "unselected"){
                     if (v.tag == null || v.tag == "unselected") {
-                        select(v, null)
+                        select(v, parent)
                         /** Show the checkboxes for each of the favourite elements */
                         recyclerView.forEach {view ->
                             val viewGroup = (view as ViewGroup)[0] as ViewGroup
@@ -209,7 +209,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
                 }
                 /** if recycler is already selected then simply select the view */
                 else select(v, null)
-                /** parent3 = outer most constraint layout from fragment_favourites, rest goes upwards */
+
                 parent.findViewById<MaterialTextView>(R.id.selectedNumsOfFavourites)
                     .text = adapter.numSelected.toString()
                 parent.findViewById<LinearLayout>(R.id.removeItemsWidget).apply{
