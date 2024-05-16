@@ -60,7 +60,6 @@ class StopListElemsAdapter(private val data: List<String>, private val list: Lis
                     view.context.dataStore.updateData { favourites ->
                         favourites.copy(list = favourites.list.mutate {
                             it.remove(BusInfo(data, headsign))
-                            Log.d("FAVOURITES", "CLICKED TO REMOVE A FAVOURITE!")
                         })
                     }
                 }

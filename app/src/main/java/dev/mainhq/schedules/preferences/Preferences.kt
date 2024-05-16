@@ -20,7 +20,7 @@ import java.lang.Exception
 //TODO eventually encrypt all the data to make it safe from other apps in case unwanted access happens
 
 @Serializable
-data class Favourites(
+data class FavouritesData(
     @Serializable(with = MyPersistentListSerializer::class)
     val list : PersistentList<BusInfo> = persistentListOf()
 )
@@ -55,13 +55,13 @@ class MyPersistentListSerializer(private val serializer: KSerializer<BusInfo>) :
 }
 
 
-object SettingsSerializer : Serializer<Favourites> {
-    override val defaultValue: Favourites
-        get() = Favourites()
+object SettingsSerializer : Serializer<FavouritesData> {
+    override val defaultValue: FavouritesData
+        get() = FavouritesData()
 
-    override suspend fun readFrom(input: InputStream): Favourites {
+    override suspend fun readFrom(input: InputStream): FavouritesData {
         return try{
-            Json.decodeFromString(Favourites.serializer(), input.readBytes().decodeToString())
+            Json.decodeFromString(FavouritesData.serializer(), input.readBytes().decodeToString())
         }
         catch (e : Exception){
             e.printStackTrace()
@@ -69,9 +69,9 @@ object SettingsSerializer : Serializer<Favourites> {
         }
     }
 
-    override suspend fun writeTo(t: Favourites, output: OutputStream) {
+    override suspend fun writeTo(t: FavouritesData, output: OutputStream) {
         output.write(
-            Json.encodeToString(Favourites.serializer(), t).encodeToByteArray()
+            Json.encodeToString(FavouritesData.serializer(), t).encodeToByteArray()
         )
     }
 }

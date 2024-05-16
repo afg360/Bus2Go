@@ -65,7 +65,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:textSize="20sp"
-                        android:text="@string/select_favourites_to_delete"
+                        android:text="@string/select_favourites_to_remove"
                         android:fontFamily="@font/goli_medium"
                         android:layout_marginStart="10dp"
                         app:layout_constraintStart_toEndOf="@id/selectAllCheckboxLinearLayout"
@@ -73,12 +73,13 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         />
                     <LinearLayout
-                        android:id="@+id/deleteItemsWidget"
+                        android:id="@+id/removeItemsWidget"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:layout_margin="15dp"
                         android:orientation="vertical"
                         android:gravity="center"
+                        android:background="?attr/selectableItemBackground"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -87,12 +88,12 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:background="@drawable/baseline_delete_24"
-                            android:contentDescription="Tap to delete selected items"
+                            android:contentDescription="Tap to remove selected items"
                             />
                         <com.google.android.material.textview.MaterialTextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Delete"
+                            android:text="Remove"
                             android:textSize="15sp"
                             android:fontFamily="@font/goli_regular"
                             />

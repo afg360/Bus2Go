@@ -114,7 +114,6 @@ class Home : Fragment(R.layout.home_fragment) {
             }
             else super.onOptionsItemSelected(it)
         }
-
     }
 
     fun onBackPressed() {

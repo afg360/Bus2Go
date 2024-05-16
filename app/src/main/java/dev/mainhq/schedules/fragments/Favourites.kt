@@ -3,10 +3,10 @@ package dev.mainhq.schedules.fragments
 import android.content.Context
 import android.icu.util.Calendar
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
+import android.widget.LinearLayout
 import androidx.activity.OnBackPressedCallback
 import androidx.core.view.children
 import androidx.core.view.forEach
@@ -15,21 +15,22 @@ import androidx.core.view.size
 import androidx.datastore.core.DataStore
 import androidx.datastore.dataStore
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentContainerView
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.checkbox.MaterialCheckBox
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.schedules.R
 import dev.mainhq.schedules.database.AppDatabase
 import dev.mainhq.schedules.preferences.BusInfo
-import dev.mainhq.schedules.preferences.Favourites
+import dev.mainhq.schedules.preferences.FavouritesData
 import dev.mainhq.schedules.preferences.SettingsSerializer
 import dev.mainhq.schedules.utils.Time
 import dev.mainhq.schedules.utils.adapters.*
+import kotlinx.collections.immutable.mutate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -40,7 +41,7 @@ import java.util.concurrent.TimeUnit
 
 /** The datastore of favourites refers to favourites defined in the preferences file, at dev.mainhq.schedules.preferences,
  *  NOT THIS FRAGMENT */
-val Context.dataStore : DataStore<Favourites> by dataStore(
+val Context.dataStore : DataStore<FavouritesData> by dataStore(
     fileName = "favourites.json",
     serializer = SettingsSerializer
 )
@@ -56,7 +57,7 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
             if (list == null) TODO("List from datastore is null!")
             else if (list.isEmpty()) setEmpty(view)
             else {
-                val mutableList = setBus(list, view)
+                val mutableList = setBus(list)
                 recyclerViewDisplay(view, mutableList)
             }
         }
@@ -104,7 +105,7 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
                         val tmpList = context?.dataStore?.data?.first()?.list?.toList() ?: listOf()
                         if (tmpList.isNotEmpty()) {
                             //FIXME we only want to change the time left data, NOT the background colors etc
-                            val mutableList = setBus(tmpList, requireView())
+                            val mutableList = setBus(tmpList)
                             withContext(Dispatchers.Main){
                                 //FIXME bug is at line below
                                 val favouritesListElemsAdapter = recyclerView.adapter as FavouritesListElemsAdapter?
@@ -120,7 +121,37 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
             }
         })
         selectAllFavourites(recyclerView)
-        //TODO setup the garbage can image and its action, alongside numbers dynamically changing when user selects/deselects items to delete
+        parentFragment?.view?.findViewById<LinearLayout>(R.id.removeItemsWidget)?.setOnClickListener {_ ->
+            this.context?.also { context ->
+                MaterialAlertDialogBuilder(context)
+                    //.setTitle(resources.getString(R.string.title))
+                    .setMessage(resources.getString(R.string.remove_confirmation_dialog_text))
+                    .setNegativeButton(resources.getString(R.string.remove_confirmation_dialog_decline)) { dialog, _ ->
+                        dialog.cancel()
+                    }
+                    .setPositiveButton(resources.getString(R.string.remove_confirmation_dialog_accept)) { dialog, _ ->
+                        val toRemoveList = mutableListOf<BusInfo>()
+                        recyclerView.forEach {
+                            if ((recyclerView.adapter as FavouritesListElemsAdapter).isSelected(it as ViewGroup)){
+                                toRemoveList.add(busInfoFromView(it))
+                            }
+                        }
+                        lifecycleScope.launch {
+                            context.dataStore.updateData { favouritesData ->
+                                favouritesData.copy(list = favouritesData.list.mutate {
+                                    it.removeIf{busInfo -> toRemoveList.contains(busInfo) }
+                                })
+                            }
+                            withContext(Dispatchers.Main){
+                                recyclerViewDisplay(view, setBus(context.dataStore.data.first().list.toList()))
+                                //TODO update appBar
+                                dialog.cancel()
+                            }
+                        }
+                    }
+                    .show()
+            }
+        }
     }
 
     override fun onPause() {
@@ -140,7 +171,7 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
         }
     }
 
-    private suspend fun setBus(list : List<BusInfo>, view : View) : MutableList<FavouriteBusInfo> {
+    private suspend fun setBus(list : List<BusInfo>) : MutableList<FavouriteBusInfo> {
         //todo find the first time data for every bus on the list
         val stopsInfoDAO = context?.applicationContext?.let {
             Room.databaseBuilder(it, AppDatabase::class.java, "stm_info.db")
@@ -161,12 +192,11 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
             list.forEach {busInfo ->
                 stopsInfoDAO?.getFavouriteStopTime(busInfo.stopName, dayString, Time(calendar).toString(), busInfo.tripHeadsign)
                     ?.let { time -> times.add(FavouriteBusInfo(busInfo, time)) }
-        }
+            }
         return times
     }
 
-    private suspend fun recyclerViewDisplay(view : View, times : MutableList<FavouriteBusInfo>,
-                                            recyclerView: RecyclerView? = null){
+    private suspend fun recyclerViewDisplay(view : View, times : MutableList<FavouriteBusInfo>){
         return withContext(Dispatchers.Main){
             view.findViewById<MaterialTextView>(R.id.favourites_text_view).text = getText(R.string.favourites)
             val layoutManager = LinearLayoutManager(view.context)
@@ -179,14 +209,14 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
     }
 
 
-    //TODO could add an onclick listener on the "all" textview to make it better
+    //TODO CODE REPETITION IS SHITTY (same at dev.mainhq.utils.adapters.FavouritesListElemsAdapter)
     /** Add an onclicklistener to the material checkbox of the selection part of nav bar */
     private fun selectAllFavourites(recyclerView: RecyclerView){
         (parentFragment as Home).view?.findViewById<MaterialCheckBox>(R.id.selectAllCheckbox)
-            ?.addOnCheckedStateChangedListener { _, state ->
-                /** Check all the items inside the recyclerview */
+            ?.setOnClickListener {
                 recyclerView.apply {
-                    if (state == MaterialCheckBox.STATE_CHECKED) {
+                    /** If user clicks when it is not already checked*/
+                    if ((it as MaterialCheckBox).isChecked) {
                         forEach {
                             (adapter as FavouritesListElemsAdapter).select(it as ViewGroup)
                         }
@@ -197,10 +227,25 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
                         }
                     }
                     (parentFragment as Home).view?.findViewById<MaterialTextView>(R.id.selectedNumsOfFavourites)
-                        ?.text = (adapter as FavouritesListElemsAdapter).numSelected.toString()
+                        ?.text = (adapter as FavouritesListElemsAdapter).run {
+                        val deleteItemsWidget = this@Favourites.parentFragment?.view?.findViewById<LinearLayout>(R.id.removeItemsWidget)
+                        if (numSelected > 0) {
+                            if (deleteItemsWidget?.visibility == View.GONE) deleteItemsWidget.visibility = View.VISIBLE
+                            numSelected.toString()
+                        }
+                        else {
+                            deleteItemsWidget?.visibility = View.GONE
+                            recyclerView.context.getString(R.string.select_favourites_to_remove)
+                        }
+                    }
                 }
             }
+    }
 
+    private fun busInfoFromView(view : ViewGroup) : BusInfo{
+        return BusInfo(view.findViewById<MaterialTextView>(R.id.favouritesStopNameTextView).text.toString(),
+            view.findViewById<MaterialTextView>(R.id.favouritesTripheadsignTextView).text.toString()
+        )
     }
 
     override fun onDestroy() {
