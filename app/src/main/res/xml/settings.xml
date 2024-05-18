@@ -2,45 +2,46 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     >
     <PreferenceCategory
-        app:title="General Settings"
+        app:title="@string/general_settings"
         >
         <ListPreference
             app:key="language"
-            app:title="Language"
+            app:title="@string/language"
             app:icon="@drawable/baseline_language_24"
             app:entries="@array/langs"
             app:entryValues="@array/langs"
-            app:summary="Choose the main language of the app"
+            app:defaultValue="@string/system"
+            app:summary="@string/language_summary"
             />
-        <PreferenceScreen
-            app:key="theme"
-            app:title="Theme"
+        <SwitchPreferenceCompat
+            app:key="dark-mode"
+            app:title="@string/theme"
             app:icon="@drawable/baseline_theme_24"
-            app:summary="System Default"
+            app:defaultValue="true"
             >
-        </PreferenceScreen>
+        </SwitchPreferenceCompat>
     </PreferenceCategory>
 
     <PreferenceCategory
-        app:title="Internet Settings"
+        app:title="@string/internet_settings"
         >
         <SwitchPreferenceCompat
-            app:key="real-time-update"
-            app:title="Real time updates"
-            app:summary="Toggle on or off to enable real time data updates (uses internet)"
+            app:key="real-time-data"
+            app:title="@string/real_time_data_updates"
+            app:summary="@string/real_time_data_updates_summary"
             />
         <SwitchPreferenceCompat
-            app:key="search-for-updates"
-            app:title="Automatic updates"
+            app:key="auto-updates"
+            app:title="@string/auto_updates"
             app:icon="@drawable/baseline_update_24"
-            app:summary="Toggle on or off to enable the app to periodically look for new releases of the application"
+            app:summary="@string/auto_updates_summary"
             />
         <SwitchPreferenceCompat
             app:key="update-notifications"
-            app:title="Update notifications"
+            app:title="@string/update_notifications"
             app:icon="@drawable/baseline_notifications_24"
-            app:summary="Toggle on/off to activate/deactivate notifications for new updates of the application"
-            app:dependency="search-for-updates"
+            app:summary="@string/update_notifications_summary"
+            app:dependency="auto-updates"
             />
     </PreferenceCategory>
 
@@ -59,5 +60,10 @@
             app:icon="@drawable/baseline_feedback_24"
             app:summary="Report technical issues or suggest new features"/>
     </PreferenceCategory>
+    <Preference
+        app:key="info"
+        app:title="App Info"
+        app:icon="@drawable/baseline_info_outline_24"
+        />
 
 </PreferenceScreen>

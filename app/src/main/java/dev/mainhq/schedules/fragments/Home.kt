@@ -22,6 +22,7 @@ import com.google.android.material.search.SearchBar
 import com.google.android.material.search.SearchView
 import com.google.android.material.search.SearchView.TransitionState
 import com.google.android.material.textview.MaterialTextView
+import dev.mainhq.schedules.MainActivity
 import dev.mainhq.schedules.R
 import dev.mainhq.schedules.SearchBus
 import dev.mainhq.schedules.Settings
@@ -42,7 +43,8 @@ class Home : Fragment(R.layout.home_fragment) {
             override fun onResume(owner: LifecycleOwner) {
                 super.onResume(owner)
                 childFragmentManager.beginTransaction()
-                    .replace(R.id.favouritesFragmentContainer, Favourites()).commit()
+                    .replace(R.id.favouritesFragmentContainer,
+                        Favourites((this@Home.activity as MainActivity).realTime)).commit()
             }
         })
 

@@ -56,8 +56,6 @@ android {
 
 protobuf {
     protoc {
-        //todo path to your protobuffer compiler
-        path = 'C:\\Program Files\\Protoc\\bin'
         artifact = 'com.google.protobuf:protoc:4.26.1'
     }
     plugins{
@@ -116,10 +114,11 @@ dependencies {
     //Preference manager
     implementation "androidx.preference:preference-ktx:1.2.1"
 
+    def data_store_version = "1.0.0"
     //DataStore
-    implementation "androidx.datastore:datastore-preferences:1.0.0"
+    implementation "androidx.datastore:datastore-preferences:$data_store_version"
     //proto datastore
-    implementation "androidx.datastore:datastore:1.0.0"
+    implementation "androidx.datastore:datastore:$data_store_version"
 
     //kotlin serializable
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2"
@@ -149,5 +148,4 @@ dependencies {
     //Protobuf
     def protobuf_version = "4.26.1"
     implementation "com.google.protobuf:protobuf-javalite:$protobuf_version"
-
 }

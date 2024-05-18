@@ -3,6 +3,7 @@ package dev.mainhq.schedules.fragments
 import android.content.Context
 import android.icu.util.Calendar
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
@@ -30,14 +31,17 @@ import dev.mainhq.schedules.preferences.FavouritesData
 import dev.mainhq.schedules.preferences.SettingsSerializer
 import dev.mainhq.schedules.utils.Time
 import dev.mainhq.schedules.utils.adapters.*
+import dev.mainhq.schedules.utils.web.WebRequest
 import kotlinx.collections.immutable.mutate
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 
 /** The datastore of favourites refers to favourites defined in the preferences file, at dev.mainhq.schedules.preferences,
  *  NOT THIS FRAGMENT */
@@ -46,7 +50,7 @@ val Context.dataStore : DataStore<FavouritesData> by dataStore(
     serializer = SettingsSerializer
 )
 
-class Favourites : Fragment(R.layout.fragment_favourites) {
+class Favourites(private val isRealTime : Boolean) : Fragment(R.layout.fragment_favourites) {
     var executor : ScheduledExecutorService? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -91,24 +95,47 @@ class Favourites : Fragment(R.layout.fragment_favourites) {
                 recyclerView.viewTreeObserver.removeOnGlobalLayoutListener(this)
                 executor = Executors.newSingleThreadScheduledExecutor()
                 val copy = executor!!
+                //TODO check if inrealtime is on.
+                //if yes, do a try/catch block (in case not connected to internet)
+
                 copy.scheduleAtFixedRate({
-                    lifecycleScope.launch {
-                        //todo could add some incertitude, and web requests here too
-                        val tmpList = context?.dataStore?.data?.first()?.list?.toList() ?: listOf()
-                        if (tmpList.isNotEmpty()) {
-                            //FIXME we only want to change the time left data, NOT the background colors etc
-                            val mutableList = toFavouriteBusInfoList(tmpList)
-                            withContext(Dispatchers.Main){
-                                //FIXME nullPointerException bug is at line below
-                                val favouritesListElemsAdapter = recyclerView.adapter as FavouritesListElemsAdapter?
-                                for (i in 0 until recyclerView.size) {
-                                    favouritesListElemsAdapter?.updateTime(recyclerView[i] as ViewGroup, mutableList[i])
+                    if (isRealTime){
+                        lifecycleScope.launch {
+                            val webRequestDeffered = async{
+                                try{
+                                    WebRequest.getResponse()
+                                }
+                                catch (e : TimeoutException){
+                                    Log.e("TIMEOUT EXCEPTION", "Not connected to internet, will strictly rely on local info")
+                                    null//USE NULL SO THAT WE CAN ASSESS THE DATA
                                 }
                             }
+                            val tmpListDeffered = async{context?.dataStore?.data?.first()?.list?.toList() ?: listOf()}
+                            webRequestDeffered.await()
+                            tmpListDeffered.await()
                         }
-                        //FIXME WE COULD REMOVE THAT LINE OF CODE?
-                        else setEmpty(view)
                     }
+                    else{
+                        lifecycleScope.launch {
+                            //todo could add some incertitude, and web requests here too
+
+                            val tmpList = context?.dataStore?.data?.first()?.list?.toList() ?: listOf()
+                            if (tmpList.isNotEmpty()) {
+                                //FIXME we only want to change the time left data, NOT the background colors etc
+                                val mutableList = toFavouriteBusInfoList(tmpList)
+                                withContext(Dispatchers.Main){
+                                    //FIXME nullPointerException bug is at line below
+                                    val favouritesListElemsAdapter = recyclerView.adapter as FavouritesListElemsAdapter?
+                                    for (i in 0 until recyclerView.size) {
+                                        favouritesListElemsAdapter?.updateTime(recyclerView[i] as ViewGroup, mutableList[i])
+                                    }
+                                }
+                            }
+                            //FIXME WE COULD REMOVE THAT LINE OF CODE?
+                            else setEmpty(view)
+                        }
+                    }
+
                 }, 0, 1, TimeUnit.SECONDS) //TODO need it to be for android or java????
             }
         })

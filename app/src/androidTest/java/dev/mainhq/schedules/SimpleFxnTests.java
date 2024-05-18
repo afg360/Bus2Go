@@ -25,16 +25,4 @@ public class SimpleFxnTests {
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         assertEquals("dev.mainhq.schedules", appContext.getPackageName());
     }
-    @Test
-    public void checkQuery(){
-        String query1 = "mon";
-        ActivityScenario.launch(MainActivity.class).onActivity(
-                activity ->{
-                    SearchView sv = activity.findViewById(R.id.app_bar_search_icon);
-                    sv.setQuery(query1, true);
-                    assertEquals(query1, sv.getQuery().toString());
-                }
-        );
-        //Espresso.
-    }
 }

@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <array name="langs">
-        <item>System</item>
-        <item>English</item>
-        <item>Français</item>
-        <item>Español</item>
+        <item>@string/system</item>
+        <item>@string/english</item>
+        <item>@string/french</item>
+        <item>@string/spanish</item>
+    </array>
+    <array name="themes">
+        <item>@string/system</item>
+        <item>@string/light</item>
+        <item>@string/dark</item>
     </array>
 </resources>

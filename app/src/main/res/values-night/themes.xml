@@ -1,11 +1,15 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Theme.Schedules" parent="Theme.Material3.Dark.NoActionBar">
+    <style name="Theme.Schedules.Dark" parent="Theme.Material3.Dark.NoActionBar">
         <item name="colorPrimary">@color/basic_blue</item>
         <item name="editTextColor">@color/light</item>
 
         <item name="colorPrimaryDark">@android:color/transparent</item>
         <item name="colorAccent">@color/basic_blue</item>/
+        <item name="android:navigationBarColor">
+            @android:color/transparent
+        </item>
+
     </style>
 
 </resources>

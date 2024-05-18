@@ -47,14 +47,14 @@ class ChooseDirection : AppCompatActivity() {
             lifecycleScope.launch {
                 val db = databaseBuilder(applicationContext, AppDatabase::class.java, "stm_info")
                     .createFromAsset("database/stm_info.db").build()
-                val dirs = async {db.tripsDao().getTripHeadsigns(busNum.toInt())}.await()
-                val dir0 = async { db.stopsInfoDao().getStopNames(dirs[0])}.await()
-                val dir1 = async { db.stopsInfoDao().getStopNames(dirs.last()) }.await()
+                val dirs = db.tripsDao().getTripHeadsigns(busNum.toInt())
+                val exe0 = async { db.stopsInfoDao().getStopNames(dirs[0]) }
+                val exe1 = async { db.stopsInfoDao().getStopNames(dirs.last()) }
                 val orientation = if (dirs[0].last() == 'E' || dirs[0].last() == 'O') Orientation.HORIZONTAL
                                   else Orientation.VERTICAL
                 val headsign0 = dirs[0]
                 val headsign1 = dirs[1]
-                setListeners(orientation, dir0, dir1, headsign0, headsign1)
+                setListeners(orientation, exe0.await(), exe1.await(), headsign0, headsign1)
                 db.close()
             }
         }

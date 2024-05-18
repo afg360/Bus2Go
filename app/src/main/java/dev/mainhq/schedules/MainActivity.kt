@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import dev.mainhq.schedules.fragments.Alarms
 import dev.mainhq.schedules.fragments.Home
 import dev.mainhq.schedules.fragments.Map
+import dev.mainhq.schedules.utils.SettingsData
 
 //TODO
 //when updating the app (especially for new stm txt files), will need
@@ -20,17 +21,21 @@ import dev.mainhq.schedules.fragments.Map
 class MainActivity() : AppCompatActivity() {
 
     private lateinit var activityType : ActivityType
+    var realTime : Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        //if (false) { //TODO check if config file exists
+        //    val intent = Intent(applicationContext, Config::class.java)
+        //    startActivity(intent)
+        //}
 
-        if (false) { //TODO check if config file exists
-            val intent = Intent(this.applicationContext, Config::class.java)
-            startActivity(intent)
-        }
+        /* THEME must be set before setContentView */
         setContentView(R.layout.main_activity)
-        activityType = ActivityType.HOME
+        val settingsData = SettingsData(applicationContext)//.setTheme(applicationContext)
+        realTime = settingsData.isRealTime()
 
+        activityType = ActivityType.HOME
         val home = Home()
         supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer, home).commit()
         setBackground()

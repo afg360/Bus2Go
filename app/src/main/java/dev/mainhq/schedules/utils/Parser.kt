@@ -1,13 +1,10 @@
 package dev.mainhq.schedules.utils
 
-import android.content.Context
-import android.widget.SearchView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
-import dev.mainhq.schedules.MainActivity
 import dev.mainhq.schedules.R
 import dev.mainhq.schedules.database.AppDatabase
 import dev.mainhq.schedules.database.dao.BusRouteInfo
@@ -19,7 +16,7 @@ import java.util.Locale
 //right now only for the main activities
 //todo may use db operations instead
 
-/** Sets up the activity data from the database to be displayed for the user **/
+/** Sets up the activity data from the database and then displays it to the user **/
 suspend fun setup(query : String, fragment : Fragment, color : Int?){
     val db = Room.databaseBuilder(fragment.requireContext(), AppDatabase::class.java, "stm_info")
         .createFromAsset("database/stm_info.db").build()

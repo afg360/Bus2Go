@@ -1,0 +1,32 @@
+<resources>
+    <string name="language">Langue</string>
+    <string name="theme">Thème</string>
+    <string name="language_prompt">Choisissez une langue</string>
+    <string name="english">English</string>
+    <string name="french">Français</string>
+    <string name="spanish">Español</string>
+    <string name="confirm">Confirmer</string>
+    <string name="cancel">Annuler</string>
+    <string name="light">Clair</string>
+    <string name="dark">Sombre</string>
+    <string name="choose_a_direction">Choisissez une direction</string>
+    <string name="search">Chercher une ligne de bus, ou un numéro de bus</string>
+    <string name="settings">Paramètres</string>
+    <string name="system">Système</string>
+    <string name="favourites">Lignes de bus favories</string>
+    <string name="no_favourites">Aucun favori pour l\'instant</string>
+    <string name="select_favourites_to_remove">Choisissez les favoris à enlever</string>
+    <string name="remove_confirmation_dialog_text">Êtes-vous sûr de vouloir supprimer ces favoris de votre écran principal?</string>
+    <string name="remove_confirmation_dialog_decline">Non</string>
+    <string name="remove_confirmation_dialog_accept">Oui</string>
+    <string name="general_settings">Paramètres Générales</string>
+    <string name="internet_settings">Paramètres Internet</string>
+    <string name="real_time_data_updates">Mise à jour des données en temps réel</string>
+    <string name="real_time_data_updates_summary">Activez pour permettre la mise à jour de données en temp réel (utilise l\'Internet)</string>
+    <string name="language_summary">Choisissez la langue de l\'application</string>
+    <string name="auto_updates">Mises à jour automatiques</string>
+    <string name="auto_updates_summary">Activez ou désactivez pour permettre à l\'application de chercher périodiquement de nouvelles versions de l\'application</string>
+    <string name="update_notifications">Notifications de mises à jour</string>
+    <string name="update_notifications_summary">Activez pour permettre l\'activation de notifications qui vous tiendront au courant des nouvelles mises à jour disponibles</string>
+
+</resources>
