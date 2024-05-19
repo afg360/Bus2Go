@@ -21,9 +21,10 @@ import android.icu.util.Calendar
 //must be careful when dealing with hours AFTER 23:59:59
 //since they may be considered in a new day in android, but not for stm
 //todo add a home button to go back to the main activity
-class Times : AppCompatActivity() {
+class Times : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        //setTheme()
         setContentView(R.layout.times)
         val stopName = intent.getStringExtra("stopName")!!
         assert (stopName.isNotEmpty())

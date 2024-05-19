@@ -22,9 +22,10 @@ import java.util.ArrayList
 //todo
 //change appbar to be only a back button
 //todo may make it a swapable ui instead of choosing button0 or 1
-class ChooseDirection : AppCompatActivity() {
+class ChooseDirection : BaseActivity() {
     override fun onCreate(savedInstanceState : Bundle?) {
         super.onCreate(savedInstanceState);
+        //setTheme()
         val extras : Bundle = this.intent.extras ?: throw AssertionError("Assertion failed");
         val busName = extras.getString("busName") ?: throw AssertionError("busName is Null");
         val busNum = extras.getString("busNum") ?: throw AssertionError("busNum is Null");

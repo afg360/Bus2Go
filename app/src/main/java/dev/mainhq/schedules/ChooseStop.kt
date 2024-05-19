@@ -18,7 +18,7 @@ import kotlinx.coroutines.withContext
 //all the possible stations (ordered by id, and prob based on localisation? -> not privacy friendly
 //and once the user clicks, either new activity OR new fragment? -> in the latter case need to implement onback
 //todo add possibility of searching amongst all the stops
-class ChooseStop : AppCompatActivity() {
+class ChooseStop : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

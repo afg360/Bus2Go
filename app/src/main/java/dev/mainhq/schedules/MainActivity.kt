@@ -18,10 +18,10 @@ import dev.mainhq.schedules.utils.SettingsData
 //to show to user storing favourites of "deprecated buses" that it has changed
 //to another bus (e.g. 435 -> 465)
 
-class MainActivity() : AppCompatActivity() {
+class MainActivity() : BaseActivity() {
 
     private lateinit var activityType : ActivityType
-    var realTime : Boolean = false
+    //var realTime : Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,9 +31,11 @@ class MainActivity() : AppCompatActivity() {
         //}
 
         /* THEME must be set before setContentView */
+        //TODO must also setup the color of all the drawables needed
+        //AppThemeState.setTheme(this)
         setContentView(R.layout.main_activity)
-        val settingsData = SettingsData(applicationContext)//.setTheme(applicationContext)
-        realTime = settingsData.isRealTime()
+        //val settingsData = SettingsData(applicationContext)//.setTheme(applicationContext)
+        //realTime = settingsData.isRealTime()
 
         activityType = ActivityType.HOME
         val home = Home()

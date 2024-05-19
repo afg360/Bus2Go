@@ -10,7 +10,7 @@ import java.lang.IllegalStateException
 import java.lang.ref.WeakReference
 
 //instead of creating a new intent, just redo the list if search done in this activity
-class SearchBus : AppCompatActivity() {
+class SearchBus : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         this.setContentView(R.layout.search_bus)
