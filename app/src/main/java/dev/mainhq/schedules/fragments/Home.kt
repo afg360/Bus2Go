@@ -44,7 +44,7 @@ class Home : Fragment(R.layout.home_fragment) {
                 super.onResume(owner)
                 childFragmentManager.beginTransaction()
                     .replace(R.id.favouritesFragmentContainer,
-                        Favourites((this@Home.activity as MainActivity).realTime)).commit()
+                        Favourites()).commit()
             }
         })
 

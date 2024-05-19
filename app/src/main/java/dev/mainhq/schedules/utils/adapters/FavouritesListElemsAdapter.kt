@@ -206,14 +206,11 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
                         checkBoxView.isChecked = true
                     }
                     tmpRecyclerView.tag = "selected"
-                }
-                /** if recycler is already selected then simply select the view */
-                else select(v, null)
-
-                parent.findViewById<MaterialTextView>(R.id.selectedNumsOfFavourites)
-                    .text = adapter.numSelected.toString()
-                parent.findViewById<LinearLayout>(R.id.removeItemsWidget).apply{
-                    if (visibility == GONE) visibility = VISIBLE
+                    parent.findViewById<MaterialTextView>(R.id.selectedNumsOfFavourites)
+                        .text = adapter.numSelected.toString()
+                    parent.findViewById<LinearLayout>(R.id.removeItemsWidget).apply{
+                        if (visibility == GONE) visibility = VISIBLE
+                    }
                 }
                 true
             }
