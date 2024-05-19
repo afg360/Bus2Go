@@ -60,7 +60,7 @@ class Home : Fragment(R.layout.home_fragment) {
                     }
                     else {
                         lifecycleScope.launch {
-                            setup(it, this@Home, R.color.white)
+                            setup(it, this@Home)
                         }
                     }
                 }

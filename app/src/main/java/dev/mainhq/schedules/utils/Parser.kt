@@ -17,16 +17,16 @@ import java.util.Locale
 //todo may use db operations instead
 
 /** Sets up the activity data from the database and then displays it to the user **/
-suspend fun setup(query : String, fragment : Fragment, color : Int?){
+suspend fun setup(query : String, fragment : Fragment){
     val db = Room.databaseBuilder(fragment.requireContext(), AppDatabase::class.java, "stm_info")
         .createFromAsset("database/stm_info.db").build()
     val routes = db.routesDao()
     val list = routes.getBusRouteInfo(FuzzyQuery(query))
-    displayBuses(list, fragment, color)
+    displayBuses(list, fragment)
     db.close()
 }
 
-private suspend fun displayBuses(list : List<BusRouteInfo>, fragment: Fragment, color : Int?){
+private suspend fun displayBuses(list : List<BusRouteInfo>, fragment: Fragment){
     //todo
     //need to handle queries where french accents are needed
     //val parsable = Parser.toParsable(query)
@@ -34,7 +34,6 @@ private suspend fun displayBuses(list : List<BusRouteInfo>, fragment: Fragment, 
     withContext(Dispatchers.Main){
         val recyclerView : RecyclerView = fragment.requireView().findViewById(R.id.search_recycle_view)
         val layoutManager = LinearLayoutManager(fragment.requireContext().applicationContext)
-        //color?.let { recyclerView.setBackgroundColor(activity.resources.getColor(it, null)) }
         recyclerView.adapter = BusListElemsAdapter(list)
         layoutManager.orientation = LinearLayoutManager.VERTICAL
         recyclerView.layoutManager = layoutManager
