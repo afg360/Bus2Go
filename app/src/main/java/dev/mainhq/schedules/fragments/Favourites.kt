@@ -50,7 +50,7 @@ val Context.dataStore : DataStore<FavouritesData> by dataStore(
     serializer = SettingsSerializer
 )
 
-class Favourites(private val isRealTime : Boolean) : Fragment(R.layout.fragment_favourites) {
+class Favourites() : Fragment(R.layout.fragment_favourites) {
     var executor : ScheduledExecutorService? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -99,23 +99,6 @@ class Favourites(private val isRealTime : Boolean) : Fragment(R.layout.fragment_
                 //if yes, do a try/catch block (in case not connected to internet)
 
                 copy.scheduleAtFixedRate({
-                    if (isRealTime){
-                        lifecycleScope.launch {
-                            val webRequestDeffered = async{
-                                try{
-                                    WebRequest.getResponse()
-                                }
-                                catch (e : TimeoutException){
-                                    Log.e("TIMEOUT EXCEPTION", "Not connected to internet, will strictly rely on local info")
-                                    null//USE NULL SO THAT WE CAN ASSESS THE DATA
-                                }
-                            }
-                            val tmpListDeffered = async{context?.dataStore?.data?.first()?.list?.toList() ?: listOf()}
-                            webRequestDeffered.await()
-                            tmpListDeffered.await()
-                        }
-                    }
-                    else{
                         lifecycleScope.launch {
                             //todo could add some incertitude, and web requests here too
 
@@ -134,8 +117,6 @@ class Favourites(private val isRealTime : Boolean) : Fragment(R.layout.fragment_
                             //FIXME WE COULD REMOVE THAT LINE OF CODE?
                             else setEmpty(view)
                         }
-                    }
-
                 }, 0, 1, TimeUnit.SECONDS) //TODO need it to be for android or java????
             }
         })
