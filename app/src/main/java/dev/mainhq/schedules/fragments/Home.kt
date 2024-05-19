@@ -55,7 +55,6 @@ class Home : Fragment(R.layout.home_fragment) {
                     if (it.isEmpty()){
                         val recyclerView = view.findViewById<RecyclerView>(R.id.search_recycle_view)
                         val layoutManager = LinearLayoutManager(this@Home.context)
-                        recyclerView.setBackgroundColor(resources.getColor(R.color.dark, null))
                         recyclerView.adapter = BusListElemsAdapter(ArrayList())
                         recyclerView.layoutManager = layoutManager
                     }

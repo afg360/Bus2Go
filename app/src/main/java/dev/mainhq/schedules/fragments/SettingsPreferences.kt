@@ -16,7 +16,6 @@ class SettingsPreferences : PreferenceFragmentCompat() ,
     SharedPreferences.OnSharedPreferenceChangeListener {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.settings, rootKey)
-
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
@@ -30,7 +29,7 @@ class SettingsPreferences : PreferenceFragmentCompat() ,
                 }
                 "dark-mode" -> {
                     Log.d("Preferences", "Dark-mode enabled")
-                    (host as Settings) .changeTheme()
+                    (host as Settings).changeTheme()
                 }
             }
         }

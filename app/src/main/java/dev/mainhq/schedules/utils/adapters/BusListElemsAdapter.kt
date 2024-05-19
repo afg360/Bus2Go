@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.schedules.ChooseDirection
 import dev.mainhq.schedules.R
 import dev.mainhq.schedules.database.dao.BusRouteInfo
@@ -41,8 +42,8 @@ class BusListElemsAdapter(private val busData: List<BusRouteInfo>) :
     }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view), OnClickListener {
-        val busDirView: TextView
-        val busNumView: TextView
+        val busDirView: MaterialTextView
+        val busNumView: MaterialTextView
         init {
             busDirView = view.findViewById(R.id.busDir)
             busNumView = view.findViewById(R.id.busNum)

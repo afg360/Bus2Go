@@ -53,7 +53,6 @@ class MainActivity() : BaseActivity() {
         })
     }
 
-
     private fun setButtons(){
         findViewById<LinearLayout>(R.id.homeScreenButton).setOnClickListener {
             if (activityType != ActivityType.HOME){

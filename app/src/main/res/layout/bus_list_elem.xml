@@ -11,7 +11,7 @@
     app:layout_constraintTop_toTopOf="parent"
     >
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/busDir"
             android:layout_width="225dp"
             android:layout_height="wrap_content"
@@ -23,7 +23,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/busNum"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
