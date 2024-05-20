@@ -17,7 +17,7 @@ The above needs absolutely no internet connection to work
 ## Ideas
 - !! Calculate best paths to take to get to a destination at a certain time
 
-# Buiilding from source
+# Building from source
 To build from source, you must initialise the local database used by the application. It
 can be initialised by running powershell/bash scripts. More info at [./scripts](./scripts).
 You must make sure that the database is stored under [./app/src/main/assets/database](./app/src/main/assets/database)
@@ -25,4 +25,8 @@ You must make sure that the database is stored under [./app/src/main/assets/data
 You can then run `./gradlew build` to build it.
 
 # Disclaimer
-The application is not fully completed and may contain bugs. We are trying to dix these and implement the features ASAP.
+The application is still in alpha version. It is not fully completed and may contain bugs. 
+We are trying to fix these and implement the features ASAP.
+
+# Acknowledgements
+This application uses the GOLI font. It's licence is available under [./app/src/main/assets/fonts](./app/src/main/assets/database)
