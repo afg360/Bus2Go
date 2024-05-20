@@ -53,6 +53,23 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
 
         holder.onLongClick(holder.itemView)
         holder.onClick(holder.itemView)
+        holder.checkBoxView.setOnClickListener {
+            val parent = recyclerView.parent.parent.parent.parent.parent.parent as ViewGroup
+            if ((it as MaterialCheckBox).isChecked) holder.select(holder.itemView, parent)
+            else holder.unSelect(holder.itemView, parent)
+            parent.findViewById<MaterialTextView>(R.id.selectedNumsOfFavourites)
+                .text = (recyclerView.adapter as FavouritesListElemsAdapter).numSelected.run{
+                val deleteItemsWidget = parent.findViewById<LinearLayout>(R.id.removeItemsWidget)
+                if (this > 0) {
+                    if (deleteItemsWidget.visibility == GONE) deleteItemsWidget.visibility = VISIBLE
+                    toString()
+                }
+                else {
+                    deleteItemsWidget.visibility = GONE
+                    recyclerView.context.getString(R.string.select_favourites_to_remove)
+                }
+            }
+        }
     }
 
     fun updateTime(viewGroup : ViewGroup, favouritesBusInfo: FavouriteBusInfo){
@@ -109,15 +126,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
             arrivalTimeTextView = view.findViewById(R.id.favouritesBusTimeTextView)
             timeRemainingTextView = view.findViewById(R.id.favouritesBusTimeRemainingTextView)
             checkBoxView = view.findViewById(R.id.favourites_check_box)
-            //TODO
-            /** Also add an onClick for the checkbox view itself... */
-            //checkBoxView.setOnClickListener{
-            //    (recyclerView.adapter as FavouritesListElemsAdapter).also {
-            //        if (it.numSelected == it.itemCount - 1) {
-            //            if (!checkBoxView.isChecked) checkBoxView.isChecked = true
-            //        }
-            //    }
-            //}
+
         }
 
         //fixme not working properly
@@ -185,7 +194,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
                 ((it.context as MainActivity).findViewById<FragmentContainerView>(R.id.mainFragmentContainer)
                     .getFragment() as Home).view?.findViewById<AppBarLayout>(R.id.mainAppBar)
                     ?.apply{
-                        /** This is the search bar*/
+                        /** This is the search bar that will disappear in the appBar*/
                         children.elementAt(0).visibility = GONE
                         /** This is the constraint layout having the selection mode */
                         children.elementAt(1).visibility = VISIBLE

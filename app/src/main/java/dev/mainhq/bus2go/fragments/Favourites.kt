@@ -31,7 +31,6 @@ import dev.mainhq.bus2go.preferences.SettingsSerializer
 import dev.mainhq.bus2go.utils.Time
 import dev.mainhq.bus2go.utils.adapters.FavouritesListElemsAdapter
 import dev.mainhq.bus2go.utils.adapters.setMargins
-import dev.mainhq.bus2go.utils.adapters.*
 import kotlinx.collections.immutable.mutate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -118,7 +117,7 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
                 }, 0, 1, TimeUnit.SECONDS) //TODO need it to be for android or java????
             }
         })
-        selectAllFavourites(recyclerView)
+        selectAllFavouritesOnClickListener(recyclerView)
         parentFragment?.view?.findViewById<LinearLayout>(R.id.removeItemsWidget)?.setOnClickListener {_ ->
             this.context?.also { context ->
                 MaterialAlertDialogBuilder(context)
@@ -195,7 +194,7 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
     }
 
     private suspend fun recyclerViewDisplay(view : View, times : MutableList<FavouriteBusInfo>){
-        return withContext(Dispatchers.Main){
+        withContext(Dispatchers.Main){
             view.findViewById<MaterialTextView>(R.id.favourites_text_view).text = getText(R.string.favourites)
             val layoutManager = LinearLayoutManager(view.context)
             layoutManager.orientation = LinearLayoutManager.VERTICAL
@@ -208,7 +207,7 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
 
     //TODO CODE REPETITION IS SHITTY (same at dev.mainhq.utils.adapters.FavouritesListElemsAdapter)
     /** Add an onclicklistener to the material checkbox of the selection part of nav bar */
-    private fun selectAllFavourites(recyclerView: RecyclerView){
+    private fun selectAllFavouritesOnClickListener(recyclerView: RecyclerView){
         (parentFragment as Home).view?.findViewById<MaterialCheckBox>(R.id.selectAllCheckbox)
             ?.setOnClickListener {
                 recyclerView.apply {
