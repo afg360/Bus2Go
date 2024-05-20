@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option java_package = "dev.mainhq.schedules";
+option java_package = "dev.mainhq.bus2go";
 option java_multiple_files = true;
 
 message Favourites {

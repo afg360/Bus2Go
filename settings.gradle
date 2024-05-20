@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "schedules"
+rootProject.name = "bus2go"
 include ':app'

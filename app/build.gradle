@@ -8,7 +8,7 @@ plugins {
 }
 
 android {
-    namespace 'dev.mainhq.schedules'
+    namespace 'dev.mainhq.bus2go'
     compileSdk 34
 
     sourceSets {
@@ -28,7 +28,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "dev.mainhq.schedules"
+        applicationId "dev.mainhq.bus2go"
         minSdk 25
         targetSdk 34
         versionCode 1
