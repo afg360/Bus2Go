@@ -1,10 +1,14 @@
-#!/bin/sh
-path='/absolute/path/to/your/sql/directory'
-project='/absolute/path/to/your/project'
-cd $path
+#!/bin/bash
+path=/absolute/path/to/scripts/folder/sql
+#e.g. path=$PROJECT_FOLDER/bus2go/scripts
+project=/absolute/path/to/your/project/database/folder
 
-for dir in $(ls -d .)
+cd $path
+for dir in $(ls)
 do
+  if [[ ! -d $dir ]]; then
+    continue
+  fi
 	cd $dir
 	echo "Working on $dir"
 	echo "Starting script.py"
@@ -23,9 +27,10 @@ cd $path/..
 python3 ./script.py
 echo "Completed the initialisation of the database"
 
-echo "Would you like to copy the database for the android schedules project? [y/n] -> "
+echo -n "Would you like to copy the database for the android schedules project? [y/n] -> "
 read choice
-if [[ $choice =~ '^(y|yes)$' ]]; then
+#this part doesnt work properly for the moment
+if [[ $choice = 'y' || 'yes' ]]; then
     echo "Copying database to the project"
 	cp -i 'sql/stm_info.db' $project
 else

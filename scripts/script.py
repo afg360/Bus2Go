@@ -38,4 +38,4 @@ print("Vacuuming database")
 cur.execute("VACUUM;")
 
 print("Creating index on StopsInfo")
-cur.execute("CREATE INDEX StopsInfoIndex ON StopsIndex(trip_headsign,stop_name)")
+cur.execute("CREATE INDEX StopsInfoIndex ON StopsInfo(trip_headsign,stop_name)")
