@@ -6,6 +6,7 @@ Make sure to set the appropriate variables before running the scripts, depending
 # Usage
 ## Windows
 If you are using Windows, enable permission to run powershell scripts. You can then run the script by running `./initall.ps1` inside powershell
+You may need to change the $path and $project folder names to something else (on lines 42 and 47 respectively)
 
 ## Linux
 The script for linux should be ran under bash. Be sure to give the right permissions to the file so that it can be run:
@@ -17,4 +18,5 @@ If you use the script without needing to download the txt files, make sure to se
 Moreover, do the same regardless for the download, to the $project folder, which would point to folder in the android project where the
 assets will be stored (in this case the database).
 ### Dependencies
-The script uses curl to download the necessary files, as well as unzip in linux for unziping the zip file.
+The script uses curl to download the necessary files, as well as unzip in linux for unziping the zip file. You must have both installed before
+proceeding.

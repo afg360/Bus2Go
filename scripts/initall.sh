@@ -19,6 +19,7 @@ if [ -z "$list" ]; then
                 rm agency.txt calendar_dates.txt feed_info.txt data.zip
             else
                 echo "An error occured trying to unzip the data file. Aborting the script"
+                exit $?
             fi
             #move the unzip files to the correct directory, named similarly
             for file in *.txt; do
@@ -39,8 +40,8 @@ if [ -z "$list" ]; then
             exit 1
         fi
 else
-    #The below could look like path=$PROJECT_FOLDER/scripts
-    path=/absolute/path/to/scripts/folder/sql
+    #The below could look like path=$PROJECT_FOLDER/scripts/sql
+    path=/absolute/path/to/scripts/folder/scripts/sql
 fi
 
 #initialisation of the database starts here
