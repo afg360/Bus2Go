@@ -1,6 +1,53 @@
 #!/bin/bash
-path=/absolute/path/to/scripts/folder/sql
-#e.g. path=$PROJECT_FOLDER/bus2go/scripts
+
+#check if the txt files exist (assuming they are the correct ones)
+list=$(find . -type f -name "*.txt" | grep -v 'note[s]\?.txt')
+
+#download them if the user chooses to. Curl and unzip must be installed to proceed
+if [ -z "$list" ]; then
+    echo "No matching txt data files found in the subdirectories."
+        echo -n "Do you wish to download them now? [y/n] (no will abort the script) -> "
+        read -r answer
+        if [[ $answer = "y" || $answer = "yes" ]]; then
+            if ! command unzip &> /dev/null; then
+                echo "unzip is not installed on this system. You must install it before running this script. Aborting."
+                exit 2
+            fi
+            curl -L https://www.stm.info/sites/default/files/gtfs/gtfs_stm.zip -o data.zip
+            unzip data.zip
+            if [[ $? -eq 0 ]]; then
+                rm agency.txt calendar_dates.txt feed_info.txt data.zip
+            else
+                echo "An error occured trying to unzip the data file. Aborting the script"
+            fi
+            #move the unzip files to the correct directory, named similarly
+            for file in *.txt; do
+                if [[ -f $file ]]; then
+                    if [[ $file = "stop_times.txt" ]]; then
+                        mv "$file" "./sql/stop-times"
+                    else
+                            base_name="./sql/${file%.txt}"
+                        if [[ -d $base_name ]]; then
+                            mv "$file" "$base_name/"
+                        fi
+                    fi
+                fi
+            done
+            path=$(pwd)/sql
+        else
+            echo "Aborting script"
+            exit 1
+        fi
+else
+    #The below could look like path=$PROJECT_FOLDER/scripts
+    path=/absolute/path/to/scripts/folder/sql
+fi
+
+#initialisation of the database starts here
+
+#The below should point to the folder where you want to place
+#the database inside your project
+#e.g. project=$PROJECT_FOLDER/src/main/assets/database
 project=/absolute/path/to/your/project/database/folder
 
 cd $path
@@ -13,7 +60,7 @@ do
 	echo "Working on $dir"
 	echo "Starting script.py"
 	python3 script.py
-	#check if executed properly
+	#check if python script executed properly
 	if [[ $? -ne 0 ]]; then
 		echo -e "Skipping $dir. No python script to run in this folder\n\n"
 	else
@@ -27,9 +74,9 @@ cd $path/..
 python3 ./script.py
 echo "Completed the initialisation of the database"
 
+#copy to the $project path if the user chooses to
 echo -n "Would you like to copy the database for the android schedules project? [y/n] -> "
 read choice
-#this part doesnt work properly for the moment
 if [[ $choice = 'y' || 'yes' ]]; then
     echo "Copying database to the project"
 	cp -i 'sql/stm_info.db' $project
