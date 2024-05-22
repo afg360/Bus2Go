@@ -22,11 +22,15 @@ To build from source, you must initialise the local database used by the applica
 can be initialised by running powershell/bash scripts. More info at [./scripts](./scripts).
 You must make sure that the database is stored under [./app/src/main/assets/database](./app/src/main/assets/database)
 (The database folder is not created in the git repo so you may need to create it yourself).
-You can then run `./gradlew build` to build it.
+You can then run 
+```
+./gradlew build
+```
+to build it.
 
 # Disclaimer
 The application is still in alpha version. It is not fully completed and may contain bugs. 
 We are trying to fix these and implement the features ASAP.
 
 # Acknowledgements
-This application uses the GOLI font. It's licence is available under [./app/src/main/assets/fonts](./app/src/main/assets/database)
+This application uses the GOLI font. It's licence is available under [./app/src/main/assets/fonts](./app/src/main/assets/fonts)
