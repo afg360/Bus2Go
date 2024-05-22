@@ -27,7 +27,7 @@ import dev.mainhq.bus2go.utils.setup
 import kotlinx.coroutines.launch
 
 //FIXME CANNOT SUPPORT VERY FAST CHANGES BETWEEN THIS FRAG AND THE OTHERS -> APP CRASHES BECAUSE NO VIEW IS RETURNED
-class Home : Fragment(R.layout.home_fragment) {
+class Home : Fragment(R.layout.fragment_home) {
     //todo could use a favourites list here to use in other methods
     private lateinit var searchView : SearchView
 

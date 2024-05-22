@@ -25,6 +25,7 @@
             android:layout_width="match_parent"
             android:layout_height="50dp"
             >
+            <!-- Instead of that layout use a material tab layout-->
             <LinearLayout
                 android:id="@+id/bottomNavLinearLayout"
                 android:layout_width="match_parent"

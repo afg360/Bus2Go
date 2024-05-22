@@ -1,19 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".fragments.Alarms">
 
-    <com.google.android.material.textview.MaterialTextView
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/alarmsAppBar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Coming Soon...
-        Alarms"
-        android:fontFamily="@font/goli_medium"
-        android:textAlignment="center"
-        android:gravity="center"
-        android:textSize="100sp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        >
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/alarmsMaterialToolBar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:menu="@menu/app_bar_alarms"
+            app:title="Alarms"
+            />
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/alarmsAppBar"
         />
 
-</FrameLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

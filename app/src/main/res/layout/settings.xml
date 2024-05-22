@@ -13,20 +13,11 @@
         >
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/settingsToolBar"
+            app:title="@string/settings"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
-            >
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/settingsTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/settings"
-                android:textSize="25sp"
-                android:layout_margin="5dp"
-                android:padding="5dp"
-                />
-        </com.google.android.material.appbar.MaterialToolbar>
+            />
         <com.google.android.material.divider.MaterialDivider
             android:layout_width="match_parent"
             android:layout_height="1dp"

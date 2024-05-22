@@ -10,6 +10,7 @@
         <item name="android:navigationBarColor">
             @android:color/transparent
         </item>
+        <item name="fontFamily">@font/goli_regular</item>
     </style>
 
 </resources>

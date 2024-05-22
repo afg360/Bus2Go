@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/addAlarmButton"
+        android:title="Add alarm"
+        android:icon="@drawable/baseline_add_alarm_24"
+        android:visible="true"
+        app:showAsAction="always"
+        />
+    <item android:id="@+id/settingsIcon"
+        android:icon="@drawable/baseline_settings_24"
+        android:title="@string/settings"
+        app:showAsAction="ifRoom"
+        />
+</menu>
