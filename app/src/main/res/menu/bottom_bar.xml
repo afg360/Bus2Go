@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/homeScreenButton"
+        android:title="@string/home"
+        android:icon="@drawable/outline_home_24"
+        />
+    <item android:id="@+id/mapButton"
+        android:title="@string/map"
+        android:icon="@drawable/outline_map_24"
+        />
+    <item android:id="@+id/alarmsButton"
+        android:title="@string/alarms"
+        android:icon="@drawable/outline_alarm_24"
+        />
+</menu>

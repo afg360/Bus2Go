@@ -11,6 +11,7 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -38,10 +39,14 @@ class Home : Fragment(R.layout.fragment_home) {
         lifecycle.addObserver(object : DefaultLifecycleObserver {
             override fun onResume(owner: LifecycleOwner) {
                 super.onResume(owner)
-                childFragmentManager.beginTransaction()
-                    .replace(R.id.favouritesFragmentContainer,
-                        Favourites()
-                    ).commit()
+                if (owner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED) && isAdded) {
+
+                    childFragmentManager.beginTransaction()
+                        .replace(
+                            R.id.favouritesFragmentContainer,
+                            Favourites()
+                        ).commit()
+                }
             }
         })
 

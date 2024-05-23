@@ -23,85 +23,20 @@
         <com.google.android.material.bottomappbar.BottomAppBar
             android:id="@+id/mainBottomAppBar"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="wrap_content"
             >
             <!-- Instead of that layout use a material tab layout-->
             <LinearLayout
                 android:id="@+id/bottomNavLinearLayout"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal"
-                android:gravity="center"
+                android:layout_height="wrap_content"
                 >
-                <LinearLayout
-                    android:id="@+id/homeScreenButton"
-                    android:layout_width="75dp"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:background="?attr/selectableItemBackground"
-                    android:layout_marginHorizontal="10dp"
-                    android:paddingTop="2dp"
-                    >
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/outline_home_24"
-                        />
-                    <com.google.android.material.textview.MaterialTextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Home"
-                        android:fontFamily="@font/goli_regular"
-                        />
-                </LinearLayout>
-
-                <!-- Could instead use fragments?? -->
-                <LinearLayout
-                    android:id="@+id/mapButton"
-                    android:layout_width="75dp"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:background="?attr/selectableItemBackground"
-                    android:layout_marginHorizontal="10dp"
-                    android:paddingTop="2dp"
-                    >
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/outline_map_24"
-                        />
-                    <com.google.android.material.textview.MaterialTextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Map"
-                        android:fontFamily="@font/goli_regular"
-                        />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/alarmsButton"
-                    android:layout_width="75dp"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:background="?attr/selectableItemBackground"
-                    android:layout_marginHorizontal="10dp"
-                    android:paddingTop="2dp"
-                    >
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/outline_alarm_24"
-                        />
-                    <com.google.android.material.textview.MaterialTextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Alarms"
-                        android:fontFamily="@font/goli_regular"
-                        />
-                </LinearLayout>
+                <com.google.android.material.bottomnavigation.BottomNavigationView
+                    android:id="@+id/bottomNavBarView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:menu="@menu/bottom_bar"
+                    />
             </LinearLayout>
         </com.google.android.material.bottomappbar.BottomAppBar>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>

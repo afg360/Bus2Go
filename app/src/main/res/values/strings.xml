@@ -31,4 +31,7 @@
     <string name="auto_updates_summary">Toggle on or off to enable the app to periodically look for new releases of the application</string>
     <string name="update_notifications">Update notifications</string>
     <string name="update_notifications_summary">Toggle on/off to activate/deactivate notifications for new updates of the application</string>
+    <string name="home">Home</string>
+    <string name="map">Map</string>
+    <string name="alarms">Alarms</string>
 </resources>

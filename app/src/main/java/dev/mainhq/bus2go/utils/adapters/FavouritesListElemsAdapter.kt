@@ -1,6 +1,8 @@
 package dev.mainhq.bus2go.utils.adapters
 
 import android.content.Intent
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
@@ -25,13 +27,18 @@ import dev.mainhq.bus2go.Times
 import dev.mainhq.bus2go.fragments.FavouriteBusInfo
 import dev.mainhq.bus2go.fragments.Home
 import dev.mainhq.bus2go.utils.Time
+import java.lang.ref.WeakReference
+import java.util.Timer
+import java.util.TimerTask
+import java.util.concurrent.TimeUnit
 
-class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, private val recyclerView: RecyclerView)
+class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, recyclerView: WeakReference<RecyclerView>)
     : RecyclerView.Adapter<FavouritesListElemsAdapter.ViewHolder>(){
 
         //FIXME shitty implementation for now... using a direct reference
 
     var numSelected : Int = 0
+    private val recyclerView = recyclerView.get()!!
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         //FIXME check if parent can provide me the recyclerview instead
@@ -114,6 +121,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
         return viewGroup.tag == "selected"
     }
 
+
     class ViewHolder(view : View, private val recyclerView: RecyclerView) : RecyclerView.ViewHolder(view), OnClickListener, OnLongClickListener{
         var checkBoxView : MaterialCheckBox
         val tripHeadsignTextView : MaterialTextView
@@ -126,7 +134,6 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
             arrivalTimeTextView = view.findViewById(R.id.favouritesBusTimeTextView)
             timeRemainingTextView = view.findViewById(R.id.favouritesBusTimeRemainingTextView)
             checkBoxView = view.findViewById(R.id.favourites_check_box)
-
         }
 
         //fixme not working properly
@@ -136,20 +143,20 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
         override fun onClick(v: View?) {
             //TODO give the all checkbox a tag. if tag == allSelected, then deselect it if we unselect at least one
             //FIXME Refactor code to have less lines taken
-            val parent = (recyclerView.parent.parent.parent.parent.parent.parent as ViewGroup)
+            val parent = WeakReference((recyclerView.parent.parent.parent.parent.parent.parent as ViewGroup))
             v?.setOnClickListener{
                 //FIXME instead of using tags could simply use materialcheckbox.isChecked
                 if (it.tag != null){
                     when(it.tag){
                         "selected" -> {
-                            unSelect(it, parent)
+                            unSelect(it, parent.get()!!)
                             checkBoxView.isChecked = false
                         }
                         "unselected" -> {
                             recyclerView.tag?.let{tag ->
                                 when(tag){
                                     "selected" -> {
-                                        select(it, parent)
+                                        select(it, parent.get()!!)
                                         checkBoxView.isChecked = true
                                     }
                                     "unselected" -> startTimes(v)
@@ -161,16 +168,16 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
                 else if (recyclerView.tag != null){
                     when(recyclerView.tag){
                         "selected" -> {
-                            select(it, parent)
+                            select(it, parent.get()!!)
                             checkBoxView.isChecked = true
                         }
                         "unselected" -> startTimes(v)
                     }
                 }
                 else startTimes(v)
-                parent.findViewById<MaterialTextView>(R.id.selectedNumsOfFavourites)
+                parent.get()!!.findViewById<MaterialTextView>(R.id.selectedNumsOfFavourites)
                     .text = (recyclerView.adapter as FavouritesListElemsAdapter).numSelected.run{
-                    val deleteItemsWidget = parent.findViewById<LinearLayout>(R.id.removeItemsWidget)
+                    val deleteItemsWidget = parent.get()!!.findViewById<LinearLayout>(R.id.removeItemsWidget)
                     if (this > 0) {
                         if (deleteItemsWidget.visibility == GONE) deleteItemsWidget.visibility = VISIBLE
                         toString()
@@ -189,7 +196,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
             //TODO is v : View only the item clicked, or the whole thing? may need to retrieve the whole parent and set its tag only
             //FIXME need to update the select all button ONLY IF one item in the list
             /** This next line will attempt to change the appbar to allow deletions */
-            val parent = (recyclerView.parent.parent.parent.parent.parent.parent as ViewGroup)
+            val parent = WeakReference(recyclerView.parent.parent.parent.parent.parent.parent as ViewGroup)
             v?.setOnLongClickListener{
                 ((it.context as MainActivity).findViewById<FragmentContainerView>(R.id.mainFragmentContainer)
                     .getFragment() as Home).view?.findViewById<AppBarLayout>(R.id.mainAppBar)
@@ -204,7 +211,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
                 /** if recycler has never been long clicked/has been backed, check if the view is not selected and select it */
                 if (tmpRecyclerView.tag == null || tmpRecyclerView.tag == "unselected"){
                     if (v.tag == null || v.tag == "unselected") {
-                        select(v, parent)
+                        select(v, parent.get()!!)
                         /** Show the checkboxes for each of the favourite elements */
                         recyclerView.forEach {view ->
                             val viewGroup = (view as ViewGroup)[0] as ViewGroup
@@ -215,9 +222,9 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, priv
                         checkBoxView.isChecked = true
                     }
                     tmpRecyclerView.tag = "selected"
-                    parent.findViewById<MaterialTextView>(R.id.selectedNumsOfFavourites)
+                    parent.get()!!.findViewById<MaterialTextView>(R.id.selectedNumsOfFavourites)
                         .text = adapter.numSelected.toString()
-                    parent.findViewById<LinearLayout>(R.id.removeItemsWidget).apply{
+                    parent.get()!!.findViewById<LinearLayout>(R.id.removeItemsWidget).apply{
                         if (visibility == GONE) visibility = VISIBLE
                     }
                 }

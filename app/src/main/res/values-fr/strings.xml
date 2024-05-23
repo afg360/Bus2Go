@@ -28,5 +28,8 @@
     <string name="auto_updates_summary">Activez ou désactivez pour permettre à l\'application de chercher périodiquement de nouvelles versions de l\'application</string>
     <string name="update_notifications">Notifications de mises à jour</string>
     <string name="update_notifications_summary">Activez pour permettre l\'activation de notifications qui vous tiendront au courant des nouvelles mises à jour disponibles</string>
+    <string name="home">Accueil</string>
+    <string name="map">Carte</string>
+    <string name="alarms">Alarmes</string>
 
 </resources>

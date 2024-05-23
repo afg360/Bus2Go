@@ -3,6 +3,7 @@ package dev.mainhq.bus2go.fragments
 import android.content.Context
 import android.icu.util.Calendar
 import android.os.Bundle
+import android.os.Handler
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
@@ -33,9 +34,13 @@ import dev.mainhq.bus2go.utils.adapters.FavouritesListElemsAdapter
 import dev.mainhq.bus2go.utils.adapters.setMargins
 import kotlinx.collections.immutable.mutate
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.internal.wait
+import java.lang.ref.WeakReference
+import java.util.Timer
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
@@ -48,12 +53,15 @@ val Context.dataStore : DataStore<FavouritesData> by dataStore(
 )
 
 class Favourites() : Fragment(R.layout.fragment_favourites) {
+
     var executor : ScheduledExecutorService? = null
+    var updateJob : Job? = null
+    private lateinit var listener : ViewTreeObserver.OnGlobalLayoutListener
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        lifecycleScope.launch {
+        updateJob = lifecycleScope.launch {
             val list =  context?.dataStore?.data?.first()?.list?.toList() ?: listOf()
             if (list.isEmpty()) setEmpty(view)
             else {
@@ -61,10 +69,14 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
                 recyclerViewDisplay(view, mutableList)
             }
         }
+
+
         val appBar = (parentFragment as Home).view?.findViewById<AppBarLayout>(R.id.mainAppBar)
+
         /** This part allows us to press the back button when in selection mode of favourites to get out of it */
 
         //FIXME activity?. instead???
+
         requireActivity().onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
             /** Hides all the checkboxes of the items in the recyclerview, deselects them, and puts back the searchbar as the nav bar */
             override fun handleOnBackPressed() {
@@ -84,39 +96,40 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
             }
         })
 
-        val recyclerView : RecyclerView = requireView().findViewById(R.id.favouritesRecyclerView)
+
+
+        val recyclerView : RecyclerView = view.findViewById(R.id.favouritesRecyclerView)
         /** This part allows us to update each recyclerview item from favourites in "real time", i.e. the user can see
          *  an updated time left displayed */
-        recyclerView.viewTreeObserver?.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+
+        listener = object : ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
                 recyclerView.viewTreeObserver.removeOnGlobalLayoutListener(this)
                 executor = Executors.newSingleThreadScheduledExecutor()
-                val copy = executor!!
                 //TODO check if inrealtime is on.
-                //if yes, do a try/catch block (in case not connected to internet)
-
-                copy.scheduleAtFixedRate({
-                        lifecycleScope.launch {
-                            //todo could add some incertitude, and web requests here too
-
-                            val tmpList = context?.dataStore?.data?.first()?.list?.toList() ?: listOf()
-                            if (tmpList.isNotEmpty()) {
-                                //FIXME we only want to change the time left data, NOT the background colors etc
-                                val mutableList = toFavouriteBusInfoList(tmpList)
-                                withContext(Dispatchers.Main){
-                                    //FIXME nullPointerException bug is at line below
-                                    val favouritesListElemsAdapter = recyclerView.adapter as FavouritesListElemsAdapter?
-                                    for (i in 0 until recyclerView.size) {
-                                        favouritesListElemsAdapter?.updateTime(recyclerView[i] as ViewGroup, mutableList[i])
-                                    }
+                //FIXME this part crashes/creates a memory leak!!!!!!!
+                executor!!.scheduleAtFixedRate({
+                    updateJob = lifecycleScope.launch {
+                        //todo could add some incertitude, and web requests here too
+                        val tmpList = context?.dataStore?.data?.first()?.list?.toList() ?: listOf()
+                        if (tmpList.isNotEmpty()) {
+                            //FIXME we only want to change the time left data, NOT the background colors etc
+                            val mutableList = toFavouriteBusInfoList(tmpList)
+                            withContext(Dispatchers.Main){
+                                //FIXME nullPointerException bug is at line below
+                                val favouritesListElemsAdapter = recyclerView.adapter as FavouritesListElemsAdapter?
+                                for (i in 0 until recyclerView.size) {
+                                    favouritesListElemsAdapter?.updateTime(recyclerView[i] as ViewGroup, mutableList[i])
                                 }
                             }
-                            //FIXME WE COULD REMOVE THAT LINE OF CODE?
-                            else setEmpty(view)
                         }
-                }, 0, 1, TimeUnit.SECONDS) //TODO need it to be for android or java????
-            }
-        })
+                        //FIXME WE COULD REMOVE THAT LINE OF CODE?
+                        //else setEmpty(view)
+                    } }, 0, 1, TimeUnit.SECONDS)
+            } }
+        recyclerView.viewTreeObserver?.addOnGlobalLayoutListener(listener)
+
+
         selectAllFavouritesOnClickListener(recyclerView)
         parentFragment?.view?.findViewById<LinearLayout>(R.id.removeItemsWidget)?.setOnClickListener {_ ->
             this.context?.also { context ->
@@ -149,15 +162,14 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
                     .show()
             }
         }
+
     }
 
-    override fun onPause() {
-        super.onPause()
-        //FIXME DOES NOT SEEM TO PREVENT THE BELOW
-        //Prevents an IllegalArgumentException when coming back to the activity
+    override fun onDestroyView() {
+        super.onDestroyView()
+        //recyclerView.viewTreeObserver?.removeOnGlobalLayoutListener(listener)
+        updateJob?.cancel()
         executor?.shutdown()
-
-        //TODO go back to normal mode if was in selection mode
     }
 
     private suspend fun setEmpty(view : View){
@@ -201,7 +213,7 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
             val recyclerViewTmp : RecyclerView? = view.findViewById(R.id.favouritesRecyclerView)
             recyclerViewTmp?.layoutManager = layoutManager
             //TODO need to improve that code to make it more safe
-            recyclerViewTmp?.adapter = recyclerViewTmp?.let { FavouritesListElemsAdapter(times, it) }
+            recyclerViewTmp?.adapter = recyclerViewTmp?.let { FavouritesListElemsAdapter(times, WeakReference(it) ) }
         }
     }
 
@@ -252,9 +264,6 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
         )
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-    }
 }
 
 data class FavouriteBusInfo(val busInfo: BusInfo, val arrivalTime : Time)

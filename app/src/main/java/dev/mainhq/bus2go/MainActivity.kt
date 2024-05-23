@@ -3,7 +3,9 @@ package dev.mainhq.bus2go
 import android.os.Bundle
 import android.util.TypedValue
 import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import com.google.android.material.navigation.NavigationBarView
 import dev.mainhq.bus2go.fragments.Alarms
 import dev.mainhq.bus2go.fragments.Home
 import dev.mainhq.bus2go.fragments.Map
@@ -35,8 +37,39 @@ class MainActivity() : BaseActivity() {
         activityType = ActivityType.HOME
         val home = Home()
         supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer, home).commit()
-        setBackground()
-        setButtons()
+        //setBackground()
+        //setButtons()
+
+        val bottomNav = findViewById<NavigationBarView>(R.id.bottomNavBarView)
+        bottomNav.setOnItemSelectedListener {
+            when(it.itemId) {
+                R.id.homeScreenButton -> {
+                    // Respond to navigation item 1 click
+                    if (activityType != ActivityType.HOME) {
+                        supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer, Home()).commit()
+                        activityType = ActivityType.HOME
+                    }
+                    true
+                }
+                R.id.mapButton -> {
+                    // Respond to navigation item 2 click
+                    if (activityType != ActivityType.MAP) {
+                        supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer, Map()).commit()
+                        activityType = ActivityType.MAP
+                    }
+                    true
+                }
+                R.id.alarmsButton -> {
+                    // Respond to navigation item 2 click
+                    if (activityType != ActivityType.ALARMS) {
+                        supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer, Alarms()).commit()
+                        activityType = ActivityType.ALARMS
+                    }
+                    true
+                }
+                else -> false
+            }
+        }
 
         onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true){
             override fun handleOnBackPressed() {
@@ -46,53 +79,6 @@ class MainActivity() : BaseActivity() {
                 }
             }
         })
-    }
-
-    private fun setButtons(){
-        findViewById<LinearLayout>(R.id.homeScreenButton).setOnClickListener {
-            if (activityType != ActivityType.HOME){
-                activityType = ActivityType.HOME
-                supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer, Home()).commit()
-                setBackground()
-            }
-        }
-        findViewById<LinearLayout>(R.id.mapButton).setOnClickListener {
-            if (activityType != ActivityType.MAP){
-                activityType = ActivityType.MAP
-                supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer, Map()).commit()
-                setBackground()
-            }
-        }
-        findViewById<LinearLayout>(R.id.alarmsButton).setOnClickListener {
-            if (activityType != ActivityType.ALARMS){
-                activityType = ActivityType.ALARMS
-                supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer, Alarms()).commit()
-                setBackground()
-            }
-        }
-    }
-
-    private fun setBackground(){
-        setDefaultBackgroundColors()
-        when(activityType){
-            ActivityType.HOME -> {
-                findViewById<LinearLayout>(R.id.homeScreenButton).setBackgroundColor(com.google.android.material.R.attr.colorControlHighlight)
-            }
-            ActivityType.MAP -> {
-                findViewById<LinearLayout>(R.id.mapButton).setBackgroundColor(com.google.android.material.R.attr.colorControlHighlight)
-            }
-            ActivityType.ALARMS -> {
-                findViewById<LinearLayout>(R.id.alarmsButton).setBackgroundColor(com.google.android.material.R.attr.colorControlHighlight)
-            }
-        }
-    }
-
-    private fun setDefaultBackgroundColors(){
-        val typedValue = TypedValue()
-        theme.resolveAttribute(androidx.appcompat.R.attr.selectableItemBackground, typedValue, true)
-        findViewById<LinearLayout>(R.id.homeScreenButton).setBackgroundResource(typedValue.resourceId)
-        findViewById<LinearLayout>(R.id.mapButton).setBackgroundResource(typedValue.resourceId)
-        findViewById<LinearLayout>(R.id.alarmsButton).setBackgroundResource(typedValue.resourceId)
     }
 
     private enum class ActivityType{
