@@ -3,7 +3,6 @@ package dev.mainhq.bus2go.fragments
 import android.content.Context
 import android.icu.util.Calendar
 import android.os.Bundle
-import android.os.Handler
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
@@ -38,16 +37,14 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.internal.wait
 import java.lang.ref.WeakReference
-import java.util.Timer
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 
 /** The datastore of favourites refers to favourites defined in the preferences file, at dev.mainhq.schedules.preferences,
  *  NOT THIS FRAGMENT */
-val Context.dataStore : DataStore<FavouritesData> by dataStore(
+val Context.favouritesDataStore : DataStore<FavouritesData> by dataStore(
     fileName = "favourites.json",
     serializer = SettingsSerializer
 )
@@ -62,7 +59,7 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
         super.onViewCreated(view, savedInstanceState)
 
         updateJob = lifecycleScope.launch {
-            val list =  context?.dataStore?.data?.first()?.list?.toList() ?: listOf()
+            val list =  context?.favouritesDataStore?.data?.first()?.list?.toList() ?: listOf()
             if (list.isEmpty()) setEmpty(view)
             else {
                 val mutableList = toFavouriteBusInfoList(list)
@@ -111,7 +108,7 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
                 executor!!.scheduleAtFixedRate({
                     updateJob = lifecycleScope.launch {
                         //todo could add some incertitude, and web requests here too
-                        val tmpList = context?.dataStore?.data?.first()?.list?.toList() ?: listOf()
+                        val tmpList = context?.favouritesDataStore?.data?.first()?.list?.toList() ?: listOf()
                         if (tmpList.isNotEmpty()) {
                             //FIXME we only want to change the time left data, NOT the background colors etc
                             val mutableList = toFavouriteBusInfoList(tmpList)
@@ -147,13 +144,13 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
                             }
                         }
                         lifecycleScope.launch {
-                            context.dataStore.updateData { favouritesData ->
+                            context.favouritesDataStore.updateData { favouritesData ->
                                 favouritesData.copy(list = favouritesData.list.mutate {
                                     it.removeIf{busInfo -> toRemoveList.contains(busInfo) }
                                 })
                             }
                             withContext(Dispatchers.Main){
-                                recyclerViewDisplay(view, toFavouriteBusInfoList(context.dataStore.data.first().list.toList()))
+                                recyclerViewDisplay(view, toFavouriteBusInfoList(context.favouritesDataStore.data.first().list.toList()))
                                 appBar?.apply { changeAppBar(this) }
                                 dialog.cancel()
                             }

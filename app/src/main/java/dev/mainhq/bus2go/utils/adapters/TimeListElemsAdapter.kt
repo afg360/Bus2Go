@@ -19,7 +19,7 @@ class TimeListElemsAdapter(private val timeData: List<Time>)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(LayoutInflater.from(parent.context)
-            .inflate(R.layout.time_list_elem, parent, false)
+            .inflate(R.layout.elem_time_list, parent, false)
         )
     }
 

@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.Times
-import dev.mainhq.bus2go.fragments.dataStore
+import dev.mainhq.bus2go.fragments.favouritesDataStore
 import dev.mainhq.bus2go.preferences.BusInfo
 import kotlinx.collections.immutable.mutate
 import kotlinx.coroutines.launch
@@ -25,7 +25,7 @@ class StopListElemsAdapter(private val data: List<String>, private val list: Lis
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
             LayoutInflater.from(parent.context)
-            .inflate(R.layout.stop_list_elem, parent, false),
+            .inflate(R.layout.elem_stop_list, parent, false),
             headsign
         )
     }
@@ -43,7 +43,7 @@ class StopListElemsAdapter(private val data: List<String>, private val list: Lis
                 view.setBackgroundResource(R.drawable.favourite_drawable_on)
                 view.tag = "on"
                 view.findViewTreeLifecycleOwner()!!.lifecycleScope.launch {
-                    view.context.dataStore.updateData { favourites ->
+                    view.context.favouritesDataStore.updateData { favourites ->
                         favourites.copy(list = favourites.list.mutate {
                             //maybe add a tripid or some identifier so that it is a unique thing deleted
                             it.add(BusInfo(data, headsign))
@@ -57,7 +57,7 @@ class StopListElemsAdapter(private val data: List<String>, private val list: Lis
                 view.tag = "off"
                 //todo add to favourites
                 view.findViewTreeLifecycleOwner()!!.lifecycleScope.launch {
-                    view.context.dataStore.updateData { favourites ->
+                    view.context.favouritesDataStore.updateData { favourites ->
                         favourites.copy(list = favourites.list.mutate {
                             it.remove(BusInfo(data, headsign))
                         })

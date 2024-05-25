@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="10dp"
+    android:gravity="start"
+    >
+
+        <RadioButton
+            android:id="@+id/radio_button_1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="start"
+        android:layout_marginHorizontal="20dp"
+        >
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/alarmDialogBusNum"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ma bus NUM"
+            android:textSize="20sp"
+            />
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/alarmDialogBusLine"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="x -> y"
+            android:textSize="20sp"
+            />
+    </LinearLayout>
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/alarmDialogBusStop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:text="Name bus stop"
+        />
+
+</LinearLayout>

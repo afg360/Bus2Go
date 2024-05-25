@@ -26,7 +26,7 @@ class BusListElemsAdapter(private val busData: List<BusRouteInfo>) :
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
             LayoutInflater.from(parent.context)
-                .inflate(R.layout.bus_list_elem, parent, false)
+                .inflate(R.layout.elem_bus_list, parent, false)
         )
     }
 

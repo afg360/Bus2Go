@@ -1,6 +1,7 @@
 package dev.mainhq.bus2go.preferences
 
 import androidx.datastore.core.Serializer
+import dev.mainhq.bus2go.utils.Time
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
@@ -17,51 +18,59 @@ import java.io.InputStream
 import java.io.OutputStream
 import java.lang.Exception
 
-//TODO eventually encrypt all the data to make it safe from other apps in case unwanted access happens
 
 @Serializable
-data class FavouritesData(
-    @Serializable(with = MyPersistentListSerializer::class)
-    val list : PersistentList<BusInfo> = persistentListOf()
+data class AlarmsData (
+    @Serializable(with = InnerPersistentListSerializer::class)
+    val list : PersistentList<Alarm> = persistentListOf()
 )
 
 @Serializable
-data class BusInfo(
-    val stopName : String,
-    val tripHeadsign : String,
+data class Alarm(
+    val title : String,
+    val busInfo : BusInfo,
+    val timeBefore : SerializableTime
+)
+
+@Serializable
+data class SerializableTime(
+    val hour : Int,
+    val min : Int,
+    val sec : Int
 )
 
 @Suppress("EXTERNAL_SERIALIZER_USELESS")
 @OptIn(ExperimentalSerializationApi::class)
 @kotlinx.serialization.Serializer(forClass = PersistentList::class)
-class MyPersistentListSerializer(private val serializer: KSerializer<BusInfo>) : KSerializer<PersistentList<BusInfo>> {
+class InnerPersistentListSerializer(private val serializer: KSerializer<Alarm>) :
+    KSerializer<PersistentList<Alarm>> {
 
     private class PersistentListDescriptor :
-        SerialDescriptor by serialDescriptor<List<BusInfo>>() {
+        SerialDescriptor by serialDescriptor<List<AlarmsData>>() {
         @ExperimentalSerializationApi
         override val serialName: String = "kotlinx.serialization.immutable.persistentList"
     }
 
     override val descriptor: SerialDescriptor = PersistentListDescriptor()
 
-    override fun serialize(encoder: Encoder, value: PersistentList<BusInfo>) {
+    override fun serialize(encoder: Encoder, value: PersistentList<Alarm>) {
         return ListSerializer(serializer).serialize(encoder, value)
     }
 
-    override fun deserialize(decoder: Decoder): PersistentList<BusInfo> {
+    override fun deserialize(decoder: Decoder): PersistentList<Alarm> {
         return ListSerializer(serializer).deserialize(decoder).toPersistentList()
     }
 
 }
 
 
-object SettingsSerializer : Serializer<FavouritesData> {
-    override val defaultValue: FavouritesData
-        get() = FavouritesData()
+object AlarmsSerializer : Serializer<AlarmsData> {
+    override val defaultValue: AlarmsData
+        get() = AlarmsData()
 
-    override suspend fun readFrom(input: InputStream): FavouritesData {
+    override suspend fun readFrom(input: InputStream): AlarmsData {
         return try{
-            Json.decodeFromString(FavouritesData.serializer(), input.readBytes().decodeToString())
+            Json.decodeFromString(AlarmsData.serializer(), input.readBytes().decodeToString())
         }
         catch (e : Exception){
             e.printStackTrace()
@@ -69,10 +78,9 @@ object SettingsSerializer : Serializer<FavouritesData> {
         }
     }
 
-    override suspend fun writeTo(t: FavouritesData, output: OutputStream) {
+    override suspend fun writeTo(t: AlarmsData, output: OutputStream) {
         output.write(
-            Json.encodeToString(FavouritesData.serializer(), t).encodeToByteArray()
+            Json.encodeToString(AlarmsData.serializer(), t).encodeToByteArray()
         )
     }
 }
-

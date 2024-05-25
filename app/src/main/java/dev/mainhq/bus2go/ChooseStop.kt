@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import dev.mainhq.bus2go.fragments.dataStore
+import dev.mainhq.bus2go.fragments.favouritesDataStore
 import dev.mainhq.bus2go.utils.adapters.StopListElemsAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -30,7 +30,7 @@ class ChooseStop : BaseActivity() {
             val layoutManager = LinearLayoutManager(applicationContext)
             lifecycleScope.launch {
                 //the datastore may be closed!
-                val favourites = dataStore.data.first().list.toList()
+                val favourites = favouritesDataStore.data.first().list.toList()
                 withContext(Dispatchers.Main){
                     recyclerView.adapter = StopListElemsAdapter(data, favourites, headsign)
                     layoutManager.orientation = LinearLayoutManager.VERTICAL
