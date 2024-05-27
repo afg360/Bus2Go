@@ -75,6 +75,8 @@ class Alarms : Fragment(R.layout.fragment_alarms) {
                         view.findViewById<FloatingActionButton>(R.id.floatingActionButton).setOnClickListener {_ ->
                             //Create a popup containing the recyclerview of each buses in favourites
                             context?.also {
+                                val alarmCreationDialog = AlarmCreationDialog()
+                                //TODO DEPRECATED FOR DATA EXCHANGE alarmCreationDialog.setTargetFragment(this@Alarms, 0)
                                 val transaction = parentFragmentManager.beginTransaction()
                                 transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                                 transaction.add(AlarmCreationDialog(), null).commit()

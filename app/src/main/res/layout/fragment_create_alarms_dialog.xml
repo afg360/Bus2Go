@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".fragments.AlarmCreationDialog"
+    >
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintTop_toTopOf="parent"
+        >
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            >
+            <com.google.android.material.appbar.MaterialToolbar
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:title="Create a new alarm"
+                app:titleCentered="true"
+                />
+            <!-- add an onclick for the below to open choose_stop dialog -->
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/textViewChooseStop"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Pick a stop for which you need an alarm"
+                android:textSize="30sp"
+                android:layout_margin="20dp"
+                />
+            <com.google.android.material.divider.MaterialDivider
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                />
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/chooseDateTextView"
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="20dp"
+                android:text="Choose days"
+                android:textAlignment="center"
+                android:textSize="30sp"
+                android:drawableStart="@drawable/baseline_date_range_24"
+                />
+            <include layout="@layout/day_of_the_week_layout"/>
+            <com.google.android.material.divider.MaterialDivider
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                />
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/chooseTimeTextView"
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="20dp"
+                android:text="Choose a time"
+                android:textAlignment="center"
+                android:textSize="30sp"
+                android:drawableStart="@drawable/baseline_access_time_24"
+                />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        >
+        <com.google.android.material.bottomappbar.BottomAppBar
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="end"
+                >
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/cancelAlarmCreation"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cancel"
+                    android:textSize="15sp"
+                    android:layout_marginHorizontal="10dp"
+                    android:background="?attr/selectableItemBackground"
+                    />
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Accept"
+                    android:textSize="15sp"
+                    android:textColor="@color/grey"
+                    android:layout_marginHorizontal="10dp"
+                    />
+            </LinearLayout>
+
+        </com.google.android.material.bottomappbar.BottomAppBar>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -150,5 +150,5 @@ dependencies {
     implementation "com.google.protobuf:protobuf-javalite:$protobuf_version"
 
     //LeakCanary
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.13'
+    //debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.13'
 }

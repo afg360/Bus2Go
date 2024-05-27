@@ -8,7 +8,7 @@ import kotlin.properties.Delegates
 /** Base activity class defining the correct theme to apply */
 open class BaseActivity : AppCompatActivity() {
 
-    protected var isDark by Delegates.notNull<Boolean>()
+    private var isDark by Delegates.notNull<Boolean>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -41,8 +41,8 @@ class AlarmDialogListElemsAdapter(private val list : List<BusInfo>, private val 
         holder.itemView.setOnClickListener {
             val radioButton : MaterialRadioButton = it.findViewById(R.id.radio_button_1)
             if (!radioButton.isChecked) {
-                recyclerView.forEach {
-                    val viewGroup = it as ViewGroup
+                recyclerView.forEach {view ->
+                    val viewGroup = view as ViewGroup
                     viewGroup.findViewById<MaterialRadioButton>(R.id.radio_button_1).isChecked =
                         false
                 }
