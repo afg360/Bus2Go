@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
 import dev.mainhq.bus2go.database.AppDatabase
 import dev.mainhq.bus2go.utils.Time
-import dev.mainhq.bus2go.utils.adapters.TimeListElemsAdapter
+import dev.mainhq.bus2go.adapters.TimeListElemsAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

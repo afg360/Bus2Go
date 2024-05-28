@@ -26,6 +26,7 @@ data class FavouritesData(
 )
 
 @Serializable
+//FIXME could improve the data stored inside for better ease of use
 data class BusInfo(
     val stopName : String,
     val tripHeadsign : String,

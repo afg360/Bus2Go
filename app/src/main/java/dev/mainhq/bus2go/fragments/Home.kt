@@ -23,7 +23,7 @@ import com.google.android.material.search.SearchView.TransitionState
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.SearchBus
 import dev.mainhq.bus2go.Settings
-import dev.mainhq.bus2go.utils.adapters.BusListElemsAdapter
+import dev.mainhq.bus2go.adapters.BusListElemsAdapter
 import dev.mainhq.bus2go.utils.setup
 import kotlinx.coroutines.launch
 

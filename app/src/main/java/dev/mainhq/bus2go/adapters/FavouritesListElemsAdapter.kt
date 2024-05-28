@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go.utils.adapters
+package dev.mainhq.bus2go.adapters
 
 import android.content.Intent
 import android.os.Handler

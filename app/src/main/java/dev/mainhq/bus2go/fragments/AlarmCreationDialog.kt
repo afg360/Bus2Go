@@ -1,6 +1,5 @@
 package dev.mainhq.bus2go.fragments
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
@@ -10,26 +9,16 @@ import androidx.core.view.children
 import androidx.core.view.get
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentTransaction
-import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.textview.MaterialTextView
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.MaterialTimePicker.INPUT_MODE_KEYBOARD
 import com.google.android.material.timepicker.TimeFormat
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.utils.adapters.AlarmDialogListElemsAdapter
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 
 private const val UNSELECTED = "UNSELECTED"
 private const val SELECTED = "SELECTED"
 
-@SuppressLint("RestrictedApi")
 class AlarmCreationDialog : DialogFragment(R.layout.fragment_create_alarms_dialog) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,7 +35,7 @@ class AlarmCreationDialog : DialogFragment(R.layout.fragment_create_alarms_dialo
                 //TODO DEPRECATED FOR DATA EXCHANGE alarmCreationDialog.setTargetFragment(this@Alarms, 0)
                 val transaction = parentFragmentManager.beginTransaction()
                 transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                transaction.add(AlarmCreationChooseBusDialog(), null).commit()
+                transaction.add(alarmCreationChooseBusDialog, null).commit()
             }
         }
 
@@ -101,9 +90,19 @@ class AlarmCreationDialog : DialogFragment(R.layout.fragment_create_alarms_dialo
             }
         }
 
-        view.findViewById<MaterialTextView>(R.id.cancelAlarmCreation).setOnClickListener {
-            dismiss()
-        }
+        val bottomNavBar = AlarmCreationDialogBottomNavBar()
+        bottomNavBar.setBottomNavBarListener(object : AlarmCreationDialogBottomNavBar.BottomNavBarListener{
+            override fun onCancel() {
+                dismiss()
+            }
+
+            override fun onAccept() {
+            }
+
+        })
+        childFragmentManager.beginTransaction()
+            .add(R.id.createAlarmsDialogBottomNav, bottomNavBar)
+            .commit()
     }
 }
 

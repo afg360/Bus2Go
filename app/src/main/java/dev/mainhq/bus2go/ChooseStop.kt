@@ -5,7 +5,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import dev.mainhq.bus2go.fragments.favouritesDataStore
-import dev.mainhq.bus2go.utils.adapters.StopListElemsAdapter
+import dev.mainhq.bus2go.adapters.StopListElemsAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch

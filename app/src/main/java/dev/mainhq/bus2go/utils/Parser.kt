@@ -8,7 +8,7 @@ import androidx.room.Room
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.database.AppDatabase
 import dev.mainhq.bus2go.database.dao.BusRouteInfo
-import dev.mainhq.bus2go.utils.adapters.BusListElemsAdapter
+import dev.mainhq.bus2go.adapters.BusListElemsAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.Locale

@@ -1,25 +1,26 @@
-package dev.mainhq.bus2go.utils.adapters
+package dev.mainhq.bus2go.adapters
 
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.OnClickListener
 import android.view.ViewGroup
-import android.widget.RadioGroup
+import androidx.appcompat.app.ActionBarDrawerToggle.Delegate
 import androidx.core.view.forEach
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.radiobutton.MaterialRadioButton
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
+import dev.mainhq.bus2go.fragments.AlarmCreationDialogBottomNavBar
 import dev.mainhq.bus2go.preferences.BusInfo
 
-class AlarmDialogListElemsAdapter(private val list : List<BusInfo>, private val recyclerView: RecyclerView)
+class AlarmDialogListElemsAdapter(private val list : List<BusInfo>, private val recyclerView: RecyclerView,
+    private val bottomNavBar: AlarmCreationDialogBottomNavBar)
     : RecyclerView.Adapter<AlarmDialogListElemsAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view){
         val alarmDialogBusNum : MaterialTextView = view.findViewById(R.id.alarmDialogBusNum)
         //val alarmDialogBusLine : MaterialTextView = view.findViewById(R.id.alarmDialogBusLine)
         val alarmDialogBusStop : MaterialTextView = view.findViewById(R.id.alarmDialogBusStop)
-        val radioButton : MaterialRadioButton = view.findViewById(R.id.radio_button_1)
+        val radioButton : MaterialRadioButton = view.findViewById(R.id.addAlarmBusChoiceRadioButton)
 
     }
 
@@ -39,15 +40,16 @@ class AlarmDialogListElemsAdapter(private val list : List<BusInfo>, private val 
         //holder.alarmDialogBusLine.text = data.busLine
         holder.alarmDialogBusStop.text = data.stopName
         holder.itemView.setOnClickListener {
-            val radioButton : MaterialRadioButton = it.findViewById(R.id.radio_button_1)
+            val radioButton : MaterialRadioButton = it.findViewById(R.id.addAlarmBusChoiceRadioButton)
             if (!radioButton.isChecked) {
                 recyclerView.forEach {view ->
                     val viewGroup = view as ViewGroup
-                    viewGroup.findViewById<MaterialRadioButton>(R.id.radio_button_1).isChecked =
-                        false
+                    viewGroup.findViewById<MaterialRadioButton>(R.id.addAlarmBusChoiceRadioButton)
+                        .isChecked = false
                 }
                 radioButton.isChecked = true
             }
+            bottomNavBar.activateAcceptAlarmButton()
         }
     }
 }

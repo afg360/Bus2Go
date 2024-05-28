@@ -18,7 +18,7 @@ import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.Settings
 import dev.mainhq.bus2go.preferences.AlarmsData
 import dev.mainhq.bus2go.preferences.AlarmsSerializer
-import dev.mainhq.bus2go.utils.adapters.AlarmsListElemAdapter
+import dev.mainhq.bus2go.adapters.AlarmsListElemAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -36,11 +36,7 @@ class Alarms : Fragment(R.layout.fragment_alarms) {
         val menuBar = view.findViewById<MaterialToolbar>(R.id.alarmsMaterialToolBar)
         menuBar.setOnMenuItemClickListener {
             when (it.itemId){
-                /*R.id.addAlarmButton -> {
-                    Toast.makeText(view.context, "Hello", Toast.LENGTH_SHORT).show()
-                    true
-                }*/
-                R.id.settingsIcon -> {
+                R.id.settingsIcon, R.id.addAlarmButton -> {
                     val intent = Intent(this.context, Settings::class.java)
                     startActivity(intent)
                     true
@@ -92,5 +88,4 @@ class Alarms : Fragment(R.layout.fragment_alarms) {
             }
         }
     }
-
 }

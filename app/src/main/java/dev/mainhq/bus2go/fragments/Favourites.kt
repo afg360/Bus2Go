@@ -29,8 +29,8 @@ import dev.mainhq.bus2go.preferences.BusInfo
 import dev.mainhq.bus2go.preferences.FavouritesData
 import dev.mainhq.bus2go.preferences.SettingsSerializer
 import dev.mainhq.bus2go.utils.Time
-import dev.mainhq.bus2go.utils.adapters.FavouritesListElemsAdapter
-import dev.mainhq.bus2go.utils.adapters.setMargins
+import dev.mainhq.bus2go.adapters.FavouritesListElemsAdapter
+import dev.mainhq.bus2go.adapters.setMargins
 import kotlinx.collections.immutable.mutate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
