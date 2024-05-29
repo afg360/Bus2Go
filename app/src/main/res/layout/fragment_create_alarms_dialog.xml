@@ -33,35 +33,44 @@
                 android:textSize="30sp"
                 android:layout_margin="20dp"
                 />
-            <com.google.android.material.divider.MaterialDivider
+            <LinearLayout
+                android:id="@+id/alarmCreationHiddenThings"
                 android:layout_width="match_parent"
-                android:layout_height="1dp"
-                />
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/chooseDateTextView"
-                android:layout_width="300dp"
                 android:layout_height="wrap_content"
-                android:layout_margin="20dp"
-                android:text="Choose days"
-                android:textAlignment="center"
-                android:textSize="30sp"
-                android:drawableStart="@drawable/baseline_date_range_24"
-                />
-            <include layout="@layout/day_of_the_week_layout"/>
-            <com.google.android.material.divider.MaterialDivider
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                />
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/chooseTimeTextView"
-                android:layout_width="300dp"
-                android:layout_height="wrap_content"
-                android:layout_margin="20dp"
-                android:text="Choose a time"
-                android:textAlignment="center"
-                android:textSize="30sp"
-                android:drawableStart="@drawable/baseline_access_time_24"
-                />
+                android:orientation="vertical"
+                android:visibility="invisible"
+                >
+                <com.google.android.material.divider.MaterialDivider
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    />
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/chooseDateTextView"
+                    android:layout_width="300dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="20dp"
+                    android:text="Choose days"
+                    android:textAlignment="center"
+                    android:textSize="30sp"
+                    android:drawableStart="@drawable/baseline_date_range_24"
+                    />
+                <include layout="@layout/day_of_the_week_layout"/>
+                <com.google.android.material.divider.MaterialDivider
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    />
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/chooseTimeTextView"
+                    android:layout_width="300dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="20dp"
+                    android:text="Choose a time"
+                    android:textAlignment="center"
+                    android:textSize="30sp"
+                    android:drawableStart="@drawable/baseline_access_time_24"
+                    />
+            </LinearLayout>
+
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
     <androidx.fragment.app.FragmentContainerView

@@ -45,12 +45,16 @@ class AlarmCreationDialogBottomNavBar : Fragment(R.layout.fragment_create_alarms
         acceptAlarmCreation.tag = UNAVAILABLE
         acceptAlarmCreation.setTextColor(resources.getColor(R.color.grey, null))
         acceptAlarmCreation.setOnClickListener {
-            bottomNavBarListener.onAccept()
+            if (acceptAlarmCreation.tag == AVAILABLE) bottomNavBarListener.onAccept()
         }
     }
 
     fun activateAcceptAlarmButton(){
         acceptAlarmCreation.tag = AVAILABLE
         acceptAlarmCreation.setTextColor(resources.getColor(R.color.basic_blue, null))
+    }
+    fun deActivateAcceptAlarmButton(){
+        acceptAlarmCreation.tag = UNAVAILABLE
+        acceptAlarmCreation.setTextColor(resources.getColor(R.color.grey, null))
     }
 }

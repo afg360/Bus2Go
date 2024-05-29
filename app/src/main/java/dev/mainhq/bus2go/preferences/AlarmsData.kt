@@ -27,9 +27,14 @@ data class AlarmsData (
 
 @Serializable
 data class Alarm(
-    val title : String, /** Name of the alarm given. Should be unique */
-    val busInfo : BusInfo, /** Suppose to be the same as buses in the favourites */
-    val timeBefore : SerializableTime /** Time set for the alarm to ring before the  */
+    /** Name of the alarm given. Should be unique */
+    val title : String,
+    /** Suppose to be the same as buses in the favourites */
+    val busInfo : BusInfo,
+    /** Time set for the alarm to ring before the  */
+    val timeBefore : SerializableTime,
+    /** Days when the alarm will have to ring */
+    val ringDays : String
 )
 
 @Serializable

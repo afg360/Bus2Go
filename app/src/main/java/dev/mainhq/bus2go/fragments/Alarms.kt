@@ -9,6 +9,9 @@ import android.widget.Toast
 import androidx.datastore.core.DataStore
 import androidx.datastore.dataStore
 import androidx.fragment.app.FragmentTransaction
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -19,21 +22,21 @@ import dev.mainhq.bus2go.Settings
 import dev.mainhq.bus2go.preferences.AlarmsData
 import dev.mainhq.bus2go.preferences.AlarmsSerializer
 import dev.mainhq.bus2go.adapters.AlarmsListElemAdapter
+import dev.mainhq.bus2go.viewmodel.AlarmCreationViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-val Context.alarmDataStore : DataStore<AlarmsData> by dataStore(
-    fileName = "alarms.json",
-    serializer = AlarmsSerializer
-)
+
 
 /* For the moment, the user can only add an alarm to a favourite bus */
 class Alarms : Fragment(R.layout.fragment_alarms) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val alarmViewModel = ViewModelProvider(this)[AlarmCreationViewModel::class.java]
+
         val menuBar = view.findViewById<MaterialToolbar>(R.id.alarmsMaterialToolBar)
         menuBar.setOnMenuItemClickListener {
             when (it.itemId){
@@ -51,7 +54,7 @@ class Alarms : Fragment(R.layout.fragment_alarms) {
             linearLayoutManager.orientation = LinearLayoutManager.VERTICAL
             recyclerView.layoutManager = linearLayoutManager
             lifecycleScope.launch {
-                val list = it.alarmDataStore.data.first().list.toList()
+                val list = alarmViewModel.readAlarms()
                 withContext(Dispatchers.Main){
                     recyclerView.adapter = AlarmsListElemAdapter(list)
                 }
@@ -72,11 +75,11 @@ class Alarms : Fragment(R.layout.fragment_alarms) {
                         view.findViewById<FloatingActionButton>(R.id.floatingActionButton).setOnClickListener {_ ->
                             //Create a popup containing the recyclerview of each buses in favourites
                             context?.also {
-                                val alarmCreationDialog = AlarmCreationDialog()
+                                val alarmCreationDialog = AlarmCreationDialog(alarmViewModel)
                                 //TODO DEPRECATED FOR DATA EXCHANGE alarmCreationDialog.setTargetFragment(this@Alarms, 0)
                                 val transaction = parentFragmentManager.beginTransaction()
                                 transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                                transaction.add(AlarmCreationDialog(), null).commit()
+                                transaction.add(alarmCreationDialog, null).commit()
                             }
                         }
                     }
