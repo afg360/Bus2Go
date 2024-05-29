@@ -31,6 +31,7 @@ val Context.alarmDataStore : DataStore<AlarmsData> by dataStore(
 
 /* For the moment, the user can only add an alarm to a favourite bus */
 class Alarms : Fragment(R.layout.fragment_alarms) {
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val menuBar = view.findViewById<MaterialToolbar>(R.id.alarmsMaterialToolBar)

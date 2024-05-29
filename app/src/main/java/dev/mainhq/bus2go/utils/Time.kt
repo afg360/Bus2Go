@@ -1,13 +1,22 @@
 package dev.mainhq.bus2go.utils
 
 import android.icu.util.Calendar
+import android.os.Parcel
+import android.os.Parcelable
 import android.util.Log
+import kotlinx.serialization.Serializable
 
 /** Allows to do operations more easily on time based formats */
-class Time(hour : Int, min : Int, sec : Int) : Comparable<Time>{
+class Time(hour : Int, min : Int, sec : Int) : Comparable<Time>, Parcelable {
     var hour : Int
     var min : Int
     var sec : Int
+
+    constructor(parcel: Parcel) : this(
+        parcel.readInt(),
+        parcel.readInt(),
+        parcel.readInt()
+    )
 
     init {
         this.sec = sec % 60
@@ -75,6 +84,16 @@ class Time(hour : Int, min : Int, sec : Int) : Comparable<Time>{
         return "$hour:$min:$sec"
     }
 
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    override fun writeToParcel(dest: Parcel, flags: Int) {
+        dest.writeInt(hour)
+        dest.writeInt(min)
+        dest.writeInt(sec)
+    }
+
     override fun equals(other: Any?): Boolean {
         if (other is Time){
             val tmp : Time = other
@@ -88,5 +107,15 @@ class Time(hour : Int, min : Int, sec : Int) : Comparable<Time>{
         result = 31 * result + min
         result = 31 * result + sec
         return result
+    }
+
+    companion object CREATOR : Parcelable.Creator<Time> {
+        override fun createFromParcel(parcel: Parcel): Time {
+            return Time(parcel)
+        }
+
+        override fun newArray(size: Int): Array<Time?> {
+            return arrayOfNulls(size)
+        }
     }
 }

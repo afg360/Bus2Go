@@ -1,5 +1,7 @@
 package dev.mainhq.bus2go.preferences
 
+import android.os.Parcel
+import android.os.Parcelable
 import androidx.datastore.core.Serializer
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
@@ -27,10 +29,32 @@ data class FavouritesData(
 
 @Serializable
 //FIXME could improve the data stored inside for better ease of use
-data class BusInfo(
-    val stopName : String,
-    val tripHeadsign : String,
-)
+data class BusInfo(val stopName : String, val tripHeadsign : String)
+    : Parcelable {
+    constructor(parcel: Parcel) : this(
+        parcel.readString()!!,
+        parcel.readString()!!
+    )
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    override fun writeToParcel(dest: Parcel, flags: Int) {
+        dest.writeString(stopName)
+        dest.writeString(tripHeadsign)
+    }
+
+    companion object CREATOR : Parcelable.Creator<BusInfo> {
+        override fun createFromParcel(parcel: Parcel): BusInfo {
+            return BusInfo(parcel)
+        }
+
+        override fun newArray(size: Int): Array<BusInfo?> {
+            return arrayOfNulls(size)
+        }
+    }
+}
 
 @Suppress("EXTERNAL_SERIALIZER_USELESS")
 @OptIn(ExperimentalSerializationApi::class)

@@ -12,6 +12,7 @@ import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.fragments.AlarmCreationDialogBottomNavBar
 import dev.mainhq.bus2go.preferences.BusInfo
 
+//FIXME may need to get rid of these references
 class AlarmDialogListElemsAdapter(private val list : List<BusInfo>, private val recyclerView: RecyclerView,
     private val bottomNavBar: AlarmCreationDialogBottomNavBar)
     : RecyclerView.Adapter<AlarmDialogListElemsAdapter.ViewHolder>() {
