@@ -7,8 +7,6 @@ import androidx.datastore.dataStore
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import dev.mainhq.bus2go.fragments.AlarmCreationChooseBusDialog.AlarmBusInfo
 import dev.mainhq.bus2go.preferences.Alarm
@@ -49,13 +47,30 @@ class AlarmCreationViewModel(private val application : Application) : AndroidVie
             application.alarmDataStore.updateData {alarmsData ->
                 alarmsData.copy(list = alarmsData.list.mutate {
                     it.add(Alarm(
-                        "My title",
+                        "Hello World",
                         alarmBusInfo.value!!.busInfo,
                         alarmBusInfo.value!!.time.run { SerializableTime(hour, min, sec) },
                         chosenDays.value!!
                     ))
                 })
             }
+        }
+    }
+
+    fun createAlarm(block : (() -> Unit)){
+        //TODO check if good data before storing
+        viewModelScope.launch {
+            application.alarmDataStore.updateData {alarmsData ->
+                alarmsData.copy(list = alarmsData.list.mutate {
+                    it.add(Alarm(
+                        "Hello World",
+                        alarmBusInfo.value!!.busInfo,
+                        alarmBusInfo.value!!.time.run { SerializableTime(hour, min, sec) },
+                        chosenDays.value!!
+                    ))
+                })
+            }
+            block()
         }
     }
 

@@ -1,16 +1,14 @@
 package dev.mainhq.bus2go.fragments
 
-import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.View
 import android.widget.Toast
-import androidx.datastore.core.DataStore
-import androidx.datastore.dataStore
+import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
-import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -19,9 +17,8 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.Settings
-import dev.mainhq.bus2go.preferences.AlarmsData
-import dev.mainhq.bus2go.preferences.AlarmsSerializer
 import dev.mainhq.bus2go.adapters.AlarmsListElemAdapter
+import dev.mainhq.bus2go.preferences.Alarm
 import dev.mainhq.bus2go.viewmodel.AlarmCreationViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -31,11 +28,14 @@ import kotlinx.coroutines.withContext
 
 
 /* For the moment, the user can only add an alarm to a favourite bus */
-class Alarms : Fragment(R.layout.fragment_alarms) {
+class Alarms(private val alarmViewModel : AlarmCreationViewModel)
+    : Fragment(R.layout.fragment_alarms)  {
+
+    private lateinit var list : List<Alarm>
+    private lateinit var recyclerView: RecyclerView
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val alarmViewModel = ViewModelProvider(this)[AlarmCreationViewModel::class.java]
 
         val menuBar = view.findViewById<MaterialToolbar>(R.id.alarmsMaterialToolBar)
         menuBar.setOnMenuItemClickListener {
@@ -49,17 +49,16 @@ class Alarms : Fragment(R.layout.fragment_alarms) {
             }
         }
         context?.also {
-            val recyclerView : RecyclerView = view.findViewById(R.id.alarmsList)
+            recyclerView = view.findViewById(R.id.alarmsList)
             val linearLayoutManager = LinearLayoutManager(it)
             linearLayoutManager.orientation = LinearLayoutManager.VERTICAL
             recyclerView.layoutManager = linearLayoutManager
             lifecycleScope.launch {
-                val list = alarmViewModel.readAlarms()
+                list = alarmViewModel.readAlarms()
                 withContext(Dispatchers.Main){
                     recyclerView.adapter = AlarmsListElemAdapter(list)
                 }
             }
-
         }
 
         context?.apply {
@@ -79,14 +78,26 @@ class Alarms : Fragment(R.layout.fragment_alarms) {
                                 //TODO DEPRECATED FOR DATA EXCHANGE alarmCreationDialog.setTargetFragment(this@Alarms, 0)
                                 val transaction = parentFragmentManager.beginTransaction()
                                 transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                                transaction.add(alarmCreationDialog, null).commit()
+                                transaction.add(alarmCreationDialog, null)
+                                    .addToBackStack("ALARM_CREATION_DIALOG").commit()
                             }
                         }
                     }
-                    else{
-                        view.findViewById<FloatingActionButton>(R.id.floatingActionButton).setOnClickListener{
+                    else view.findViewById<FloatingActionButton>(R.id.floatingActionButton)
+                        .setOnClickListener{
                             Toast.makeText(view.context, "No favourites made", Toast.LENGTH_SHORT).show()
                         }
+                }
+            }
+        }
+
+        setFragmentResultListener("NEW_ALARM") { requestKey, bundle ->
+            val newAlarm = bundle.getBoolean("ON_ACCEPT")
+            if (newAlarm){
+                lifecycleScope.launch {
+                    val list = alarmViewModel.readAlarms()
+                    withContext(Dispatchers.Main){
+                        recyclerView.adapter = AlarmsListElemAdapter(list)
                     }
                 }
             }

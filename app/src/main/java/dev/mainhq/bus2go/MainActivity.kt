@@ -5,10 +5,12 @@ import android.util.TypedValue
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.navigation.NavigationBarView
 import dev.mainhq.bus2go.fragments.Alarms
 import dev.mainhq.bus2go.fragments.Home
 import dev.mainhq.bus2go.fragments.Map
+import dev.mainhq.bus2go.viewmodel.AlarmCreationViewModel
 
 //TODO
 //when updating the app (especially for new stm txt files), will need
@@ -40,6 +42,7 @@ class MainActivity() : BaseActivity() {
         //setBackground()
         //setButtons()
 
+        val alarmViewModel = ViewModelProvider(this)[AlarmCreationViewModel::class.java]
         val bottomNav = findViewById<NavigationBarView>(R.id.bottomNavBarView)
         bottomNav.setOnItemSelectedListener {
             when(it.itemId) {
@@ -62,7 +65,7 @@ class MainActivity() : BaseActivity() {
                 R.id.alarmsButton -> {
                     // Respond to navigation item 2 click
                     if (activityType != ActivityType.ALARMS) {
-                        supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer, Alarms()).commit()
+                        supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer, Alarms(alarmViewModel)).commit()
                         activityType = ActivityType.ALARMS
                     }
                     true

@@ -11,10 +11,13 @@ import android.widget.RadioButton
 import android.widget.RelativeLayout
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.os.bundleOf
 import androidx.core.view.children
 import androidx.core.view.get
+import androidx.datastore.preferences.core.Preferences
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentTransaction
+import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.textview.MaterialTextView
@@ -45,8 +48,6 @@ class AlarmCreationDialog(private val alarmCreationViewModel : AlarmCreationView
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        //alarmCreationViewModel = ViewModelProvider(this)[AlarmCreationViewModel::class.java]
-
         view.findViewById<MaterialTextView>(R.id.textViewChooseStop).setOnClickListener { _ ->
             val alarmCreationChooseBusDialog = AlarmCreationChooseBusDialog()
             //TODO DEPRECATED FOR DATA EXCHANGE alarmCreationDialog.setTargetFragment(this@Alarms, 0)
@@ -57,7 +58,8 @@ class AlarmCreationDialog(private val alarmCreationViewModel : AlarmCreationView
                 if (Build.VERSION.SDK_INT < 33) {
                     alarmCreationViewModel.updateAlarmBus(bundle.getParcelable("ALARM_BUS_INFO")!!)
                 } else {
-                    alarmCreationViewModel.updateAlarmBus(bundle.getParcelable("", AlarmCreationChooseBusDialog.AlarmBusInfo::class.java)!!)
+                    alarmCreationViewModel.updateAlarmBus(bundle.getParcelable("ALARM_BUS_INFO",
+                        AlarmCreationChooseBusDialog.AlarmBusInfo::class.java)!!)
                 }
                 alarmCreationViewModel.alarmBusInfo.value?.also {
                     Log.d("ALARM BUS", it.toString())
@@ -142,8 +144,14 @@ class AlarmCreationDialog(private val alarmCreationViewModel : AlarmCreationView
 
             override fun onAccept() {
                 //TODO save the data, create a new alarm (goes inside alarms.json), and dismiss
-                this@AlarmCreationDialog.alarmCreationViewModel.createAlarm()
-                dismiss()
+                this@AlarmCreationDialog.apply{
+                    alarmCreationViewModel.createAlarm{
+                        setFragmentResult("NEW_ALARM",
+                            bundleOf(Pair("ON_ACCEPT", true))
+                        )
+                        dismiss()
+                    }
+                }
             }
 
         })
