@@ -28,7 +28,7 @@ import kotlinx.coroutines.withContext
 
 
 /* For the moment, the user can only add an alarm to a favourite bus */
-class Alarms(private val alarmViewModel : AlarmCreationViewModel)
+class Alarms(val alarmViewModel : AlarmCreationViewModel)
     : Fragment(R.layout.fragment_alarms)  {
 
     private lateinit var list : List<Alarm>

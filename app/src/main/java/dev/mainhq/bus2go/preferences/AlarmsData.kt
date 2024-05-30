@@ -27,6 +27,8 @@ data class AlarmsData (
 
 @Serializable
 data class Alarm(
+    //TODO add a unique id attribute so that alarms may have the same title
+    val id : Int,
     /** Name of the alarm given. Should be unique */
     val title : String,
     /** Suppose to be the same as buses in the favourites */
@@ -34,7 +36,9 @@ data class Alarm(
     /** Time set for the alarm to ring before the  */
     val timeBefore : SerializableTime,
     /** Days when the alarm will have to ring */
-    val ringDays : String
+    val ringDays : String,
+    /** Stores if it's on or off */
+    val isOn : Boolean
 )
 
 @Serializable

@@ -13,7 +13,6 @@ import dev.mainhq.bus2go.preferences.Alarm
 import dev.mainhq.bus2go.preferences.AlarmsData
 import dev.mainhq.bus2go.preferences.AlarmsSerializer
 import dev.mainhq.bus2go.preferences.SerializableTime
-import dev.mainhq.bus2go.utils.Time
 import kotlinx.collections.immutable.mutate
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -24,6 +23,9 @@ class AlarmCreationViewModel(private val application : Application) : AndroidVie
 
     private val _alarmBusInfo : MutableLiveData<AlarmBusInfo> = MutableLiveData()
         val alarmBusInfo : LiveData<AlarmBusInfo> get() = _alarmBusInfo
+
+    private val _isOn : MutableLiveData<Boolean> = MutableLiveData(true)
+        val isOn : LiveData<Boolean> get() = _isOn
 
     private val _chosenDays : MutableLiveData<String> = MutableLiveData("hello")
         val chosenDays: LiveData<String> get() = _chosenDays
@@ -41,16 +43,36 @@ class AlarmCreationViewModel(private val application : Application) : AndroidVie
         _chosenDays.value = dateString //TODO TO PARSE THE STRING/LIST
     }
 
+    fun updateLiveActivatedState(id : Int, state : Boolean){
+        _isOn.value = state
+        viewModelScope.launch {
+            application.alarmDataStore.updateData {alarmsData ->
+                alarmsData.copy(list = alarmsData.list.mutate {list ->
+                    list[id - 1] = Alarm(
+                        list[id - 1].id,
+                        list[id - 1].title,
+                        list[id - 1].busInfo,
+                        list[id - 1].timeBefore,
+                        list[id - 1].ringDays,
+                        !list[id - 1].isOn,
+                    )
+                })
+            }
+        }
+    }
+
     fun createAlarm(){
-        //TODO check if good data before storing
         viewModelScope.launch {
             application.alarmDataStore.updateData {alarmsData ->
                 alarmsData.copy(list = alarmsData.list.mutate {
                     it.add(Alarm(
-                        "Hello World",
+                        //FIXME THIS PART WILL FAIL UNIQUENESS WHEN DELETING AND CREATING NEW ALARMS (and keeping older ones)
+                        id = application.alarmDataStore.data.first().list.size + 1,
+                        title = "Hello World",
                         alarmBusInfo.value!!.busInfo,
                         alarmBusInfo.value!!.time.run { SerializableTime(hour, min, sec) },
-                        chosenDays.value!!
+                        chosenDays.value!!,
+                        isOn.value!!
                     ))
                 })
             }
@@ -63,16 +85,19 @@ class AlarmCreationViewModel(private val application : Application) : AndroidVie
             application.alarmDataStore.updateData {alarmsData ->
                 alarmsData.copy(list = alarmsData.list.mutate {
                     it.add(Alarm(
-                        "Hello World",
+                        id = application.alarmDataStore.data.first().list.size + 1,
+                        title = "Hello World",
                         alarmBusInfo.value!!.busInfo,
                         alarmBusInfo.value!!.time.run { SerializableTime(hour, min, sec) },
-                        chosenDays.value!!
+                        chosenDays.value!!,
+                        isOn.value!!
                     ))
                 })
             }
             block()
         }
     }
+
 
     suspend fun readAlarms() : List<Alarm>{
         return application.alarmDataStore.data.first().list.toList()

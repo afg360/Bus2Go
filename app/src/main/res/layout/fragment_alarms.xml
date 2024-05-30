@@ -33,6 +33,7 @@
         app:srcCompat="@drawable/baseline_add_alarm_24"
         app:layout_constraintBottom_toBottomOf="@id/alarmsList"
         app:layout_constraintEnd_toEndOf="@id/alarmsList"
+        android:layout_marginEnd="10dp"
         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
