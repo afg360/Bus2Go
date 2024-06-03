@@ -40,7 +40,7 @@ class AlarmCreationDialog(private val alarmCreationViewModel : AlarmCreationView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setStyle(STYLE_NORMAL, R.style.Theme_Schedules_Dark)
+        setStyle(STYLE_NORMAL, R.style.MaterialTheme_Bus2Go_Dark)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

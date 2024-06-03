@@ -66,7 +66,7 @@ class AlarmCreationChooseBusDialog() : DialogFragment(R.layout.fragment_create_a
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setStyle(STYLE_NORMAL, R.style.Theme_Schedules_Dark)
+        setStyle(STYLE_NORMAL, R.style.MaterialTheme_Bus2Go_Dark)
         (context as Activity).also {
             activityResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
                 if (result.resultCode == Activity.RESULT_OK) {

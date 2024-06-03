@@ -16,8 +16,8 @@ class Settings : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (PreferenceManager.getDefaultSharedPreferences(this)
-                .getBoolean("dark-mode", true)) setTheme(R.style.Theme_Schedules_Dark)
-        else setTheme(R.style.Theme_Schedules)
+                .getBoolean("dark-mode", true)) setTheme(R.style.MaterialTheme_Bus2Go_Dark)
+        else setTheme(R.style.MaterialTheme_Bus2Go)
         setContentView(R.layout.settings)
 
         val menuBar = findViewById<MaterialToolbar>(R.id.settingsToolBar)

@@ -11,8 +11,8 @@ object AppThemeState {
      *  on the oncreate of an activity */
     fun setTheme(activityContext : Context, isDark : Boolean){
         prevVal = isDark
-        if (prevVal) activityContext.setTheme(R.style.Theme_Schedules_Dark)
-        else activityContext.setTheme(R.style.Theme_Schedules)
+        if (prevVal) activityContext.setTheme(R.style.MaterialTheme_Bus2Go_Dark)
+        else activityContext.setTheme(R.style.MaterialTheme_Bus2Go)
     }
 
     /** Called to see if the theme of the whole app changed
