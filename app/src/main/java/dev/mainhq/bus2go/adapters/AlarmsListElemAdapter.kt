@@ -39,10 +39,14 @@ class AlarmsListElemAdapter(private val list : List<Alarm>)
         holder.alarmTitle.text = data.title
         holder.alarmBusInfo.text = data.busInfo.stopName
         holder.alarmTimeBefore.text = "${data.timeBefore.hour}h, ${data.timeBefore.min}"
-        holder.materialSwitch.text = data.ringDays
+        val list = mutableListOf<Char>()
+        //TODO if M-F -> "Weekdays", if all days: "week"
+        data.ringDays.forEach{ if (it.value) list.add(it.key) }
+        holder.materialSwitch.text = list.toString()
         if (data.isOn) holder.materialSwitch.isChecked = true
         holder.materialSwitch.setOnClickListener {
-            (holder.itemView.findFragment<Alarms>()).alarmViewModel.updateLiveActivatedState(data.id, holder.materialSwitch.isChecked)
+            holder.itemView.findFragment<Alarms>().alarmViewModel
+                .updateLiveActivatedState(data.id, holder.materialSwitch.isChecked)
         }
         //holder.itemView.setOnClickListener {
         //

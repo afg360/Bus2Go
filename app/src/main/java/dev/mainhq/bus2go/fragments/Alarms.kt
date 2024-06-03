@@ -1,6 +1,11 @@
 package dev.mainhq.bus2go.fragments
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.media.Ringtone
+import android.media.RingtoneManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -15,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import dev.mainhq.bus2go.MainActivity
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.Settings
 import dev.mainhq.bus2go.adapters.AlarmsListElemAdapter
@@ -24,7 +30,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-
+import java.util.Calendar
 
 
 /* For the moment, the user can only add an alarm to a favourite bus */
@@ -85,7 +91,7 @@ class Alarms(val alarmViewModel : AlarmCreationViewModel)
                     }
                     else view.findViewById<FloatingActionButton>(R.id.floatingActionButton)
                         .setOnClickListener{
-                            Toast.makeText(view.context, "No favourites made", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(view.context, "No favourites made yet", Toast.LENGTH_SHORT).show()
                         }
                 }
             }
@@ -102,5 +108,15 @@ class Alarms(val alarmViewModel : AlarmCreationViewModel)
                 }
             }
         }
+    }
+}
+
+class AlarmReceiver : BroadcastReceiver() {
+    override fun onReceive(context: Context?, intent: Intent?) {
+        // This method is called when the BroadcastReceiver is receiving an Intent broadcast.
+        // Play alarm sound or trigger any action you want here.
+        val alarmUri: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+        val ringtone: Ringtone = RingtoneManager.getRingtone(context, alarmUri)
+        ringtone.play()
     }
 }

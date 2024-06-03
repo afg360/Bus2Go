@@ -77,11 +77,8 @@ class AlarmCreationChooseBusDialog() : DialogFragment(R.layout.fragment_create_a
                     }
                     time?.also {time ->
                         setFragmentResult("requestKey", bundleOf("ALARM_BUS_INFO" to AlarmBusInfo(
-                            BusInfo(
-                                alarmDialogBusStop, alarmDialogBusNum
-                            ),
-                            time
-                        )))
+                            BusInfo(alarmDialogBusStop, alarmDialogBusNum),
+                            time)))
                         dismiss()
                     }
                 }

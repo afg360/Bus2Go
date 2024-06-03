@@ -1,33 +1,30 @@
 package dev.mainhq.bus2go.fragments
 
-import android.app.Activity
-import android.content.Intent
+import java.util.Calendar
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.RadioButton
 import android.widget.RelativeLayout
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.os.bundleOf
 import androidx.core.view.children
 import androidx.core.view.get
-import androidx.datastore.preferences.core.Preferences
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.setFragmentResultListener
-import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.textview.MaterialTextView
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.MaterialTimePicker.INPUT_MODE_KEYBOARD
 import com.google.android.material.timepicker.TimeFormat
+import dev.mainhq.bus2go.MainActivity
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.preferences.BusInfo
 import dev.mainhq.bus2go.utils.Time
 import dev.mainhq.bus2go.viewmodel.AlarmCreationViewModel
+import java.lang.IllegalStateException
 
 
 private const val UNSELECTED = "UNSELECTED"
@@ -39,6 +36,7 @@ class AlarmCreationDialog(private val alarmCreationViewModel : AlarmCreationView
 
     private var allZero = true
     private var allUnselected = true
+    private lateinit var beforeTime : Time
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,9 +54,9 @@ class AlarmCreationDialog(private val alarmCreationViewModel : AlarmCreationView
             transaction.add(alarmCreationChooseBusDialog, null).commit()
             setFragmentResultListener("requestKey") { requestKey, bundle ->
                 if (Build.VERSION.SDK_INT < 33) {
-                    alarmCreationViewModel.updateAlarmBus(bundle.getParcelable("ALARM_BUS_INFO")!!)
+                    alarmCreationViewModel.updateAlarmBusInfo(bundle.getParcelable("ALARM_BUS_INFO")!!)
                 } else {
-                    alarmCreationViewModel.updateAlarmBus(bundle.getParcelable("ALARM_BUS_INFO",
+                    alarmCreationViewModel.updateAlarmBusInfo(bundle.getParcelable("ALARM_BUS_INFO",
                         AlarmCreationChooseBusDialog.AlarmBusInfo::class.java)!!)
                 }
                 alarmCreationViewModel.alarmBusInfo.value?.also {
@@ -84,7 +82,10 @@ class AlarmCreationDialog(private val alarmCreationViewModel : AlarmCreationView
                             chooseTimeTextView.text =
                                 "${timePicker.hour} h, ${timePicker.minute} min before choosen bus time"
                             allZero = timePicker.hour == 0 && timePicker.minute == 0
-                            if (!allUnselected && !allZero) bottomNavBar.activateAcceptAlarmButton()
+                            if (!allUnselected && !allZero) {
+                                bottomNavBar.activateAcceptAlarmButton()
+                                beforeTime = Time(timePicker.hour, timePicker.minute, 0)
+                            }
                             else bottomNavBar.deActivateAcceptAlarmButton()
                         }
                         timePicker.show(parentFragmentManager, null)
@@ -145,6 +146,50 @@ class AlarmCreationDialog(private val alarmCreationViewModel : AlarmCreationView
             override fun onAccept() {
                 //TODO save the data, create a new alarm (goes inside alarms.json), and dismiss
                 this@AlarmCreationDialog.apply{
+                    //could assert non-null
+                    val map = (alarmCreationViewModel.chosenDays.value)?.toMutableMap() ?: mutableMapOf()
+                    view.findViewById<LinearLayout>(R.id.chooseDatesRadios).children.forEach{
+                        val radioButton = (it as ViewGroup)[0] as RadioButton
+                        when(radioButton.id){
+                            R.id.sundayRadio -> if (radioButton.isChecked) map.replace('d', true)
+                            R.id.mondayRadio -> if (radioButton.isChecked) map.replace('m', true)
+                            R.id.tuesdayRadio -> if (radioButton.isChecked) map.replace('t', true)
+                            R.id.wednesdayRadio -> if (radioButton.isChecked) map.replace('w', true)
+                            R.id.thursdayRadio -> if (radioButton.isChecked) map.replace('y', true)
+                            R.id.fridayRadio -> if (radioButton.isChecked) map.replace('f', true)
+                            R.id.saturdayRadio -> if (radioButton.isChecked) map.replace('s', true)
+                            else -> throw IllegalStateException("There cannot be another radio button for the days!")
+                        }
+                    }
+                    alarmCreationViewModel.updateDays(map)
+                    alarmCreationViewModel.updateBeforeTime(beforeTime)
+                    // NAMING of an alarm: alarmID.dayOfWeek
+                    map.forEach { (day, isOn) ->
+                        /* Need to setup an alarm for every day on! */
+                        if (isOn){
+                            Calendar.getInstance().apply {
+                                when(day){
+                                    'd' -> set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
+                                    'm' -> set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
+                                    't' -> set(Calendar.DAY_OF_WEEK, Calendar.TUESDAY)
+                                    'w' -> set(Calendar.DAY_OF_WEEK, Calendar.WEDNESDAY)
+                                    'y' -> set(Calendar.DAY_OF_WEEK, Calendar.THURSDAY)
+                                    'f' -> set(Calendar.DAY_OF_WEEK, Calendar.FRIDAY)
+                                    's' -> set(Calendar.DAY_OF_WEEK, Calendar.SATURDAY)
+                                    else -> throw IllegalStateException("Cannot have another any other char representing a day of the week")
+                                }
+                                alarmCreationViewModel.alarmBusInfo.value!!.time
+                                    .subtract(beforeTime).also {
+                                        if (it == null) throw IllegalStateException("An error occured trying to calculate alarm times to go off")
+                                        set(Calendar.HOUR_OF_DAY, it.hour)
+                                        set(Calendar.MINUTE, it.min)
+                                        set(Calendar.SECOND, it.sec)
+                                    }
+                                (requireActivity() as MainActivity).setAlarm(requireContext(), this)
+                            }
+
+                        }
+                    }
                     alarmCreationViewModel.createAlarm{
                         setFragmentResult("NEW_ALARM",
                             bundleOf(Pair("ON_ACCEPT", true))

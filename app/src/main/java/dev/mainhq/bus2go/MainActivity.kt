@@ -1,5 +1,9 @@
 package dev.mainhq.bus2go
 
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.util.TypedValue
 import android.widget.LinearLayout
@@ -7,10 +11,12 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.navigation.NavigationBarView
+import dev.mainhq.bus2go.fragments.AlarmReceiver
 import dev.mainhq.bus2go.fragments.Alarms
 import dev.mainhq.bus2go.fragments.Home
 import dev.mainhq.bus2go.fragments.Map
 import dev.mainhq.bus2go.viewmodel.AlarmCreationViewModel
+import java.util.Calendar
 
 //TODO
 //when updating the app (especially for new stm txt files), will need
@@ -83,6 +89,25 @@ class MainActivity() : BaseActivity() {
             }
         })
     }
+
+    fun setAlarm(context: Context, calendar: Calendar) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(context, AlarmReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(context, 0, intent,
+            PendingIntent.FLAG_IMMUTABLE)
+        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
+    }
+
+    fun cancelAlarm(context: Context) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(context, AlarmReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(context, 0, intent,
+            PendingIntent.FLAG_IMMUTABLE)
+
+        // Cancel the alarm
+        alarmManager.cancel(pendingIntent)
+    }
+
 
     private enum class ActivityType{
         HOME, MAP, ALARMS

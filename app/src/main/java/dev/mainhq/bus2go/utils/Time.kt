@@ -4,6 +4,7 @@ import android.icu.util.Calendar
 import android.os.Parcel
 import android.os.Parcelable
 import android.util.Log
+import dev.mainhq.bus2go.preferences.SerializableTime
 import kotlinx.serialization.Serializable
 
 /** Allows to do operations more easily on time based formats */
@@ -23,7 +24,7 @@ class Time(hour : Int, min : Int, sec : Int) : Comparable<Time>, Parcelable {
         this.min = (min + this.sec / 60) % 60
         this.hour = (hour + this.min / 60)  % 24
     }
-    /** Format must be = HH:MM:SS */
+    /** Format of string must be = HH:MM:SS */
     constructor(time : String) : this(0,0,0) {
         if (time.isNotEmpty()){
             val list : List<String> = time.split(":")
@@ -43,6 +44,12 @@ class Time(hour : Int, min : Int, sec : Int) : Comparable<Time>, Parcelable {
         this.hour = calendar.get(Calendar.HOUR_OF_DAY)
         this.min = calendar.get(Calendar.MINUTE)
         this.sec = calendar.get(Calendar.SECOND)
+    }
+
+    constructor(serializableTime: SerializableTime) : this(0,0,0){
+        this.hour = serializableTime.hour
+        this.min = serializableTime.min
+        this.sec = serializableTime.sec
     }
 
     fun subtract(time : Time) : Time?{
@@ -82,6 +89,10 @@ class Time(hour : Int, min : Int, sec : Int) : Comparable<Time>, Parcelable {
         val min = if (this.min >= 10) this.min.toString() else "0" + this.min.toString()
         val sec = if (this.sec >= 10) this.sec.toString() else "0" + this.sec.toString()
         return "$hour:$min:$sec"
+    }
+
+    fun toSerializableTime() : SerializableTime{
+        return SerializableTime(hour, min, sec)
     }
 
     override fun describeContents(): Int {
