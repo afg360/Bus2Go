@@ -57,7 +57,8 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, recy
         holder.stopNameTextView.text = info.busInfo.stopName
         holder.arrivalTimeTextView.text = info.arrivalTime.toString()
         holder.timeRemainingTextView.text = getTimeRemaining(info.arrivalTime)
-
+        if (info.arrivalTime.timeRemaining()?.compareTo(Time(0,3,59)) == -1)
+            holder.timeRemainingTextView.setTextColor(holder.itemView.resources.getColor(R.color.red, null))
         holder.onLongClick(holder.itemView)
         holder.onClick(holder.itemView)
         holder.checkBoxView.setOnClickListener {
@@ -83,6 +84,8 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, recy
         val container = viewGroup[0] as ViewGroup
         ((container[1] as ViewGroup)[2] as MaterialTextView).text = favouritesBusInfo.arrivalTime.toString()
         ((container[1] as ViewGroup)[1] as MaterialTextView).text = getTimeRemaining(favouritesBusInfo.arrivalTime)
+        if (favouritesBusInfo.arrivalTime.timeRemaining()?.compareTo(Time(0,3,59)) == -1) ((container[1] as ViewGroup)[1] as MaterialTextView)
+            .setTextColor(viewGroup.resources.getColor(R.color.red, null))
     }
 
     private fun getTimeRemaining(arrivalTime: Time): String {

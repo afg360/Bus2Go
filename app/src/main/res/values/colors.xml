@@ -11,6 +11,7 @@
     <color name="dark">#1B1B1B</color>
     <color name="light">#DDDDDDDD</color>
     <color name="grey">#88888888</color>
+    <color name="red">#DCFF0072</color>
     <color name="select_grey">#801B1B1B</color>
     <style name="themeSwitch" parent="@style/Widget.AppCompat.CompoundButton.Switch">
         <item name="colorControlActivated">#46bdbf</item>
