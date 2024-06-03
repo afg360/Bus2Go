@@ -2,13 +2,10 @@
 <project version="4">
   <component name="deploymentTargetDropDown">
     <value>
-      <entry key="WebRequestTest">
+      <entry key="TimeClassTest">
         <State />
       </entry>
       <entry key="app">
-        <State />
-      </entry>
-      <entry key="httpRequest()">
         <State />
       </entry>
       <entry key="test1()">
@@ -18,6 +15,9 @@
         <State />
       </entry>
       <entry key="test3()">
+        <State />
+      </entry>
+      <entry key="testSubErr()">
         <State />
       </entry>
     </value>

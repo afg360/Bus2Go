@@ -52,6 +52,7 @@ class Time(hour : Int, min : Int, sec : Int) : Comparable<Time>, Parcelable {
         this.sec = serializableTime.sec
     }
 
+    /** Returns null if this < time and this > 3 */
     fun subtract(time : Time) : Time?{
         val rel = this.compareTo(time)
         if (rel == -1) {
