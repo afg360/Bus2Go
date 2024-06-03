@@ -128,6 +128,7 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
 
 
         selectAllFavouritesOnClickListener(recyclerView)
+
         parentFragment?.view?.findViewById<LinearLayout>(R.id.removeItemsWidget)?.setOnClickListener {_ ->
             this.context?.also { context ->
                 MaterialAlertDialogBuilder(context)
@@ -150,9 +151,9 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
                                 })
                             }
                             withContext(Dispatchers.Main){
-                                recyclerViewDisplay(view, toFavouriteBusInfoList(context.favouritesDataStore.data.first().list.toList()))
+                                recyclerViewDisplay(view, toFavouriteBusInfoList(context.favouritesDataStore.data.first().list.toList()), new = true)
                                 appBar?.apply { changeAppBar(this) }
-                                dialog.cancel()
+                                dialog.dismiss()
                             }
                         }
                     }
@@ -202,7 +203,7 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
         return times
     }
 
-    private suspend fun recyclerViewDisplay(view : View, times : MutableList<FavouriteBusInfo>){
+    private suspend fun recyclerViewDisplay(view : View, times : MutableList<FavouriteBusInfo>, new : Boolean = false){
         withContext(Dispatchers.Main){
             view.findViewById<MaterialTextView>(R.id.favourites_text_view).text = getText(R.string.favourites)
             val layoutManager = LinearLayoutManager(view.context)
@@ -210,6 +211,7 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
             val recyclerViewTmp : RecyclerView? = view.findViewById(R.id.favouritesRecyclerView)
             recyclerViewTmp?.layoutManager = layoutManager
             //TODO need to improve that code to make it more safe
+            if (new) recyclerViewTmp?.tag = "unselected"
             recyclerViewTmp?.adapter = recyclerViewTmp?.let { FavouritesListElemsAdapter(times, WeakReference(it) ) }
         }
     }
