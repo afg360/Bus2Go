@@ -115,7 +115,7 @@ def route_table(conn, agency):
     sql = """CREATE TABLE IF NOT EXISTS Routes (
     	id INTEGER PRIMARY KEY NOT NULL,
     	route_id INTEGER NOT NULL,
-    	agency_id TEXT NOT NULL,
+    	agency TEXT NOT NULL,
     	route_long_name TEXT NOT NULL,
     	route_type INTEGER NOT NULL,
     	route_color TEXT NOT NULL,
@@ -129,7 +129,7 @@ def route_table(conn, agency):
         file.readline()
         for line in file:
             tokens = line.replace("\n", "").replace("'", "''").split(",")
-            sql = """INSERT INTO Routes (route_id,agency_id,route_long_name,route_type,route_color,route_text_color)
+            sql = """INSERT INTO Routes (route_id,agency,route_long_name,route_type,route_color,route_text_color)
             VALUES (?,?,?,?,?,?);"""
             cursor.execute(sql, (tokens[0],tokens[1],tokens[3],tokens[4],tokens[5], tokens[6]))
             conn.commit()
@@ -257,7 +257,7 @@ def trips_table(conn, agency):
     	trip_headsign TEXT NOT NULL,
     	direction_id INTEGER NOT NULL,
     	shape_id INTEGER NOT NULL REFERENCES Forms(shape_id),
-    	wheelchair_accessible INTEGER NOT NULL
+    	wheelchair INTEGER NOT NULL
     );"""
     cursor.execute(query)
 
@@ -270,7 +270,7 @@ def trips_table(conn, agency):
         for line in file:
             tokens = line.split(",")
             chunk.append((tokens[2],tokens[0],tokens[1],tokens[3],tokens[4],tokens[5],tokens[6]))
-            sql = "INSERT INTO Trips (trip_id,route_id,service_id,trip_headsign,direction_id,shape_id,wheelchair_accessible) VALUES (?,?,?,?,?,?,?);\n"
+            sql = "INSERT INTO Trips (trip_id,route_id,service_id,trip_headsign,direction_id,shape_id,wheelchair) VALUES (?,?,?,?,?,?,?);\n"
             if len(chunk) >= chunk_size:
                 print(f"Created chunk #{i}. Executing query")
                 cursor.executemany(sql, chunk)
