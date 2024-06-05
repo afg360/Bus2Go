@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go.database.dao
+package dev.mainhq.bus2go.database.stm_data.dao
 
 import androidx.room.Dao
 import androidx.room.Query

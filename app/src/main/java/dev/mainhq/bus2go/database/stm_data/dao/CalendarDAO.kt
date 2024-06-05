@@ -1,8 +1,8 @@
-package dev.mainhq.bus2go.database.dao
+package dev.mainhq.bus2go.database.stm_data.dao
 
 import androidx.room.Dao
 import androidx.room.Query
-import dev.mainhq.bus2go.database.entities.Calendar
+import dev.mainhq.bus2go.database.stm_data.entities.Calendar
 
 @Dao
 interface CalendarDAO {

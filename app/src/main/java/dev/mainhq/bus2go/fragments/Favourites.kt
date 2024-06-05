@@ -24,7 +24,7 @@ import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.database.AppDatabase
+import dev.mainhq.bus2go.database.stm_data.AppDatabase
 import dev.mainhq.bus2go.preferences.BusInfo
 import dev.mainhq.bus2go.preferences.FavouritesData
 import dev.mainhq.bus2go.preferences.SettingsSerializer
@@ -69,11 +69,9 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
 
 
         val appBar = (parentFragment as Home).view?.findViewById<AppBarLayout>(R.id.mainAppBar)
-
         /** This part allows us to press the back button when in selection mode of favourites to get out of it */
 
         //FIXME activity?. instead???
-
         requireActivity().onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
             /** Hides all the checkboxes of the items in the recyclerview, deselects them, and puts back the searchbar as the nav bar */
             override fun handleOnBackPressed() {
@@ -125,7 +123,6 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
                     } }, 0, 1, TimeUnit.SECONDS)
             } }
         recyclerView.viewTreeObserver?.addOnGlobalLayoutListener(listener)
-
 
         selectAllFavouritesOnClickListener(recyclerView)
 

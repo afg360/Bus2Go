@@ -40,7 +40,6 @@ class Home : Fragment(R.layout.fragment_home) {
             override fun onResume(owner: LifecycleOwner) {
                 super.onResume(owner)
                 if (owner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED) && isAdded) {
-
                     childFragmentManager.beginTransaction()
                         .replace(
                             R.id.favouritesFragmentContainer,

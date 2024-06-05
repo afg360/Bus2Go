@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.ChooseDirection
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.database.dao.BusRouteInfo
+import dev.mainhq.bus2go.database.stm_data.dao.BusRouteInfo
 
 //TODO
 //could add view/ontouchlistener to handle touch holding, etc.
