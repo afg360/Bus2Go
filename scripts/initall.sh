@@ -102,8 +102,11 @@ elif [[ $1 = "exo" ]]; then
   #to replace below if needed
   #path=/project/folder
   path=.
+  #e.g. project=$PROJECT_FOLDER/src/main/assets/database
+  project=/absolute/path/to/your/project/database/folder
   cd $path/exo
   python3 setup_exo_db.py
+  cp -i 'exo_info.db' $project
   exit $?
 
 #all downloads
