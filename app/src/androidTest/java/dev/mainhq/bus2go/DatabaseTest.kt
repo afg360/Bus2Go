@@ -5,9 +5,9 @@ import android.util.Log
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import dev.mainhq.bus2go.database.AppDatabase
-import dev.mainhq.bus2go.database.dao.RoutesDAO
-import dev.mainhq.bus2go.database.dao.TripsDAO
+import dev.mainhq.bus2go.database.stm_data.AppDatabase
+import dev.mainhq.bus2go.database.stm_data.dao.RoutesDAO
+import dev.mainhq.bus2go.database.stm_data.dao.TripsDAO
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before

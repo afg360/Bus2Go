@@ -7,7 +7,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.room.Room.databaseBuilder
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textview.MaterialTextView
-import dev.mainhq.bus2go.database.AppDatabase
+import dev.mainhq.bus2go.database.stm_data.AppDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch

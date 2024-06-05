@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go.database.entities;
+package dev.mainhq.bus2go.database.stm_data.entities;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;

@@ -6,7 +6,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
-import dev.mainhq.bus2go.database.AppDatabase
+import dev.mainhq.bus2go.database.stm_data.AppDatabase
 import dev.mainhq.bus2go.utils.Time
 import dev.mainhq.bus2go.utils.adapters.TimeListElemsAdapter
 import kotlinx.coroutines.Dispatchers

@@ -6,8 +6,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.database.AppDatabase
-import dev.mainhq.bus2go.database.dao.BusRouteInfo
+import dev.mainhq.bus2go.database.stm_data.AppDatabase
+import dev.mainhq.bus2go.database.stm_data.dao.BusRouteInfo
 import dev.mainhq.bus2go.utils.adapters.BusListElemsAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

@@ -24,14 +24,13 @@ import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.database.AppDatabase
+import dev.mainhq.bus2go.database.stm_data.AppDatabase
 import dev.mainhq.bus2go.preferences.BusInfo
 import dev.mainhq.bus2go.preferences.FavouritesData
 import dev.mainhq.bus2go.preferences.SettingsSerializer
 import dev.mainhq.bus2go.utils.Time
 import dev.mainhq.bus2go.utils.adapters.FavouritesListElemsAdapter
 import dev.mainhq.bus2go.utils.adapters.setMargins
-import dev.mainhq.bus2go.utils.adapters.*
 import kotlinx.collections.immutable.mutate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
