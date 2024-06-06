@@ -22,10 +22,10 @@ import dev.mainhq.bus2go.database.stm_data.entities.Trips
 @Database(entities = [Routes::class, Trips::class, StopsInfo::class,
     Stops::class, Calendar::class, Shapes::class, Forms::class], version = 1)
 @TypeConverters(Converters::class)
-abstract class AppDatabase : RoomDatabase() {
-    abstract fun routesDao() : RoutesDAO;
-    abstract fun tripsDao() : TripsDAO;
-    abstract fun stopsInfoDao() : StopsInfoDAO;
+abstract class AppDatabaseSTM : RoomDatabase() {
+    abstract fun routesDao() : RoutesDAO
+    abstract fun tripsDao() : TripsDAO
+    abstract fun stopsInfoDao() : StopsInfoDAO
     abstract fun stopDao() : StopsDAO
     abstract fun calendarDao() : CalendarDAO
     abstract fun shapesDao() : ShapesDAO

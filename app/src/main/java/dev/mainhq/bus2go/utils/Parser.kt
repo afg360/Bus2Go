@@ -7,9 +7,12 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.adapters.BusListElemsAdapter
-import dev.mainhq.bus2go.database.stm_data.AppDatabase
+import dev.mainhq.bus2go.database.stm_data.AppDatabaseSTM
 import dev.mainhq.bus2go.database.stm_data.dao.BusRouteInfo
+import dev.mainhq.bus2go.database.exo_data.AppDatabaseExo
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import java.util.Locale
 
@@ -17,13 +20,28 @@ import java.util.Locale
 //todo may use db operations instead
 
 /** Sets up the activity data from the database and then displays it to the user **/
-suspend fun setup(query : String, fragment : Fragment){
-    val db = Room.databaseBuilder(fragment.requireContext(), AppDatabase::class.java, "stm_info")
+suspend fun setup(coroutineScope: CoroutineScope, query : String, fragment : Fragment){
+    val dbSTM = Room.databaseBuilder(fragment.requireContext(), AppDatabaseSTM::class.java, "stm_info")
         .createFromAsset("database/stm_info.db").build()
-    val routes = db.routesDao()
-    val list = routes.getBusRouteInfo(FuzzyQuery(query))
+    val dbExo =Room.databaseBuilder(fragment.requireContext(), AppDatabaseExo::class.java, "exo_info")
+        .createFromAsset("database/exo_info.db").build()
+    val jobSTM = coroutineScope.async {
+        val routes = dbSTM.routesDao()
+        routes.getBusRouteInfo(FuzzyQuery(query))
+        //listOf<BusRouteInfo>()
+    }
+    val jobExo = coroutineScope.async {
+        val routes = dbExo.routesDao()
+        val list = routes.getBusRouteInfo(FuzzyQuery(query, true))
+        list.toMutableList().map {
+            BusRouteInfo(it.routeId.split("-", limit = 2)[1], it.routeName)
+        }
+        //listOf<BusRouteInfo>()
+    }
+    val list = jobSTM.await() + jobExo.await()
     displayBuses(list, fragment)
-    db.close()
+    dbSTM.close()
+    dbExo.close()
 }
 
 private suspend fun displayBuses(list : List<BusRouteInfo>, fragment: Fragment){
@@ -41,7 +59,7 @@ private suspend fun displayBuses(list : List<BusRouteInfo>, fragment: Fragment){
 }
 
 suspend fun setup(query : String, activity : AppCompatActivity, color : Int?){
-    val db = Room.databaseBuilder(activity, AppDatabase::class.java, "stm_info")
+    val db = Room.databaseBuilder(activity, AppDatabaseSTM::class.java, "stm_info")
         .createFromAsset("database/stm_info.db").build()
     val routes = db.routesDao()
     val list = routes.getBusRouteInfo(FuzzyQuery(query))

@@ -22,18 +22,15 @@ Database Schema for each agency:
     "table": "Forms",
     "schema": {
       "id": "INTEGER PRIMARY KEY",
-      "agency": "TEXT NOT NULL",
-      "shape_id": "INTEGER NOT NULL",
-      "(agency,shape_id)": "UNIQUE"
+      "shape_id": "TEXT UNIQUE NOT NULL"
     },
-    "descr": "From shapes.txt, lists all the unique shape_ids for each agency."
+    "descr": "From shapes.txt, lists all the unique shape_ids for each agency. shape_id syntax : 'agency-shape_id_val' "
   },
   {
     "table": "Routes",
     "schema": {
       "id": "INTEGER PRIMARY KEY",
-      "route_id": "INTEGER NOT NULL",
-      "agency": "TEXT NOT NULL",
+      "route_id": "TEXT UNIQUE NOT NULL",
       "route_long_name": "TEXT NOT NULL",
       "route_type": "INTEGER NOT NULL",
       "route_color": "TEXT NOT NULL",
@@ -45,7 +42,7 @@ Database Schema for each agency:
     "table": "Shapes",
     "schema": {
       "id": "INTEGER PRIMARY KEY",
-      "shape_id": "INTEGER NOT NULL REFERENCES Forms(shape_id)",
+      "shape_id": "TEXT NOT NULL REFERENCES Forms(shape_id)",
       "lat": "REAL NOT NULL",
       "long": "REAL NOT NULL",
       "sequence": "INTEGER NOT NULL"
@@ -56,10 +53,10 @@ Database Schema for each agency:
     "table": "StopTimes",
     "schema": {
       "id": "INTEGER PRIMARY KEY",
-      "trip_id": "INTEGER NOT NULL REFERENCES Trips(trip_id)",
+      "trip_id": "TEXT NOT NULL REFERENCES Trips(trip_id)",
       "arrival_time": "TEXT NOT NULL",
       "departure_time": "TEXT NOT NULL",
-      "stop_id": "INTEGER NOT NULL REFERENCES Stops(stop_id)",
+      "stop_id": "TEXT NOT NULL REFERENCES Stops(stop_id)",
       "stop_seq": "INTEGER NOT NULL"
     },
     "descr": "From stop_times.txt, lists all the stop times for each trip of each agency."
@@ -68,11 +65,11 @@ Database Schema for each agency:
     "table": "Stops",
     "schema": {
       "id": "INTEGER PRIMARY KEY",
-      "agency": "TEXT NOT NULL",
-      "stop_code": "INTEGER NOT NULL",
+      "stop_id": "TEXT NOT NULL",
       "stop_name": "TEXT NOT NULL",
       "lat": "REAL NOT NULL",
       "long": "REAL NOT NULL",
+      "stop_code": "TEXT NOT NULL",
       "wheelchair": "INTEGER NOT NULL"
     },
     "descr": "From stops.txt, lists all the available stops for each agency."
@@ -81,15 +78,15 @@ Database Schema for each agency:
     "table": "Trips",
     "schema": {
       "id": "INTEGER PRIMARY KEY",
-      "trip_id": "INTEGER NOT NULL",
-      "route_id": "INTEGER NOT NULL REFERENCES Routes(route_id)",
+      "trip_id": "TEXT NOT NULL",
+      "route_id": "TEXT NOT NULL REFERENCES Routes(route_id)",
       "service_id": "TEXT NOT NULL REFERENCES Calendar(service_id)",
       "trip_headsign": "TEXT NOT NULL",
       "direction_id": "INTEGER NOT NULL",
-      "shape_id": "INTEGER NOT NULL REFERENCES Forms(shape_id)",
+      "shape_id": "TEXT NOT NULL REFERENCES Forms(shape_id)",
       "wheelchair": "INTEGER NOT NULL"
     },
-    "descr": "From stops.txt, lists all the available stops for each agency."
+    "descr": "From trips.txt, lists all the available trips for each agency."
   }
 ]
 ```

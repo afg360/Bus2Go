@@ -96,7 +96,12 @@ elseif ($args[0] -eq "stm"){
 elseif ($args[0] -eq "exo"){
     $path = (Get-Location).Path + "/exo"
     cd $path
-    python setup_exo_db.py
+    if ($args[1] -eq "--no-download"){
+        python setup_exo_db.py "no-download"
+    }
+    else{
+        python setup_exo_db.py
+    }
     $project='~/Desktop/Programming/Projects/android-apps/bus2go/android_app/app/src/main/assets/database'
     Copy-Item './exo_info.db' $project -Confirm
     cd ..

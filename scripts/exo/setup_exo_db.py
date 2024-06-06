@@ -83,9 +83,7 @@ def forms_table(conn, agency):
 
     sql = """CREATE TABLE IF NOT EXISTS Forms (
     	id INTEGER PRIMARY KEY NOT NULL,
-    	agency TEXT NOT NULL,
-    	shape_id INTEGER UNIQUE NOT NULL, --perhaps could add more data
-    	UNIQUE(agency,shape_id)
+    	shape_id TEXT UNIQUE NOT NULL
     );"""
     cursor.execute(sql)
     print("Initialised table Forms")
@@ -99,9 +97,9 @@ def forms_table(conn, agency):
             tokens = line.split(",")
             shape_id = tokens[0]
             if not shape_id == prev:
-                queries.append((agency,tokens[0],))
+                queries.append((f"{agency}-{tokens[0]}",))
                 prev = shape_id
-        sql = "INSERT INTO Forms (agency,shape_id) VALUES (?,?);\n"
+        sql = "INSERT INTO Forms (shape_id) VALUES (?);\n"
         cursor.execute("BEGIN TRANSACTION;")
         cursor.executemany(sql, queries)
         conn.commit()
@@ -114,8 +112,7 @@ def route_table(conn, agency):
 
     sql = """CREATE TABLE IF NOT EXISTS Routes (
     	id INTEGER PRIMARY KEY NOT NULL,
-    	route_id INTEGER NOT NULL,
-    	agency TEXT NOT NULL,
+    	route_id TEXT UNIQUE NOT NULL,
     	route_long_name TEXT NOT NULL,
     	route_type INTEGER NOT NULL,
     	route_color TEXT NOT NULL,
@@ -129,9 +126,9 @@ def route_table(conn, agency):
         file.readline()
         for line in file:
             tokens = line.replace("\n", "").replace("'", "''").split(",")
-            sql = """INSERT INTO Routes (route_id,agency,route_long_name,route_type,route_color,route_text_color)
-            VALUES (?,?,?,?,?,?);"""
-            cursor.execute(sql, (tokens[0],tokens[1],tokens[3],tokens[4],tokens[5], tokens[6]))
+            sql = """INSERT INTO Routes (route_id,route_long_name,route_type,route_color,route_text_color)
+            VALUES (?,?,?,?,?);"""
+            cursor.execute(sql, (f"{agency}-{tokens[0]}",tokens[3],tokens[4],tokens[5], tokens[6]))
             conn.commit()
     print("Successfully inserted Routes table")
     cursor.close()
@@ -143,7 +140,7 @@ def shapes_table(conn, agency):
 
     sql = """CREATE TABLE IF NOT EXISTS Shapes (
     	id INTEGER PRIMARY KEY NOT NULL,
-    	shape_id INTEGER NOT NULL REFERENCES Forms(shape_id),
+    	shape_id TEXT NOT NULL REFERENCES Forms(shape_id),
     	lat REAL NOT NULL,
     	long REAL NOT NULL,
     	sequence INTEGER NOT NULL
@@ -173,10 +170,10 @@ def stop_times_table(conn, agency):
     #COULD INCLUDE TIMEPOINT: 0 = approx, 1 = exact
     query = """CREATE TABLE IF NOT EXISTS StopTimes (
     	id INTEGER PRIMARY KEY NOT NULL,
-    	trip_id INTEGER NOT NULL REFERENCES Trips(trip_id),
+    	trip_id TEXT NOT NULL REFERENCES Trips(trip_id),
     	arrival_time TEXT NOT NULL,
     	departure_time TEXT NOT NULL,
-    	stop_id INTEGER NOT NULL REFERENCES Stops(stop_id),
+    	stop_id TEXT NOT NULL REFERENCES Stops(stop_id),
     	stop_seq INTEGER NOT NULL
     );
     """
@@ -219,11 +216,11 @@ def stops_table(conn, agency):
 
     sql = """CREATE TABLE IF NOT EXISTS Stops (
     	id INTEGER PRIMARY KEY NOT NULL,
-    	agency TEXT NOT NULL,
-    	stop_code INTEGER NOT NULL,
+    	stop_id TEXT UNIQUE NOT NULL,
     	stop_name TEXT NOT NULL,
     	lat REAL NOT NULL,
     	long REAL NOT NULL,
+    	stop_code TEXT NOT NULL,
     	wheelchair INTEGER NOT NULL
     );"""
     cursor.execute(sql)
@@ -235,8 +232,8 @@ def stops_table(conn, agency):
         file.readline()
         for line in file:
             tokens = line.split(",")
-            chunk.append((agency, tokens[1], tokens[2], tokens[3], tokens[4], tokens[5]))
-        sql = "INSERT INTO Stops (agency,stop_code,stop_name,lat,long,wheelchair) VALUES (?,?,?,?,?,?);\n"
+            chunk.append((f"{agency}-{tokens[0]}",tokens[1],tokens[2], tokens[3], tokens[5], tokens[6]))
+        sql = "INSERT INTO Stops (stop_id,stop_name,lat,long,stop_code,wheelchair) VALUES (?,?,?,?,?,?);\n"
 
         cursor.execute("BEGIN TRANSACTION;")
         cursor.executemany(sql, chunk)
@@ -251,12 +248,12 @@ def trips_table(conn, agency):
 
     query = """CREATE TABLE IF NOT EXISTS Trips (
     	id INTEGER PRIMARY KEY NOT NULL,
-    	trip_id INTEGER NOT NULL,
-    	route_id INTEGER NOT NULL REFERENCES Routes(route_id),
+    	trip_id TEXT NOT NULL,
+    	route_id TEXT NOT NULL REFERENCES Routes(route_id),
     	service_id TEXT NOT NULL REFERENCES Calendar(service_id),
     	trip_headsign TEXT NOT NULL,
     	direction_id INTEGER NOT NULL,
-    	shape_id INTEGER NOT NULL REFERENCES Forms(shape_id),
+    	shape_id TEXT NOT NULL REFERENCES Forms(shape_id),
     	wheelchair INTEGER NOT NULL
     );"""
     cursor.execute(query)
@@ -269,7 +266,7 @@ def trips_table(conn, agency):
         i = 1
         for line in file:
             tokens = line.split(",")
-            chunk.append((tokens[2],tokens[0],tokens[1],tokens[3],tokens[4],tokens[5],tokens[6]))
+            chunk.append((f"{agency}-{tokens[2]}",tokens[0],tokens[1],tokens[3],tokens[4],tokens[5],tokens[6]))
             sql = "INSERT INTO Trips (trip_id,route_id,service_id,trip_headsign,direction_id,shape_id,wheelchair) VALUES (?,?,?,?,?,?,?);\n"
             if len(chunk) >= chunk_size:
                 print(f"Created chunk #{i}. Executing query")
@@ -302,15 +299,19 @@ def main():
     ]
     jobs = []
 
-    for file in files:
-        thread = threading.Thread(target=download, args=(
-            "https://exo.quebec/xdata/" + file + "/google_transit.zip", file
-        ))
-        jobs.append(thread)
-        thread.start()
+    import sys
+    if (len(sys.argv) > 1 and sys.argv[1] == "no-download"):
+        pass
+    else:
+        for file in files:
+            thread = threading.Thread(target=download, args=(
+                "https://exo.quebec/xdata/" + file + "/google_transit.zip", file
+            ))
+            jobs.append(thread)
+            thread.start()
+        for job in jobs:
+            job.join()
 
-    for job in jobs:
-        job.join()
     for dir in files:
         print(f"Initialising data for {dir}")
         db_data_init(dir)

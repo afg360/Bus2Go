@@ -24,7 +24,7 @@ import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.database.stm_data.AppDatabase
+import dev.mainhq.bus2go.database.stm_data.AppDatabaseSTM
 import dev.mainhq.bus2go.preferences.BusInfo
 import dev.mainhq.bus2go.preferences.FavouritesData
 import dev.mainhq.bus2go.preferences.SettingsSerializer
@@ -178,7 +178,7 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
     private suspend fun toFavouriteBusInfoList(list : List<BusInfo>) : MutableList<FavouriteBusInfo> {
         //todo find the first time data for every bus on the list
         val stopsInfoDAO = context?.applicationContext?.let {
-            Room.databaseBuilder(it, AppDatabase::class.java, "stm_info.db")
+            Room.databaseBuilder(it, AppDatabaseSTM::class.java, "stm_info.db")
                     .createFromAsset("database/stm_info.db").build() }?.stopsInfoDao()
             val times : MutableList<FavouriteBusInfo> = mutableListOf()
             val calendar = Calendar.getInstance()

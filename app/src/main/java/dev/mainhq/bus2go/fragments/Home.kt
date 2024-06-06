@@ -61,7 +61,7 @@ class Home : Fragment(R.layout.fragment_home) {
                     }
                     else {
                         lifecycleScope.launch {
-                            setup(it, this@Home)
+                            setup(this, it, this@Home)
                         }
                     }
                 }

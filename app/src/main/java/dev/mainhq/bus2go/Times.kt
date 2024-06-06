@@ -6,14 +6,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
-import dev.mainhq.bus2go.database.stm_data.AppDatabase
+import dev.mainhq.bus2go.database.stm_data.AppDatabaseSTM
 import dev.mainhq.bus2go.utils.Time
 import dev.mainhq.bus2go.adapters.TimeListElemsAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import android.icu.util.Calendar
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlin.properties.Delegates
 
@@ -38,7 +37,7 @@ class Times : BaseActivity() {
             //if yes, make a web request
             //if not connected to internet, then below
             val job = async {
-                val db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "stm_info.db")
+                val db = Room.databaseBuilder(applicationContext, AppDatabaseSTM::class.java, "stm_info.db")
                     .createFromAsset("database/stm_info.db").build()
                 db.stopsInfoDao()
             }

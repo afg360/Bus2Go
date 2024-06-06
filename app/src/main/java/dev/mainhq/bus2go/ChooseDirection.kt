@@ -7,7 +7,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.room.Room.databaseBuilder
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textview.MaterialTextView
-import dev.mainhq.bus2go.database.stm_data.AppDatabase
+import dev.mainhq.bus2go.database.stm_data.AppDatabaseSTM
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -41,7 +41,7 @@ class ChooseDirection : BaseActivity() {
         }
         else{
             lifecycleScope.launch {
-                val db = databaseBuilder(applicationContext, AppDatabase::class.java, "stm_info")
+                val db = databaseBuilder(applicationContext, AppDatabaseSTM::class.java, "stm_info")
                     .createFromAsset("database/stm_info.db").build()
                 val dirs = db.tripsDao().getTripHeadsigns(busNum.toInt())
                 val exe0 = async { db.stopsInfoDao().getStopNames(dirs[0]) }

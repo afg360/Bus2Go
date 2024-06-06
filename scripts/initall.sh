@@ -105,7 +105,13 @@ elif [[ $1 = "exo" ]]; then
   #e.g. project=$PROJECT_FOLDER/src/main/assets/database
   project=/absolute/path/to/your/project/database/folder
   cd $path/exo
-  python3 setup_exo_db.py
+  if [[ $2 = "--no-download" ]]; then
+    python3 setup_exo_db.py "no-download"
+  elif [[ $# -gt 2]]; then
+    echo "Too many given arguments!"
+  else
+    python3 setup_exo_db.py
+  fi
   cp -i 'exo_info.db' $project
   exit $?
 
