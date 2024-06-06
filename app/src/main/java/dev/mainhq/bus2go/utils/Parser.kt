@@ -2,13 +2,13 @@ package dev.mainhq.bus2go.utils
 
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.adapters.BusListElemsAdapter
 import dev.mainhq.bus2go.database.stm_data.AppDatabaseSTM
-import dev.mainhq.bus2go.database.stm_data.dao.BusRouteInfo
 import dev.mainhq.bus2go.database.exo_data.AppDatabaseExo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -27,16 +27,17 @@ suspend fun setup(coroutineScope: CoroutineScope, query : String, fragment : Fra
         .createFromAsset("database/exo_info.db").build()
     val jobSTM = coroutineScope.async {
         val routes = dbSTM.routesDao()
-        routes.getBusRouteInfo(FuzzyQuery(query))
-        //listOf<BusRouteInfo>()
+        val list = routes.getBusRouteInfo(FuzzyQuery(query))
+        list.toMutableList().map {
+            BusInfo(it.routeId, it.routeName, BusAgency.STM)
+        }
     }
     val jobExo = coroutineScope.async {
         val routes = dbExo.routesDao()
         val list = routes.getBusRouteInfo(FuzzyQuery(query, true))
         list.toMutableList().map {
-            BusRouteInfo(it.routeId.split("-", limit = 2)[1], it.routeName)
+            BusInfo(it.routeId.split("-", limit = 2)[1], it.routeName, BusAgency.EXO)
         }
-        //listOf<BusRouteInfo>()
     }
     val list = jobSTM.await() + jobExo.await()
     displayBuses(list, fragment)
@@ -44,7 +45,7 @@ suspend fun setup(coroutineScope: CoroutineScope, query : String, fragment : Fra
     dbExo.close()
 }
 
-private suspend fun displayBuses(list : List<BusRouteInfo>, fragment: Fragment){
+private suspend fun displayBuses(list : List<BusInfo>, fragment: Fragment){
     //todo
     //need to handle queries where french accents are needed
     //val parsable = Parser.toParsable(query)
@@ -59,15 +60,31 @@ private suspend fun displayBuses(list : List<BusRouteInfo>, fragment: Fragment){
 }
 
 suspend fun setup(query : String, activity : AppCompatActivity, color : Int?){
-    val db = Room.databaseBuilder(activity, AppDatabaseSTM::class.java, "stm_info")
+    val dbSTM = Room.databaseBuilder(activity, AppDatabaseSTM::class.java, "stm_info")
         .createFromAsset("database/stm_info.db").build()
-    val routes = db.routesDao()
-    val list = routes.getBusRouteInfo(FuzzyQuery(query))
+    val dbExo =Room.databaseBuilder(activity, AppDatabaseExo::class.java, "exo_info")
+        .createFromAsset("database/exo_info.db").build()
+    val jobSTM = activity.lifecycleScope.async {
+        val routes = dbSTM.routesDao()
+        val list = routes.getBusRouteInfo(FuzzyQuery(query))
+        list.toMutableList().map {
+            BusInfo(it.routeId, it.routeName, BusAgency.STM)
+        }
+    }
+    val jobExo = activity.lifecycleScope.async {
+        val routes = dbExo.routesDao()
+        val list = routes.getBusRouteInfo(FuzzyQuery(query, true))
+        list.toMutableList().map {
+            BusInfo(it.routeId.split("-", limit = 2)[1], it.routeName, BusAgency.EXO)
+        }
+    }
+    val list = jobSTM.await() + jobExo.await()
     displayBuses(list, activity, color)
-    db.close()
+    dbSTM.close()
+    dbExo.close()
 }
 
-private suspend fun displayBuses(list : List<BusRouteInfo>, activity: AppCompatActivity, color : Int?){
+private suspend fun displayBuses(list : List<BusInfo>, activity: AppCompatActivity, color : Int?){
     //todo
     //need to handle queries where french accents are needed
     //val parsable = Parser.toParsable(query)
@@ -98,5 +115,11 @@ fun toParsable(txt: String): String {
         .replace("ô", "o")
         .replace("û", "u")
     return str
+}
+
+data class BusInfo(val routeId : String, val routeName : String, val busAgency: BusAgency)
+
+enum class BusAgency : java.io.Serializable{
+    STM, EXO
 }
 

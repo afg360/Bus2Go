@@ -8,7 +8,7 @@ import dev.mainhq.bus2go.utils.Time
 interface StopTimesDAO {
 
     @Query("SELECT DISTINCT stop_name FROM StopTimes " +
-            "JOIN Stops on Stops.id = StopTimes.stop_id " +
+            "JOIN Stops on Stops.stop_id = StopTimes.stop_id " +
             "JOIN Trips ON Trips.trip_id = StopTimes.trip_id " +
             "WHERE trip_headsign = (:headsign) ORDER BY stop_seq")
     suspend fun getStopNames(headsign : String) : List<String>
