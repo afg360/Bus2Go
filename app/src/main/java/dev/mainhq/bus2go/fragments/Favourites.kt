@@ -31,6 +31,8 @@ import dev.mainhq.bus2go.preferences.SettingsSerializer
 import dev.mainhq.bus2go.utils.Time
 import dev.mainhq.bus2go.adapters.FavouritesListElemsAdapter
 import dev.mainhq.bus2go.adapters.setMargins
+import dev.mainhq.bus2go.database.exo_data.AppDatabaseExo
+import dev.mainhq.bus2go.utils.BusAgency
 import kotlinx.collections.immutable.mutate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -59,11 +61,12 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
         super.onViewCreated(view, savedInstanceState)
 
         updateJob = lifecycleScope.launch {
-            val list =  context?.favouritesDataStore?.data?.first()?.list?.toList() ?: listOf()
-            if (list.isEmpty()) setEmpty(view)
+            val listSTM =  context?.favouritesDataStore?.data?.first()?.listSTM?.toList() ?: listOf()
+            val listExo = context?.favouritesDataStore?.data?.first()?.listExo?.toList() ?: listOf()
+            if (listSTM.isEmpty() && listExo.isEmpty()) setEmpty(view)
             else {
-                val mutableList = toFavouriteBusInfoList(list)
-                recyclerViewDisplay(view, mutableList)
+                val mutableList = toFavouriteBusInfoList(listSTM, BusAgency.STM) + toFavouriteBusInfoList(listExo, BusAgency.EXO)
+                recyclerViewDisplay(view, mutableList.toMutableList())
             }
         }
 
@@ -106,10 +109,11 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
                 executor!!.scheduleAtFixedRate({
                     updateJob = lifecycleScope.launch {
                         //todo could add some incertitude, and web requests here too
-                        val tmpList = context?.favouritesDataStore?.data?.first()?.list?.toList() ?: listOf()
-                        if (tmpList.isNotEmpty()) {
+                        val tmpListSTM = context?.favouritesDataStore?.data?.first()?.listSTM?.toList() ?: listOf()
+                        val tmpListExo = context?.favouritesDataStore?.data?.first()?.listExo?.toList() ?: listOf()
+                        if (tmpListSTM.isNotEmpty() || tmpListExo.isNotEmpty()) {
                             //FIXME we only want to change the time left data, NOT the background colors etc
-                            val mutableList = toFavouriteBusInfoList(tmpList)
+                            val mutableList = toFavouriteBusInfoList(tmpListSTM, BusAgency.STM) + toFavouriteBusInfoList(tmpListExo, BusAgency.EXO)
                             withContext(Dispatchers.Main){
                                 //FIXME nullPointerException bug is at line below
                                 val favouritesListElemsAdapter = recyclerView.adapter as FavouritesListElemsAdapter?
@@ -143,12 +147,15 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
                         }
                         lifecycleScope.launch {
                             context.favouritesDataStore.updateData { favouritesData ->
-                                favouritesData.copy(list = favouritesData.list.mutate {
+                                favouritesData.copy(listSTM = favouritesData.listSTM.mutate {
                                     it.removeIf{busInfo -> toRemoveList.contains(busInfo) }
                                 })
                             }
                             withContext(Dispatchers.Main){
-                                recyclerViewDisplay(view, toFavouriteBusInfoList(context.favouritesDataStore.data.first().list.toList()), new = true)
+                                recyclerViewDisplay(view,
+                                    (toFavouriteBusInfoList(context.favouritesDataStore.data.first().listSTM.toList(), BusAgency.STM)
+                                    + toFavouriteBusInfoList(context.favouritesDataStore.data.first().listExo.toList(), BusAgency.EXO)).toMutableList()
+                                    , new = true)
                                 appBar?.apply { changeAppBar(this) }
                                 dialog.dismiss()
                             }
@@ -175,29 +182,56 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
     }
 
     /** Used to get the required data to make a list of favouriteBusInfo, adding dates to busInfo elements */
-    private suspend fun toFavouriteBusInfoList(list : List<BusInfo>) : MutableList<FavouriteBusInfo> {
+    private suspend fun toFavouriteBusInfoList(list : List<BusInfo>, agency: BusAgency) : MutableList<FavouriteBusInfo> {
         //todo find the first time data for every bus on the list
-        val stopsInfoDAO = context?.applicationContext?.let {
-            Room.databaseBuilder(it, AppDatabaseSTM::class.java, "stm_info.db")
-                    .createFromAsset("database/stm_info.db").build() }?.stopsInfoDao()
-            val times : MutableList<FavouriteBusInfo> = mutableListOf()
-            val calendar = Calendar.getInstance()
-            val dayString = when (calendar.get(Calendar.DAY_OF_WEEK)) {
-                Calendar.SUNDAY -> "d"
-                Calendar.MONDAY -> "m"
-                Calendar.TUESDAY -> "t"
-                Calendar.WEDNESDAY -> "w"
-                Calendar.THURSDAY -> "y"
-                Calendar.FRIDAY -> "f"
-                Calendar.SATURDAY -> "s"
-                else -> null
+        when(agency){
+            BusAgency.STM -> {
+                val stopsInfoDAO = context?.applicationContext?.let {
+                    Room.databaseBuilder(it, AppDatabaseSTM::class.java, "stm_info.db")
+                        .createFromAsset("database/stm_info.db").build() }?.stopsInfoDao()
+                val times : MutableList<FavouriteBusInfo> = mutableListOf()
+                val calendar = Calendar.getInstance()
+                val dayString = when (calendar.get(Calendar.DAY_OF_WEEK)) {
+                    Calendar.SUNDAY -> "d"
+                    Calendar.MONDAY -> "m"
+                    Calendar.TUESDAY -> "t"
+                    Calendar.WEDNESDAY -> "w"
+                    Calendar.THURSDAY -> "y"
+                    Calendar.FRIDAY -> "f"
+                    Calendar.SATURDAY -> "s"
+                    else -> null
+                }
+                dayString ?: throw IllegalStateException("Cannot have a non day of the week!")
+                list.forEach {busInfo ->
+                    stopsInfoDAO?.getFavouriteStopTime(busInfo.stopName, dayString, Time(calendar).toString(), busInfo.tripHeadsign)
+                        ?.also { time -> times.add(FavouriteBusInfo(busInfo, time, agency)) }
+                }
+                return times
             }
-            dayString ?: throw IllegalStateException("Cannot have a non day of the week!")
-            list.forEach {busInfo ->
-                stopsInfoDAO?.getFavouriteStopTime(busInfo.stopName, dayString, Time(calendar).toString(), busInfo.tripHeadsign)
-                    ?.let { time -> times.add(FavouriteBusInfo(busInfo, time)) }
+            BusAgency.EXO -> {
+                val stopTimesDAO = context?.applicationContext?.let {
+                    Room.databaseBuilder(it, AppDatabaseExo::class.java, "exo_info.db")
+                        .createFromAsset("database/exo_info.db").build() }?.stopTimesDao()
+                val times : MutableList<FavouriteBusInfo> = mutableListOf()
+                val calendar = Calendar.getInstance()
+                val dayString = when (calendar.get(Calendar.DAY_OF_WEEK)) {
+                    Calendar.SUNDAY -> "d"
+                    Calendar.MONDAY -> "m"
+                    Calendar.TUESDAY -> "t"
+                    Calendar.WEDNESDAY -> "w"
+                    Calendar.THURSDAY -> "y"
+                    Calendar.FRIDAY -> "f"
+                    Calendar.SATURDAY -> "s"
+                    else -> null
+                }
+                dayString ?: throw IllegalStateException("Cannot have a non day of the week!")
+                list.forEach {busInfo ->
+                    stopTimesDAO?.getFavouriteStopTime(busInfo.stopName, dayString, Time(calendar).toString(), busInfo.tripHeadsign)
+                        ?.also { time -> times.add(FavouriteBusInfo(busInfo, time, agency)) }
+                }
+                return times
             }
-        return times
+        }
     }
 
     private suspend fun recyclerViewDisplay(view : View, times : MutableList<FavouriteBusInfo>, new : Boolean = false){
@@ -262,4 +296,4 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
 
 }
 
-data class FavouriteBusInfo(val busInfo: BusInfo, val arrivalTime : Time)
+data class FavouriteBusInfo(val busInfo: BusInfo, val arrivalTime : Time, val agency : BusAgency)

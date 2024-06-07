@@ -25,16 +25,17 @@ const val AGENCY = "AGENCY"
 //change appbar to be only a back button
 //todo may make it a swapable ui instead of choosing button0 or 1
 class ChooseDirection : BaseActivity() {
+    private lateinit var agency : BusAgency
     override fun onCreate(savedInstanceState : Bundle?) {
         super.onCreate(savedInstanceState);
         //setTheme()
         val extras : Bundle = this.intent.extras ?: throw AssertionError("Assertion failed")
         val busName = extras.getString(BUS_NAME) ?: throw AssertionError("BUS_NAME is Null")
         val busNum = extras.getString(BUS_NUM) ?: throw AssertionError("BUS_NUM is Null")
-        val agency = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        agency = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             extras.getSerializable (AGENCY, BusAgency::class.java) ?: throw AssertionError("AGENCY is Null")
         } else {
-            extras.getSerializable (AGENCY) ?: throw AssertionError("AGENCY is Null")
+            extras.getSerializable (AGENCY) as BusAgency? ?: throw AssertionError("AGENCY is Null")
         }
         //set a loading screen first before displaying the correct buttons
         this.setContentView(R.layout.choose_direction);
@@ -43,10 +44,10 @@ class ChooseDirection : BaseActivity() {
         busNumView.text = busNum;
         busNameView.text = busName;
 
-        setButtons(busNum, agency as BusAgency)
+        setButtons(busNum)
     }
 
-    private fun setButtons(busNum : String, agency: BusAgency){
+    private fun setButtons(busNum : String){
         if (busNum.toInt() <= 5){
             //todo
             Log.e("Dir Error", "No available buttons for the moment")
@@ -83,12 +84,14 @@ class ChooseDirection : BaseActivity() {
                             findViewById<MaterialButton>(R.id.route_0).setOnClickListener{
                                 intent.putStringArrayListExtra("stops", dir0 as ArrayList<String>)
                                 intent.putExtra("headsign", headsign0)
+                                intent.putExtra(AGENCY, agency)
                                 startActivity(intent)
                             }
                             findViewById<MaterialTextView>(R.id.description_route_1).text = headsign1
                             findViewById<MaterialButton>(R.id.route_1).setOnClickListener{
                                 intent.putStringArrayListExtra("stops", dir1 as ArrayList<String>)
                                 intent.putExtra("headsign", headsign1)
+                                intent.putExtra(AGENCY, agency)
                                 startActivity(intent)
                             }
                         }
@@ -124,11 +127,13 @@ class ChooseDirection : BaseActivity() {
                 leftButton.setOnClickListener {
                     intent.putStringArrayListExtra("stops", dir0 as ArrayList<String>)
                     intent.putExtra("headsign", headsign0)
+                    intent.putExtra(AGENCY, agency)
                     startActivity(intent)
                 }
                 rightButton.setOnClickListener {
                     intent.putStringArrayListExtra("stops", dir1 as ArrayList<String>)
                     intent.putExtra("headsign", headsign1)
+                    intent.putExtra(AGENCY, agency)
                     startActivity(intent)
                 }
             }
@@ -138,11 +143,13 @@ class ChooseDirection : BaseActivity() {
                 leftButton.setOnClickListener {
                     intent.putStringArrayListExtra("stops", dir1 as ArrayList<String>)
                     intent.putExtra("headsign", headsign1)
+                    intent.putExtra(AGENCY, agency)
                     startActivity(intent)
                 }
                 rightButton.setOnClickListener {
                     intent.putStringArrayListExtra("stops", dir0 as ArrayList<String>)
                     intent.putExtra("headsign", headsign0)
+                    intent.putExtra(AGENCY, agency)
                     startActivity(intent)
                 }
             }

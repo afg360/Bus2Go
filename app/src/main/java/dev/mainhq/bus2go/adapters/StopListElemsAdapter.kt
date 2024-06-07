@@ -10,23 +10,26 @@ import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textview.MaterialTextView
+import dev.mainhq.bus2go.AGENCY
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.Times
 import dev.mainhq.bus2go.fragments.favouritesDataStore
 import dev.mainhq.bus2go.preferences.BusInfo
+import dev.mainhq.bus2go.utils.BusAgency
 import kotlinx.collections.immutable.mutate
 import kotlinx.coroutines.launch
 
 
 class StopListElemsAdapter(private val data: List<String>, private val list: List<BusInfo>,
-                           private val headsign: String)
+                           private val headsign: String, private val agency: BusAgency)
     : RecyclerView.Adapter<StopListElemsAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
             LayoutInflater.from(parent.context)
             .inflate(R.layout.elem_stop_list, parent, false),
-            headsign
+            headsign,
+            agency
         )
     }
 
@@ -44,11 +47,21 @@ class StopListElemsAdapter(private val data: List<String>, private val list: Lis
                 view.tag = "on"
                 view.findViewTreeLifecycleOwner()!!.lifecycleScope.launch {
                     view.context.favouritesDataStore.updateData { favourites ->
-                        favourites.copy(list = favourites.list.mutate {
-                            //maybe add a tripid or some identifier so that it is a unique thing deleted
-                            it.add(BusInfo(data, headsign))
-                            Log.d("FAVOURITES", "CLICKED TO ADD A FAVOURITE!")
-                        })
+                        when(agency){
+                            BusAgency.STM -> {
+                                favourites.copy(listSTM = favourites.listSTM.mutate {
+                                    //maybe add a tripid or some identifier so that it is a unique thing deleted
+
+                                    it.add(BusInfo(data, headsign))
+                                })
+                            }
+                            BusAgency.EXO -> {
+                                favourites.copy(listExo = favourites.listExo.mutate {
+                                    //maybe add a tripid or some identifier so that it is a unique thing deleted
+                                    it.add(BusInfo(data, headsign))
+                                })
+                            }
+                        }
                     }
                 }
             }
@@ -58,9 +71,21 @@ class StopListElemsAdapter(private val data: List<String>, private val list: Lis
                 //todo add to favourites
                 view.findViewTreeLifecycleOwner()!!.lifecycleScope.launch {
                     view.context.favouritesDataStore.updateData { favourites ->
-                        favourites.copy(list = favourites.list.mutate {
-                            it.remove(BusInfo(data, headsign))
-                        })
+                        when(agency){
+                            BusAgency.STM -> {
+                                favourites.copy(listSTM = favourites.listSTM.mutate {
+                                    //maybe add a tripid or some identifier so that it is a unique thing deleted
+
+                                    it.remove(BusInfo(data, headsign))
+                                })
+                            }
+                            BusAgency.EXO -> {
+                                favourites.copy(listExo = favourites.listExo.mutate {
+                                    //maybe add a tripid or some identifier so that it is a unique thing deleted
+                                    it.remove(BusInfo(data, headsign))
+                                })
+                            }
+                        }
                     }
                 }
             }
@@ -71,7 +96,7 @@ class StopListElemsAdapter(private val data: List<String>, private val list: Lis
         return this.data.size
     }
 
-    class ViewHolder(view: View, private val headsign : String) : RecyclerView.ViewHolder(view) {
+    class ViewHolder(view: View, private val headsign : String, private val agency: BusAgency) : RecyclerView.ViewHolder(view) {
         //TODO INSTEAD ADD A COLUMN IN DATABASE TO SET AS FAVOURITE A CERTAIN STOP, AND AFFICHER ONLY THE NEXT STOP
         val stopNameTextView: MaterialTextView
         val favouriteSelectedView : ImageView
@@ -82,6 +107,7 @@ class StopListElemsAdapter(private val data: List<String>, private val list: Lis
                 val intent = Intent(view.context, Times::class.java)
                 intent.putExtra("stopName", stopName)
                 intent.putExtra("headsign", headsign)
+                intent.putExtra(AGENCY, agency)
                 it.context.startActivity(intent)
                 it.clearFocus()
             }

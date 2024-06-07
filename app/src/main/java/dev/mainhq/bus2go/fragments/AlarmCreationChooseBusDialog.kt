@@ -93,7 +93,7 @@ class AlarmCreationChooseBusDialog() : DialogFragment(R.layout.fragment_create_a
         /** List all the favourite stops available for the user to create an alarm */
         lifecycleScope.launch {
             context?.also {
-                val job = async{it.favouritesDataStore.data.first().list.toList()}
+                val job = async{it.favouritesDataStore.data.first().listSTM.toList()}
                 val bottomNavBar = AlarmCreationDialogBottomNavBar()
                 withContext(Dispatchers.Main) {
                     bottomNavBar.setBottomNavBarListener(object : AlarmCreationDialogBottomNavBar.BottomNavBarListener{

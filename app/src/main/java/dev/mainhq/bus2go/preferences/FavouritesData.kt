@@ -3,6 +3,7 @@ package dev.mainhq.bus2go.preferences
 import android.os.Parcel
 import android.os.Parcelable
 import androidx.datastore.core.Serializer
+import dev.mainhq.bus2go.utils.BusAgency
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
@@ -24,7 +25,9 @@ import java.lang.Exception
 @Serializable
 data class FavouritesData(
     @Serializable(with = MyPersistentListSerializer::class)
-    val list : PersistentList<BusInfo> = persistentListOf()
+    val listSTM : PersistentList<BusInfo> = persistentListOf(),
+    @Serializable(with = MyPersistentListSerializer::class)
+    val listExo : PersistentList<BusInfo> = persistentListOf()
 )
 
 @Serializable

@@ -19,5 +19,6 @@
         <item name="android:colorForeground">#42221f</item>
     </style>
     <color name="basic_blue">#FF0a5af2</color>
+    <color name="basic_purple">#FF8021cb</color>
 
 </resources>
