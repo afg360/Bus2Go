@@ -2,6 +2,7 @@ package dev.mainhq.bus2go.viewmodel
 
 import android.app.Application
 import android.content.Context
+import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.dataStore
 import androidx.lifecycle.AndroidViewModel
@@ -32,11 +33,10 @@ class FavouritesViewModel(private val application: Application) : AndroidViewMod
     private val _exoBusInfo : MutableStateFlow<List<BusInfo>> = MutableStateFlow(listOf())
     val exoBusInfo : StateFlow<List<BusInfo>> get() = _exoBusInfo
 
-    fun loadData(){
-        viewModelScope.launch {
-            _stmBusInfo.value = application.favouritesDataStore.data.first().listSTM
-            _exoBusInfo.value = application.favouritesDataStore.data.first().listExo
-        }
+    suspend fun loadData(){
+        val data = application.favouritesDataStore.data.first()
+        _stmBusInfo.value = data.listSTM
+        _exoBusInfo.value = data.listExo
     }
 
     fun getAllBusInfo() : List<BusInfo>{ return stmBusInfo.value + exoBusInfo.value }

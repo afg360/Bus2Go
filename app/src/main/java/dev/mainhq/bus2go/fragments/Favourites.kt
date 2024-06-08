@@ -49,13 +49,17 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        favouritesViewModel.loadData()
-        val listSTM = favouritesViewModel.stmBusInfo.value
-        val listExo = favouritesViewModel.exoBusInfo.value
-        if (listSTM.isEmpty() && listExo.isEmpty())
-            view.findViewById<MaterialTextView>(R.id.favourites_text_view).text = getText(R.string.no_favourites)
-        else {
-            lifecycleScope.launch {
+        lifecycleScope.launch {
+            favouritesViewModel.loadData()
+            val listSTM = favouritesViewModel.stmBusInfo.value
+            val listExo = favouritesViewModel.exoBusInfo.value
+            if (listSTM.isEmpty() && listExo.isEmpty()) {
+                withContext(Dispatchers.Main){
+                    view.findViewById<MaterialTextView>(R.id.favourites_text_view).text =
+                        getText(R.string.no_favourites)
+                }
+            }
+            else {
                 val list = (toFavouriteBusInfoList(listSTM, BusAgency.STM) + toFavouriteBusInfoList(listExo, BusAgency.EXO))
                 withContext(Dispatchers.Main){
                     view.findViewById<MaterialTextView>(R.id.favourites_text_view).text = getText(R.string.favourites)
@@ -67,9 +71,9 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
                     recyclerViewTmp?.tag = "unselected"
                     recyclerViewTmp?.adapter = recyclerViewTmp?.let { FavouritesListElemsAdapter(list, WeakReference(it) ) }
                 }
+
             }
         }
-
 
         val appBar = (parentFragment as Home).view?.findViewById<AppBarLayout>(R.id.mainAppBar)
         /** This part allows us to press the back button when in selection mode of favourites to get out of it */
