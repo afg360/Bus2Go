@@ -2,12 +2,14 @@ package dev.mainhq.bus2go
 
 import android.os.Build
 import android.os.Bundle
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import dev.mainhq.bus2go.fragments.favouritesDataStore
 import dev.mainhq.bus2go.adapters.StopListElemsAdapter
 import dev.mainhq.bus2go.utils.BusAgency
+import dev.mainhq.bus2go.viewmodel.FavouritesViewModel
+import dev.mainhq.bus2go.viewmodel.favouritesDataStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -18,15 +20,14 @@ import kotlinx.coroutines.withContext
 //all the possible stations (ordered by id, and prob based on localisation? -> not privacy friendly
 //and once the user clicks, either new activity OR new fragment? -> in the latter case need to implement onback
 //todo add possibility of searching amongst all the stops
-class ChooseStop : BaseActivity() {
+class ChooseStop() : BaseActivity() {
 
     private lateinit var agency: BusAgency
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.choose_stop)
-
-        //below represents strings of stopsinfo
+        val favouritesViewModel = ViewModelProvider(this)[FavouritesViewModel::class.java]        //below represents strings of stopsinfo
         val data : List<String> = intent.getStringArrayListExtra("stops") ?: listOf()
         val headsign = intent.getStringExtra("headsign") ?: ""
         agency = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -39,9 +40,9 @@ class ChooseStop : BaseActivity() {
             val layoutManager = LinearLayoutManager(applicationContext)
             lifecycleScope.launch {
                 //the datastore may be closed!
-                val favourites = favouritesDataStore.data.first().listSTM.toList()
+                val favourites = favouritesViewModel.stmBusInfo.value + favouritesViewModel.exoBusInfo.value
                 withContext(Dispatchers.Main){
-                    recyclerView.adapter = StopListElemsAdapter(data, favourites, headsign, agency)
+                    recyclerView.adapter = StopListElemsAdapter(data, favourites, headsign, agency, favouritesViewModel)
                     layoutManager.orientation = LinearLayoutManager.VERTICAL
                     recyclerView.layoutManager = layoutManager
                 }

@@ -1,6 +1,5 @@
 package dev.mainhq.bus2go.fragments
 
-import android.content.Context
 import android.icu.util.Calendar
 import android.os.Bundle
 import android.view.View
@@ -12,8 +11,6 @@ import androidx.core.view.children
 import androidx.core.view.forEach
 import androidx.core.view.get
 import androidx.core.view.size
-import androidx.datastore.core.DataStore
-import androidx.datastore.dataStore
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -26,17 +23,15 @@ import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.database.stm_data.AppDatabaseSTM
 import dev.mainhq.bus2go.preferences.BusInfo
-import dev.mainhq.bus2go.preferences.FavouritesData
-import dev.mainhq.bus2go.preferences.SettingsSerializer
 import dev.mainhq.bus2go.utils.Time
 import dev.mainhq.bus2go.adapters.FavouritesListElemsAdapter
 import dev.mainhq.bus2go.adapters.setMargins
 import dev.mainhq.bus2go.database.exo_data.AppDatabaseExo
 import dev.mainhq.bus2go.utils.BusAgency
-import kotlinx.collections.immutable.mutate
+import dev.mainhq.bus2go.viewmodel.FavouritesViewModel
+import dev.mainhq.bus2go.viewmodel.RoomViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.lang.ref.WeakReference
@@ -44,14 +39,9 @@ import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 
-/** The datastore of favourites refers to favourites defined in the preferences file, at dev.mainhq.schedules.preferences,
- *  NOT THIS FRAGMENT */
-val Context.favouritesDataStore : DataStore<FavouritesData> by dataStore(
-    fileName = "favourites.json",
-    serializer = SettingsSerializer
-)
 
-class Favourites() : Fragment(R.layout.fragment_favourites) {
+class Favourites(private val favouritesViewModel: FavouritesViewModel,
+    private val roomViewModel : RoomViewModel) : Fragment(R.layout.fragment_favourites) {
 
     var executor : ScheduledExecutorService? = null
     var updateJob : Job? = null
@@ -59,14 +49,24 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        updateJob = lifecycleScope.launch {
-            val listSTM =  context?.favouritesDataStore?.data?.first()?.listSTM?.toList() ?: listOf()
-            val listExo = context?.favouritesDataStore?.data?.first()?.listExo?.toList() ?: listOf()
-            if (listSTM.isEmpty() && listExo.isEmpty()) setEmpty(view)
-            else {
-                val mutableList = toFavouriteBusInfoList(listSTM, BusAgency.STM) + toFavouriteBusInfoList(listExo, BusAgency.EXO)
-                recyclerViewDisplay(view, mutableList.toMutableList())
+        favouritesViewModel.loadData()
+        val listSTM = favouritesViewModel.stmBusInfo.value
+        val listExo = favouritesViewModel.exoBusInfo.value
+        if (listSTM.isEmpty() && listExo.isEmpty())
+            view.findViewById<MaterialTextView>(R.id.favourites_text_view).text = getText(R.string.no_favourites)
+        else {
+            lifecycleScope.launch {
+                val list = (toFavouriteBusInfoList(listSTM, BusAgency.STM) + toFavouriteBusInfoList(listExo, BusAgency.EXO))
+                withContext(Dispatchers.Main){
+                    view.findViewById<MaterialTextView>(R.id.favourites_text_view).text = getText(R.string.favourites)
+                    val layoutManager = LinearLayoutManager(view.context)
+                    layoutManager.orientation = LinearLayoutManager.VERTICAL
+                    val recyclerViewTmp : RecyclerView? = view.findViewById(R.id.favouritesRecyclerView)
+                    recyclerViewTmp?.layoutManager = layoutManager
+                    //TODO need to improve that code to make it more safe
+                    recyclerViewTmp?.tag = "unselected"
+                    recyclerViewTmp?.adapter = recyclerViewTmp?.let { FavouritesListElemsAdapter(list, WeakReference(it) ) }
+                }
             }
         }
 
@@ -94,8 +94,6 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
             }
         })
 
-
-
         val recyclerView : RecyclerView = view.findViewById(R.id.favouritesRecyclerView)
         /** This part allows us to update each recyclerview item from favourites in "real time", i.e. the user can see
          *  an updated time left displayed */
@@ -107,12 +105,11 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
                 //TODO check if inrealtime is on.
                 //FIXME this part crashes/creates a memory leak!!!!!!!
                 executor!!.scheduleAtFixedRate({
-                    updateJob = lifecycleScope.launch {
-                        //todo could add some incertitude, and web requests here too
-                        val tmpListSTM = context?.favouritesDataStore?.data?.first()?.listSTM?.toList() ?: listOf()
-                        val tmpListExo = context?.favouritesDataStore?.data?.first()?.listExo?.toList() ?: listOf()
-                        if (tmpListSTM.isNotEmpty() || tmpListExo.isNotEmpty()) {
-                            //FIXME we only want to change the time left data, NOT the background colors etc
+                    val tmpListSTM = favouritesViewModel.stmBusInfo.value
+                    val tmpListExo = favouritesViewModel.exoBusInfo.value
+                    if (tmpListSTM.isNotEmpty() || tmpListExo.isNotEmpty()) {
+                        //FIXME we only want to change the time left data, NOT the background colors etc
+                        lifecycleScope.launch{
                             val mutableList = toFavouriteBusInfoList(tmpListSTM, BusAgency.STM) + toFavouriteBusInfoList(tmpListExo, BusAgency.EXO)
                             withContext(Dispatchers.Main){
                                 //FIXME nullPointerException bug is at line below
@@ -140,26 +137,20 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
                     }
                     .setPositiveButton(resources.getString(R.string.remove_confirmation_dialog_accept)) { dialog, _ ->
                         val toRemoveList = mutableListOf<BusInfo>()
+                        //TODO add agencies to know from which list to remove
                         recyclerView.forEach {
                             if ((recyclerView.adapter as FavouritesListElemsAdapter).isSelected(it as ViewGroup)){
                                 toRemoveList.add(busInfoFromView(it))
                             }
                         }
+                        favouritesViewModel.removeFavourites(toRemoveList)
                         lifecycleScope.launch {
-                            context.favouritesDataStore.updateData { favouritesData ->
-                                favouritesData.copy(listSTM = favouritesData.listSTM.mutate {
-                                    it.removeIf{busInfo -> toRemoveList.contains(busInfo) }
-                                })
-                            }
-                            withContext(Dispatchers.Main){
-                                recyclerViewDisplay(view,
-                                    (toFavouriteBusInfoList(context.favouritesDataStore.data.first().listSTM.toList(), BusAgency.STM)
-                                    + toFavouriteBusInfoList(context.favouritesDataStore.data.first().listExo.toList(), BusAgency.EXO)).toMutableList()
-                                    , new = true)
-                                appBar?.apply { changeAppBar(this) }
-                                dialog.dismiss()
-                            }
+                            val list = (toFavouriteBusInfoList(favouritesViewModel.stmBusInfo.value, BusAgency.STM)
+                                    + toFavouriteBusInfoList(favouritesViewModel.exoBusInfo.value, BusAgency.EXO)).toMutableList()
+                            recyclerViewDisplay(view, list, new = true)
                         }
+                        appBar?.apply { changeAppBar(this) }
+                        dialog.dismiss()
                     }
                     .show()
             }
@@ -174,62 +165,28 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
         executor?.shutdown()
     }
 
-    private suspend fun setEmpty(view : View){
-        //FIXME seems that changing too many times/too fast the fragment causes it to fuck up the context? -> crash because not attached?
-        withContext(Dispatchers.Main){
-            view.findViewById<MaterialTextView>(R.id.favourites_text_view).text = getText(R.string.no_favourites)
-        }
-    }
-
     /** Used to get the required data to make a list of favouriteBusInfo, adding dates to busInfo elements */
     private suspend fun toFavouriteBusInfoList(list : List<BusInfo>, agency: BusAgency) : MutableList<FavouriteBusInfo> {
-        //todo find the first time data for every bus on the list
-        when(agency){
+        val times : MutableList<FavouriteBusInfo> = mutableListOf()
+        val calendar = Calendar.getInstance()
+        val dayString = when (calendar.get(Calendar.DAY_OF_WEEK)) {
+            Calendar.SUNDAY -> "d"
+            Calendar.MONDAY -> "m"
+            Calendar.TUESDAY -> "t"
+            Calendar.WEDNESDAY -> "w"
+            Calendar.THURSDAY -> "y"
+            Calendar.FRIDAY -> "f"
+            Calendar.SATURDAY -> "s"
+            else -> null
+        }
+        dayString ?: throw IllegalStateException("Cannot have a non day of the week!")
+        return when(agency){
             BusAgency.STM -> {
-                val stopsInfoDAO = context?.applicationContext?.let {
-                    Room.databaseBuilder(it, AppDatabaseSTM::class.java, "stm_info.db")
-                        .createFromAsset("database/stm_info.db").build() }?.stopsInfoDao()
-                val times : MutableList<FavouriteBusInfo> = mutableListOf()
-                val calendar = Calendar.getInstance()
-                val dayString = when (calendar.get(Calendar.DAY_OF_WEEK)) {
-                    Calendar.SUNDAY -> "d"
-                    Calendar.MONDAY -> "m"
-                    Calendar.TUESDAY -> "t"
-                    Calendar.WEDNESDAY -> "w"
-                    Calendar.THURSDAY -> "y"
-                    Calendar.FRIDAY -> "f"
-                    Calendar.SATURDAY -> "s"
-                    else -> null
-                }
-                dayString ?: throw IllegalStateException("Cannot have a non day of the week!")
-                list.forEach {busInfo ->
-                    stopsInfoDAO?.getFavouriteStopTime(busInfo.stopName, dayString, Time(calendar).toString(), busInfo.tripHeadsign)
-                        ?.also { time -> times.add(FavouriteBusInfo(busInfo, time, agency)) }
-                }
-                return times
+                roomViewModel.getStopTimes(list, agency, dayString, calendar, times)
             }
+
             BusAgency.EXO -> {
-                val stopTimesDAO = context?.applicationContext?.let {
-                    Room.databaseBuilder(it, AppDatabaseExo::class.java, "exo_info.db")
-                        .createFromAsset("database/exo_info.db").build() }?.stopTimesDao()
-                val times : MutableList<FavouriteBusInfo> = mutableListOf()
-                val calendar = Calendar.getInstance()
-                val dayString = when (calendar.get(Calendar.DAY_OF_WEEK)) {
-                    Calendar.SUNDAY -> "d"
-                    Calendar.MONDAY -> "m"
-                    Calendar.TUESDAY -> "t"
-                    Calendar.WEDNESDAY -> "w"
-                    Calendar.THURSDAY -> "y"
-                    Calendar.FRIDAY -> "f"
-                    Calendar.SATURDAY -> "s"
-                    else -> null
-                }
-                dayString ?: throw IllegalStateException("Cannot have a non day of the week!")
-                list.forEach {busInfo ->
-                    stopTimesDAO?.getFavouriteStopTime(busInfo.stopName, dayString, Time(calendar).toString(), busInfo.tripHeadsign)
-                        ?.also { time -> times.add(FavouriteBusInfo(busInfo, time, agency)) }
-                }
-                return times
+                roomViewModel.getStopTimes(list, agency, dayString, calendar, times)
             }
         }
     }

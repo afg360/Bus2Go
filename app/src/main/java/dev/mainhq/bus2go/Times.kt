@@ -103,6 +103,7 @@ class Times : BaseActivity() {
                     dayString ?: throw IllegalStateException("Cannot have a non day of the week!")
                     val curTime = Time(calendar)
                     Log.d("CURRENT TIME", curTime.toString())
+                    //FIXME VERY SLOW
                     val stopTimes = job.await().getStopTimes(stopName, dayString, curTime.toString(), headsign)
                     withContext(Dispatchers.Main){
                         val recyclerView : RecyclerView = findViewById(R.id.time_recycle_view)
@@ -115,6 +116,5 @@ class Times : BaseActivity() {
                 }
             }
         }
-
     }
 }

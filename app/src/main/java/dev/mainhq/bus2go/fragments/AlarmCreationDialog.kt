@@ -24,13 +24,15 @@ import dev.mainhq.bus2go.MainActivity
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.utils.Time
 import dev.mainhq.bus2go.viewmodel.AlarmCreationViewModel
+import dev.mainhq.bus2go.viewmodel.FavouritesViewModel
 import java.lang.IllegalStateException
 
 
 private const val UNSELECTED = "UNSELECTED"
 private const val SELECTED = "SELECTED"
 
-class AlarmCreationDialog(private val alarmCreationViewModel : AlarmCreationViewModel) : DialogFragment(R.layout.fragment_create_alarms_dialog) {
+class AlarmCreationDialog(private val alarmCreationViewModel : AlarmCreationViewModel,
+    private val favouritesViewModel: FavouritesViewModel) : DialogFragment(R.layout.fragment_create_alarms_dialog) {
 
     private lateinit var bottomNavBar: AlarmCreationDialogBottomNavBar
 
@@ -47,7 +49,7 @@ class AlarmCreationDialog(private val alarmCreationViewModel : AlarmCreationView
         super.onViewCreated(view, savedInstanceState)
 
         view.findViewById<MaterialTextView>(R.id.textViewChooseStop).setOnClickListener { _ ->
-            val alarmCreationChooseBusDialog = AlarmCreationChooseBusDialog()
+            val alarmCreationChooseBusDialog = AlarmCreationChooseBusDialog(favouritesViewModel)
             //TODO DEPRECATED FOR DATA EXCHANGE alarmCreationDialog.setTargetFragment(this@Alarms, 0)
             val transaction = parentFragmentManager.beginTransaction()
             transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)

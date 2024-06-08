@@ -16,6 +16,9 @@ import dev.mainhq.bus2go.fragments.Alarms
 import dev.mainhq.bus2go.fragments.Home
 import dev.mainhq.bus2go.fragments.Map
 import dev.mainhq.bus2go.viewmodel.AlarmCreationViewModel
+import dev.mainhq.bus2go.viewmodel.FavouritesViewModel
+import dev.mainhq.bus2go.viewmodel.RoomViewModel
+import dev.mainhq.bus2go.viewmodel.favouritesDataStore
 import java.util.Calendar
 
 //TODO
@@ -39,14 +42,11 @@ class MainActivity() : BaseActivity() {
         //TODO must also setup the color of all the drawables needed
         //AppThemeState.setTheme(this)
         setContentView(R.layout.main_activity)
-        //val settingsData = SettingsData(applicationContext)//.setTheme(applicationContext)
-        //realTime = settingsData.isRealTime()
-
+        val favouritesViewModel = ViewModelProvider(this)[FavouritesViewModel::class.java]
+        val roomViewModel = ViewModelProvider(this)[RoomViewModel::class.java]
         activityType = ActivityType.HOME
-        val home = Home()
+        val home = Home(favouritesViewModel, roomViewModel)
         supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer, home).commit()
-        //setBackground()
-        //setButtons()
 
         val alarmViewModel = ViewModelProvider(this)[AlarmCreationViewModel::class.java]
         val bottomNav = findViewById<NavigationBarView>(R.id.bottomNavBarView)
@@ -55,7 +55,8 @@ class MainActivity() : BaseActivity() {
                 R.id.homeScreenButton -> {
                     // Respond to navigation item 1 click
                     if (activityType != ActivityType.HOME) {
-                        supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer, Home()).commit()
+                        supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer,
+                            Home(favouritesViewModel, roomViewModel)).commit()
                         activityType = ActivityType.HOME
                     }
                     true
@@ -71,7 +72,8 @@ class MainActivity() : BaseActivity() {
                 R.id.alarmsButton -> {
                     // Respond to navigation item 2 click
                     if (activityType != ActivityType.ALARMS) {
-                        supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer, Alarms(alarmViewModel)).commit()
+                        supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer,
+                            Alarms(alarmViewModel, favouritesViewModel)).commit()
                         activityType = ActivityType.ALARMS
                     }
                     true

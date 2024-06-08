@@ -18,6 +18,11 @@ import kotlinx.collections.immutable.mutate
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
+private val Context.alarmDataStore : DataStore<AlarmsData> by dataStore(
+    fileName = "alarms.json",
+    serializer = AlarmsSerializer
+)
+
 //FIXME UPDATE THIS VIEW MODEL TO STORE BETTER ORGANISED DATA
 /** Used to save the state when creating a new alarm. */
 class AlarmCreationViewModel(private val application : Application) : AndroidViewModel(application) {
@@ -35,11 +40,6 @@ class AlarmCreationViewModel(private val application : Application) : AndroidVie
 
     private val _beforeTime : MutableLiveData<SerializableTime> = MutableLiveData()
     val beforeTime : LiveData<SerializableTime> get() = _beforeTime
-
-    private val Context.alarmDataStore : DataStore<AlarmsData> by dataStore(
-        fileName = "alarms.json",
-        serializer = AlarmsSerializer
-    )
 
     fun updateAlarmBusInfo(alarmBusInfo: AlarmBusInfo){
         _alarmBusInfo.value = alarmBusInfo

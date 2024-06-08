@@ -13,15 +13,16 @@ import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.AGENCY
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.Times
-import dev.mainhq.bus2go.fragments.favouritesDataStore
 import dev.mainhq.bus2go.preferences.BusInfo
 import dev.mainhq.bus2go.utils.BusAgency
+import dev.mainhq.bus2go.viewmodel.FavouritesViewModel
 import kotlinx.collections.immutable.mutate
 import kotlinx.coroutines.launch
 
 
 class StopListElemsAdapter(private val data: List<String>, private val list: List<BusInfo>,
-                           private val headsign: String, private val agency: BusAgency)
+                           private val headsign: String, private val agency: BusAgency,
+                           private val favouritesViewModel: FavouritesViewModel)
     : RecyclerView.Adapter<StopListElemsAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -45,49 +46,13 @@ class StopListElemsAdapter(private val data: List<String>, private val list: Lis
             if (view.tag.equals("off")) {
                 view.setBackgroundResource(R.drawable.favourite_drawable_on)
                 view.tag = "on"
-                view.findViewTreeLifecycleOwner()!!.lifecycleScope.launch {
-                    view.context.favouritesDataStore.updateData { favourites ->
-                        when(agency){
-                            BusAgency.STM -> {
-                                favourites.copy(listSTM = favourites.listSTM.mutate {
-                                    //maybe add a tripid or some identifier so that it is a unique thing deleted
-
-                                    it.add(BusInfo(data, headsign))
-                                })
-                            }
-                            BusAgency.EXO -> {
-                                favourites.copy(listExo = favourites.listExo.mutate {
-                                    //maybe add a tripid or some identifier so that it is a unique thing deleted
-                                    it.add(BusInfo(data, headsign))
-                                })
-                            }
-                        }
-                    }
-                }
+                favouritesViewModel.addFavourites(agency, data, headsign)
             }
             else {
                 view.setBackgroundResource(R.drawable.favourite_drawable_off)
                 view.tag = "off"
                 //todo add to favourites
-                view.findViewTreeLifecycleOwner()!!.lifecycleScope.launch {
-                    view.context.favouritesDataStore.updateData { favourites ->
-                        when(agency){
-                            BusAgency.STM -> {
-                                favourites.copy(listSTM = favourites.listSTM.mutate {
-                                    //maybe add a tripid or some identifier so that it is a unique thing deleted
-
-                                    it.remove(BusInfo(data, headsign))
-                                })
-                            }
-                            BusAgency.EXO -> {
-                                favourites.copy(listExo = favourites.listExo.mutate {
-                                    //maybe add a tripid or some identifier so that it is a unique thing deleted
-                                    it.remove(BusInfo(data, headsign))
-                                })
-                            }
-                        }
-                    }
-                }
+                favouritesViewModel.removeFavourites(agency, data, headsign)
             }
         }
     }

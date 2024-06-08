@@ -23,6 +23,7 @@ import dev.mainhq.bus2go.Times
 import dev.mainhq.bus2go.adapters.AlarmDialogListElemsAdapter
 import dev.mainhq.bus2go.preferences.BusInfo
 import dev.mainhq.bus2go.utils.Time
+import dev.mainhq.bus2go.viewmodel.FavouritesViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
@@ -30,7 +31,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 
-class AlarmCreationChooseBusDialog() : DialogFragment(R.layout.fragment_create_alarms_choose_stop_dialog) {
+class AlarmCreationChooseBusDialog(private val favouritesViewModel: FavouritesViewModel) : DialogFragment(R.layout.fragment_create_alarms_choose_stop_dialog) {
 
     data class AlarmBusInfo(val busInfo : BusInfo, val time : Time) : Parcelable {
         constructor(parcel: Parcel) : this(
@@ -93,7 +94,6 @@ class AlarmCreationChooseBusDialog() : DialogFragment(R.layout.fragment_create_a
         /** List all the favourite stops available for the user to create an alarm */
         lifecycleScope.launch {
             context?.also {
-                val job = async{it.favouritesDataStore.data.first().listSTM.toList()}
                 val bottomNavBar = AlarmCreationDialogBottomNavBar()
                 withContext(Dispatchers.Main) {
                     bottomNavBar.setBottomNavBarListener(object : AlarmCreationDialogBottomNavBar.BottomNavBarListener{
@@ -128,7 +128,7 @@ class AlarmCreationChooseBusDialog() : DialogFragment(R.layout.fragment_create_a
                     childFragmentManager.beginTransaction()
                         .add(R.id.createAlarmsDialogChooseBusBottomNav, bottomNavBar)
                         .commit()
-                     val list = job.await()
+                     val list = favouritesViewModel.getAllBusInfo()
                      recyclerView = view.findViewById(R.id.alarmDialogRecyclerView)
                      val layoutManager = LinearLayoutManager(it)
                      layoutManager.orientation = LinearLayoutManager.VERTICAL

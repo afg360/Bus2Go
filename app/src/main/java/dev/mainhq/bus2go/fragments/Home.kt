@@ -25,10 +25,12 @@ import dev.mainhq.bus2go.SearchBus
 import dev.mainhq.bus2go.Settings
 import dev.mainhq.bus2go.adapters.BusListElemsAdapter
 import dev.mainhq.bus2go.utils.setup
+import dev.mainhq.bus2go.viewmodel.FavouritesViewModel
+import dev.mainhq.bus2go.viewmodel.RoomViewModel
 import kotlinx.coroutines.launch
 
 //FIXME CANNOT SUPPORT VERY FAST CHANGES BETWEEN THIS FRAG AND THE OTHERS -> APP CRASHES BECAUSE NO VIEW IS RETURNED
-class Home : Fragment(R.layout.fragment_home) {
+class Home(private val favouritesViewModel: FavouritesViewModel, private val roomViewModel: RoomViewModel) : Fragment(R.layout.fragment_home) {
     //todo could use a favourites list here to use in other methods
     private lateinit var searchView : SearchView
 
@@ -43,7 +45,7 @@ class Home : Fragment(R.layout.fragment_home) {
                     childFragmentManager.beginTransaction()
                         .replace(
                             R.id.favouritesFragmentContainer,
-                            Favourites()
+                            Favourites(favouritesViewModel, roomViewModel)
                         ).commit()
                 }
             }

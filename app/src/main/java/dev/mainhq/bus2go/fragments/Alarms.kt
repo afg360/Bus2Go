@@ -22,6 +22,8 @@ import dev.mainhq.bus2go.Settings
 import dev.mainhq.bus2go.adapters.AlarmsListElemAdapter
 import dev.mainhq.bus2go.preferences.Alarm
 import dev.mainhq.bus2go.viewmodel.AlarmCreationViewModel
+import dev.mainhq.bus2go.viewmodel.FavouritesViewModel
+import dev.mainhq.bus2go.viewmodel.favouritesDataStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -29,7 +31,7 @@ import kotlinx.coroutines.withContext
 
 
 /* For the moment, the user can only add an alarm to a favourite bus */
-class Alarms(val alarmViewModel : AlarmCreationViewModel)
+class Alarms(val alarmViewModel : AlarmCreationViewModel, private val favouritesViewModel: FavouritesViewModel)
     : Fragment(R.layout.fragment_alarms)  {
 
     private lateinit var list : List<Alarm>
@@ -66,7 +68,7 @@ class Alarms(val alarmViewModel : AlarmCreationViewModel)
             //This recycler View is NOT in the xml. it is created for the dialog box specifically
             val recyclerView = RecyclerView(this)
             lifecycleScope.launch {
-                val list =  favouritesDataStore.data.first().listSTM.toList()
+                val list =  favouritesViewModel.getAllBusInfo()
                 withContext(Dispatchers.Main){
                     if (list.isNotEmpty()) {
                         val layoutManager = LinearLayoutManager(view.context)
@@ -75,7 +77,7 @@ class Alarms(val alarmViewModel : AlarmCreationViewModel)
                         view.findViewById<FloatingActionButton>(R.id.floatingActionButton).setOnClickListener {_ ->
                             //Create a popup containing the recyclerview of each buses in favourites
                             context?.also {
-                                val alarmCreationDialog = AlarmCreationDialog(alarmViewModel)
+                                val alarmCreationDialog = AlarmCreationDialog(alarmViewModel, favouritesViewModel)
                                 //TODO DEPRECATED FOR DATA EXCHANGE alarmCreationDialog.setTargetFragment(this@Alarms, 0)
                                 val transaction = parentFragmentManager.beginTransaction()
                                 transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)

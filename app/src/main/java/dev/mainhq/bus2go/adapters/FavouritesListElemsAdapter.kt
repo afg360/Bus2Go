@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.textview.MaterialTextView
+import dev.mainhq.bus2go.AGENCY
 import dev.mainhq.bus2go.MainActivity
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.Times
@@ -93,6 +94,52 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, recy
                 }
             }
         }
+
+        holder.itemView.setOnClickListener {
+            //FIXME could remove nullability by setting holder.itemview.tag = "unselected"...
+            val parent = WeakReference((recyclerView.parent.parent.parent.parent.parent.parent as ViewGroup))
+            if (it.tag != null){
+                when(it.tag){
+                    "selected" -> {
+                        holder.unSelect(it, parent.get()!!)
+                        holder.checkBoxView.isChecked = false
+                    }
+                    "unselected" -> {
+                        recyclerView.tag?.let{tag ->
+                            when(tag){
+                                "selected" -> {
+                                    holder.select(it, parent.get()!!)
+                                    holder.checkBoxView.isChecked = true
+                                }
+                                "unselected" -> startTimes(holder, it, info.agency)
+                            }
+                        }
+                    }
+                }
+            }
+            else if (recyclerView.tag != null){
+                when(recyclerView.tag){
+                    "selected" -> {
+                        holder.select(it, parent.get()!!)
+                        holder.checkBoxView.isChecked = true
+                    }
+                    "unselected" -> startTimes(holder, it, info.agency)
+                }
+            }
+            else startTimes(holder, it, info.agency)
+            parent.get()!!.findViewById<MaterialTextView>(R.id.selectedNumsOfFavourites)
+                .text = (recyclerView.adapter as FavouritesListElemsAdapter).numSelected.run{
+                val deleteItemsWidget = parent.get()!!.findViewById<LinearLayout>(R.id.removeItemsWidget)
+                if (this > 0) {
+                    if (deleteItemsWidget.visibility == GONE) deleteItemsWidget.visibility = VISIBLE
+                    toString()
+                }
+                else {
+                    deleteItemsWidget.visibility = GONE
+                    recyclerView.context.getString(R.string.select_favourites_to_remove)
+                }
+            }
+        }
     }
 
     fun updateTime(viewGroup : ViewGroup, favouritesBusInfo: FavouriteBusInfo){
@@ -135,11 +182,21 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, recy
         }
     }
 
+
+
     fun isSelected(/** Outer view group layout, containing the linear layout (at the moment) for the other components */
                viewGroup : ViewGroup) : Boolean{
         return viewGroup.tag == "selected"
     }
 
+    private fun startTimes(holder : ViewHolder, view : View, agency: BusAgency){
+        val intent = Intent(view.context, Times::class.java)
+        intent.putExtra("stopName", holder.stopNameTextView.text as String)
+        intent.putExtra("headsign", holder.tripHeadsignTextView.text as String)
+        intent.putExtra(AGENCY, agency)
+        view.context.startActivity(intent)
+        view.clearFocus()
+    }
 
     class ViewHolder(view : View, private val recyclerView: RecyclerView) : RecyclerView.ViewHolder(view), OnClickListener, OnLongClickListener{
         var checkBoxView : MaterialCheckBox
@@ -162,50 +219,9 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, recy
         override fun onClick(v: View?) {
             //TODO give the all checkbox a tag. if tag == allSelected, then deselect it if we unselect at least one
             //FIXME Refactor code to have less lines taken
-            val parent = WeakReference((recyclerView.parent.parent.parent.parent.parent.parent as ViewGroup))
+
             v?.setOnClickListener{
-                //FIXME instead of using tags could simply use materialcheckbox.isChecked
-                if (it.tag != null){
-                    when(it.tag){
-                        "selected" -> {
-                            unSelect(it, parent.get()!!)
-                            checkBoxView.isChecked = false
-                        }
-                        "unselected" -> {
-                            recyclerView.tag?.let{tag ->
-                                when(tag){
-                                    "selected" -> {
-                                        select(it, parent.get()!!)
-                                        checkBoxView.isChecked = true
-                                    }
-                                    "unselected" -> startTimes(v)
-                                }
-                            }
-                        }
-                    }
-                }
-                else if (recyclerView.tag != null){
-                    when(recyclerView.tag){
-                        "selected" -> {
-                            select(it, parent.get()!!)
-                            checkBoxView.isChecked = true
-                        }
-                        "unselected" -> startTimes(v)
-                    }
-                }
-                else startTimes(v)
-                parent.get()!!.findViewById<MaterialTextView>(R.id.selectedNumsOfFavourites)
-                    .text = (recyclerView.adapter as FavouritesListElemsAdapter).numSelected.run{
-                    val deleteItemsWidget = parent.get()!!.findViewById<LinearLayout>(R.id.removeItemsWidget)
-                    if (this > 0) {
-                        if (deleteItemsWidget.visibility == GONE) deleteItemsWidget.visibility = VISIBLE
-                        toString()
-                    }
-                    else {
-                        deleteItemsWidget.visibility = GONE
-                        recyclerView.context.getString(R.string.select_favourites_to_remove)
-                    }
-                }
+
             }
         }
 
@@ -250,14 +266,6 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, recy
                 true
             }
             return false
-        }
-
-        private fun startTimes(view : View){
-            val intent = Intent(view.context, Times::class.java)
-            intent.putExtra("stopName", stopNameTextView.text as String)
-            intent.putExtra("headsign", tripHeadsignTextView.text as String)
-            view.context.startActivity(intent)
-            view.clearFocus()
         }
 
         fun select(view : View, parent : ViewGroup?){
