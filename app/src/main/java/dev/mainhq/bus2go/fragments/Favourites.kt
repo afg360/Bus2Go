@@ -30,6 +30,7 @@ import dev.mainhq.bus2go.database.exo_data.AppDatabaseExo
 import dev.mainhq.bus2go.utils.BusAgency
 import dev.mainhq.bus2go.viewmodel.FavouritesViewModel
 import dev.mainhq.bus2go.viewmodel.RoomViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -147,10 +148,10 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
                                 toRemoveList.add(busInfoFromView(it))
                             }
                         }
-                        favouritesViewModel.removeFavourites(toRemoveList)
                         lifecycleScope.launch {
+                            favouritesViewModel.removeFavourites(toRemoveList)
                             val list = (toFavouriteBusInfoList(favouritesViewModel.stmBusInfo.value, BusAgency.STM)
-                                    + toFavouriteBusInfoList(favouritesViewModel.exoBusInfo.value, BusAgency.EXO)).toMutableList()
+                                    + toFavouriteBusInfoList(favouritesViewModel.exoBusInfo.value, BusAgency.EXO))
                             recyclerViewDisplay(view, list, new = true)
                         }
                         appBar?.apply { changeAppBar(this) }
@@ -184,18 +185,10 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
             else -> null
         }
         dayString ?: throw IllegalStateException("Cannot have a non day of the week!")
-        return when(agency){
-            BusAgency.STM -> {
-                roomViewModel.getStopTimes(list, agency, dayString, calendar, times)
-            }
-
-            BusAgency.EXO -> {
-                roomViewModel.getStopTimes(list, agency, dayString, calendar, times)
-            }
-        }
+        return roomViewModel.getStopTimes(list, agency, dayString, calendar, times)
     }
 
-    private suspend fun recyclerViewDisplay(view : View, times : MutableList<FavouriteBusInfo>, new : Boolean = false){
+    private suspend fun recyclerViewDisplay(view : View, times : List<FavouriteBusInfo>, new : Boolean = false){
         withContext(Dispatchers.Main){
             view.findViewById<MaterialTextView>(R.id.favourites_text_view).text = getText(R.string.favourites)
             val layoutManager = LinearLayoutManager(view.context)

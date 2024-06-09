@@ -24,9 +24,8 @@ def download(url : str, destination : str) -> None:
         print(f"Failed to download {url}")
 
 
-def db_data_init(agency : str) -> None:
+def db_data_init(conn, agency : str) -> None:
     """Initialise the data in the database associated to that agency"""
-    conn = sqlite3.connect("./exo_info.db")
     calendar_table(conn, agency)
     route_table(conn, agency)
     forms_table(conn, agency)
@@ -34,7 +33,6 @@ def db_data_init(agency : str) -> None:
     stop_times_table(conn, agency)
     stops_table(conn, agency)
     trips_table(conn, agency)
-    conn.close()
 
 
 def calendar_table(conn, agency) -> None:
@@ -203,10 +201,7 @@ def stop_times_table(conn, agency):
             conn.commit()
     print("Successfully inserted table")
 
-    #query = "CREATE INDEX StopTimesIndex ON StopTimes(stop_id,trip_id);"
-    #print("Creating index for StopTimes on stopid and tripid")
-    #cursor.execute(query)
-    #print("Successfully created index for table StopTimes")
+
     cursor.close()
 
 
@@ -278,6 +273,7 @@ def trips_table(conn, agency):
             cursor.executemany(sql, chunk)
             conn.commit()
     print("Successfully inserted table")
+    cursor.close()
 
 
 def main():
@@ -312,10 +308,18 @@ def main():
         for job in jobs:
             job.join()
 
+    conn = sqlite3.connect("./exo_info.db")
     for dir in files:
         print(f"Initialising data for {dir}")
-        db_data_init(dir)
+        db_data_init(conn, dir)
 
+    cursor = conn.cursor()
+    print("Creating index for StopTimes on stopid and tripid")
+    cursor.execute("CREATE INDEX StopTimesIndexStopId ON StopTimes(stop_id);")
+    cursor.execute("CREATE INDEX StopTimesIndexTripId ON StopTimes(trip_id);")
+    cursor.execute("CREATE INDEX TripsIndexTripId ON Trips(trip_id);")
+    print("Successfully created index for table StopTimes")
+    conn.close()
 
 if __name__ == "__main__":
     main()

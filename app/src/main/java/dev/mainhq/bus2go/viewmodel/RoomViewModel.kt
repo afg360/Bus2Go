@@ -14,8 +14,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import android.icu.util.Calendar
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.coroutineContext
 
 class RoomViewModel(private val application: Application) : AndroidViewModel(application) {
     private val _stmDatabase : MutableStateFlow<AppDatabaseSTM?> = MutableStateFlow(
@@ -30,16 +33,23 @@ class RoomViewModel(private val application: Application) : AndroidViewModel(app
 
     suspend fun getStopTimes(list : List<BusInfo>, agency : BusAgency, dayString : String,
                      calendar : Calendar, times : MutableList<FavouriteBusInfo>) : MutableList<FavouriteBusInfo> {
-        val stopsInfoDAO = stmDatabase.value?.stopsInfoDao()
-        list.forEach {busInfo ->
-            stopsInfoDAO?.getFavouriteStopTime(busInfo.stopName, dayString, Time(calendar).toString(), busInfo.tripHeadsign)
-                ?.also { time -> times.add(FavouriteBusInfo(busInfo, time, agency)) }
+        when(agency){
+            BusAgency.STM -> {
+                val stopsInfoDAO = stmDatabase.value?.stopsInfoDao()
+                list.forEach {busInfo ->
+                    stopsInfoDAO?.getFavouriteStopTime(busInfo.stopName, dayString, Time(calendar).toString(), busInfo.tripHeadsign)
+                        ?.also { time -> times.add(FavouriteBusInfo(busInfo, time, agency)) }
+                }
+                return times
+            }
+            BusAgency.EXO -> {
+                val stopTimesDAO = exoDataBase.value?.stopTimesDao()
+                list.forEach {busInfo ->
+                    stopTimesDAO?.getFavouriteStopTime(busInfo.stopName, dayString, Time(calendar).toString(), busInfo.tripHeadsign)
+                        ?.also { time -> times.add(FavouriteBusInfo(busInfo, time, agency)) }
+                }
+                return times
+            }
         }
-        val stopTimesDAO = exoDataBase.value?.stopTimesDao()
-        list.forEach {busInfo ->
-            stopTimesDAO?.getFavouriteStopTime(busInfo.stopName, dayString, Time(calendar).toString(), busInfo.tripHeadsign)
-                ?.also { time -> times.add(FavouriteBusInfo(busInfo, time, agency)) }
-        }
-        return times
     }
 }

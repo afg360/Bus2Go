@@ -97,6 +97,7 @@ elseif ($args[0] -eq "exo"){
     $path = (Get-Location).Path + "/exo"
     cd $path
     if ($args[1] -eq "--no-download"){
+        rm exo_info.db
         python setup_exo_db.py "no-download"
     }
     else{

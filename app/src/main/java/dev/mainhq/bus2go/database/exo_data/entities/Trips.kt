@@ -6,7 +6,7 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey;
 
-@Entity (indices = [Index(value = ["trip_id"], unique = true)],
+@Entity (indices = [Index(name = "TripsIndexTripId", value = ["trip_id"]), Index(value = ["trip_id"], unique = true)],
     foreignKeys = [
         ForeignKey(entity = Routes::class, parentColumns = ["route_id"], childColumns = ["route_id"]),
         ForeignKey(entity = Calendar::class, parentColumns = ["service_id"], childColumns = ["service_id"]),

@@ -41,18 +41,16 @@ class FavouritesViewModel(private val application: Application) : AndroidViewMod
 
     fun getAllBusInfo() : List<BusInfo>{ return stmBusInfo.value + exoBusInfo.value }
 
-    fun removeFavourites(toRemoveList : List<BusInfo>){
-        viewModelScope.launch {
-            application.favouritesDataStore.updateData { favouritesData ->
-                favouritesData.copy(listSTM = favouritesData.listSTM.mutate {
-                    it.removeIf{busInfo -> toRemoveList.contains(busInfo) }
-                })
-            }
-            application.favouritesDataStore.updateData { favouritesData ->
-                favouritesData.copy(listSTM = favouritesData.listExo.mutate {
-                    it.removeIf{busInfo -> toRemoveList.contains(busInfo) }
-                })
-            }
+    suspend fun removeFavourites(toRemoveList : List<BusInfo>){
+        application.favouritesDataStore.updateData { favouritesData ->
+            favouritesData.copy(listSTM = favouritesData.listSTM.mutate {
+                it.removeIf{busInfo -> toRemoveList.contains(busInfo) }
+            })
+        }
+        application.favouritesDataStore.updateData { favouritesData ->
+            favouritesData.copy(listSTM = favouritesData.listExo.mutate {
+                it.removeIf{busInfo -> toRemoveList.contains(busInfo) }
+            })
         }
     }
 
