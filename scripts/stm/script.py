@@ -2,7 +2,7 @@
 
 import sqlite3
 
-connection = sqlite3.connect("sql/stm_info.db")
+connection = sqlite3.connect("./stm_info.db")
 cur = connection.cursor()
 
 print("Dropping table StopsInfo")

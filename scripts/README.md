@@ -1,11 +1,17 @@
+# Database
 This section stores a few simple scripts to initialise the database
 used by the Bus2Go application, from where the basic data for transit
-is stored. For the moment, the data is from the [stm](https://www.stm.info/en/about/developers).
-Make sure to set the appropriate variables before running the scripts, depending on your platform.
+is stored. For the moment, the data is from the [STM](https://www.stm.info/en/about/developers)
+and [Exo](https://exo.quebec/en/about/open-data).
+
+### Make sure to set the appropriate variables before running the scripts, depending on your platform.
 
 # Usage
+Before using the script, be sure to initialise the right **$path** and **$project** variables either inside the initall.ps1 or the initall.sh script so that the script can be ran properly
+
 ## Windows
-If you are using Windows, enable permission to run powershell scripts. You can then run the script by running `./initall.ps1` inside powershell
+If you are using Windows, enable permission to run powershell scripts.
+
 You may need to change the $path and $project folder names to something else (on lines 42 and 47 respectively)
 ### Syntax
 To initialise all the databases, run this command:
@@ -16,6 +22,8 @@ If you only need it for a specific agency, run:
 ```powershell
 ./initall.ps1 <agency-name>
 ```
+You can use the **--no-download** flag with the **exo** agency to skip the download process if the files are already there.
+
 You can also check the help output by running:
 ```powershell
 ./initall.ps1 -help
@@ -24,13 +32,24 @@ You can also check the help output by running:
 The script for linux should be ran under bash. Be sure to give the right permissions to the file so that it can be run:
 ```bash
 chmod u+x initall.sh
+```
+### Syntax
+To initialise all the databases, run
+```bash
 ./initall.sh
 ```
-If you use the script without needing to download the txt files, make sure to set the right paths by line 44 for the $path variable.
-Moreover, do the same regardless for the download, to the $project folder, which would point to folder in the android project where the
-assets will be stored (in this case the database).
+This will download the necessary data as well as create the database files, and prompt you to copy the files at the right directory
 
-If you want to use the exo command, you would need to replace the $path variable to your proper path, at line 103.
+To initialise the database for a certain agency only, run
+```bash
+./initall.sh <agency-name>
+```
+You may use the **--no-download** flag with the **exo** agency to skip the download process if the files are already there.
+
+To get the help output, run
+```bash
+./initall.sh --help
+```
 ### Dependencies
 The script uses curl to download the necessary files, as well as unzip in linux for unziping the zip file. You must have both installed before
 proceeding.

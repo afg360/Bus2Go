@@ -2,18 +2,8 @@ param (
     [switch]$help = $false
 )
 
-if ($help) {
-    echo "Script to initialise databases containing static data from transit agencies.
-    Usage: $ ./initall.ps1 <agency-name> -> download the data and initialise the database
-                                            only related to the given agency-name.
-           $ ./initall.ps1 -> download the data from all the agencies and init all the databases.
-           $ ./initall.ps1 -help -> print this help message
-    E.g.:  $ ./initall.ps1 stm
-    "
-}
-
-elseif ($args[0] -eq "stm"){
-    # Check if the txt files exist (assuming they are the correct ones)
+function execute_stm {
+# Check if the txt files exist (assuming they are the correct ones)
     $list = Get-ChildItem -Path . -Recurse -Filter *.txt | Where-Object { $_.Name -notmatch 'note[s]?.txt' }
     # Download them if the user chooses to. Curl and unzip must be installed to proceed
     if (-not $list) {
@@ -90,14 +80,24 @@ elseif ($args[0] -eq "stm"){
     else {
     	echo "No copying. Don't forget to do the process manually"
     }
+    cd ..
     echo "Completed task"
 }
 
-elseif ($args[0] -eq "exo"){
+function execute_exo{
+    param(
+        [string]$Arg
+    )
     $path = (Get-Location).Path + "/exo"
     cd $path
-    if ($args[1] -eq "--no-download"){
+    try{
         rm exo_info.db
+    }
+    catch{
+        echo "Could not remove exo_info.db"
+        echo "Either the file does not exist or is used in another application"
+    }
+    if ($Arg -eq "--no-download"){
         python setup_exo_db.py "no-download"
     }
     else{
@@ -108,8 +108,26 @@ elseif ($args[0] -eq "exo"){
     cd ..
 }
 
+if ($help) {
+    echo "Script to initialise databases containing static data from transit agencies.
+Usage: $ ./initall.ps1 <agency-name> -> download the data and initialise the database
+                                        only related to the given agency-name.
+       $ ./initall.ps1               -> download the data from all the agencies and init all the databases.
+       $ ./initall.ps1 -help         -> print this help message
+E.g.:  $ ./initall.ps1 stm
+    "
+}
+
+elseif ($args[0] -eq "stm"){
+    execute_stm
+}
+
+elseif ($args[0] -eq "exo"){
+    execute_exo -Arg $args[1]
+}
+
 elseif ($args.Count -eq 0){
-    echo "Not implemented yet"
+    execute_stm
 }
 
 else{
