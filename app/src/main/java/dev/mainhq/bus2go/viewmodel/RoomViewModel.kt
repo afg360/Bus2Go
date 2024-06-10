@@ -82,10 +82,15 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    suspend fun getTrips(agency: BusAgency, busNum : Int) : List<String>{
+    suspend fun getTrips(agency: BusAgency,/** String because some busNums are of the form'T100'*/
+                                            bus: String) : List<String>{
         return when(agency){
-            BusAgency.STM -> stmDatabase.tripsDao().getTripHeadsigns(busNum)
-            BusAgency.EXO -> exoDataBase.tripsDao().getTripHeadsigns(busNum)
+            BusAgency.STM -> {
+                val busNum = bus.toInt()
+                if (busNum > 5) stmDatabase.tripsDao().getTripHeadsigns(busNum)
+                else listOf()
+            }
+            BusAgency.EXO -> exoDataBase.tripsDao().getTripHeadsigns(bus)
         }
     }
 
