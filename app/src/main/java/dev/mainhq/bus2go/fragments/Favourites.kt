@@ -15,22 +15,18 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.room.Room
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.database.stm_data.AppDatabaseSTM
 import dev.mainhq.bus2go.preferences.BusInfo
 import dev.mainhq.bus2go.utils.Time
 import dev.mainhq.bus2go.adapters.FavouritesListElemsAdapter
 import dev.mainhq.bus2go.adapters.setMargins
-import dev.mainhq.bus2go.database.exo_data.AppDatabaseExo
 import dev.mainhq.bus2go.utils.BusAgency
 import dev.mainhq.bus2go.viewmodel.FavouritesViewModel
 import dev.mainhq.bus2go.viewmodel.RoomViewModel
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -185,7 +181,7 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
             else -> null
         }
         dayString ?: throw IllegalStateException("Cannot have a non day of the week!")
-        return roomViewModel.getStopTimes(list, agency, dayString, calendar, times)
+        return roomViewModel.getFavouriteStopTimes(list, agency, dayString, calendar, times)
     }
 
     private suspend fun recyclerViewDisplay(view : View, times : List<FavouriteBusInfo>, new : Boolean = false){

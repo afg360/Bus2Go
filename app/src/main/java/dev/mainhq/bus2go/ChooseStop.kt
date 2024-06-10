@@ -10,7 +10,9 @@ import dev.mainhq.bus2go.adapters.StopListElemsAdapter
 import dev.mainhq.bus2go.utils.BusAgency
 import dev.mainhq.bus2go.viewmodel.FavouritesViewModel
 import dev.mainhq.bus2go.viewmodel.favouritesDataStore
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -27,8 +29,12 @@ class ChooseStop() : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.choose_stop)
-        val favouritesViewModel = ViewModelProvider(this)[FavouritesViewModel::class.java]        //below represents strings of stopsinfo
+        val favouritesViewModel = ViewModelProvider(this)[FavouritesViewModel::class.java]
+        val loadingJob = lifecycleScope.async { favouritesViewModel.loadData() }
+
+        //terminus (i.e. to destination) = data.last(), needed for exo because some of the headsigns are the same
         val data : List<String> = intent.getStringArrayListExtra("stops") ?: listOf()
+
         val headsign = intent.getStringExtra("headsign") ?: ""
         agency = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.getSerializableExtra (AGENCY, BusAgency::class.java) ?: throw AssertionError("AGENCY is Null")
@@ -40,6 +46,7 @@ class ChooseStop() : BaseActivity() {
             val layoutManager = LinearLayoutManager(applicationContext)
             lifecycleScope.launch {
                 //the datastore may be closed!
+                loadingJob.await()
                 val favourites = favouritesViewModel.stmBusInfo.value + favouritesViewModel.exoBusInfo.value
                 withContext(Dispatchers.Main){
                     recyclerView.adapter = StopListElemsAdapter(data, favourites, headsign, agency, favouritesViewModel)
@@ -47,7 +54,6 @@ class ChooseStop() : BaseActivity() {
                     recyclerView.layoutManager = layoutManager
                 }
             }
-
         }
         else{
             TODO("Display message saying no stops found")

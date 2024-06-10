@@ -56,16 +56,18 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, recy
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val info = list[position]
-        holder.stopNameTextView.text = info.busInfo.stopName
         holder.arrivalTimeTextView.text = info.arrivalTime.toString()
         holder.timeRemainingTextView.text = getTimeRemaining(info.arrivalTime)
-        holder.tripHeadsignTextView.text = info.busInfo.tripHeadsign
+        holder.stopNameTextView.text = info.busInfo.stopName
+
         when(info.agency){
             BusAgency.STM -> {
+                holder.tripHeadsignTextView.text = info.busInfo.tripHeadsign
                 holder.tripHeadsignTextView.setTextColor(holder.itemView.resources.getColor(R.color.basic_blue, null))
                 holder.stopNameTextView.setTextColor(holder.itemView.resources.getColor(R.color.basic_blue, null))
             }
             BusAgency.EXO -> {
+                holder.tripHeadsignTextView.text = "Vers ${info.busInfo.tripHeadsign}"
                 holder.tripHeadsignTextView.setTextColor(holder.itemView.resources.getColor(R.color.basic_purple, null))
                 holder.stopNameTextView.setTextColor(holder.itemView.resources.getColor(R.color.basic_purple, null))
             }

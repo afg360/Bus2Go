@@ -11,6 +11,7 @@ import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.database.exo_data.AppDatabaseExo
 import dev.mainhq.bus2go.database.stm_data.AppDatabaseSTM
 import dev.mainhq.bus2go.utils.BusAgency
+import dev.mainhq.bus2go.viewmodel.RoomViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -20,15 +21,19 @@ import java.util.ArrayList
 const val BUS_NAME = "BUS_NAME"
 const val BUS_NUM = "BUS_NUM"
 const val AGENCY = "AGENCY"
+const val DIRECTION = "DIRECTION"
 
 //todo
 //change appbar to be only a back button
 //todo may make it a swapable ui instead of choosing button0 or 1
 class ChooseDirection : BaseActivity() {
+
     private lateinit var agency : BusAgency
+    private lateinit var roomViewModel: RoomViewModel
+
     override fun onCreate(savedInstanceState : Bundle?) {
         super.onCreate(savedInstanceState);
-        //setTheme()
+        roomViewModel = RoomViewModel(application)
         val extras : Bundle = this.intent.extras ?: throw AssertionError("Assertion failed")
         val busName = extras.getString(BUS_NAME) ?: throw AssertionError("BUS_NAME is Null")
         val busNum = extras.getString(BUS_NUM) ?: throw AssertionError("BUS_NUM is Null")
@@ -54,37 +59,27 @@ class ChooseDirection : BaseActivity() {
         }
         else{
             lifecycleScope.launch {
+                val dirs = roomViewModel.getTrips(agency, busNum.toInt())
+                val jobs = roomViewModel.getStopNames(this, agency, dirs)
+                val headsign0 = dirs[0]
+                val headsign1 = dirs[1]
                 when (agency) {
                     BusAgency.STM -> {
-                        val db = databaseBuilder(applicationContext, AppDatabaseSTM::class.java, "stm_info")
-                            .createFromAsset("database/stm_info.db").build()
-                        val dirs = db.tripsDao().getTripHeadsigns(busNum.toInt())
-                        val exe0 = async { db.stopsInfoDao().getStopNames(dirs[0]) }
-                        val exe1 = async { db.stopsInfoDao().getStopNames(dirs.last()) }
                         val orientation = if (dirs[0].last() == 'E' || dirs[0].last() == 'O') Orientation.HORIZONTAL
                         else Orientation.VERTICAL
-                        val headsign0 = dirs[0]
-                        val headsign1 = dirs[1]
-                        setListeners(orientation, exe0.await(), exe1.await(), headsign0, headsign1)
-                        db.close()
+                        setListeners(orientation, jobs.first.await(), jobs.second.await(), headsign0, headsign1)
                     }
                     BusAgency.EXO -> {
-                        val db = databaseBuilder(applicationContext, AppDatabaseExo::class.java, "exo_info")
-                            .createFromAsset("database/exo_info.db").build()
-                        val dirs = db.tripsDao().getTripHeadsigns(busNum.toInt())
-                        val exe0 = async { db.stopTimesDao().getStopNames(dirs[0]) }
-                        val exe1 = async { db.stopTimesDao().getStopNames(dirs.last()) }
-                        val headsign0 = dirs[0]
-                        val headsign1 = dirs[1]
                         val intent = Intent(applicationContext, ChooseStop::class.java)
-                        val dir0 = exe0.await()
-                        val dir1 = exe1.await()
+                        val dir0 = jobs.first.await()
+                        val dir1 = jobs.second.await()
                         withContext(Dispatchers.Main){
                             findViewById<MaterialTextView>(R.id.description_route_0).text = headsign0
                             findViewById<MaterialButton>(R.id.route_0).setOnClickListener{
                                 intent.putStringArrayListExtra("stops", dir0 as ArrayList<String>)
                                 intent.putExtra("headsign", headsign0)
                                 intent.putExtra(AGENCY, agency)
+                                //intent.putExtra(DIRECTION, )
                                 startActivity(intent)
                             }
                             findViewById<MaterialTextView>(R.id.description_route_1).text = headsign1
@@ -95,7 +90,6 @@ class ChooseDirection : BaseActivity() {
                                 startActivity(intent)
                             }
                         }
-                        db.close()
                     }
                 }
 
