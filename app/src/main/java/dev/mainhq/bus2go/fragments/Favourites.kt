@@ -58,6 +58,7 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
             }
             else {
                 val list = (toFavouriteBusInfoList(listSTM, BusAgency.STM) + toFavouriteBusInfoList(listExo, BusAgency.EXO))
+                println(list.toString())
                 withContext(Dispatchers.Main){
                     view.findViewById<MaterialTextView>(R.id.favourites_text_view).text = getText(R.string.favourites)
                     val layoutManager = LinearLayoutManager(view.context)
@@ -186,7 +187,14 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
 
     private suspend fun recyclerViewDisplay(view : View, times : List<FavouriteBusInfo>, new : Boolean = false){
         withContext(Dispatchers.Main){
-            view.findViewById<MaterialTextView>(R.id.favourites_text_view).text = getText(R.string.favourites)
+            if (times.isEmpty()){
+                view.findViewById<MaterialTextView>(R.id.favourites_text_view).text =
+                    getText(R.string.no_favourites)
+            }
+            else {
+                view.findViewById<MaterialTextView>(R.id.favourites_text_view).text =
+                    getText(R.string.favourites)
+            }
             val layoutManager = LinearLayoutManager(view.context)
             layoutManager.orientation = LinearLayoutManager.VERTICAL
             val recyclerViewTmp : RecyclerView? = view.findViewById(R.id.favouritesRecyclerView)
@@ -246,4 +254,4 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
 
 }
 
-data class FavouriteBusInfo(val busInfo: BusInfo, val arrivalTime : Time, val agency : BusAgency)
+data class FavouriteBusInfo(val busInfo: BusInfo, val arrivalTime : Time?, val agency : BusAgency)

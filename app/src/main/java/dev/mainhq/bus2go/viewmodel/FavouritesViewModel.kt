@@ -42,16 +42,19 @@ class FavouritesViewModel(private val application: Application) : AndroidViewMod
     fun getAllBusInfo() : List<BusInfo>{ return stmBusInfo.value + exoBusInfo.value }
 
     suspend fun removeFavourites(toRemoveList : List<BusInfo>){
+        //update data inside the json file
         application.favouritesDataStore.updateData { favouritesData ->
             favouritesData.copy(listSTM = favouritesData.listSTM.mutate {
                 it.removeIf{busInfo -> toRemoveList.contains(busInfo) }
             })
         }
         application.favouritesDataStore.updateData { favouritesData ->
-            favouritesData.copy(listSTM = favouritesData.listExo.mutate {
+            favouritesData.copy(listExo = favouritesData.listExo.mutate {
                 it.removeIf{busInfo -> toRemoveList.contains(busInfo) }
             })
         }
+        //update the current fields so that display can be done properly
+        loadData()
     }
 
     /** Used inside StopListElemsAdapter */

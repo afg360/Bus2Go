@@ -57,7 +57,18 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, recy
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val info = list[position]
         holder.arrivalTimeTextView.text = info.arrivalTime.toString()
-        holder.timeRemainingTextView.text = getTimeRemaining(info.arrivalTime)
+        if (info.arrivalTime == null){
+            holder.timeRemainingTextView.text = "None for today"
+        }
+        else{
+            holder.timeRemainingTextView.text = getTimeRemaining(info.arrivalTime)
+            if (info.arrivalTime.timeRemaining()?.compareTo(Time(0,3,59)) == -1)
+                holder.timeRemainingTextView.setTextColor(holder.itemView.resources.getColor(R.color.red, null))
+            else {
+                holder.timeRemainingTextView.setTextColor(holder.itemView.resources.getColor(R.color.light, null))
+            }
+        }
+
         holder.stopNameTextView.text = info.busInfo.stopName
 
         when(info.agency){
@@ -67,16 +78,12 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, recy
                 holder.stopNameTextView.setTextColor(holder.itemView.resources.getColor(R.color.basic_blue, null))
             }
             BusAgency.EXO -> {
-                holder.tripHeadsignTextView.text = "Vers ${info.busInfo.tripHeadsign}"
+                holder.tripHeadsignTextView.text = info.busInfo.tripHeadsign//Annoying to find solution"Vers ${info.busInfo.tripHeadsign}"
                 holder.tripHeadsignTextView.setTextColor(holder.itemView.resources.getColor(R.color.basic_purple, null))
                 holder.stopNameTextView.setTextColor(holder.itemView.resources.getColor(R.color.basic_purple, null))
             }
         }
-        if (info.arrivalTime.timeRemaining()?.compareTo(Time(0,3,59)) == -1)
-            holder.timeRemainingTextView.setTextColor(holder.itemView.resources.getColor(R.color.red, null))
-        else {
-            holder.timeRemainingTextView.setTextColor(holder.itemView.resources.getColor(R.color.light, null))
-        }
+
         holder.onLongClick(holder.itemView)
         holder.onClick(holder.itemView)
         holder.checkBoxView.setOnClickListener {
@@ -144,13 +151,16 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, recy
         }
     }
 
+    /** Only applies for when the arrival time exists (for some buses, some days do not have any trips */
     fun updateTime(viewGroup : ViewGroup, favouritesBusInfo: FavouriteBusInfo){
         val container = viewGroup[0] as ViewGroup
-        ((container[1] as ViewGroup)[2] as MaterialTextView).text = favouritesBusInfo.arrivalTime.toString()
-        ((container[1] as ViewGroup)[1] as MaterialTextView).text = getTimeRemaining(favouritesBusInfo.arrivalTime)
-        if (favouritesBusInfo.arrivalTime.timeRemaining()?.compareTo(Time(0,3,59)) == -1) ((container[1] as ViewGroup)[1] as MaterialTextView)
-            .setTextColor(viewGroup.resources.getColor(R.color.red, null))
-        else ((container[1] as ViewGroup)[1] as MaterialTextView).setTextColor(viewGroup.resources.getColor(R.color.light, null))
+        favouritesBusInfo.arrivalTime?.also {
+            ((container[1] as ViewGroup)[2] as MaterialTextView).text = favouritesBusInfo.arrivalTime.toString()
+            ((container[1] as ViewGroup)[1] as MaterialTextView).text = getTimeRemaining(it)
+            if (it.timeRemaining()?.compareTo(Time(0,3,59)) == -1) ((container[1] as ViewGroup)[1] as MaterialTextView)
+                .setTextColor(viewGroup.resources.getColor(R.color.red, null))
+            else ((container[1] as ViewGroup)[1] as MaterialTextView).setTextColor(viewGroup.resources.getColor(R.color.light, null))
+        }
     }
 
     private fun getTimeRemaining(arrivalTime: Time): String {

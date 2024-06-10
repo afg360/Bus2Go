@@ -65,6 +65,23 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    /** Used for alarm creations */
+    suspend fun getStopTimes(stopName : String, dayString : String, headsign : String, agency : BusAgency) : List<Time>{
+        return when(agency){
+            BusAgency.STM -> stmDatabase.stopsInfoDao().getStopTimes(stopName, dayString, headsign)
+            BusAgency.EXO -> exoDataBase.stopTimesDao().getStopTimes(stopName, dayString, headsign)
+        }
+    }
+
+    /** */
+    suspend fun getStopTimes(stopName : String, dayString : String,
+                             curTime : String, headsign : String, agency : BusAgency) : List<Time>{
+        return when(agency){
+            BusAgency.STM -> stmDatabase.stopsInfoDao().getStopTimes(stopName, dayString, curTime, headsign)
+            BusAgency.EXO -> exoDataBase.stopTimesDao().getStopTimes(stopName, dayString, curTime, headsign)
+        }
+    }
+
     suspend fun getTrips(agency: BusAgency, busNum : Int) : List<String>{
         return when(agency){
             BusAgency.STM -> stmDatabase.tripsDao().getTripHeadsigns(busNum)
