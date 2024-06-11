@@ -57,7 +57,7 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
                 }
             }
             else {
-                val list = (toFavouriteBusInfoList(listSTM, BusAgency.STM) + toFavouriteBusInfoList(listExo, BusAgency.EXO))
+                val list = (toFavouriteBusInfoList(listSTM, BusAgency.STM) + toFavouriteBusInfoList(listExo, BusAgency.EXO_OTHER))
                 println(list.toString())
                 withContext(Dispatchers.Main){
                     view.findViewById<MaterialTextView>(R.id.favourites_text_view).text = getText(R.string.favourites)
@@ -112,7 +112,7 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
                     if (tmpListSTM.isNotEmpty() || tmpListExo.isNotEmpty()) {
                         //FIXME we only want to change the time left data, NOT the background colors etc
                         lifecycleScope.launch{
-                            val mutableList = toFavouriteBusInfoList(tmpListSTM, BusAgency.STM) + toFavouriteBusInfoList(tmpListExo, BusAgency.EXO)
+                            val mutableList = toFavouriteBusInfoList(tmpListSTM, BusAgency.STM) + toFavouriteBusInfoList(tmpListExo, BusAgency.EXO_OTHER)
                             withContext(Dispatchers.Main){
                                 //FIXME nullPointerException bug is at line below
                                 val favouritesListElemsAdapter = recyclerView.adapter as FavouritesListElemsAdapter?
@@ -148,7 +148,7 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
                         lifecycleScope.launch {
                             favouritesViewModel.removeFavourites(toRemoveList)
                             val list = (toFavouriteBusInfoList(favouritesViewModel.stmBusInfo.value, BusAgency.STM)
-                                    + toFavouriteBusInfoList(favouritesViewModel.exoBusInfo.value, BusAgency.EXO))
+                                    + toFavouriteBusInfoList(favouritesViewModel.exoBusInfo.value, BusAgency.EXO_OTHER))
                             recyclerViewDisplay(view, list, new = true)
                         }
                         appBar?.apply { changeAppBar(this) }

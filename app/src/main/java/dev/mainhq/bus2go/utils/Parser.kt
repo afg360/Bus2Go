@@ -33,23 +33,16 @@ suspend fun setup(coroutineScope: CoroutineScope, query : String, fragment : Fra
         }
     }
     val jobExo = coroutineScope.async {
+        //TODO FIRST CHECK IF IT IS A TRAIN OR SOMETHING ELSE
         val routes = dbExo.routesDao()
         val list = routes.getBusRouteInfo(FuzzyQuery(query, true))
         list.toMutableList().map {
-            BusInfo(it.routeId.split("-", limit = 2)[1], it.routeName, BusAgency.EXO)
+            val tmp = it.routeId.split("-", limit = 2)
+            if (tmp[0] == "trains") BusInfo(tmp[1], it.routeName, BusAgency.EXO_TRAIN)
+            else BusInfo(tmp[1], it.routeName, BusAgency.EXO_OTHER)
         }
     }
     val list = jobSTM.await() + jobExo.await()
-    displayBuses(list, fragment)
-    dbSTM.close()
-    dbExo.close()
-}
-
-private suspend fun displayBuses(list : List<BusInfo>, fragment: Fragment){
-    //todo
-    //need to handle queries where french accents are needed
-    //val parsable = Parser.toParsable(query)
-    //todo need to implement fuzzyquery
     withContext(Dispatchers.Main){
         val recyclerView : RecyclerView = fragment.requireView().findViewById(R.id.search_recycle_view)
         val layoutManager = LinearLayoutManager(fragment.requireContext().applicationContext)
@@ -57,6 +50,8 @@ private suspend fun displayBuses(list : List<BusInfo>, fragment: Fragment){
         layoutManager.orientation = LinearLayoutManager.VERTICAL
         recyclerView.layoutManager = layoutManager
     }
+    dbSTM.close()
+    dbExo.close()
 }
 
 suspend fun setup(query : String, activity : AppCompatActivity, color : Int?){
@@ -75,7 +70,7 @@ suspend fun setup(query : String, activity : AppCompatActivity, color : Int?){
         val routes = dbExo.routesDao()
         val list = routes.getBusRouteInfo(FuzzyQuery(query, true))
         list.toMutableList().map {
-            BusInfo(it.routeId.split("-", limit = 2)[1], it.routeName, BusAgency.EXO)
+            BusInfo(it.routeId.split("-", limit = 2)[1], it.routeName, BusAgency.EXO_OTHER)
         }
     }
     val list = jobSTM.await() + jobExo.await()
@@ -120,6 +115,6 @@ fun toParsable(txt: String): String {
 data class BusInfo(val routeId : String, val routeName : String, val busAgency: BusAgency)
 
 enum class BusAgency : java.io.Serializable{
-    STM, EXO
+    STM, EXO_TRAIN, EXO_OTHER
 }
 

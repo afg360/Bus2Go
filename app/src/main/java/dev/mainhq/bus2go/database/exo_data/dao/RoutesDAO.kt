@@ -9,15 +9,19 @@ import dev.mainhq.bus2go.utils.FuzzyQuery
 interface RoutesDAO {
 
     @Query("SELECT route_long_name FROM Routes;")
-    suspend fun getBusDir() : List<String>;
+    suspend fun getBusDir() : List<String>
 
     @Query("SELECT DISTINCT route_color AS routeColor,route_text_color AS routeTextColor FROM Routes WHERE route_id = (:routeId);")
-    suspend fun getRouteColor(routeId : String) : Colors;
+    suspend fun getRouteColor(routeId : String) : Colors
 
     @Query("SELECT route_id AS routeId,route_long_name AS routeName FROM Routes " +
             "WHERE route_id LIKE '%' || (:routeId) || '%' " +
             "OR route_long_name LIKE '%' || (:routeId) || '%' ;")
     suspend fun getBusRouteInfo(routeId : FuzzyQuery) : List<BusRouteInfo>
+
+    @Query("SELECT route_id as routeId FROM Routes " +
+            "WHERE route_id LIKE 'trains-' || (:routeId);")
+    suspend fun getTrainRouteAgency(routeId: String) : List<String>
 
 }
 

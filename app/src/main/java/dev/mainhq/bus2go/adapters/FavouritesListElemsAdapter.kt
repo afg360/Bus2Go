@@ -1,8 +1,6 @@
 package dev.mainhq.bus2go.adapters
 
 import android.content.Intent
-import android.os.Handler
-import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
@@ -29,11 +27,7 @@ import dev.mainhq.bus2go.fragments.FavouriteBusInfo
 import dev.mainhq.bus2go.fragments.Home
 import dev.mainhq.bus2go.utils.BusAgency
 import dev.mainhq.bus2go.utils.Time
-import okhttp3.internal.userAgent
 import java.lang.ref.WeakReference
-import java.util.Timer
-import java.util.TimerTask
-import java.util.concurrent.TimeUnit
 
 class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, recyclerView: WeakReference<RecyclerView>)
     : RecyclerView.Adapter<FavouritesListElemsAdapter.ViewHolder>(){
@@ -77,11 +71,12 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, recy
                 holder.tripHeadsignTextView.setTextColor(holder.itemView.resources.getColor(R.color.basic_blue, null))
                 holder.stopNameTextView.setTextColor(holder.itemView.resources.getColor(R.color.basic_blue, null))
             }
-            BusAgency.EXO -> {
+            BusAgency.EXO_OTHER -> {
                 holder.tripHeadsignTextView.text = info.busInfo.tripHeadsign//Annoying to find solution"Vers ${info.busInfo.tripHeadsign}"
                 holder.tripHeadsignTextView.setTextColor(holder.itemView.resources.getColor(R.color.basic_purple, null))
                 holder.stopNameTextView.setTextColor(holder.itemView.resources.getColor(R.color.basic_purple, null))
             }
+            else -> TODO("Not yet implemented")
         }
 
         holder.onLongClick(holder.itemView)

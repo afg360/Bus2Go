@@ -9,13 +9,10 @@ import dev.mainhq.bus2go.fragments.FavouriteBusInfo
 import dev.mainhq.bus2go.preferences.BusInfo
 import dev.mainhq.bus2go.utils.BusAgency
 import dev.mainhq.bus2go.utils.Time
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import android.icu.util.Calendar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.collect
 
 class RoomViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -36,7 +33,10 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
                 }
                 return times
             }
-            BusAgency.EXO -> {
+            BusAgency.EXO_TRAIN -> {
+                TODO("Not implemented yet")
+            }
+            BusAgency.EXO_OTHER -> {
                 val stopTimesDAO = exoDataBase.stopTimesDao()
                 list.forEach {busInfo ->
                     stopTimesDAO.getFavouriteStopTime(busInfo.stopName, dayString, Time(calendar).toString(), busInfo.tripHeadsign)
@@ -56,12 +56,12 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
                 val exe1 = coroutineScope.async { stmDatabase.stopsInfoDao().getStopNames(dirs.last()) }
                 Pair(exe0, exe1)
             }
-
-            BusAgency.EXO -> {
+            BusAgency.EXO_OTHER -> {
                 val exe0 = coroutineScope.async { exoDataBase.stopTimesDao().getStopNames(dirs[0]) }
                 val exe1 = coroutineScope.async { exoDataBase.stopTimesDao().getStopNames(dirs.last()) }
                 Pair(exe0, exe1)
             }
+            else -> throw IllegalArgumentException("Cannot use the fxn getStopNames for ${agency}.")
         }
     }
 
@@ -69,7 +69,8 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
     suspend fun getStopTimes(stopName : String, dayString : String, headsign : String, agency : BusAgency) : List<Time>{
         return when(agency){
             BusAgency.STM -> stmDatabase.stopsInfoDao().getStopTimes(stopName, dayString, headsign)
-            BusAgency.EXO -> exoDataBase.stopTimesDao().getStopTimes(stopName, dayString, headsign)
+            BusAgency.EXO_OTHER -> exoDataBase.stopTimesDao().getStopTimes(stopName, dayString, headsign)
+            else -> throw IllegalArgumentException("Cannot use the fxn getStopTimes for ${agency}.")
         }
     }
 
@@ -78,11 +79,12 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
                              curTime : String, headsign : String, agency : BusAgency) : List<Time>{
         return when(agency){
             BusAgency.STM -> stmDatabase.stopsInfoDao().getStopTimes(stopName, dayString, curTime, headsign)
-            BusAgency.EXO -> exoDataBase.stopTimesDao().getStopTimes(stopName, dayString, curTime, headsign)
+            BusAgency.EXO_OTHER -> exoDataBase.stopTimesDao().getStopTimes(stopName, dayString, curTime, headsign)
+            else -> throw IllegalArgumentException("Cannot use the fxn getStopNames for ${agency}.")
         }
     }
 
-    suspend fun getTrips(agency: BusAgency,/** String because some busNums are of the form'T100'*/
+    suspend fun getDirections(agency: BusAgency,/** String because some busNums are of the form'T100'*/
                                             bus: String) : List<String>{
         return when(agency){
             BusAgency.STM -> {
@@ -90,8 +92,17 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
                 if (busNum > 5) stmDatabase.tripsDao().getTripHeadsigns(busNum)
                 else listOf()
             }
-            BusAgency.EXO -> exoDataBase.tripsDao().getTripHeadsigns(bus)
+            BusAgency.EXO_TRAIN -> throw IllegalArgumentException("Cannot use the fxn getDirections for ${agency}.")
+            BusAgency.EXO_OTHER -> exoDataBase.tripsDao().getTripHeadsigns(bus)
         }
+    }
+
+    //FIXME may need direction_id in the arguments...?
+    suspend fun getTrainStopNames(coroutineScope: CoroutineScope, routeId : Int)
+    : Pair<Deferred<List<String>>, Deferred<List<String>>> {
+        val job1 = coroutineScope.async { exoDataBase.stopTimesDao().getTrainStopNames(routeId, 0) }
+        val job2 = coroutineScope.async { exoDataBase.stopTimesDao().getTrainStopNames(routeId, 1) }
+        return Pair(job1, job2)
     }
 
     override fun onCleared() {

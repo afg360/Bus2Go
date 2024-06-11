@@ -7,11 +7,20 @@ import dev.mainhq.bus2go.utils.Time
 @Dao
 interface StopTimesDAO {
 
+    //FIXME DID I FORGET DIRECTION_IDS IN getStopNames???
+    //FIXME SHOULD ALSO TAKE INTO CONSIDERATION DATES WHEN CHECKING WHICH STOPS ARE AVAILABLE
     @Query("SELECT DISTINCT stop_name FROM StopTimes " +
             "JOIN Stops on Stops.stop_id = StopTimes.stop_id " +
             "JOIN Trips ON Trips.trip_id = StopTimes.trip_id " +
             "WHERE trip_headsign = (:headsign) ORDER BY stop_seq")
     suspend fun getStopNames(headsign : String) : List<String>
+
+    @Query("SELECT DISTINCT stop_name FROM StopTimes " +
+            "JOIN Stops ON StopTimes.stop_id = Stops.stop_id " +
+            "JOIN Trips on StopTimes.trip_id = Trips.trip_id " +
+            "WHERE route_id = (:routeId) AND trips.trip_id LIKE 'trains%' " +
+            "AND direction_id = (:directionId) ORDER BY stop_seq;")
+    suspend fun getTrainStopNames(routeId : Int, directionId : Int) : List<String>
 
     @Query("SELECT DISTINCT arrival_time FROM StopTimes " +
             "JOIN  Stops ON StopTimes.stop_id = Stops.stop_id " +

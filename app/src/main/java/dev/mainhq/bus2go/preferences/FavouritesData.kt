@@ -27,7 +27,10 @@ data class FavouritesData(
     @Serializable(with = MyPersistentListSerializer::class)
     val listSTM : PersistentList<BusInfo> = persistentListOf(),
     @Serializable(with = MyPersistentListSerializer::class)
-    val listExo : PersistentList<BusInfo> = persistentListOf()
+    val listExo : PersistentList<BusInfo> = persistentListOf(),
+    //TODO MAY BE REMOVED
+    @Serializable(with = MyPersistentListSerializer::class)
+    val listExoTrain : PersistentList<BusInfo> = persistentListOf()
 )
 
 @Serializable
