@@ -8,7 +8,7 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.utils.BusAgency
-import dev.mainhq.bus2go.viewmodel.RoomViewModel
+import dev.mainhq.bus2go.viewmodels.RoomViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -18,6 +18,9 @@ import java.util.ArrayList
 const val BUS_NAME = "BUS_NAME"
 const val BUS_NUM = "BUS_NUM"
 const val AGENCY = "AGENCY"
+/** Only for use with trains! */
+const val ROUTE_ID = "ROUTE_ID"
+const val DIRECTION_ID = "DIRECTION_ID"
 
 //todo
 //change appbar to be only a back button
@@ -66,14 +69,16 @@ class ChooseDirection : BaseActivity() {
                     findViewById<MaterialTextView>(R.id.description_route_0).text = headsign0 //FIXME???
                     findViewById<MaterialButton>(R.id.route_0).setOnClickListener {
                         intent.putStringArrayListExtra("stops", dir0 as ArrayList<String>)
-                        intent.putExtra("headsign", headsign0)
+                        intent.putExtra(DIRECTION_ID, 0)
+                        intent.putExtra(ROUTE_ID, routeId.toString())
                         intent.putExtra(AGENCY, agency)
                         startActivity(intent)
                     }
                     findViewById<MaterialTextView>(R.id.description_route_1).text = headsign1
                     findViewById<MaterialButton>(R.id.route_1).setOnClickListener {
                         intent.putStringArrayListExtra("stops", dir1 as ArrayList<String>)
-                        intent.putExtra("headsign", headsign1)
+                        intent.putExtra(DIRECTION_ID, 1)
+                        intent.putExtra(ROUTE_ID, routeId.toString())
                         intent.putExtra(AGENCY, agency)
                         startActivity(intent)
                     }

@@ -23,8 +23,8 @@ import com.google.android.material.timepicker.TimeFormat
 import dev.mainhq.bus2go.MainActivity
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.utils.Time
-import dev.mainhq.bus2go.viewmodel.AlarmCreationViewModel
-import dev.mainhq.bus2go.viewmodel.FavouritesViewModel
+import dev.mainhq.bus2go.viewmodels.AlarmCreationViewModel
+import dev.mainhq.bus2go.viewmodels.FavouritesViewModel
 import java.lang.IllegalStateException
 
 

@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go.viewmodel
+package dev.mainhq.bus2go.viewmodels
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -82,6 +82,10 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
             BusAgency.EXO_OTHER -> exoDataBase.stopTimesDao().getStopTimes(stopName, dayString, curTime, headsign)
             else -> throw IllegalArgumentException("Cannot use the fxn getStopNames for ${agency}.")
         }
+    }
+
+    suspend fun getTrainStopTimes(routeId: Int, stopName: String, directionId : Int, curTime : String) : List<Time>{
+        return exoDataBase.stopTimesDao().getTrainStopTimes(routeId, stopName, directionId, curTime)
     }
 
     suspend fun getDirections(agency: BusAgency,/** String because some busNums are of the form'T100'*/

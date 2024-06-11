@@ -3,7 +3,6 @@ package dev.mainhq.bus2go.preferences
 import android.os.Parcel
 import android.os.Parcelable
 import androidx.datastore.core.Serializer
-import dev.mainhq.bus2go.utils.BusAgency
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
@@ -24,19 +23,73 @@ import java.lang.Exception
 
 @Serializable
 data class FavouritesData(
-    @Serializable(with = MyPersistentListSerializer::class)
+    @Serializable(with = PersistentBusInfoListSerializer::class)
     val listSTM : PersistentList<BusInfo> = persistentListOf(),
-    @Serializable(with = MyPersistentListSerializer::class)
+    @Serializable(with = PersistentBusInfoListSerializer::class)
     val listExo : PersistentList<BusInfo> = persistentListOf(),
     //TODO MAY BE REMOVED
-    @Serializable(with = MyPersistentListSerializer::class)
-    val listExoTrain : PersistentList<BusInfo> = persistentListOf()
+    @Serializable(with = PersistentTrainInfoListSerializer::class)
+    val listExoTrain : PersistentList<TrainInfo> = persistentListOf()
 )
+
+interface TransitInfo
+
+@Serializable
+data class TrainInfo(val stopName : String, val routeId : String, val directionId : Int)
+    : Parcelable, TransitInfo {
+    constructor(parcel: Parcel) : this(
+        parcel.readString()!!,
+        parcel.readString()!!,
+        parcel.readInt()
+    )
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    override fun writeToParcel(dest: Parcel, flags: Int) {
+        dest.writeString(stopName)
+        dest.writeString(routeId)
+        dest.writeInt(directionId)
+    }
+
+    companion object CREATOR : Parcelable.Creator<TrainInfo> {
+        override fun createFromParcel(parcel: Parcel): TrainInfo {
+            return TrainInfo(parcel)
+        }
+
+        override fun newArray(size: Int): Array<TrainInfo?> {
+            return arrayOfNulls(size)
+        }
+    }
+}
+
+@Suppress("EXTERNAL_SERIALIZER_USELESS")
+@OptIn(ExperimentalSerializationApi::class)
+@kotlinx.serialization.Serializer(forClass = PersistentList::class)
+class PersistentTrainInfoListSerializer(private val serializer: KSerializer<TrainInfo>) : KSerializer<PersistentList<TrainInfo>> {
+
+    private class PersistentListDescriptor :
+        SerialDescriptor by serialDescriptor<List<TrainInfo>>() {
+        @ExperimentalSerializationApi
+        override val serialName: String = "kotlinx.serialization.immutable.persistentList"
+    }
+
+    override val descriptor: SerialDescriptor = PersistentListDescriptor()
+
+    override fun serialize(encoder: Encoder, value: PersistentList<TrainInfo>) {
+        return ListSerializer(serializer).serialize(encoder, value)
+    }
+
+    override fun deserialize(decoder: Decoder): PersistentList<TrainInfo> {
+        return ListSerializer(serializer).deserialize(decoder).toPersistentList()
+    }
+}
 
 @Serializable
 //FIXME could improve the data stored inside for better ease of use
 data class BusInfo(val stopName : String, val tripHeadsign : String)
-    : Parcelable {
+    : Parcelable, TransitInfo {
     constructor(parcel: Parcel) : this(
         parcel.readString()!!,
         parcel.readString()!!
@@ -65,7 +118,7 @@ data class BusInfo(val stopName : String, val tripHeadsign : String)
 @Suppress("EXTERNAL_SERIALIZER_USELESS")
 @OptIn(ExperimentalSerializationApi::class)
 @kotlinx.serialization.Serializer(forClass = PersistentList::class)
-class MyPersistentListSerializer(private val serializer: KSerializer<BusInfo>) : KSerializer<PersistentList<BusInfo>> {
+class PersistentBusInfoListSerializer(private val serializer: KSerializer<BusInfo>) : KSerializer<PersistentList<BusInfo>> {
 
     private class PersistentListDescriptor :
         SerialDescriptor by serialDescriptor<List<BusInfo>>() {
@@ -82,7 +135,6 @@ class MyPersistentListSerializer(private val serializer: KSerializer<BusInfo>) :
     override fun deserialize(decoder: Decoder): PersistentList<BusInfo> {
         return ListSerializer(serializer).deserialize(decoder).toPersistentList()
     }
-
 }
 
 object SettingsSerializer : Serializer<FavouritesData> {

@@ -23,10 +23,8 @@ import dev.mainhq.bus2go.Times
 import dev.mainhq.bus2go.adapters.AlarmDialogListElemsAdapter
 import dev.mainhq.bus2go.preferences.BusInfo
 import dev.mainhq.bus2go.utils.Time
-import dev.mainhq.bus2go.viewmodel.FavouritesViewModel
+import dev.mainhq.bus2go.viewmodels.FavouritesViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 

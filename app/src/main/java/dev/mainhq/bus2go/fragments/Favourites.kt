@@ -25,8 +25,8 @@ import dev.mainhq.bus2go.utils.Time
 import dev.mainhq.bus2go.adapters.FavouritesListElemsAdapter
 import dev.mainhq.bus2go.adapters.setMargins
 import dev.mainhq.bus2go.utils.BusAgency
-import dev.mainhq.bus2go.viewmodel.FavouritesViewModel
-import dev.mainhq.bus2go.viewmodel.RoomViewModel
+import dev.mainhq.bus2go.viewmodels.FavouritesViewModel
+import dev.mainhq.bus2go.viewmodels.RoomViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -146,7 +146,7 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
                             }
                         }
                         lifecycleScope.launch {
-                            favouritesViewModel.removeFavourites(toRemoveList)
+                            favouritesViewModel.removeFavouriteBuses(toRemoveList)
                             val list = (toFavouriteBusInfoList(favouritesViewModel.stmBusInfo.value, BusAgency.STM)
                                     + toFavouriteBusInfoList(favouritesViewModel.exoBusInfo.value, BusAgency.EXO_OTHER))
                             recyclerViewDisplay(view, list, new = true)

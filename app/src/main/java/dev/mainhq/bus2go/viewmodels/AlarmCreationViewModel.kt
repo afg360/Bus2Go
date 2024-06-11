@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go.viewmodel
+package dev.mainhq.bus2go.viewmodels
 
 import android.app.Application
 import android.content.Context

@@ -1,12 +1,9 @@
 package dev.mainhq.bus2go
 
 import android.os.Bundle
-import android.util.Log
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.room.Room
-import dev.mainhq.bus2go.database.stm_data.AppDatabaseSTM
 import dev.mainhq.bus2go.utils.Time
 import dev.mainhq.bus2go.adapters.TimeListElemsAdapter
 import kotlinx.coroutines.Dispatchers
@@ -15,11 +12,9 @@ import kotlinx.coroutines.withContext
 import android.icu.util.Calendar
 import android.os.Build
 import androidx.lifecycle.ViewModelProvider
-import dev.mainhq.bus2go.database.exo_data.AppDatabaseExo
 import dev.mainhq.bus2go.utils.BusAgency
-import dev.mainhq.bus2go.viewmodel.RoomViewModel
+import dev.mainhq.bus2go.viewmodels.RoomViewModel
 import kotlinx.coroutines.async
-import kotlin.properties.Delegates
 
 //todo
 //must be careful when dealing with hours AFTER 23:59:59
@@ -27,22 +22,22 @@ import kotlin.properties.Delegates
 //todo add a home button to go back to the main activity
 class Times : BaseActivity() {
 
-    private var fromAlarmCreation by Delegates.notNull<Boolean>()
+    private var fromAlarmCreation = false
     private lateinit var agency: BusAgency
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //setTheme()
         setContentView(R.layout.times)
         val stopName = intent.getStringExtra("stopName")!!
         assert (stopName.isNotEmpty())
-        val headsign = intent.getStringExtra("headsign")!!
         agency = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.getSerializableExtra (AGENCY, BusAgency::class.java) ?: throw AssertionError("AGENCY is Null")
         } else {
             intent.getSerializableExtra (AGENCY) as BusAgency? ?: throw AssertionError("AGENCY is Null")
         }
         fromAlarmCreation = intent.getBooleanExtra("ALARMS", false)
+
+
         val roomViewModel = ViewModelProvider(this)[RoomViewModel::class.java]
         val calendar : Calendar = Calendar.getInstance()
         val dayString = when (calendar.get(Calendar.DAY_OF_WEEK)) {
@@ -57,16 +52,37 @@ class Times : BaseActivity() {
         }
         dayString ?: throw IllegalStateException("Cannot have a non day of the week!")
         val curTime = Time(calendar)
-        lifecycleScope.launch {
-            val stopTimes = roomViewModel.getStopTimes(stopName, dayString, curTime.toString(), headsign, agency)
-            withContext(Dispatchers.Main){
-                //If stopTimes.isEmpty, say that it is empty
-                val recyclerView : RecyclerView = findViewById(R.id.time_recycle_view)
-                val layoutManager = LinearLayoutManager(applicationContext)
-                layoutManager.orientation = LinearLayoutManager.VERTICAL
-                recyclerView.layoutManager = layoutManager
-                //need to improve that code to make it more safe
-                recyclerView.adapter = TimeListElemsAdapter(stopTimes, fromAlarmCreation)
+        if (agency == BusAgency.EXO_TRAIN){
+            val routeId = intent.getStringExtra(ROUTE_ID)!!.toInt() //for now, may switch to regular string
+            val directionId = intent.getIntExtra(DIRECTION_ID, -1)
+            if (directionId == -1) throw IllegalStateException("Cannot not give a direction id for a train!!")
+            lifecycleScope.launch {
+                //headsign.toInt() is actually the directionId for trains
+                val stopTimes = roomViewModel.getTrainStopTimes(routeId, stopName, directionId, curTime.toString())
+                withContext(Dispatchers.Main) {
+                    //If stopTimes.isEmpty, say that it is empty
+                    val recyclerView: RecyclerView = findViewById(R.id.time_recycle_view)
+                    val layoutManager = LinearLayoutManager(applicationContext)
+                    layoutManager.orientation = LinearLayoutManager.VERTICAL
+                    recyclerView.layoutManager = layoutManager
+                    //need to improve that code to make it more safe
+                    recyclerView.adapter = TimeListElemsAdapter(stopTimes, fromAlarmCreation)
+                }
+            }
+        }
+        else {
+            val headsign = intent.getStringExtra("headsign")!!
+            lifecycleScope.launch {
+                val stopTimes = roomViewModel.getStopTimes(stopName, dayString, curTime.toString(), headsign, agency)
+                withContext(Dispatchers.Main) {
+                    //If stopTimes.isEmpty, say that it is empty
+                    val recyclerView: RecyclerView = findViewById(R.id.time_recycle_view)
+                    val layoutManager = LinearLayoutManager(applicationContext)
+                    layoutManager.orientation = LinearLayoutManager.VERTICAL
+                    recyclerView.layoutManager = layoutManager
+                    //need to improve that code to make it more safe
+                    recyclerView.adapter = TimeListElemsAdapter(stopTimes, fromAlarmCreation)
+                }
             }
         }
     }
