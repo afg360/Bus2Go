@@ -34,4 +34,12 @@
     <string name="home">Home</string>
     <string name="map">Map</string>
     <string name="alarms">Alarms</string>
+    <string name="west">West</string>
+    <string name="east">East</string>
+    <string name="north">North</string>
+    <string name="south">South</string>
+    <string name="from_to">From %1$s to %2$s</string>
+    <string name="in_min">In %1$s min</string>
+    <string name="in_more_than_an_hour"><![CDATA[In >> 1h]]></string>
+    <string name="none_for_the_rest_of_the_today">None for the rest of the today</string>
 </resources>

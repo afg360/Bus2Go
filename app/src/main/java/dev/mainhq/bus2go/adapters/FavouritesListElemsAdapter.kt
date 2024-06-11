@@ -52,7 +52,8 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, recy
         val info = list[position]
         holder.arrivalTimeTextView.text = info.arrivalTime.toString()
         if (info.arrivalTime == null){
-            holder.timeRemainingTextView.text = "None for today"
+            holder.timeRemainingTextView.text =
+                holder.itemView.context.getString(R.string.none_for_the_rest_of_the_today)
         }
         else{
             holder.timeRemainingTextView.text = getTimeRemaining(info.arrivalTime)

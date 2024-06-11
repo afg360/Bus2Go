@@ -147,17 +147,17 @@ class ChooseDirection : BaseActivity() {
             val intent = Intent(applicationContext, ChooseStop::class.java)
             when (orientation){
                 Orientation.HORIZONTAL -> {
-                    leftButton.text = "West"
-                    rightButton.text = "East"
+                    leftButton.text = getString(R.string.west)
+                    rightButton.text = getString(R.string.east)
                 }
                 Orientation.VERTICAL -> {
-                    leftButton.text = "North"
-                    rightButton.text = "South"
+                    leftButton.text = getString(R.string.north)
+                    rightButton.text = getString(R.string.south)
                 }
             }
             if (dir0[0].last() == 'W' || dir0[0].last() == 'N') {
-                leftDescr.text = "From ${dir0[0]} to ${dir0.last()}"
-                rightDescr.text = "From ${dir1[0]} to ${dir1.last()}"
+                leftDescr.text = getString(R.string.from_to, dir0[0], dir0.last())
+                rightDescr.text = getString(R.string.from_to, dir1[0], dir1.last())
                 leftButton.setOnClickListener {
                     intent.putStringArrayListExtra("stops", dir0 as ArrayList<String>)
                     intent.putExtra("headsign", headsign0)
@@ -172,8 +172,8 @@ class ChooseDirection : BaseActivity() {
                 }
             }
             else{
-                leftDescr.text = "From ${dir1[0]} to ${dir1.last()}"
-                rightDescr.text = "From ${dir0[0]} to ${dir0.last()}"
+                leftDescr.text = getString(R.string.from_to, dir1[0], dir1.last())
+                rightDescr.text = getString(R.string.from_to, dir0[0], dir0.last())
                 leftButton.setOnClickListener {
                     intent.putStringArrayListExtra("stops", dir1 as ArrayList<String>)
                     intent.putExtra("headsign", headsign1)

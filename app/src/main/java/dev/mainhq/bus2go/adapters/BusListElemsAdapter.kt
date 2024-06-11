@@ -39,7 +39,6 @@ class BusListElemsAdapter(private val busData: List<BusInfo>) :
         holder.busNumView.text = data.routeId.toString()
         holder.busDirView.text = data.routeName
         holder.itemView.setOnClickListener {
-            val layout = it as ConstraintLayout
             val intent = Intent(it.context, ChooseDirection::class.java)
             intent.putExtra(
                 BUS_NAME,
