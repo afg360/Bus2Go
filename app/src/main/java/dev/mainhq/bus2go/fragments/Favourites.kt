@@ -24,7 +24,8 @@ import dev.mainhq.bus2go.preferences.BusInfo
 import dev.mainhq.bus2go.utils.Time
 import dev.mainhq.bus2go.adapters.FavouritesListElemsAdapter
 import dev.mainhq.bus2go.adapters.setMargins
-import dev.mainhq.bus2go.utils.BusAgency
+import dev.mainhq.bus2go.preferences.TransitInfo
+import dev.mainhq.bus2go.utils.TransitAgency
 import dev.mainhq.bus2go.viewmodels.FavouritesViewModel
 import dev.mainhq.bus2go.viewmodels.RoomViewModel
 import kotlinx.coroutines.Dispatchers
@@ -50,14 +51,16 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
             favouritesViewModel.loadData()
             val listSTM = favouritesViewModel.stmBusInfo.value
             val listExo = favouritesViewModel.exoBusInfo.value
-            if (listSTM.isEmpty() && listExo.isEmpty()) {
+            val listTrain = favouritesViewModel.exoTrainInfo.value
+            if (listSTM.isEmpty() && listExo.isEmpty() && listTrain.isEmpty()) {
                 withContext(Dispatchers.Main){
                     view.findViewById<MaterialTextView>(R.id.favourites_text_view).text =
                         getText(R.string.no_favourites)
                 }
             }
             else {
-                val list = (toFavouriteBusInfoList(listSTM, BusAgency.STM) + toFavouriteBusInfoList(listExo, BusAgency.EXO_OTHER))
+                val list = toFavouriteTransitInfoList(listSTM, TransitAgency.STM) + toFavouriteTransitInfoList(listExo, TransitAgency.EXO_OTHER) +
+                        toFavouriteTransitInfoList(listTrain, TransitAgency.EXO_TRAIN)
                 println(list.toString())
                 withContext(Dispatchers.Main){
                     view.findViewById<MaterialTextView>(R.id.favourites_text_view).text = getText(R.string.favourites)
@@ -99,7 +102,6 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
         val recyclerView : RecyclerView = view.findViewById(R.id.favouritesRecyclerView)
         /** This part allows us to update each recyclerview item from favourites in "real time", i.e. the user can see
          *  an updated time left displayed */
-
         listener = object : ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
                 recyclerView.viewTreeObserver.removeOnGlobalLayoutListener(this)
@@ -109,10 +111,12 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
                 executor!!.scheduleAtFixedRate({
                     val tmpListSTM = favouritesViewModel.stmBusInfo.value
                     val tmpListExo = favouritesViewModel.exoBusInfo.value
-                    if (tmpListSTM.isNotEmpty() || tmpListExo.isNotEmpty()) {
+                    val tmpListTrain = favouritesViewModel.exoTrainInfo.value
+                    if (tmpListSTM.isNotEmpty() || tmpListExo.isNotEmpty() || tmpListTrain.isNotEmpty()) {
                         //FIXME we only want to change the time left data, NOT the background colors etc
                         lifecycleScope.launch{
-                            val mutableList = toFavouriteBusInfoList(tmpListSTM, BusAgency.STM) + toFavouriteBusInfoList(tmpListExo, BusAgency.EXO_OTHER)
+                            val mutableList = toFavouriteTransitInfoList(tmpListSTM, TransitAgency.STM) + toFavouriteTransitInfoList(tmpListExo, TransitAgency.EXO_OTHER) +
+                                    toFavouriteTransitInfoList(tmpListTrain, TransitAgency.EXO_TRAIN)
                             withContext(Dispatchers.Main){
                                 //FIXME nullPointerException bug is at line below
                                 val favouritesListElemsAdapter = recyclerView.adapter as FavouritesListElemsAdapter?
@@ -147,8 +151,8 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
                         }
                         lifecycleScope.launch {
                             favouritesViewModel.removeFavouriteBuses(toRemoveList)
-                            val list = (toFavouriteBusInfoList(favouritesViewModel.stmBusInfo.value, BusAgency.STM)
-                                    + toFavouriteBusInfoList(favouritesViewModel.exoBusInfo.value, BusAgency.EXO_OTHER))
+                            val list = (toFavouriteTransitInfoList(favouritesViewModel.stmBusInfo.value, TransitAgency.STM)
+                                    + toFavouriteTransitInfoList(favouritesViewModel.exoBusInfo.value, TransitAgency.EXO_OTHER))
                             recyclerViewDisplay(view, list, new = true)
                         }
                         appBar?.apply { changeAppBar(this) }
@@ -168,8 +172,8 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
     }
 
     /** Used to get the required data to make a list of favouriteBusInfo, adding dates to busInfo elements */
-    private suspend fun toFavouriteBusInfoList(list : List<BusInfo>, agency: BusAgency) : MutableList<FavouriteBusInfo> {
-        val times : MutableList<FavouriteBusInfo> = mutableListOf()
+    private suspend fun toFavouriteTransitInfoList(list : List<TransitInfo>, agency: TransitAgency) : MutableList<FavouriteTransitInfo> {
+        val times : MutableList<FavouriteTransitInfo> = mutableListOf()
         val calendar = Calendar.getInstance()
         val dayString = when (calendar.get(Calendar.DAY_OF_WEEK)) {
             Calendar.SUNDAY -> "d"
@@ -185,7 +189,7 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
         return roomViewModel.getFavouriteStopTimes(list, agency, dayString, calendar, times)
     }
 
-    private suspend fun recyclerViewDisplay(view : View, times : List<FavouriteBusInfo>, new : Boolean = false){
+    private suspend fun recyclerViewDisplay(view : View, times : List<FavouriteTransitInfo>, new : Boolean = false){
         withContext(Dispatchers.Main){
             if (times.isEmpty()){
                 view.findViewById<MaterialTextView>(R.id.favourites_text_view).text =
@@ -254,4 +258,4 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
 
 }
 
-data class FavouriteBusInfo(val busInfo: BusInfo, val arrivalTime : Time?, val agency : BusAgency)
+data class FavouriteTransitInfo(val transitInfo: TransitInfo, val arrivalTime : Time?, val agency : TransitAgency)

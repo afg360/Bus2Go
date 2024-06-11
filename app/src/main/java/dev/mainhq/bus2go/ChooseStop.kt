@@ -7,7 +7,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import dev.mainhq.bus2go.adapters.StopListElemsAdapter
-import dev.mainhq.bus2go.utils.BusAgency
+import dev.mainhq.bus2go.utils.TransitAgency
 import dev.mainhq.bus2go.viewmodels.FavouritesViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -22,7 +22,7 @@ import java.lang.IllegalStateException
 //todo add possibility of searching amongst all the stops
 class ChooseStop() : BaseActivity() {
 
-    private lateinit var agency: BusAgency
+    private lateinit var agency: TransitAgency
     private var directionId : Int? = null
     private var routeId : String? = null
     private var headsign : String? = null
@@ -37,15 +37,15 @@ class ChooseStop() : BaseActivity() {
         val data : List<String> = intent.getStringArrayListExtra("stops") ?: listOf()
 
         agency = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getSerializableExtra (AGENCY, BusAgency::class.java) ?: throw AssertionError("AGENCY is Null")
+            intent.getSerializableExtra (AGENCY, TransitAgency::class.java) ?: throw AssertionError("AGENCY is Null")
         } else {
-            intent.getSerializableExtra (AGENCY) as BusAgency? ?: throw AssertionError("AGENCY is Null")
+            intent.getSerializableExtra (AGENCY) as TransitAgency? ?: throw AssertionError("AGENCY is Null")
         }
         if (data.isNotEmpty()) {
             val recyclerView: RecyclerView = findViewById(R.id.stop_recycle_view)
             val layoutManager = LinearLayoutManager(applicationContext)
 
-            if (agency == BusAgency.EXO_TRAIN){
+            if (agency == TransitAgency.EXO_TRAIN){
                 directionId = intent.getIntExtra(DIRECTION_ID, -1)
                 if (directionId == -1) throw IllegalStateException("Forgot to give a direction id to a train!")
                 routeId = intent.getStringExtra(ROUTE_ID) ?: throw IllegalStateException("Forgot to give a route id to a train!")

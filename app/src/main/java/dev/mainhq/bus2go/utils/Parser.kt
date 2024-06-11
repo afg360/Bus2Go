@@ -29,7 +29,7 @@ suspend fun setup(coroutineScope: CoroutineScope, query : String, fragment : Fra
         val routes = dbSTM.routesDao()
         val list = routes.getBusRouteInfo(FuzzyQuery(query))
         list.toMutableList().map {
-            BusInfo(it.routeId, it.routeName, BusAgency.STM)
+            BusInfo(it.routeId, it.routeName, TransitAgency.STM)
         }
     }
     val jobExo = coroutineScope.async {
@@ -38,8 +38,8 @@ suspend fun setup(coroutineScope: CoroutineScope, query : String, fragment : Fra
         val list = routes.getBusRouteInfo(FuzzyQuery(query, true))
         list.toMutableList().map {
             val tmp = it.routeId.split("-", limit = 2)
-            if (tmp[0] == "trains") BusInfo(tmp[1], it.routeName, BusAgency.EXO_TRAIN)
-            else BusInfo(tmp[1], it.routeName, BusAgency.EXO_OTHER)
+            if (tmp[0] == "trains") BusInfo(tmp[1], it.routeName, TransitAgency.EXO_TRAIN)
+            else BusInfo(tmp[1], it.routeName, TransitAgency.EXO_OTHER)
         }
     }
     val list = jobSTM.await() + jobExo.await()
@@ -63,14 +63,14 @@ suspend fun setup(query : String, activity : AppCompatActivity, color : Int?){
         val routes = dbSTM.routesDao()
         val list = routes.getBusRouteInfo(FuzzyQuery(query))
         list.toMutableList().map {
-            BusInfo(it.routeId, it.routeName, BusAgency.STM)
+            BusInfo(it.routeId, it.routeName, TransitAgency.STM)
         }
     }
     val jobExo = activity.lifecycleScope.async {
         val routes = dbExo.routesDao()
         val list = routes.getBusRouteInfo(FuzzyQuery(query, true))
         list.toMutableList().map {
-            BusInfo(it.routeId.split("-", limit = 2)[1], it.routeName, BusAgency.EXO_OTHER)
+            BusInfo(it.routeId.split("-", limit = 2)[1], it.routeName, TransitAgency.EXO_OTHER)
         }
     }
     val list = jobSTM.await() + jobExo.await()
@@ -112,9 +112,9 @@ fun toParsable(txt: String): String {
     return str
 }
 
-data class BusInfo(val routeId : String, val routeName : String, val busAgency: BusAgency)
+data class BusInfo(val routeId : String, val routeName : String, val transitAgency: TransitAgency)
 
-enum class BusAgency : java.io.Serializable{
+enum class TransitAgency : java.io.Serializable{
     STM, EXO_TRAIN, EXO_OTHER
 }
 

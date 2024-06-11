@@ -12,9 +12,8 @@ import kotlinx.coroutines.withContext
 import android.icu.util.Calendar
 import android.os.Build
 import androidx.lifecycle.ViewModelProvider
-import dev.mainhq.bus2go.utils.BusAgency
+import dev.mainhq.bus2go.utils.TransitAgency
 import dev.mainhq.bus2go.viewmodels.RoomViewModel
-import kotlinx.coroutines.async
 
 //todo
 //must be careful when dealing with hours AFTER 23:59:59
@@ -23,7 +22,7 @@ import kotlinx.coroutines.async
 class Times : BaseActivity() {
 
     private var fromAlarmCreation = false
-    private lateinit var agency: BusAgency
+    private lateinit var agency: TransitAgency
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,9 +30,9 @@ class Times : BaseActivity() {
         val stopName = intent.getStringExtra("stopName")!!
         assert (stopName.isNotEmpty())
         agency = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getSerializableExtra (AGENCY, BusAgency::class.java) ?: throw AssertionError("AGENCY is Null")
+            intent.getSerializableExtra (AGENCY, TransitAgency::class.java) ?: throw AssertionError("AGENCY is Null")
         } else {
-            intent.getSerializableExtra (AGENCY) as BusAgency? ?: throw AssertionError("AGENCY is Null")
+            intent.getSerializableExtra (AGENCY) as TransitAgency? ?: throw AssertionError("AGENCY is Null")
         }
         fromAlarmCreation = intent.getBooleanExtra("ALARMS", false)
 
@@ -52,13 +51,13 @@ class Times : BaseActivity() {
         }
         dayString ?: throw IllegalStateException("Cannot have a non day of the week!")
         val curTime = Time(calendar)
-        if (agency == BusAgency.EXO_TRAIN){
+        if (agency == TransitAgency.EXO_TRAIN){
             val routeId = intent.getStringExtra(ROUTE_ID)!!.toInt() //for now, may switch to regular string
             val directionId = intent.getIntExtra(DIRECTION_ID, -1)
             if (directionId == -1) throw IllegalStateException("Cannot not give a direction id for a train!!")
             lifecycleScope.launch {
                 //headsign.toInt() is actually the directionId for trains
-                val stopTimes = roomViewModel.getTrainStopTimes(routeId, stopName, directionId, curTime.toString())
+                val stopTimes = roomViewModel.getTrainStopTimes(routeId, stopName, directionId, curTime.toString(), dayString)
                 withContext(Dispatchers.Main) {
                     //If stopTimes.isEmpty, say that it is empty
                     val recyclerView: RecyclerView = findViewById(R.id.time_recycle_view)

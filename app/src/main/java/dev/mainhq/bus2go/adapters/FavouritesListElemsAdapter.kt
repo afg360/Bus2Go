@@ -20,16 +20,21 @@ import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.AGENCY
+import dev.mainhq.bus2go.DIRECTION_ID
 import dev.mainhq.bus2go.MainActivity
 import dev.mainhq.bus2go.R
+import dev.mainhq.bus2go.ROUTE_ID
 import dev.mainhq.bus2go.Times
-import dev.mainhq.bus2go.fragments.FavouriteBusInfo
+import dev.mainhq.bus2go.fragments.FavouriteTransitInfo
 import dev.mainhq.bus2go.fragments.Home
-import dev.mainhq.bus2go.utils.BusAgency
+import dev.mainhq.bus2go.preferences.BusInfo
+import dev.mainhq.bus2go.preferences.TrainInfo
+import dev.mainhq.bus2go.preferences.TransitInfo
+import dev.mainhq.bus2go.utils.TransitAgency
 import dev.mainhq.bus2go.utils.Time
 import java.lang.ref.WeakReference
 
-class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, recyclerView: WeakReference<RecyclerView>)
+class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, recyclerView: WeakReference<RecyclerView>)
     : RecyclerView.Adapter<FavouritesListElemsAdapter.ViewHolder>(){
 
         //FIXME shitty implementation for now... using a direct reference
@@ -64,24 +69,53 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, recy
             }
         }
 
-        holder.stopNameTextView.text = info.busInfo.stopName
+        if (info.agency == TransitAgency.EXO_TRAIN){
+            info.transitInfo as TrainInfo
+            holder.stopNameTextView.text = info.transitInfo.stopName
+            holder.tripHeadsignTextView.text = info.transitInfo.routeId
 
-        when(info.agency){
-            BusAgency.STM -> {
-                holder.tripHeadsignTextView.text = info.busInfo.tripHeadsign
-                holder.tripHeadsignTextView.setTextColor(holder.itemView.resources.getColor(R.color.basic_blue, null))
-                holder.stopNameTextView.setTextColor(holder.itemView.resources.getColor(R.color.basic_blue, null))
+            holder.tripHeadsignTextView.setTextColor(holder.itemView.resources
+                .getColor(R.color.basic_purple, null))
+            holder.stopNameTextView.setTextColor(holder.itemView.resources
+                .getColor(R.color.basic_purple,null))
+        }
+        else {
+            info.transitInfo as BusInfo
+            holder.stopNameTextView.text = info.transitInfo.stopName
+            when (info.agency) {
+                TransitAgency.STM -> {
+                    holder.tripHeadsignTextView.text = info.transitInfo.tripHeadsign
+                    holder.tripHeadsignTextView.setTextColor(holder.itemView.resources
+                        .getColor(R.color.basic_blue, null))
+                    holder.stopNameTextView.setTextColor(
+                        holder.itemView.resources.getColor(
+                            R.color.basic_blue,
+                            null
+                        )
+                    )
+                }
+
+                TransitAgency.EXO_OTHER -> {
+                    holder.tripHeadsignTextView.text =
+                        info.transitInfo.tripHeadsign
+                    holder.tripHeadsignTextView.setTextColor(
+                        holder.itemView.resources.getColor(
+                            R.color.basic_purple,
+                            null
+                        )
+                    )
+                    holder.stopNameTextView.setTextColor(
+                        holder.itemView.resources.getColor(
+                            R.color.basic_purple,
+                            null
+                        )
+                    )
+                }
+                else -> TODO("Not yet implemented")
             }
-            BusAgency.EXO_OTHER -> {
-                holder.tripHeadsignTextView.text = info.busInfo.tripHeadsign//Annoying to find solution"Vers ${info.busInfo.tripHeadsign}"
-                holder.tripHeadsignTextView.setTextColor(holder.itemView.resources.getColor(R.color.basic_purple, null))
-                holder.stopNameTextView.setTextColor(holder.itemView.resources.getColor(R.color.basic_purple, null))
-            }
-            else -> TODO("Not yet implemented")
         }
 
         holder.onLongClick(holder.itemView)
-        holder.onClick(holder.itemView)
         holder.checkBoxView.setOnClickListener {
             val parent = recyclerView.parent.parent.parent.parent.parent.parent as ViewGroup
             if ((it as MaterialCheckBox).isChecked) holder.select(holder.itemView, parent)
@@ -100,6 +134,8 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, recy
             }
         }
 
+        /** This onClick either serves to check the remaining times if not in selection mode, or to select/unselect an item of the
+         *  recycler view if in selection mode (see onLongClick for more detail on the selection mode) */
         holder.itemView.setOnClickListener {
             //FIXME could remove nullability by setting holder.itemview.tag = "unselected"...
             val parent = WeakReference((recyclerView.parent.parent.parent.parent.parent.parent as ViewGroup))
@@ -116,7 +152,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, recy
                                     holder.select(it, parent.get()!!)
                                     holder.checkBoxView.isChecked = true
                                 }
-                                "unselected" -> startTimes(holder, it, info.agency)
+                                "unselected" -> startTimes(holder, it, info)
                             }
                         }
                     }
@@ -128,10 +164,10 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, recy
                         holder.select(it, parent.get()!!)
                         holder.checkBoxView.isChecked = true
                     }
-                    "unselected" -> startTimes(holder, it, info.agency)
+                    "unselected" -> startTimes(holder, it, info)
                 }
             }
-            else startTimes(holder, it, info.agency)
+            else startTimes(holder, it, info)
             parent.get()!!.findViewById<MaterialTextView>(R.id.selectedNumsOfFavourites)
                 .text = (recyclerView.adapter as FavouritesListElemsAdapter).numSelected.run{
                 val deleteItemsWidget = parent.get()!!.findViewById<LinearLayout>(R.id.removeItemsWidget)
@@ -148,7 +184,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, recy
     }
 
     /** Only applies for when the arrival time exists (for some buses, some days do not have any trips */
-    fun updateTime(viewGroup : ViewGroup, favouritesBusInfo: FavouriteBusInfo){
+    fun updateTime(viewGroup : ViewGroup, favouritesBusInfo: FavouriteTransitInfo){
         val container = viewGroup[0] as ViewGroup
         favouritesBusInfo.arrivalTime?.also {
             ((container[1] as ViewGroup)[2] as MaterialTextView).text = favouritesBusInfo.arrivalTime.toString()
@@ -190,23 +226,29 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, recy
         }
     }
 
-
-
     fun isSelected(/** Outer view group layout, containing the linear layout (at the moment) for the other components */
                viewGroup : ViewGroup) : Boolean{
         return viewGroup.tag == "selected"
     }
 
-    private fun startTimes(holder : ViewHolder, view : View, agency: BusAgency){
+    private fun startTimes(holder : ViewHolder, view : View, info : FavouriteTransitInfo){
         val intent = Intent(view.context, Times::class.java)
         intent.putExtra("stopName", holder.stopNameTextView.text as String)
-        intent.putExtra("headsign", holder.tripHeadsignTextView.text as String)
-        intent.putExtra(AGENCY, agency)
+        intent.putExtra(AGENCY, info.agency)
+        if (info.agency == TransitAgency.EXO_TRAIN){
+            info.transitInfo as TrainInfo
+            intent.putExtra(DIRECTION_ID, info.transitInfo.directionId)
+            intent.putExtra(ROUTE_ID, info.transitInfo.routeId)
+        }
+        else {
+            info.transitInfo as BusInfo
+            intent.putExtra("headsign", holder.tripHeadsignTextView.text as String)
+        }
         view.context.startActivity(intent)
         view.clearFocus()
     }
 
-    class ViewHolder(view : View, private val recyclerView: RecyclerView) : RecyclerView.ViewHolder(view), OnClickListener, OnLongClickListener{
+    class ViewHolder(view : View, private val recyclerView: RecyclerView) : RecyclerView.ViewHolder(view), OnLongClickListener{
         var checkBoxView : MaterialCheckBox
         val tripHeadsignTextView : MaterialTextView
         val stopNameTextView : MaterialTextView
@@ -218,19 +260,6 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, recy
             arrivalTimeTextView = view.findViewById(R.id.favouritesBusTimeTextView)
             timeRemainingTextView = view.findViewById(R.id.favouritesBusTimeRemainingTextView)
             checkBoxView = view.findViewById(R.id.favourites_check_box)
-        }
-
-        //fixme not working properly
-        //create a mode for the entire recycler view, then change behaviour on onclick/onlongclick for each item
-        /** This onClick either serves to check the remaining times if not in selection mode, or to select/unselect an item of the
-         *  recycler view if in selection mode (see onLongClick for more detail on the selection mode) */
-        override fun onClick(v: View?) {
-            //TODO give the all checkbox a tag. if tag == allSelected, then deselect it if we unselect at least one
-            //FIXME Refactor code to have less lines taken
-
-            v?.setOnClickListener{
-
-            }
         }
 
         /** This onLongClick function serves as a selection interface (entering selection mode) for the recycler view items, so that

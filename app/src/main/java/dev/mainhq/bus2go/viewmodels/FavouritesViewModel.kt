@@ -10,7 +10,7 @@ import dev.mainhq.bus2go.preferences.BusInfo
 import dev.mainhq.bus2go.preferences.FavouritesData
 import dev.mainhq.bus2go.preferences.SettingsSerializer
 import dev.mainhq.bus2go.preferences.TrainInfo
-import dev.mainhq.bus2go.utils.BusAgency
+import dev.mainhq.bus2go.utils.TransitAgency
 import kotlinx.collections.immutable.mutate
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -65,7 +65,7 @@ class FavouritesViewModel(private val application: Application) : AndroidViewMod
             application.favouritesDataStore.updateData {favourites ->
                 favourites.copy(listExoTrain = favourites.listExoTrain.mutate {
                     //maybe add a tripid or some identifier so that it is a unique thing deleted
-                    it.removeIf { trainInfo -> toRemoveList.contains(TODO("")) }
+                    it.removeIf { trainInfo -> toRemoveList.contains(trainInfo) }
                 })
             }
         }
@@ -73,17 +73,17 @@ class FavouritesViewModel(private val application: Application) : AndroidViewMod
     }
 
     /** Used inside StopListElemsAdapter */
-    fun removeFavouriteBuses(agency : BusAgency, data : String, headsign : String){
+    fun removeFavouriteBuses(agency : TransitAgency, data : String, headsign : String){
         viewModelScope.launch {
             application.favouritesDataStore.updateData { favourites ->
                 when(agency){
-                    BusAgency.STM -> {
+                    TransitAgency.STM -> {
                         favourites.copy(listSTM = favourites.listSTM.mutate {
                             //maybe add a tripid or some identifier so that it is a unique thing deleted
                             it.remove(BusInfo(data, headsign))
                         })
                     }
-                    BusAgency.EXO_OTHER -> {
+                    TransitAgency.EXO_OTHER -> {
                         favourites.copy(listExo = favourites.listExo.mutate {
                             //maybe add a tripid or some identifier so that it is a unique thing deleted
                             it.remove(BusInfo(data, headsign))
@@ -95,8 +95,8 @@ class FavouritesViewModel(private val application: Application) : AndroidViewMod
         }
     }
 
-    fun removeFavouriteTrains(agency : BusAgency, stopName : String, routeId : String, directionId : Int){
-        if (agency == BusAgency.EXO_TRAIN) {
+    fun removeFavouriteTrains(agency : TransitAgency, stopName : String, routeId : String, directionId : Int){
+        if (agency == TransitAgency.EXO_TRAIN) {
             viewModelScope.launch {
                 application.favouritesDataStore.updateData {favourites ->
                     favourites.copy(listExoTrain = favourites.listExoTrain.mutate {
@@ -109,18 +109,18 @@ class FavouritesViewModel(private val application: Application) : AndroidViewMod
         else throw IllegalArgumentException("This function must only be used by trains!")
     }
 
-    fun addFavourites(agency : BusAgency, data : String, headsign : String){
+    fun addFavourites(agency : TransitAgency, data : String, headsign : String){
         viewModelScope.launch {
             application.favouritesDataStore.updateData { favourites ->
                 when(agency){
-                    BusAgency.STM -> {
+                    TransitAgency.STM -> {
                         favourites.copy(listSTM = favourites.listSTM.mutate {
                             //maybe add a tripid or some identifier so that it is a unique thing deleted
 
                             it.add(BusInfo(data, headsign))
                         })
                     }
-                    BusAgency.EXO_OTHER -> {
+                    TransitAgency.EXO_OTHER -> {
                         favourites.copy(listExo = favourites.listExo.mutate {
                             //maybe add a tripid or some identifier so that it is a unique thing deleted
                             it.add(BusInfo(data, headsign))
@@ -133,8 +133,8 @@ class FavouritesViewModel(private val application: Application) : AndroidViewMod
         }
     }
 
-    fun addFavouriteTrains(agency : BusAgency, stopName : String, routeId : String, directionId : Int){
-        if (agency == BusAgency.EXO_TRAIN)  {
+    fun addFavouriteTrains(agency : TransitAgency, stopName : String, routeId : String, directionId : Int){
+        if (agency == TransitAgency.EXO_TRAIN)  {
             viewModelScope.launch {
                 application.favouritesDataStore.updateData { favourites ->
                     favourites.copy(listExoTrain = favourites.listExoTrain.mutate {

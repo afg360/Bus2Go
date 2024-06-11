@@ -15,13 +15,13 @@ import dev.mainhq.bus2go.Times
 import dev.mainhq.bus2go.preferences.BusInfo
 import dev.mainhq.bus2go.preferences.TrainInfo
 import dev.mainhq.bus2go.preferences.TransitInfo
-import dev.mainhq.bus2go.utils.BusAgency
+import dev.mainhq.bus2go.utils.TransitAgency
 import dev.mainhq.bus2go.viewmodels.FavouritesViewModel
 
 
 class StopListElemsAdapter(private val data: List<String>, private val list: List<TransitInfo>,
                            private val headsign: String?, private val routeId : String?,
-                           private val directionId : Int?, private val agency: BusAgency,
+                           private val directionId : Int?, private val agency: TransitAgency,
                            private val favouritesViewModel: FavouritesViewModel)
     : RecyclerView.Adapter<StopListElemsAdapter.ViewHolder>() {
 
@@ -37,7 +37,7 @@ class StopListElemsAdapter(private val data: List<String>, private val list: Lis
         val data = this.data[position]
         holder.stopNameTextView.text = data
         /** Initialise the right type of favourite button */
-        if (agency == BusAgency.EXO_TRAIN){
+        if (agency == TransitAgency.EXO_TRAIN){
             if (list.contains(TrainInfo(holder.stopNameTextView.text.toString(), routeId!!, directionId!!))){
                 holder.favouriteSelectedView.tag = "on"
                 holder.favouriteSelectedView.setBackgroundResource(R.drawable.favourite_drawable_on)
@@ -82,7 +82,7 @@ class StopListElemsAdapter(private val data: List<String>, private val list: Lis
     }
 
     class ViewHolder(view: View, private val headsign : String?, private val routeId : String?,
-                     private val directionId : Int?, private val agency: BusAgency) : RecyclerView.ViewHolder(view) {
+                     private val directionId : Int?, private val agency: TransitAgency) : RecyclerView.ViewHolder(view) {
         //TODO INSTEAD ADD A COLUMN IN DATABASE TO SET AS FAVOURITE A CERTAIN STOP, AND AFFICHER ONLY THE NEXT STOP
         val stopNameTextView: MaterialTextView
         val favouriteSelectedView : ImageView
@@ -92,7 +92,7 @@ class StopListElemsAdapter(private val data: List<String>, private val list: Lis
                 val stopName = (it as MaterialTextView).text as String
                 val intent = Intent(view.context, Times::class.java)
                 intent.putExtra("stopName", stopName)
-                if (agency == BusAgency.EXO_TRAIN) {
+                if (agency == TransitAgency.EXO_TRAIN) {
                     intent.putExtra(DIRECTION_ID, directionId!!)
                     intent.putExtra(ROUTE_ID, routeId!!)
                 }

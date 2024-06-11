@@ -7,7 +7,7 @@ import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textview.MaterialTextView
-import dev.mainhq.bus2go.utils.BusAgency
+import dev.mainhq.bus2go.utils.TransitAgency
 import dev.mainhq.bus2go.viewmodels.RoomViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -27,7 +27,7 @@ const val DIRECTION_ID = "DIRECTION_ID"
 //todo may make it a swapable ui instead of choosing button0 or 1
 class ChooseDirection : BaseActivity() {
 
-    private lateinit var agency : BusAgency
+    private lateinit var agency : TransitAgency
     private lateinit var roomViewModel: RoomViewModel
 
     override fun onCreate(savedInstanceState : Bundle?) {
@@ -37,9 +37,9 @@ class ChooseDirection : BaseActivity() {
         val busName = extras.getString(BUS_NAME) ?: throw AssertionError("BUS_NAME is Null")
         val busNum = extras.getString(BUS_NUM) ?: throw AssertionError("BUS_NUM is Null")
         agency = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            extras.getSerializable (AGENCY, BusAgency::class.java) ?: throw AssertionError("AGENCY is Null")
+            extras.getSerializable (AGENCY, TransitAgency::class.java) ?: throw AssertionError("AGENCY is Null")
         } else {
-            extras.getSerializable (AGENCY) as BusAgency? ?: throw AssertionError("AGENCY is Null")
+            extras.getSerializable (AGENCY) as TransitAgency? ?: throw AssertionError("AGENCY is Null")
         }
         //set a loading screen first before displaying the correct buttons
         setContentView(R.layout.choose_direction)
@@ -48,7 +48,7 @@ class ChooseDirection : BaseActivity() {
         busNumView.text = busNum;
         busNameView.text = busName;
         //todo need to ignore bus num for trains (use agency with route to check)
-        if (agency == BusAgency.EXO_TRAIN){
+        if (agency == TransitAgency.EXO_TRAIN){
             lifecycleScope.launch{
                 //directions == 0 or 1 (used in the queries, may be different???)
                 val routeId = try {
@@ -103,13 +103,13 @@ class ChooseDirection : BaseActivity() {
             val headsign0 = dirs[0]
             val headsign1 = dirs[1]
             when (agency) {
-                BusAgency.STM -> {
+                TransitAgency.STM -> {
                     val orientation =
                         if (dirs[0].last() == 'E' || dirs[0].last() == 'O') Orientation.HORIZONTAL
                         else Orientation.VERTICAL
                     setListeners(orientation, jobs.first.await(), jobs.second.await(), headsign0, headsign1)
                 }
-                BusAgency.EXO_OTHER -> {
+                TransitAgency.EXO_OTHER -> {
                     val intent = Intent(applicationContext, ChooseStop::class.java)
                     val dir0 = jobs.first.await()
                     val dir1 = jobs.second.await()

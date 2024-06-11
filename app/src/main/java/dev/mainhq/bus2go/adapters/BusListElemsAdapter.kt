@@ -3,10 +3,7 @@ package dev.mainhq.bus2go.adapters
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.OnClickListener
 import android.view.ViewGroup
-import android.widget.TextView
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.AGENCY
@@ -14,7 +11,6 @@ import dev.mainhq.bus2go.BUS_NAME
 import dev.mainhq.bus2go.BUS_NUM
 import dev.mainhq.bus2go.ChooseDirection
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.database.stm_data.dao.BusRouteInfo
 import dev.mainhq.bus2go.utils.BusInfo
 
 //TODO
@@ -48,7 +44,7 @@ class BusListElemsAdapter(private val busData: List<BusInfo>) :
                 BUS_NUM,
                 holder.busNumView.text.toString()
             )
-            intent.putExtra(AGENCY, data.busAgency)
+            intent.putExtra(AGENCY, data.transitAgency)
             it.context.startActivity(intent)
             it.clearFocus()
         }
