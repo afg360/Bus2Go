@@ -55,7 +55,8 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val info = list[position]
-
+        //add the agency data in the tag
+        holder.itemView.tag = info.agency
         holder.arrivalTimeTextView.text = info.arrivalTime.toString()
         if (info.arrivalTime == null){
             holder.timeRemainingTextView.text =
@@ -74,7 +75,8 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
             info.transitInfo as TrainInfo
             holder.stopNameTextView.text = info.transitInfo.stopName
             holder.tripHeadsignTextView.text = info.transitInfo.routeId
-
+            //FIXME for testing purposes, the below is added
+            holder.tripHeadsignTextView.tag = info.transitInfo.directionId
             holder.tripHeadsignTextView.setTextColor(holder.itemView.resources
                 .getColor(R.color.basic_purple, null))
             holder.stopNameTextView.setTextColor(holder.itemView.resources

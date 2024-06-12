@@ -24,6 +24,7 @@ import dev.mainhq.bus2go.preferences.BusInfo
 import dev.mainhq.bus2go.utils.Time
 import dev.mainhq.bus2go.adapters.FavouritesListElemsAdapter
 import dev.mainhq.bus2go.adapters.setMargins
+import dev.mainhq.bus2go.preferences.TrainInfo
 import dev.mainhq.bus2go.preferences.TransitInfo
 import dev.mainhq.bus2go.utils.TransitAgency
 import dev.mainhq.bus2go.viewmodels.FavouritesViewModel
@@ -152,8 +153,8 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
                         lifecycleScope.launch {
                             favouritesViewModel.removeFavouriteBuses(toRemoveList)
                             val list = toFavouriteTransitInfoList(favouritesViewModel.stmBusInfo.value, TransitAgency.STM) +
-                                    toFavouriteTransitInfoList(favouritesViewModel.exoBusInfo.value, TransitAgency.EXO_OTHER)
-                                    //toFavouriteTransitInfoList(favouritesViewModel.exoTrainInfo.value, TransitAgency.EXO_TRAIN)
+                                    toFavouriteTransitInfoList(favouritesViewModel.exoBusInfo.value, TransitAgency.EXO_OTHER) +
+                                    toFavouriteTransitInfoList(favouritesViewModel.exoTrainInfo.value, TransitAgency.EXO_TRAIN)
                                     recyclerViewDisplay(view, list, new = true)
                         }
                         appBar?.apply { changeAppBar(this) }
@@ -253,9 +254,20 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
 
     //find a way to get data for trains as welll
     private fun busInfoFromView(view : ViewGroup) : TransitInfo {
-        return BusInfo(view.findViewById<MaterialTextView>(R.id.favouritesStopNameTextView).text.toString(),
-            view.findViewById<MaterialTextView>(R.id.favouritesTripheadsignTextView).text.toString()
-        )
+        return when (view.tag) {
+            TransitAgency.EXO_TRAIN -> {
+                TrainInfo(view.findViewById<MaterialTextView>(R.id.favouritesStopNameTextView).text.toString(),
+                    view.findViewById<MaterialTextView>(R.id.favouritesTripheadsignTextView).text.toString(),
+                    view.findViewById<MaterialTextView>(R.id.favouritesTripheadsignTextView).tag as Int)
+            }
+            TransitAgency.STM, TransitAgency.EXO_OTHER -> {
+                BusInfo(
+                    view.findViewById<MaterialTextView>(R.id.favouritesStopNameTextView).text.toString(),
+                    view.findViewById<MaterialTextView>(R.id.favouritesTripheadsignTextView).text.toString()
+                )
+            }
+            else -> throw IllegalStateException("The item view tag has not been initialised!!!")
+        }
     }
 
 }
