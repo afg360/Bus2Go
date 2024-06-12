@@ -217,7 +217,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
         favouritesBusInfo.arrivalTime?.also {
             ((container[1] as ViewGroup)[2] as MaterialTextView).text = getTimeRemaining(it)
             ((container[1] as ViewGroup)[3] as MaterialTextView).text = favouritesBusInfo.arrivalTime.toString()
-            if (it.timeRemaining()?.compareTo(Time(0,3,59)) == -1) ((container[1] as ViewGroup)[3] as MaterialTextView)
+            if (it.timeRemaining()?.compareTo(Time(0,3,59)) == -1) ((container[1] as ViewGroup)[2] as MaterialTextView)
                 .setTextColor(viewGroup.resources.getColor(R.color.red, null))
             else ((container[1] as ViewGroup)[3] as MaterialTextView).setTextColor(viewGroup.resources.getColor(R.color.light, null))
         }
