@@ -3,6 +3,7 @@ package dev.mainhq.bus2go.preferences
 import android.os.Parcel
 import android.os.Parcelable
 import androidx.datastore.core.Serializer
+import dev.mainhq.bus2go.utils.TransitAgency
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
@@ -32,7 +33,10 @@ data class FavouritesData(
     val listExoTrain : PersistentList<TrainInfo> = persistentListOf()
 )
 
-interface TransitInfo
+interface TransitInfo{
+    /** Used to simplify operations with favourite selections */
+    fun getAgency() : TransitType
+}
 
 @Serializable
 data class TrainInfo(val stopName : String, val routeId : String, val directionId : Int)
@@ -42,6 +46,8 @@ data class TrainInfo(val stopName : String, val routeId : String, val directionI
         parcel.readString()!!,
         parcel.readInt()
     )
+
+    override fun getAgency() = TransitType.TRAIN
 
     override fun describeContents(): Int {
         return 0
@@ -94,6 +100,8 @@ data class BusInfo(val stopName : String, val tripHeadsign : String)
         parcel.readString()!!,
         parcel.readString()!!
     )
+
+    override fun getAgency() = TransitType.BUS
 
     override fun describeContents(): Int {
         return 0
@@ -158,3 +166,6 @@ object SettingsSerializer : Serializer<FavouritesData> {
     }
 }
 
+enum class TransitType{
+    BUS, TRAIN
+}

@@ -55,6 +55,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val info = list[position]
+
         holder.arrivalTimeTextView.text = info.arrivalTime.toString()
         if (info.arrivalTime == null){
             holder.timeRemainingTextView.text =
@@ -118,8 +119,8 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
         holder.onLongClick(holder.itemView)
         holder.checkBoxView.setOnClickListener {
             val parent = recyclerView.parent.parent.parent.parent.parent.parent as ViewGroup
-            if ((it as MaterialCheckBox).isChecked) holder.select(holder.itemView, parent)
-            else holder.unSelect(holder.itemView, parent)
+            if ((it as MaterialCheckBox).isChecked) holder.select(parent)
+            else holder.unSelect(parent)
             parent.findViewById<MaterialTextView>(R.id.selectedNumsOfFavourites)
                 .text = (recyclerView.adapter as FavouritesListElemsAdapter).numSelected.run{
                 val deleteItemsWidget = parent.findViewById<LinearLayout>(R.id.removeItemsWidget)
@@ -139,35 +140,26 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
         holder.itemView.setOnClickListener {
             //FIXME could remove nullability by setting holder.itemview.tag = "unselected"...
             val parent = WeakReference((recyclerView.parent.parent.parent.parent.parent.parent as ViewGroup))
-            if (it.tag != null){
-                when(it.tag){
-                    "selected" -> {
-                        holder.unSelect(it, parent.get()!!)
-                        holder.checkBoxView.isChecked = false
-                    }
-                    "unselected" -> {
-                        recyclerView.tag?.let{tag ->
-                            when(tag){
-                                "selected" -> {
-                                    holder.select(it, parent.get()!!)
-                                    holder.checkBoxView.isChecked = true
-                                }
-                                "unselected" -> startTimes(holder, it, info)
+            if (holder.checkBoxView.isChecked){
+                holder.unSelect(parent.get()!!)
+                holder.checkBoxView.isChecked = false
+            }
+            else {
+                if (recyclerView.tag != null){
+                    recyclerView.tag.let{tag ->
+                        when(tag){
+                            "selected" -> {
+                                holder.select(parent.get()!!)
+                                holder.checkBoxView.isChecked = true
                             }
+                            "unselected" -> startTimes(holder, it, info)
                         }
                     }
                 }
-            }
-            else if (recyclerView.tag != null){
-                when(recyclerView.tag){
-                    "selected" -> {
-                        holder.select(it, parent.get()!!)
-                        holder.checkBoxView.isChecked = true
-                    }
-                    "unselected" -> startTimes(holder, it, info)
+                else{
+                    startTimes(holder, it, info)
                 }
             }
-            else startTimes(holder, it, info)
             parent.get()!!.findViewById<MaterialTextView>(R.id.selectedNumsOfFavourites)
                 .text = (recyclerView.adapter as FavouritesListElemsAdapter).numSelected.run{
                 val deleteItemsWidget = parent.get()!!.findViewById<LinearLayout>(R.id.removeItemsWidget)
@@ -206,21 +198,15 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
      *  Mainly used with configuring the back button callbacks, to deselect every items  */
     fun unSelect(/** Outer view group layout, containing the linear layout (at the moment) for the other components */
                  viewGroup : ViewGroup){
-        viewGroup.tag?.also {
-            if (it != "unselected") {
-                viewGroup.tag = "unselected"
-                /** Deselect the checkbox so that next time doesnt need to press twice to deselect it */
-                ((viewGroup[0] as ViewGroup)[0] as MaterialCheckBox).isChecked = false
-                numSelected--
-            }
+        if (((viewGroup[0] as ViewGroup)[0] as MaterialCheckBox).isChecked){
+            ((viewGroup[0] as ViewGroup)[0] as MaterialCheckBox).isChecked = false
+            numSelected--
         }
     }
 
     fun select(/** Outer view group layout, containing the linear layout (at the moment) for the other components */
                viewGroup : ViewGroup){
-        if (viewGroup.tag != "selected"){
-            viewGroup.tag = "selected"
-            /** Deselect the checkbox so that next time doesnt need to press twice to deselect it */
+        if (!((viewGroup[0] as ViewGroup)[0] as MaterialCheckBox).isChecked){
             ((viewGroup[0] as ViewGroup)[0] as MaterialCheckBox).isChecked = true
             numSelected++
         }
@@ -228,7 +214,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
 
     fun isSelected(/** Outer view group layout, containing the linear layout (at the moment) for the other components */
                viewGroup : ViewGroup) : Boolean{
-        return viewGroup.tag == "selected"
+        return ((viewGroup[0] as ViewGroup)[0] as MaterialCheckBox).isChecked
     }
 
     private fun startTimes(holder : ViewHolder, view : View, info : FavouriteTransitInfo){
@@ -282,8 +268,8 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
                 val adapter = tmpRecyclerView.adapter as FavouritesListElemsAdapter
                 /** if recycler has never been long clicked/has been backed, check if the view is not selected and select it */
                 if (tmpRecyclerView.tag == null || tmpRecyclerView.tag == "unselected"){
-                    if (v.tag == null || v.tag == "unselected") {
-                        select(v, parent.get()!!)
+                    if (!checkBoxView.isChecked){
+                        select(parent.get()!!)
                         /** Show the checkboxes for each of the favourite elements */
                         recyclerView.forEach {view ->
                             val viewGroup = (view as ViewGroup)[0] as ViewGroup
@@ -305,7 +291,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
             return false
         }
 
-        fun select(view : View, parent : ViewGroup?){
+        fun select(parent : ViewGroup?){
             parent?.findViewById<MaterialCheckBox>(R.id.selectAllCheckbox)?.apply {
                 (recyclerView.adapter as FavouritesListElemsAdapter).also {
                     if (it.numSelected == it.itemCount - 1) {
@@ -313,15 +299,13 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
                     }
                 }
             }
-            view.tag = "selected"
             (recyclerView.adapter as FavouritesListElemsAdapter).numSelected++
         }
 
-        fun unSelect(view : View, parent : ViewGroup?){
+        fun unSelect(parent : ViewGroup?){
             parent?.findViewById<MaterialCheckBox>(R.id.selectAllCheckbox)?.apply {
                     if (isChecked) isChecked = false
             }
-            view.tag = "unselected"
             (recyclerView.adapter as FavouritesListElemsAdapter).numSelected--
         }
 
@@ -332,7 +316,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
  *  and the right margin for the right most items inside the recycler view
  */
 fun setMargins(constraintLayout : ConstraintLayout, left : Int, right : Int){
-    for (i in 0..<constraintLayout.size){
+    for (i in 0..< constraintLayout.size){
         val materialTextView = constraintLayout[i] as MaterialTextView
         if (i == 0 || i == 3){
             (materialTextView.layoutParams as ViewGroup.MarginLayoutParams)

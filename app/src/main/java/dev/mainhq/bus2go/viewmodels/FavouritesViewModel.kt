@@ -10,6 +10,7 @@ import dev.mainhq.bus2go.preferences.BusInfo
 import dev.mainhq.bus2go.preferences.FavouritesData
 import dev.mainhq.bus2go.preferences.SettingsSerializer
 import dev.mainhq.bus2go.preferences.TrainInfo
+import dev.mainhq.bus2go.preferences.TransitInfo
 import dev.mainhq.bus2go.utils.TransitAgency
 import kotlinx.collections.immutable.mutate
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,7 +45,7 @@ class FavouritesViewModel(private val application: Application) : AndroidViewMod
 
     fun getAllBusInfo() : List<BusInfo> = stmBusInfo.value + exoBusInfo.value
 
-    suspend fun removeFavouriteBuses(toRemoveList : List<BusInfo>){
+    suspend fun removeFavouriteBuses(toRemoveList : List<TransitInfo>){
         //update data inside the json file
         application.favouritesDataStore.updateData { favouritesData ->
             favouritesData.copy(listSTM = favouritesData.listSTM.mutate {
@@ -54,6 +55,12 @@ class FavouritesViewModel(private val application: Application) : AndroidViewMod
         application.favouritesDataStore.updateData { favouritesData ->
             favouritesData.copy(listExo = favouritesData.listExo.mutate {
                 it.removeIf{busInfo -> toRemoveList.contains(busInfo) }
+            })
+        }
+        application.favouritesDataStore.updateData {favourites ->
+            favourites.copy(listExoTrain = favourites.listExoTrain.mutate {
+                //maybe add a tripid or some identifier so that it is a unique thing deleted
+                it.removeIf { trainInfo -> toRemoveList.contains(trainInfo) }
             })
         }
         //update the current fields so that display can be done properly

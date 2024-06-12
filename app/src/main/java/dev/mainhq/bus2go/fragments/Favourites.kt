@@ -142,7 +142,7 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
                         dialog.cancel()
                     }
                     .setPositiveButton(resources.getString(R.string.remove_confirmation_dialog_accept)) { dialog, _ ->
-                        val toRemoveList = mutableListOf<BusInfo>()
+                        val toRemoveList = mutableListOf<TransitInfo>()
                         //TODO add agencies to know from which list to remove
                         recyclerView.forEach {
                             if ((recyclerView.adapter as FavouritesListElemsAdapter).isSelected(it as ViewGroup)){
@@ -151,9 +151,10 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
                         }
                         lifecycleScope.launch {
                             favouritesViewModel.removeFavouriteBuses(toRemoveList)
-                            val list = (toFavouriteTransitInfoList(favouritesViewModel.stmBusInfo.value, TransitAgency.STM)
-                                    + toFavouriteTransitInfoList(favouritesViewModel.exoBusInfo.value, TransitAgency.EXO_OTHER))
-                            recyclerViewDisplay(view, list, new = true)
+                            val list = toFavouriteTransitInfoList(favouritesViewModel.stmBusInfo.value, TransitAgency.STM) +
+                                    toFavouriteTransitInfoList(favouritesViewModel.exoBusInfo.value, TransitAgency.EXO_OTHER)
+                                    //toFavouriteTransitInfoList(favouritesViewModel.exoTrainInfo.value, TransitAgency.EXO_TRAIN)
+                                    recyclerViewDisplay(view, list, new = true)
                         }
                         appBar?.apply { changeAppBar(this) }
                         dialog.dismiss()
@@ -250,7 +251,8 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
         appBar.children.elementAt(0).visibility = View.VISIBLE
     }
 
-    private fun busInfoFromView(view : ViewGroup) : BusInfo {
+    //find a way to get data for trains as welll
+    private fun busInfoFromView(view : ViewGroup) : TransitInfo {
         return BusInfo(view.findViewById<MaterialTextView>(R.id.favouritesStopNameTextView).text.toString(),
             view.findViewById<MaterialTextView>(R.id.favouritesTripheadsignTextView).text.toString()
         )
