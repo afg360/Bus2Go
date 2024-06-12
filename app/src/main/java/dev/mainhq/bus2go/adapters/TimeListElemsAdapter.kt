@@ -36,8 +36,9 @@ class TimeListElemsAdapter(private val timeData: List<Time>,
             val curTime = Time(Calendar.getInstance())
             val remainingTime = time.subtract(curTime)
             if (remainingTime != null) {
-                if (remainingTime.hour == 0) holder.timeLeftTextView.text = "In ${remainingTime.min} min"
-                else holder.timeLeftTextView.text = "In >> 1h"//todo
+                if (remainingTime.hour == 0) holder.timeLeftTextView.text =
+                    holder.itemView.context.getString(R.string.in_min, remainingTime.min.toString())
+                else holder.timeLeftTextView.text = holder.itemView.context.getString(R.string.in_more_than_an_hour)//todo
             }
             else{
                 holder.timeLeftTextView.text = "Passed bus???"
@@ -47,11 +48,10 @@ class TimeListElemsAdapter(private val timeData: List<Time>,
         else holder.timeLeftTextView.text = ""
 
         holder.itemView.setOnClickListener {
-            if (!fromAlarmCreation) Toast.makeText(it.context, "You touched me!", Toast.LENGTH_SHORT).show()
-            else {
+            if (fromAlarmCreation) {
                 val resultIntent = Intent()
                 resultIntent.putExtra("TIME", time)
-                (it.context as Activity).apply{
+                (it.context as Activity).apply {
                     setResult(Activity.RESULT_OK, resultIntent)
                     finish()
                 }

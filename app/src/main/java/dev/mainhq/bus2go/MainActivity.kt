@@ -5,9 +5,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.TypedValue
-import android.widget.LinearLayout
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.navigation.NavigationBarView
@@ -15,10 +12,9 @@ import dev.mainhq.bus2go.fragments.AlarmReceiver
 import dev.mainhq.bus2go.fragments.Alarms
 import dev.mainhq.bus2go.fragments.Home
 import dev.mainhq.bus2go.fragments.Map
-import dev.mainhq.bus2go.viewmodel.AlarmCreationViewModel
-import dev.mainhq.bus2go.viewmodel.FavouritesViewModel
-import dev.mainhq.bus2go.viewmodel.RoomViewModel
-import dev.mainhq.bus2go.viewmodel.favouritesDataStore
+import dev.mainhq.bus2go.viewmodels.AlarmCreationViewModel
+import dev.mainhq.bus2go.viewmodels.FavouritesViewModel
+import dev.mainhq.bus2go.viewmodels.RoomViewModel
 import java.util.Calendar
 
 //TODO

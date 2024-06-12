@@ -29,27 +29,29 @@ suspend fun setup(coroutineScope: CoroutineScope, query : String, fragment : Fra
         val routes = dbSTM.routesDao()
         val list = routes.getBusRouteInfo(FuzzyQuery(query))
         list.toMutableList().map {
-            BusInfo(it.routeId, it.routeName, BusAgency.STM)
+            TransitInfo(it.routeId, it.routeName, null, TransitAgency.STM)
         }
     }
     val jobExo = coroutineScope.async {
+        //TODO FIRST CHECK IF IT IS A TRAIN OR SOMETHING ELSE
         val routes = dbExo.routesDao()
         val list = routes.getBusRouteInfo(FuzzyQuery(query, true))
         list.toMutableList().map {
-            BusInfo(it.routeId.split("-", limit = 2)[1], it.routeName, BusAgency.EXO)
+            val tmp = it.routeId.split("-", limit = 2)
+            if (tmp[0] == "trains") {
+                val values = it.routeName.split(" - ", limit = 2)
+                TransitInfo(
+                    tmp[1],
+                    /** Parsed train name */
+                    values[1],
+                    /** Train number (WHICH IS != TO THE ROUTE_ID */
+                    values[0].toInt(),
+                    TransitAgency.EXO_TRAIN)
+            }
+            else TransitInfo(tmp[1], it.routeName, null, TransitAgency.EXO_OTHER)
         }
     }
     val list = jobSTM.await() + jobExo.await()
-    displayBuses(list, fragment)
-    dbSTM.close()
-    dbExo.close()
-}
-
-private suspend fun displayBuses(list : List<BusInfo>, fragment: Fragment){
-    //todo
-    //need to handle queries where french accents are needed
-    //val parsable = Parser.toParsable(query)
-    //todo need to implement fuzzyquery
     withContext(Dispatchers.Main){
         val recyclerView : RecyclerView = fragment.requireView().findViewById(R.id.search_recycle_view)
         val layoutManager = LinearLayoutManager(fragment.requireContext().applicationContext)
@@ -57,6 +59,8 @@ private suspend fun displayBuses(list : List<BusInfo>, fragment: Fragment){
         layoutManager.orientation = LinearLayoutManager.VERTICAL
         recyclerView.layoutManager = layoutManager
     }
+    dbSTM.close()
+    dbExo.close()
 }
 
 suspend fun setup(query : String, activity : AppCompatActivity, color : Int?){
@@ -68,14 +72,14 @@ suspend fun setup(query : String, activity : AppCompatActivity, color : Int?){
         val routes = dbSTM.routesDao()
         val list = routes.getBusRouteInfo(FuzzyQuery(query))
         list.toMutableList().map {
-            BusInfo(it.routeId, it.routeName, BusAgency.STM)
+            TransitInfo(it.routeId, it.routeName, null, TransitAgency.STM)
         }
     }
     val jobExo = activity.lifecycleScope.async {
         val routes = dbExo.routesDao()
         val list = routes.getBusRouteInfo(FuzzyQuery(query, true))
         list.toMutableList().map {
-            BusInfo(it.routeId.split("-", limit = 2)[1], it.routeName, BusAgency.EXO)
+            TransitInfo(it.routeId.split("-", limit = 2)[1], it.routeName, null, TransitAgency.EXO_OTHER)
         }
     }
     val list = jobSTM.await() + jobExo.await()
@@ -84,7 +88,7 @@ suspend fun setup(query : String, activity : AppCompatActivity, color : Int?){
     dbExo.close()
 }
 
-private suspend fun displayBuses(list : List<BusInfo>, activity: AppCompatActivity, color : Int?){
+private suspend fun displayBuses(list : List<TransitInfo>, activity: AppCompatActivity, color : Int?){
     //todo
     //need to handle queries where french accents are needed
     //val parsable = Parser.toParsable(query)
@@ -117,9 +121,10 @@ fun toParsable(txt: String): String {
     return str
 }
 
-data class BusInfo(val routeId : String, val routeName : String, val busAgency: BusAgency)
 
-enum class BusAgency : java.io.Serializable{
-    STM, EXO
+data class TransitInfo(val routeId : String, val routeName : String, val trainNum : Int?, val transitAgency: TransitAgency)
+
+enum class TransitAgency : java.io.Serializable{
+    STM, EXO_TRAIN, EXO_OTHER
 }
 

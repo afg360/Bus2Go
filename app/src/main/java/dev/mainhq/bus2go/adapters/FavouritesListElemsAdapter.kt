@@ -1,12 +1,9 @@
 package dev.mainhq.bus2go.adapters
 
 import android.content.Intent
-import android.os.Handler
-import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
-import android.view.View.OnClickListener
 import android.view.View.OnLongClickListener
 import android.view.View.VISIBLE
 import android.view.ViewGroup
@@ -22,20 +19,20 @@ import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.AGENCY
+import dev.mainhq.bus2go.DIRECTION_ID
 import dev.mainhq.bus2go.MainActivity
 import dev.mainhq.bus2go.R
+import dev.mainhq.bus2go.ROUTE_ID
 import dev.mainhq.bus2go.Times
-import dev.mainhq.bus2go.fragments.FavouriteBusInfo
+import dev.mainhq.bus2go.fragments.FavouriteTransitInfo
 import dev.mainhq.bus2go.fragments.Home
-import dev.mainhq.bus2go.utils.BusAgency
+import dev.mainhq.bus2go.preferences.BusData
+import dev.mainhq.bus2go.preferences.TrainData
+import dev.mainhq.bus2go.utils.TransitAgency
 import dev.mainhq.bus2go.utils.Time
-import okhttp3.internal.userAgent
 import java.lang.ref.WeakReference
-import java.util.Timer
-import java.util.TimerTask
-import java.util.concurrent.TimeUnit
 
-class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, recyclerView: WeakReference<RecyclerView>)
+class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, recyclerView: WeakReference<RecyclerView>)
     : RecyclerView.Adapter<FavouritesListElemsAdapter.ViewHolder>(){
 
         //FIXME shitty implementation for now... using a direct reference
@@ -56,9 +53,11 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, recy
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val info = list[position]
+
         holder.arrivalTimeTextView.text = info.arrivalTime.toString()
         if (info.arrivalTime == null){
-            holder.timeRemainingTextView.text = "None for today"
+            holder.timeRemainingTextView.text =
+                holder.itemView.context.getString(R.string.none_for_the_rest_of_the_today)
         }
         else{
             holder.timeRemainingTextView.text = getTimeRemaining(info.arrivalTime)
@@ -69,27 +68,66 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, recy
             }
         }
 
-        holder.stopNameTextView.text = info.busInfo.stopName
+        if (info.agency == TransitAgency.EXO_TRAIN){
+            info.transitData as TrainData
+            holder.trainNumberTextView.text = holder.itemView.context
+                .getString(R.string.train_to, info.transitData.trainNum.toString(), info.transitData.directionId.toString())
+            holder.trainNumberTextView.visibility = VISIBLE
+            holder.itemView.tag = info.transitData
+            holder.stopNameTextView.text = info.transitData.stopName
+            holder.tripHeadsignTextView.text = info.transitData.routeName
+            //FIXME for testing purposes, the below is added
+            holder.tripHeadsignTextView.tag = info.transitData.directionId
+            holder.tripHeadsignTextView.setTextColor(holder.itemView.resources
+                .getColor(R.color.orange, null))
+            holder.stopNameTextView.setTextColor(holder.itemView.resources
+                .getColor(R.color.orange,null))
+        }
+        else {
+            holder.trainNumberTextView.text = ""
+            holder.trainNumberTextView.visibility = GONE
+            //add the agency data in the tag
+            holder.itemView.tag = info.agency
+            info.transitData as BusData
+            holder.stopNameTextView.text = info.transitData.stopName
+            when (info.agency) {
+                TransitAgency.STM -> {
+                    holder.tripHeadsignTextView.text = info.transitData.tripHeadsign
+                    holder.tripHeadsignTextView.setTextColor(holder.itemView.resources
+                        .getColor(R.color.basic_blue, null))
+                    holder.stopNameTextView.setTextColor(
+                        holder.itemView.resources.getColor(
+                            R.color.basic_blue,
+                            null
+                        )
+                    )
+                }
 
-        when(info.agency){
-            BusAgency.STM -> {
-                holder.tripHeadsignTextView.text = info.busInfo.tripHeadsign
-                holder.tripHeadsignTextView.setTextColor(holder.itemView.resources.getColor(R.color.basic_blue, null))
-                holder.stopNameTextView.setTextColor(holder.itemView.resources.getColor(R.color.basic_blue, null))
-            }
-            BusAgency.EXO -> {
-                holder.tripHeadsignTextView.text = info.busInfo.tripHeadsign//Annoying to find solution"Vers ${info.busInfo.tripHeadsign}"
-                holder.tripHeadsignTextView.setTextColor(holder.itemView.resources.getColor(R.color.basic_purple, null))
-                holder.stopNameTextView.setTextColor(holder.itemView.resources.getColor(R.color.basic_purple, null))
+                TransitAgency.EXO_OTHER -> {
+                    holder.tripHeadsignTextView.text =
+                        info.transitData.tripHeadsign
+                    holder.tripHeadsignTextView.setTextColor(
+                        holder.itemView.resources.getColor(
+                            R.color.basic_purple,
+                            null
+                        )
+                    )
+                    holder.stopNameTextView.setTextColor(
+                        holder.itemView.resources.getColor(
+                            R.color.basic_purple,
+                            null
+                        )
+                    )
+                }
+                else -> TODO("Not yet implemented")
             }
         }
 
         holder.onLongClick(holder.itemView)
-        holder.onClick(holder.itemView)
         holder.checkBoxView.setOnClickListener {
             val parent = recyclerView.parent.parent.parent.parent.parent.parent as ViewGroup
-            if ((it as MaterialCheckBox).isChecked) holder.select(holder.itemView, parent)
-            else holder.unSelect(holder.itemView, parent)
+            if ((it as MaterialCheckBox).isChecked) holder.select(parent)
+            else holder.unSelect(parent)
             parent.findViewById<MaterialTextView>(R.id.selectedNumsOfFavourites)
                 .text = (recyclerView.adapter as FavouritesListElemsAdapter).numSelected.run{
                 val deleteItemsWidget = parent.findViewById<LinearLayout>(R.id.removeItemsWidget)
@@ -104,38 +142,31 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, recy
             }
         }
 
+        /** This onClick either serves to check the remaining times if not in selection mode, or to select/unselect an item of the
+         *  recycler view if in selection mode (see onLongClick for more detail on the selection mode) */
         holder.itemView.setOnClickListener {
             //FIXME could remove nullability by setting holder.itemview.tag = "unselected"...
             val parent = WeakReference((recyclerView.parent.parent.parent.parent.parent.parent as ViewGroup))
-            if (it.tag != null){
-                when(it.tag){
-                    "selected" -> {
-                        holder.unSelect(it, parent.get()!!)
-                        holder.checkBoxView.isChecked = false
-                    }
-                    "unselected" -> {
-                        recyclerView.tag?.let{tag ->
-                            when(tag){
-                                "selected" -> {
-                                    holder.select(it, parent.get()!!)
-                                    holder.checkBoxView.isChecked = true
-                                }
-                                "unselected" -> startTimes(holder, it, info.agency)
+            if (holder.checkBoxView.isChecked){
+                holder.unSelect(parent.get()!!)
+                holder.checkBoxView.isChecked = false
+            }
+            else {
+                if (recyclerView.tag != null){
+                    recyclerView.tag.let{tag ->
+                        when(tag){
+                            "selected" -> {
+                                holder.select(parent.get()!!)
+                                holder.checkBoxView.isChecked = true
                             }
+                            "unselected" -> startTimes(holder, it, info)
                         }
                     }
                 }
-            }
-            else if (recyclerView.tag != null){
-                when(recyclerView.tag){
-                    "selected" -> {
-                        holder.select(it, parent.get()!!)
-                        holder.checkBoxView.isChecked = true
-                    }
-                    "unselected" -> startTimes(holder, it, info.agency)
+                else{
+                    startTimes(holder, it, info)
                 }
             }
-            else startTimes(holder, it, info.agency)
             parent.get()!!.findViewById<MaterialTextView>(R.id.selectedNumsOfFavourites)
                 .text = (recyclerView.adapter as FavouritesListElemsAdapter).numSelected.run{
                 val deleteItemsWidget = parent.get()!!.findViewById<LinearLayout>(R.id.removeItemsWidget)
@@ -152,14 +183,14 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, recy
     }
 
     /** Only applies for when the arrival time exists (for some buses, some days do not have any trips */
-    fun updateTime(viewGroup : ViewGroup, favouritesBusInfo: FavouriteBusInfo){
+    fun updateTime(viewGroup : ViewGroup, favouritesBusInfo: FavouriteTransitInfo){
         val container = viewGroup[0] as ViewGroup
         favouritesBusInfo.arrivalTime?.also {
             ((container[1] as ViewGroup)[2] as MaterialTextView).text = favouritesBusInfo.arrivalTime.toString()
-            ((container[1] as ViewGroup)[1] as MaterialTextView).text = getTimeRemaining(it)
-            if (it.timeRemaining()?.compareTo(Time(0,3,59)) == -1) ((container[1] as ViewGroup)[1] as MaterialTextView)
+            ((container[1] as ViewGroup)[3] as MaterialTextView).text = getTimeRemaining(it)
+            if (it.timeRemaining()?.compareTo(Time(0,3,59)) == -1) ((container[1] as ViewGroup)[3] as MaterialTextView)
                 .setTextColor(viewGroup.resources.getColor(R.color.red, null))
-            else ((container[1] as ViewGroup)[1] as MaterialTextView).setTextColor(viewGroup.resources.getColor(R.color.light, null))
+            else ((container[1] as ViewGroup)[3] as MaterialTextView).setTextColor(viewGroup.resources.getColor(R.color.light, null))
         }
     }
 
@@ -174,67 +205,56 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, recy
      *  Mainly used with configuring the back button callbacks, to deselect every items  */
     fun unSelect(/** Outer view group layout, containing the linear layout (at the moment) for the other components */
                  viewGroup : ViewGroup){
-        viewGroup.tag?.also {
-            if (it != "unselected") {
-                viewGroup.tag = "unselected"
-                /** Deselect the checkbox so that next time doesnt need to press twice to deselect it */
-                ((viewGroup[0] as ViewGroup)[0] as MaterialCheckBox).isChecked = false
-                numSelected--
-            }
+        if (((viewGroup[0] as ViewGroup)[0] as MaterialCheckBox).isChecked){
+            ((viewGroup[0] as ViewGroup)[0] as MaterialCheckBox).isChecked = false
+            numSelected--
         }
     }
 
     fun select(/** Outer view group layout, containing the linear layout (at the moment) for the other components */
                viewGroup : ViewGroup){
-        if (viewGroup.tag != "selected"){
-            viewGroup.tag = "selected"
-            /** Deselect the checkbox so that next time doesnt need to press twice to deselect it */
+        if (!((viewGroup[0] as ViewGroup)[0] as MaterialCheckBox).isChecked){
             ((viewGroup[0] as ViewGroup)[0] as MaterialCheckBox).isChecked = true
             numSelected++
         }
     }
 
-
-
     fun isSelected(/** Outer view group layout, containing the linear layout (at the moment) for the other components */
                viewGroup : ViewGroup) : Boolean{
-        return viewGroup.tag == "selected"
+        return ((viewGroup[0] as ViewGroup)[0] as MaterialCheckBox).isChecked
     }
 
-    private fun startTimes(holder : ViewHolder, view : View, agency: BusAgency){
+    private fun startTimes(holder : ViewHolder, view : View, info : FavouriteTransitInfo){
         val intent = Intent(view.context, Times::class.java)
         intent.putExtra("stopName", holder.stopNameTextView.text as String)
-        intent.putExtra("headsign", holder.tripHeadsignTextView.text as String)
-        intent.putExtra(AGENCY, agency)
+        intent.putExtra(AGENCY, info.agency)
+        if (info.agency == TransitAgency.EXO_TRAIN){
+            info.transitData as TrainData
+            intent.putExtra(DIRECTION_ID, info.transitData.directionId)
+            intent.putExtra(ROUTE_ID, info.transitData.routeId)
+        }
+        else {
+            info.transitData as BusData
+            intent.putExtra("headsign", holder.tripHeadsignTextView.text as String)
+        }
         view.context.startActivity(intent)
         view.clearFocus()
     }
 
-    class ViewHolder(view : View, private val recyclerView: RecyclerView) : RecyclerView.ViewHolder(view), OnClickListener, OnLongClickListener{
+    class ViewHolder(view : View, private val recyclerView: RecyclerView) : RecyclerView.ViewHolder(view), OnLongClickListener{
         var checkBoxView : MaterialCheckBox
         val tripHeadsignTextView : MaterialTextView
         val stopNameTextView : MaterialTextView
         val arrivalTimeTextView : MaterialTextView
         val timeRemainingTextView : MaterialTextView
+        val trainNumberTextView : MaterialTextView
         init{
             tripHeadsignTextView = view.findViewById(R.id.favouritesTripheadsignTextView)
             stopNameTextView = view.findViewById(R.id.favouritesStopNameTextView)
             arrivalTimeTextView = view.findViewById(R.id.favouritesBusTimeTextView)
             timeRemainingTextView = view.findViewById(R.id.favouritesBusTimeRemainingTextView)
             checkBoxView = view.findViewById(R.id.favourites_check_box)
-        }
-
-        //fixme not working properly
-        //create a mode for the entire recycler view, then change behaviour on onclick/onlongclick for each item
-        /** This onClick either serves to check the remaining times if not in selection mode, or to select/unselect an item of the
-         *  recycler view if in selection mode (see onLongClick for more detail on the selection mode) */
-        override fun onClick(v: View?) {
-            //TODO give the all checkbox a tag. if tag == allSelected, then deselect it if we unselect at least one
-            //FIXME Refactor code to have less lines taken
-
-            v?.setOnClickListener{
-
-            }
+            trainNumberTextView = view.findViewById(R.id.favouritesTrainNumber)
         }
 
         /** This onLongClick function serves as a selection interface (entering selection mode) for the recycler view items, so that
@@ -257,8 +277,8 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, recy
                 val adapter = tmpRecyclerView.adapter as FavouritesListElemsAdapter
                 /** if recycler has never been long clicked/has been backed, check if the view is not selected and select it */
                 if (tmpRecyclerView.tag == null || tmpRecyclerView.tag == "unselected"){
-                    if (v.tag == null || v.tag == "unselected") {
-                        select(v, parent.get()!!)
+                    if (!checkBoxView.isChecked){
+                        select(parent.get()!!)
                         /** Show the checkboxes for each of the favourite elements */
                         recyclerView.forEach {view ->
                             val viewGroup = (view as ViewGroup)[0] as ViewGroup
@@ -280,7 +300,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, recy
             return false
         }
 
-        fun select(view : View, parent : ViewGroup?){
+        fun select(parent : ViewGroup?){
             parent?.findViewById<MaterialCheckBox>(R.id.selectAllCheckbox)?.apply {
                 (recyclerView.adapter as FavouritesListElemsAdapter).also {
                     if (it.numSelected == it.itemCount - 1) {
@@ -288,15 +308,13 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, recy
                     }
                 }
             }
-            view.tag = "selected"
             (recyclerView.adapter as FavouritesListElemsAdapter).numSelected++
         }
 
-        fun unSelect(view : View, parent : ViewGroup?){
+        fun unSelect(parent : ViewGroup?){
             parent?.findViewById<MaterialCheckBox>(R.id.selectAllCheckbox)?.apply {
                     if (isChecked) isChecked = false
             }
-            view.tag = "unselected"
             (recyclerView.adapter as FavouritesListElemsAdapter).numSelected--
         }
 
@@ -307,13 +325,13 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteBusInfo>, recy
  *  and the right margin for the right most items inside the recycler view
  */
 fun setMargins(constraintLayout : ConstraintLayout, left : Int, right : Int){
-    for (i in 0..<constraintLayout.size){
+    for (i in 0..< constraintLayout.size){
         val materialTextView = constraintLayout[i] as MaterialTextView
-        if (i == 0 || i == 3){
+        if (i == 0 || i == 1 || i == 4){
             (materialTextView.layoutParams as ViewGroup.MarginLayoutParams)
                 .setMargins(left, 0, 0, 0)
         }
-        else if (i == 1 || i == 2){
+        else if (i == 2 || i == 3){
             (materialTextView.layoutParams as ViewGroup.MarginLayoutParams)
                 .setMargins(0, 0, right, 0)
         }

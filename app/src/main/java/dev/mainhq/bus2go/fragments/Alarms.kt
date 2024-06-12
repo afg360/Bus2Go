@@ -21,11 +21,9 @@ import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.Settings
 import dev.mainhq.bus2go.adapters.AlarmsListElemAdapter
 import dev.mainhq.bus2go.preferences.Alarm
-import dev.mainhq.bus2go.viewmodel.AlarmCreationViewModel
-import dev.mainhq.bus2go.viewmodel.FavouritesViewModel
-import dev.mainhq.bus2go.viewmodel.favouritesDataStore
+import dev.mainhq.bus2go.viewmodels.AlarmCreationViewModel
+import dev.mainhq.bus2go.viewmodels.FavouritesViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 

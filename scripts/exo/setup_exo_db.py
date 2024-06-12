@@ -261,7 +261,7 @@ def trips_table(conn, agency):
         i = 1
         for line in file:
             tokens = line.split(",")
-            chunk.append((f"{agency}-{tokens[2]}",tokens[0],tokens[1],tokens[3],tokens[4],tokens[5],tokens[6]))
+            chunk.append((tokens[2],f"{agency}-{tokens[0]}",tokens[1],tokens[3],tokens[4],tokens[5],tokens[6]))
             sql = "INSERT INTO Trips (trip_id,route_id,service_id,trip_headsign,direction_id,shape_id,wheelchair) VALUES (?,?,?,?,?,?,?);\n"
             if len(chunk) >= chunk_size:
                 print(f"Created chunk #{i}. Executing query")

@@ -31,5 +31,14 @@
     <string name="home">Accueil</string>
     <string name="map">Carte</string>
     <string name="alarms">Alarmes</string>
+    <string name="west">Ouest</string>
+    <string name="east">Est</string>
+    <string name="north">Nord</string>
+    <string name="south">Sud</string>
+    <string name="from_to">De %1$s à %2$s</string>
+    <string name="in_min">Dans %1$s min</string>
+    <string name="in_more_than_an_hour"><![CDATA[Dans >> 1h]]></string>
+    <string name="none_for_the_rest_of_the_today">Aucun pour le restant de la journée</string>
+    <string name="train_to">Train #%1$s, vers %2$s</string>
 
 </resources>

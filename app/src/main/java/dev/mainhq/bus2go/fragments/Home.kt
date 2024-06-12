@@ -25,8 +25,8 @@ import dev.mainhq.bus2go.SearchBus
 import dev.mainhq.bus2go.Settings
 import dev.mainhq.bus2go.adapters.BusListElemsAdapter
 import dev.mainhq.bus2go.utils.setup
-import dev.mainhq.bus2go.viewmodel.FavouritesViewModel
-import dev.mainhq.bus2go.viewmodel.RoomViewModel
+import dev.mainhq.bus2go.viewmodels.FavouritesViewModel
+import dev.mainhq.bus2go.viewmodels.RoomViewModel
 import kotlinx.coroutines.launch
 
 //FIXME CANNOT SUPPORT VERY FAST CHANGES BETWEEN THIS FRAG AND THE OTHERS -> APP CRASHES BECAUSE NO VIEW IS RETURNED

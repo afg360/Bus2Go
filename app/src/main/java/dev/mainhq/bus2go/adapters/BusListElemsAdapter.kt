@@ -3,24 +3,21 @@ package dev.mainhq.bus2go.adapters
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.OnClickListener
 import android.view.ViewGroup
-import android.widget.TextView
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.AGENCY
-import dev.mainhq.bus2go.BUS_NAME
+import dev.mainhq.bus2go.ROUTE_NAME
 import dev.mainhq.bus2go.BUS_NUM
 import dev.mainhq.bus2go.ChooseDirection
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.database.stm_data.dao.BusRouteInfo
-import dev.mainhq.bus2go.utils.BusInfo
+import dev.mainhq.bus2go.TRAIN_NUM
+import dev.mainhq.bus2go.utils.TransitInfo
 
 //TODO
 //could add view/ontouchlistener to handle touch holding, etc.
 //may need to use a recycler view, but implement a base adapter instead...?
-class BusListElemsAdapter(private val busData: List<BusInfo>) :
+class BusListElemsAdapter(private val busData: List<TransitInfo>) :
     RecyclerView.Adapter<BusListElemsAdapter.ViewHolder>() {
     //when doing bus num >= 400, then color = green
     // if  >= 300, then color = black
@@ -36,20 +33,16 @@ class BusListElemsAdapter(private val busData: List<BusInfo>) :
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val data = busData[position]
-        holder.busNumView.text = data.routeId.toString()
+        holder.busNumView.text = data.routeId
         holder.busDirView.text = data.routeName
         holder.itemView.setOnClickListener {
-            val layout = it as ConstraintLayout
             val intent = Intent(it.context, ChooseDirection::class.java)
-            intent.putExtra(
-                BUS_NAME,
-                holder.busDirView.text.toString()
-            )
-            intent.putExtra(
-                BUS_NUM,
-                holder.busNumView.text.toString()
-            )
-            intent.putExtra(AGENCY, data.busAgency)
+            intent.putExtra(ROUTE_NAME, data.routeName)
+            intent.putExtra(BUS_NUM, holder.busNumView.text.toString())
+            data.trainNum?.apply {
+                intent.putExtra(TRAIN_NUM, this)
+            }
+            intent.putExtra(AGENCY, data.transitAgency)
             it.context.startActivity(intent)
             it.clearFocus()
         }

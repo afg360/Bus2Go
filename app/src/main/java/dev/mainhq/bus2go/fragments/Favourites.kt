@@ -20,13 +20,15 @@ import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.preferences.BusInfo
+import dev.mainhq.bus2go.preferences.BusData
 import dev.mainhq.bus2go.utils.Time
 import dev.mainhq.bus2go.adapters.FavouritesListElemsAdapter
 import dev.mainhq.bus2go.adapters.setMargins
-import dev.mainhq.bus2go.utils.BusAgency
-import dev.mainhq.bus2go.viewmodel.FavouritesViewModel
-import dev.mainhq.bus2go.viewmodel.RoomViewModel
+import dev.mainhq.bus2go.preferences.TrainData
+import dev.mainhq.bus2go.preferences.TransitData
+import dev.mainhq.bus2go.utils.TransitAgency
+import dev.mainhq.bus2go.viewmodels.FavouritesViewModel
+import dev.mainhq.bus2go.viewmodels.RoomViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -50,14 +52,16 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
             favouritesViewModel.loadData()
             val listSTM = favouritesViewModel.stmBusInfo.value
             val listExo = favouritesViewModel.exoBusInfo.value
-            if (listSTM.isEmpty() && listExo.isEmpty()) {
+            val listTrain = favouritesViewModel.exoTrainInfo.value
+            if (listSTM.isEmpty() && listExo.isEmpty() && listTrain.isEmpty()) {
                 withContext(Dispatchers.Main){
                     view.findViewById<MaterialTextView>(R.id.favourites_text_view).text =
                         getText(R.string.no_favourites)
                 }
             }
             else {
-                val list = (toFavouriteBusInfoList(listSTM, BusAgency.STM) + toFavouriteBusInfoList(listExo, BusAgency.EXO))
+                val list = toFavouriteTransitInfoList(listSTM, TransitAgency.STM) + toFavouriteTransitInfoList(listExo, TransitAgency.EXO_OTHER) +
+                        toFavouriteTransitInfoList(listTrain, TransitAgency.EXO_TRAIN)
                 println(list.toString())
                 withContext(Dispatchers.Main){
                     view.findViewById<MaterialTextView>(R.id.favourites_text_view).text = getText(R.string.favourites)
@@ -99,7 +103,6 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
         val recyclerView : RecyclerView = view.findViewById(R.id.favouritesRecyclerView)
         /** This part allows us to update each recyclerview item from favourites in "real time", i.e. the user can see
          *  an updated time left displayed */
-
         listener = object : ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
                 recyclerView.viewTreeObserver.removeOnGlobalLayoutListener(this)
@@ -109,10 +112,12 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
                 executor!!.scheduleAtFixedRate({
                     val tmpListSTM = favouritesViewModel.stmBusInfo.value
                     val tmpListExo = favouritesViewModel.exoBusInfo.value
-                    if (tmpListSTM.isNotEmpty() || tmpListExo.isNotEmpty()) {
+                    val tmpListTrain = favouritesViewModel.exoTrainInfo.value
+                    if (tmpListSTM.isNotEmpty() || tmpListExo.isNotEmpty() || tmpListTrain.isNotEmpty()) {
                         //FIXME we only want to change the time left data, NOT the background colors etc
                         lifecycleScope.launch{
-                            val mutableList = toFavouriteBusInfoList(tmpListSTM, BusAgency.STM) + toFavouriteBusInfoList(tmpListExo, BusAgency.EXO)
+                            val mutableList = toFavouriteTransitInfoList(tmpListSTM, TransitAgency.STM) + toFavouriteTransitInfoList(tmpListExo, TransitAgency.EXO_OTHER) +
+                                    toFavouriteTransitInfoList(tmpListTrain, TransitAgency.EXO_TRAIN)
                             withContext(Dispatchers.Main){
                                 //FIXME nullPointerException bug is at line below
                                 val favouritesListElemsAdapter = recyclerView.adapter as FavouritesListElemsAdapter?
@@ -138,7 +143,7 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
                         dialog.cancel()
                     }
                     .setPositiveButton(resources.getString(R.string.remove_confirmation_dialog_accept)) { dialog, _ ->
-                        val toRemoveList = mutableListOf<BusInfo>()
+                        val toRemoveList = mutableListOf<TransitData>()
                         //TODO add agencies to know from which list to remove
                         recyclerView.forEach {
                             if ((recyclerView.adapter as FavouritesListElemsAdapter).isSelected(it as ViewGroup)){
@@ -146,10 +151,11 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
                             }
                         }
                         lifecycleScope.launch {
-                            favouritesViewModel.removeFavourites(toRemoveList)
-                            val list = (toFavouriteBusInfoList(favouritesViewModel.stmBusInfo.value, BusAgency.STM)
-                                    + toFavouriteBusInfoList(favouritesViewModel.exoBusInfo.value, BusAgency.EXO))
-                            recyclerViewDisplay(view, list, new = true)
+                            favouritesViewModel.removeFavouriteBuses(toRemoveList)
+                            val list = toFavouriteTransitInfoList(favouritesViewModel.stmBusInfo.value, TransitAgency.STM) +
+                                    toFavouriteTransitInfoList(favouritesViewModel.exoBusInfo.value, TransitAgency.EXO_OTHER) +
+                                    toFavouriteTransitInfoList(favouritesViewModel.exoTrainInfo.value, TransitAgency.EXO_TRAIN)
+                                    recyclerViewDisplay(view, list, new = true)
                         }
                         appBar?.apply { changeAppBar(this) }
                         dialog.dismiss()
@@ -157,7 +163,6 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
                     .show()
             }
         }
-
     }
 
     override fun onDestroyView() {
@@ -168,8 +173,8 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
     }
 
     /** Used to get the required data to make a list of favouriteBusInfo, adding dates to busInfo elements */
-    private suspend fun toFavouriteBusInfoList(list : List<BusInfo>, agency: BusAgency) : MutableList<FavouriteBusInfo> {
-        val times : MutableList<FavouriteBusInfo> = mutableListOf()
+    private suspend fun toFavouriteTransitInfoList(list : List<TransitData>, agency: TransitAgency) : MutableList<FavouriteTransitInfo> {
+        val times : MutableList<FavouriteTransitInfo> = mutableListOf()
         val calendar = Calendar.getInstance()
         val dayString = when (calendar.get(Calendar.DAY_OF_WEEK)) {
             Calendar.SUNDAY -> "d"
@@ -185,7 +190,7 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
         return roomViewModel.getFavouriteStopTimes(list, agency, dayString, calendar, times)
     }
 
-    private suspend fun recyclerViewDisplay(view : View, times : List<FavouriteBusInfo>, new : Boolean = false){
+    private suspend fun recyclerViewDisplay(view : View, times : List<FavouriteTransitInfo>, new : Boolean = false){
         withContext(Dispatchers.Main){
             if (times.isEmpty()){
                 view.findViewById<MaterialTextView>(R.id.favourites_text_view).text =
@@ -246,12 +251,21 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
         appBar.children.elementAt(0).visibility = View.VISIBLE
     }
 
-    private fun busInfoFromView(view : ViewGroup) : BusInfo {
-        return BusInfo(view.findViewById<MaterialTextView>(R.id.favouritesStopNameTextView).text.toString(),
-            view.findViewById<MaterialTextView>(R.id.favouritesTripheadsignTextView).text.toString()
-        )
+    //find a way to get data for trains as welll
+    private fun busInfoFromView(view : ViewGroup) : TransitData {
+        return when (view.tag) {
+            is TransitAgency -> {
+                BusData(
+                    view.findViewById<MaterialTextView>(R.id.favouritesStopNameTextView).text.toString(),
+                    view.findViewById<MaterialTextView>(R.id.favouritesTripheadsignTextView).text.toString()
+                )
+            }
+            is TrainData -> {
+                view.tag as TrainData
+            }
+            else -> throw IllegalStateException("The item view tag has not been initialised!!!")
+        }
     }
-
 }
 
-data class FavouriteBusInfo(val busInfo: BusInfo, val arrivalTime : Time?, val agency : BusAgency)
+data class FavouriteTransitInfo(val transitData: TransitData, val arrivalTime : Time?, val agency : TransitAgency)
