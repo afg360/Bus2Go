@@ -96,10 +96,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
                     holder.tripHeadsignTextView.setTextColor(holder.itemView.resources
                         .getColor(R.color.basic_blue, null))
                     holder.stopNameTextView.setTextColor(
-                        holder.itemView.resources.getColor(
-                            R.color.basic_blue,
-                            null
-                        )
+                        holder.itemView.resources.getColor(R.color.basic_blue, null)
                     )
                 }
 
@@ -107,23 +104,16 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
                     holder.tripHeadsignTextView.text =
                         info.transitData.tripHeadsign
                     holder.tripHeadsignTextView.setTextColor(
-                        holder.itemView.resources.getColor(
-                            R.color.basic_purple,
-                            null
-                        )
+                        holder.itemView.resources.getColor(R.color.basic_purple, null)
                     )
                     holder.stopNameTextView.setTextColor(
-                        holder.itemView.resources.getColor(
-                            R.color.basic_purple,
-                            null
-                        )
+                        holder.itemView.resources.getColor(R.color.basic_purple, null)
                     )
                 }
                 else -> TODO("Not yet implemented")
             }
         }
 
-        holder.onLongClick(holder.itemView)
         holder.checkBoxView.setOnClickListener {
             val parent = recyclerView.parent.parent.parent.parent.parent.parent as ViewGroup
             if ((it as MaterialCheckBox).isChecked) holder.select(parent)
@@ -167,6 +157,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
                     startTimes(holder, it, info)
                 }
             }
+
             parent.get()!!.findViewById<MaterialTextView>(R.id.selectedNumsOfFavourites)
                 .text = (recyclerView.adapter as FavouritesListElemsAdapter).numSelected.run{
                 val deleteItemsWidget = parent.get()!!.findViewById<LinearLayout>(R.id.removeItemsWidget)
@@ -180,14 +171,52 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
                 }
             }
         }
+
+        /** This onLongClick function serves as a selection interface (entering selection mode) for the recycler view items, so that
+         * we can perform operations on them. */
+        holder.itemView.setOnLongClickListener {
+            val parent = WeakReference(recyclerView.parent.parent.parent.parent.parent.parent as ViewGroup)
+            /** This next line will attempt to change the appbar to allow deletions */
+            ((it.context as MainActivity).findViewById<FragmentContainerView>(R.id.mainFragmentContainer)
+                .getFragment() as Home).view?.findViewById<AppBarLayout>(R.id.mainAppBar)
+                ?.apply{
+                    /** This is the search bar that will disappear in the appBar*/
+                    children.elementAt(0).visibility = GONE
+                    /** This is the constraint layout having the selection mode */
+                    children.elementAt(1).visibility = VISIBLE
+                }
+            val tmpRecyclerView = it.parent as RecyclerView
+            val adapter = tmpRecyclerView.adapter as FavouritesListElemsAdapter
+            /** if recycler has never been long clicked/has been backed, check if the view is not selected and select it */
+            if (tmpRecyclerView.tag == null || tmpRecyclerView.tag == "unselected"){
+                if (!holder.checkBoxView.isChecked){
+                    holder.select(parent.get()!!)
+                    /** Show the checkboxes for each of the favourite elements */
+                    recyclerView.forEach {view ->
+                        val viewGroup = (view as ViewGroup)[0] as ViewGroup
+                        (viewGroup[0] as MaterialCheckBox).visibility = VISIBLE
+                        val constraintLayout = viewGroup[1] as ConstraintLayout
+                        setMargins(constraintLayout, 10, 15)
+                    }
+                    holder.checkBoxView.isChecked = true
+                }
+                tmpRecyclerView.tag = "selected"
+                parent.get()!!.findViewById<MaterialTextView>(R.id.selectedNumsOfFavourites)
+                    .text = adapter.numSelected.toString()
+                parent.get()!!.findViewById<LinearLayout>(R.id.removeItemsWidget).apply{
+                    if (visibility == GONE) visibility = VISIBLE
+                }
+            }
+            true
+        }
     }
 
     /** Only applies for when the arrival time exists (for some buses, some days do not have any trips */
     fun updateTime(viewGroup : ViewGroup, favouritesBusInfo: FavouriteTransitInfo){
         val container = viewGroup[0] as ViewGroup
         favouritesBusInfo.arrivalTime?.also {
-            ((container[1] as ViewGroup)[2] as MaterialTextView).text = favouritesBusInfo.arrivalTime.toString()
-            ((container[1] as ViewGroup)[3] as MaterialTextView).text = getTimeRemaining(it)
+            ((container[1] as ViewGroup)[2] as MaterialTextView).text = getTimeRemaining(it)
+            ((container[1] as ViewGroup)[3] as MaterialTextView).text = favouritesBusInfo.arrivalTime.toString()
             if (it.timeRemaining()?.compareTo(Time(0,3,59)) == -1) ((container[1] as ViewGroup)[3] as MaterialTextView)
                 .setTextColor(viewGroup.resources.getColor(R.color.red, null))
             else ((container[1] as ViewGroup)[3] as MaterialTextView).setTextColor(viewGroup.resources.getColor(R.color.light, null))
@@ -241,7 +270,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
         view.clearFocus()
     }
 
-    class ViewHolder(view : View, private val recyclerView: RecyclerView) : RecyclerView.ViewHolder(view), OnLongClickListener{
+    class ViewHolder(view : View, private val recyclerView: RecyclerView) : RecyclerView.ViewHolder(view){
         var checkBoxView : MaterialCheckBox
         val tripHeadsignTextView : MaterialTextView
         val stopNameTextView : MaterialTextView
@@ -255,49 +284,6 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
             timeRemainingTextView = view.findViewById(R.id.favouritesBusTimeRemainingTextView)
             checkBoxView = view.findViewById(R.id.favourites_check_box)
             trainNumberTextView = view.findViewById(R.id.favouritesTrainNumber)
-        }
-
-        /** This onLongClick function serves as a selection interface (entering selection mode) for the recycler view items, so that
-         * we can perform operations on them. */
-        override fun onLongClick(v: View?): Boolean {
-            //TODO is v : View only the item clicked, or the whole thing? may need to retrieve the whole parent and set its tag only
-            //FIXME need to update the select all button ONLY IF one item in the list
-            /** This next line will attempt to change the appbar to allow deletions */
-            val parent = WeakReference(recyclerView.parent.parent.parent.parent.parent.parent as ViewGroup)
-            v?.setOnLongClickListener{
-                ((it.context as MainActivity).findViewById<FragmentContainerView>(R.id.mainFragmentContainer)
-                    .getFragment() as Home).view?.findViewById<AppBarLayout>(R.id.mainAppBar)
-                    ?.apply{
-                        /** This is the search bar that will disappear in the appBar*/
-                        children.elementAt(0).visibility = GONE
-                        /** This is the constraint layout having the selection mode */
-                        children.elementAt(1).visibility = VISIBLE
-                    }
-                val tmpRecyclerView = v.parent as RecyclerView
-                val adapter = tmpRecyclerView.adapter as FavouritesListElemsAdapter
-                /** if recycler has never been long clicked/has been backed, check if the view is not selected and select it */
-                if (tmpRecyclerView.tag == null || tmpRecyclerView.tag == "unselected"){
-                    if (!checkBoxView.isChecked){
-                        select(parent.get()!!)
-                        /** Show the checkboxes for each of the favourite elements */
-                        recyclerView.forEach {view ->
-                            val viewGroup = (view as ViewGroup)[0] as ViewGroup
-                            (viewGroup[0] as MaterialCheckBox).visibility = VISIBLE
-                            val constraintLayout = viewGroup[1] as ConstraintLayout
-                            setMargins(constraintLayout, 10, 15)
-                        }
-                        checkBoxView.isChecked = true
-                    }
-                    tmpRecyclerView.tag = "selected"
-                    parent.get()!!.findViewById<MaterialTextView>(R.id.selectedNumsOfFavourites)
-                        .text = adapter.numSelected.toString()
-                    parent.get()!!.findViewById<LinearLayout>(R.id.removeItemsWidget).apply{
-                        if (visibility == GONE) visibility = VISIBLE
-                    }
-                }
-                true
-            }
-            return false
         }
 
         fun select(parent : ViewGroup?){
