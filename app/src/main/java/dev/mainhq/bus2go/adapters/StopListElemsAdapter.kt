@@ -22,8 +22,8 @@ import dev.mainhq.bus2go.viewmodels.FavouritesViewModel
 class StopListElemsAdapter(private val data: List<String>, private val list: List<TransitData>,
                            private val headsign: String?, private val routeId: Int?,
                            private val trainNum : Int?, private val routeName : String?,
-                           private val directionId : Int?, private val agency: TransitAgency,
-                           private val favouritesViewModel: FavouritesViewModel)
+                           private val directionId : Int?, private val direction : String,
+                           private val agency: TransitAgency, private val favouritesViewModel: FavouritesViewModel)
     : RecyclerView.Adapter<StopListElemsAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -39,7 +39,7 @@ class StopListElemsAdapter(private val data: List<String>, private val list: Lis
         holder.stopNameTextView.text = data
         /** Initialise the right type of favourite button */
         if (agency == TransitAgency.EXO_TRAIN){
-            if (list.contains(TrainData(data, routeId!!, trainNum!!, routeName!!, directionId!!))){
+            if (list.contains(TrainData(data, routeId!!, trainNum!!, routeName!!, directionId!!, direction))){
                 holder.favouriteSelectedView.tag = "on"
                 holder.favouriteSelectedView.setBackgroundResource(R.drawable.favourite_drawable_on)
             }
@@ -47,17 +47,17 @@ class StopListElemsAdapter(private val data: List<String>, private val list: Lis
                 if (view.tag.equals("off")) {
                     view.setBackgroundResource(R.drawable.favourite_drawable_on)
                     view.tag = "on"
-                    favouritesViewModel.addFavouriteTrains(agency, data, routeId, trainNum, routeName, directionId)
+                    favouritesViewModel.addFavouriteTrains(agency, data, routeId, trainNum, routeName, directionId, direction)
                 } else {
                     view.setBackgroundResource(R.drawable.favourite_drawable_off)
                     view.tag = "off"
                     //todo add to favourites
-                    favouritesViewModel.removeFavouriteTrains(agency, data, routeId, trainNum, routeName, directionId)
+                    favouritesViewModel.removeFavouriteTrains(agency, data, routeId, trainNum, routeName, directionId, direction)
                 }
             }
         }
         else{
-            if (list.contains(BusData(holder.stopNameTextView.text.toString(), headsign!!))){
+            if (list.contains(BusData(data, headsign!!, direction))){
                 holder.favouriteSelectedView.tag = "on"
                 holder.favouriteSelectedView.setBackgroundResource(R.drawable.favourite_drawable_on)
             }
@@ -65,13 +65,13 @@ class StopListElemsAdapter(private val data: List<String>, private val list: Lis
                 if (view.tag.equals("off")) {
                     view.setBackgroundResource(R.drawable.favourite_drawable_on)
                     view.tag = "on"
-                    favouritesViewModel.addFavourites(agency, data, headsign)
+                    favouritesViewModel.addFavourites(agency, data, headsign, direction)
                 }
                 else {
                     view.setBackgroundResource(R.drawable.favourite_drawable_off)
                     view.tag = "off"
                     //todo add to favourites
-                    favouritesViewModel.removeFavouriteBuses(agency, data, headsign)
+                    favouritesViewModel.removeFavouriteBuses(agency, data, headsign, direction)
                 }
             }
         }

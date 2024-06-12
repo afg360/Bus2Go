@@ -37,7 +37,7 @@ class ChooseStop() : BaseActivity() {
 
         //terminus (i.e. to destination) = data.last(), needed for exo because some of the headsigns are the same
         val data : List<String> = intent.getStringArrayListExtra("stops") ?: listOf()
-
+        val direction = intent.getStringExtra(DIRECTION)!!
         agency = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.getSerializableExtra (AGENCY, TransitAgency::class.java) ?: throw AssertionError("AGENCY is Null")
         } else {
@@ -66,7 +66,7 @@ class ChooseStop() : BaseActivity() {
                 val favourites = favouritesViewModel.stmBusInfo.value + favouritesViewModel.exoBusInfo.value +
                         favouritesViewModel.exoTrainInfo.value
                 withContext(Dispatchers.Main){
-                    recyclerView.adapter = StopListElemsAdapter(data, favourites, headsign, routeId, trainNum, routeName, directionId, agency, favouritesViewModel)
+                    recyclerView.adapter = StopListElemsAdapter(data, favourites, headsign, routeId, trainNum, routeName, directionId, direction, agency, favouritesViewModel)
                     layoutManager.orientation = LinearLayoutManager.VERTICAL
                     recyclerView.layoutManager = layoutManager
                 }

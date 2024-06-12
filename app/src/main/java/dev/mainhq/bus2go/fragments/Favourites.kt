@@ -152,9 +152,9 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
                         }
                         lifecycleScope.launch {
                             favouritesViewModel.removeFavouriteBuses(toRemoveList)
-                            val list = toFavouriteTransitInfoList(favouritesViewModel.stmBusInfo.value, TransitAgency.STM) +
-                                    toFavouriteTransitInfoList(favouritesViewModel.exoBusInfo.value, TransitAgency.EXO_OTHER) +
-                                    toFavouriteTransitInfoList(favouritesViewModel.exoTrainInfo.value, TransitAgency.EXO_TRAIN)
+                            val list = (toFavouriteTransitInfoList(favouritesViewModel.stmBusInfo.value, TransitAgency.STM)
+                                    + toFavouriteTransitInfoList(favouritesViewModel.exoBusInfo.value, TransitAgency.EXO_OTHER)
+                                    + toFavouriteTransitInfoList(favouritesViewModel.exoTrainInfo.value, TransitAgency.EXO_TRAIN))
                                     recyclerViewDisplay(view, list, new = true)
                         }
                         appBar?.apply { changeAppBar(this) }
@@ -251,18 +251,11 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
         appBar.children.elementAt(0).visibility = View.VISIBLE
     }
 
-    //find a way to get data for trains as welll
+    //find a way to get data for trains as well
     private fun busInfoFromView(view : ViewGroup) : TransitData {
         return when (view.tag) {
-            is TransitAgency -> {
-                BusData(
-                    view.findViewById<MaterialTextView>(R.id.favouritesStopNameTextView).text.toString(),
-                    view.findViewById<MaterialTextView>(R.id.favouritesTripheadsignTextView).text.toString()
-                )
-            }
-            is TrainData -> {
-                view.tag as TrainData
-            }
+            is BusData -> view.tag as BusData
+            is TrainData -> view.tag as TrainData
             else -> throw IllegalStateException("The item view tag has not been initialised!!!")
         }
     }

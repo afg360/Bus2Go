@@ -4,7 +4,6 @@ import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
-import android.view.View.OnLongClickListener
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.LinearLayout
@@ -70,25 +69,25 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
 
         if (info.agency == TransitAgency.EXO_TRAIN){
             info.transitData as TrainData
-            holder.trainNumberTextView.text = holder.itemView.context
-                .getString(R.string.train_to, info.transitData.trainNum.toString(), info.transitData.directionId.toString())
-            holder.trainNumberTextView.visibility = VISIBLE
+            holder.directionTextView.text = holder.itemView.context
+                .getString(R.string.train_to, info.transitData.trainNum.toString(), info.transitData.direction)
             holder.itemView.tag = info.transitData
             holder.stopNameTextView.text = info.transitData.stopName
             holder.tripHeadsignTextView.text = info.transitData.routeName
             //FIXME for testing purposes, the below is added
-            holder.tripHeadsignTextView.tag = info.transitData.directionId
+            holder.tripHeadsignTextView.tag = info.transitData.direction
             holder.tripHeadsignTextView.setTextColor(holder.itemView.resources
                 .getColor(R.color.orange, null))
             holder.stopNameTextView.setTextColor(holder.itemView.resources
                 .getColor(R.color.orange,null))
+            holder.directionTextView.setTextColor(holder.itemView.resources
+                .getColor(R.color.orange,null))
         }
         else {
-            holder.trainNumberTextView.text = ""
-            holder.trainNumberTextView.visibility = GONE
             //add the agency data in the tag
-            holder.itemView.tag = info.agency
             info.transitData as BusData
+            holder.itemView.tag = info.transitData
+            holder.directionTextView.text = "To ${info.transitData.direction}"
             holder.stopNameTextView.text = info.transitData.stopName
             when (info.agency) {
                 TransitAgency.STM -> {
@@ -96,6 +95,9 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
                     holder.tripHeadsignTextView.setTextColor(holder.itemView.resources
                         .getColor(R.color.basic_blue, null))
                     holder.stopNameTextView.setTextColor(
+                        holder.itemView.resources.getColor(R.color.basic_blue, null)
+                    )
+                    holder.directionTextView.setTextColor(
                         holder.itemView.resources.getColor(R.color.basic_blue, null)
                     )
                 }
@@ -107,6 +109,9 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
                         holder.itemView.resources.getColor(R.color.basic_purple, null)
                     )
                     holder.stopNameTextView.setTextColor(
+                        holder.itemView.resources.getColor(R.color.basic_purple, null)
+                    )
+                    holder.directionTextView.setTextColor(
                         holder.itemView.resources.getColor(R.color.basic_purple, null)
                     )
                 }
@@ -259,7 +264,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
         intent.putExtra(AGENCY, info.agency)
         if (info.agency == TransitAgency.EXO_TRAIN){
             info.transitData as TrainData
-            intent.putExtra(DIRECTION_ID, info.transitData.directionId)
+            intent.putExtra(DIRECTION_ID, info.transitData.direction)
             intent.putExtra(ROUTE_ID, info.transitData.routeId)
         }
         else {
@@ -276,14 +281,14 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
         val stopNameTextView : MaterialTextView
         val arrivalTimeTextView : MaterialTextView
         val timeRemainingTextView : MaterialTextView
-        val trainNumberTextView : MaterialTextView
+        val directionTextView : MaterialTextView
         init{
             tripHeadsignTextView = view.findViewById(R.id.favouritesTripheadsignTextView)
             stopNameTextView = view.findViewById(R.id.favouritesStopNameTextView)
             arrivalTimeTextView = view.findViewById(R.id.favouritesBusTimeTextView)
             timeRemainingTextView = view.findViewById(R.id.favouritesBusTimeRemainingTextView)
             checkBoxView = view.findViewById(R.id.favourites_check_box)
-            trainNumberTextView = view.findViewById(R.id.favouritesTrainNumber)
+            directionTextView = view.findViewById(R.id.favouritesDirectionTextView)
         }
 
         fun select(parent : ViewGroup?){

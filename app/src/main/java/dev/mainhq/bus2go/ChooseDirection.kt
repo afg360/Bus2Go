@@ -25,6 +25,9 @@ const val ROUTE_ID = "ROUTE_ID"
 /** The number in the train route_long_name, e.g. %11% - blablabla */
 const val TRAIN_NUM = "TRAIN_NUM"
 const val DIRECTION_ID = "DIRECTION_ID"
+/** Although similar to direction, a key represents the last station the vehicle is heading to as a string */
+const val DIRECTION = "DIRECTION"
+
 
 //todo
 //change appbar to be only a back button
@@ -37,12 +40,12 @@ class ChooseDirection : BaseActivity() {
     override fun onCreate(savedInstanceState : Bundle?) {
         super.onCreate(savedInstanceState)
         roomViewModel = RoomViewModel(application)
-        val routeName = intent.extras!!.getString(ROUTE_NAME) ?: throw AssertionError("ROUTE_NAME is Null")
-        val busNum = intent.extras!!.getString(BUS_NUM) ?: throw AssertionError("BUS_NUM is Null")
+        val routeName = intent.getStringExtra(ROUTE_NAME)!!
+        val busNum = intent.getStringExtra(BUS_NUM)!!
         agency = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.extras!!.getSerializable (AGENCY, TransitAgency::class.java) ?: throw AssertionError("AGENCY is Null")
+            intent.getSerializableExtra(AGENCY, TransitAgency::class.java)!!
         } else {
-            intent.extras!!.getSerializable (AGENCY) as TransitAgency? ?: throw AssertionError("AGENCY is Null")
+            intent.getSerializableExtra(AGENCY) as TransitAgency
         }
         //set a loading screen first before displaying the correct buttons
         setContentView(R.layout.choose_direction)
@@ -65,7 +68,7 @@ class ChooseDirection : BaseActivity() {
                 val stopNames = roomViewModel.getTrainStopNames(this, routeId)
                 val dir0 = stopNames.first.await()
                 val dir1 = stopNames.second.await()
-                //means to what station it is heading
+                //means to what station it is heading, NOT ACCURATE FOR THE MOMENT
                 val headsign0 = dir0.last()
                 val headsign1 = dir1.last()
                 withContext(Dispatchers.Main){
@@ -74,6 +77,7 @@ class ChooseDirection : BaseActivity() {
                     findViewById<MaterialButton>(R.id.route_0).setOnClickListener {
                         intent.putStringArrayListExtra("stops", dir0 as ArrayList<String>)
                         intent.putExtra(DIRECTION_ID, 0)
+                        intent.putExtra(DIRECTION, headsign0)
                         intent.putExtra(ROUTE_ID, routeId)
                         intent.putExtra(TRAIN_NUM, trainNum)
                         intent.putExtra(ROUTE_NAME, routeName)
@@ -84,6 +88,7 @@ class ChooseDirection : BaseActivity() {
                     findViewById<MaterialButton>(R.id.route_1).setOnClickListener {
                         intent.putStringArrayListExtra("stops", dir1 as ArrayList<String>)
                         intent.putExtra(DIRECTION_ID, 1)
+                        intent.putExtra(DIRECTION, headsign1)
                         intent.putExtra(ROUTE_ID, routeId)
                         intent.putExtra(TRAIN_NUM, trainNum)
                         intent.putExtra(ROUTE_NAME, routeName)
@@ -126,17 +131,11 @@ class ChooseDirection : BaseActivity() {
                     withContext(Dispatchers.Main) {
                         findViewById<MaterialTextView>(R.id.description_route_0).text = headsign0
                         findViewById<MaterialButton>(R.id.route_0).setOnClickListener {
-                            intent.putStringArrayListExtra("stops", dir0 as ArrayList<String>)
-                            intent.putExtra("headsign", headsign0)
-                            intent.putExtra(AGENCY, agency)
-                            startActivity(intent)
+                            setIntent(intent, dir0 as ArrayList<String>, headsign0, dir0.last(), agency)
                         }
                         findViewById<MaterialTextView>(R.id.description_route_1).text = headsign1
                         findViewById<MaterialButton>(R.id.route_1).setOnClickListener {
-                            intent.putStringArrayListExtra("stops", dir1 as ArrayList<String>)
-                            intent.putExtra("headsign", headsign1)
-                            intent.putExtra(AGENCY, agency)
-                            startActivity(intent)
+                            setIntent(intent, dir1 as ArrayList<String>, headsign1, dir1.last(), agency)
                         }
                     }
                 }
@@ -169,35 +168,31 @@ class ChooseDirection : BaseActivity() {
                 leftDescr.text = getString(R.string.from_to, dir0[0], dir0.last())
                 rightDescr.text = getString(R.string.from_to, dir1[0], dir1.last())
                 leftButton.setOnClickListener {
-                    intent.putStringArrayListExtra("stops", dir0 as ArrayList<String>)
-                    intent.putExtra("headsign", headsign0)
-                    intent.putExtra(AGENCY, agency)
-                    startActivity(intent)
+                    setIntent(intent, dir0 as ArrayList<String>, headsign0, dir0.last(), agency)
                 }
                 rightButton.setOnClickListener {
-                    intent.putStringArrayListExtra("stops", dir1 as ArrayList<String>)
-                    intent.putExtra("headsign", headsign1)
-                    intent.putExtra(AGENCY, agency)
-                    startActivity(intent)
+                    setIntent(intent, dir1 as ArrayList<String>, headsign1, dir1.last(), agency)
                 }
             }
             else{
                 leftDescr.text = getString(R.string.from_to, dir1[0], dir1.last())
                 rightDescr.text = getString(R.string.from_to, dir0[0], dir0.last())
                 leftButton.setOnClickListener {
-                    intent.putStringArrayListExtra("stops", dir1 as ArrayList<String>)
-                    intent.putExtra("headsign", headsign1)
-                    intent.putExtra(AGENCY, agency)
-                    startActivity(intent)
+                    setIntent(intent, dir1 as ArrayList<String>, headsign1, dir1.last(), agency)
                 }
                 rightButton.setOnClickListener {
-                    intent.putStringArrayListExtra("stops", dir0 as ArrayList<String>)
-                    intent.putExtra("headsign", headsign0)
-                    intent.putExtra(AGENCY, agency)
-                    startActivity(intent)
+                    setIntent(intent, dir0 as ArrayList<String>, headsign0, dir0.last(), agency)
                 }
             }
         }
+    }
+
+    private fun setIntent(intent : Intent, dir : ArrayList<String>, headsign: String, direction : String, agency: TransitAgency){
+        intent.putStringArrayListExtra("stops", dir)
+        intent.putExtra("headsign", headsign)
+        intent.putExtra(DIRECTION, direction)
+        intent.putExtra(AGENCY, agency)
+        startActivity(intent)
     }
 
     private enum class Orientation{

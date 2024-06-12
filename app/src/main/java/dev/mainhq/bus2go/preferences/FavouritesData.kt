@@ -35,14 +35,16 @@ data class FavouritesData(
 interface TransitData
 
 @Serializable
-data class TrainData(val stopName : String, val routeId : Int, val trainNum : Int, val routeName : String, val directionId : Int)
+data class TrainData(val stopName : String, val routeId : Int, val trainNum : Int, val routeName : String,
+                     val directionId: Int, val direction : String)
     : Parcelable, TransitData {
     constructor(parcel: Parcel) : this(
         parcel.readString()!!,
         parcel.readInt(),
         parcel.readInt(),
         parcel.readString()!!,
-        parcel.readInt()
+        parcel.readInt(),
+        parcel.readString()!!
     )
 
     override fun describeContents(): Int {
@@ -55,6 +57,7 @@ data class TrainData(val stopName : String, val routeId : Int, val trainNum : In
         dest.writeInt(trainNum)
         dest.writeString(routeName)
         dest.writeInt(directionId)
+        dest.writeString(direction)
     }
 
     companion object CREATOR : Parcelable.Creator<TrainData> {
@@ -92,9 +95,10 @@ class PersistentTrainInfoListSerializer(private val serializer: KSerializer<Trai
 
 @Serializable
 //FIXME could improve the data stored inside for better ease of use
-data class BusData(val stopName : String, val tripHeadsign : String)
+data class BusData(val stopName : String, val tripHeadsign : String, val direction: String)
     : Parcelable, TransitData {
     constructor(parcel: Parcel) : this(
+        parcel.readString()!!,
         parcel.readString()!!,
         parcel.readString()!!
     )
@@ -106,6 +110,7 @@ data class BusData(val stopName : String, val tripHeadsign : String)
     override fun writeToParcel(dest: Parcel, flags: Int) {
         dest.writeString(stopName)
         dest.writeString(tripHeadsign)
+        dest.writeString(direction)
     }
 
     companion object CREATOR : Parcelable.Creator<BusData> {

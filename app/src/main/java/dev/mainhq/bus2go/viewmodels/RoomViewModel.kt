@@ -40,7 +40,7 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
                 list as List<TrainData>
                 val stopsTimesDAO = exoDataBase.stopTimesDao()
                 list.forEach {trainInfo ->
-                    stopsTimesDAO.getFavouriteTrainStopTime(trainInfo.routeId.toInt(), trainInfo.stopName, trainInfo.directionId, Time(calendar).toString(), dayString)
+                    stopsTimesDAO.getFavouriteTrainStopTime(trainInfo.routeId, trainInfo.stopName, trainInfo.directionId, Time(calendar).toString(), dayString)
                         .also { time -> times.add(FavouriteTransitInfo(trainInfo, time, agency)) }
                 }
                 return times

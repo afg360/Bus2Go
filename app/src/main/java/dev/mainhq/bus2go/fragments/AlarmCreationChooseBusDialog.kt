@@ -61,6 +61,8 @@ class AlarmCreationChooseBusDialog(private val favouritesViewModel: FavouritesVi
     private lateinit var activityResultLauncher : ActivityResultLauncher<Intent>
     private lateinit var alarmDialogBusStop : String
     private lateinit var alarmDialogBusNum : String
+    //FIXME NEED TO BE INIT!
+    private lateinit var alarmDialogBusDirection : String
     private var time : Time? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,7 +78,7 @@ class AlarmCreationChooseBusDialog(private val favouritesViewModel: FavouritesVi
                     }
                     time?.also {time ->
                         setFragmentResult("requestKey", bundleOf("ALARM_BUS_INFO" to AlarmBusInfo(
-                            BusData(alarmDialogBusStop, alarmDialogBusNum),
+                            BusData(alarmDialogBusStop, alarmDialogBusNum, alarmDialogBusDirection),
                             time)))
                         dismiss()
                     }
@@ -105,6 +107,7 @@ class AlarmCreationChooseBusDialog(private val favouritesViewModel: FavouritesVi
                                         val intent = Intent(context, Times::class.java)
                                         alarmDialogBusStop = it.findViewById<MaterialTextView>(R.id.alarmDialogBusStop).text.toString()
                                         alarmDialogBusNum = it.findViewById<MaterialTextView>(R.id.alarmDialogBusNum).text.toString()
+                                        //alarmDialogBusDirection = favouritesViewModel.
                                         intent.putExtra("stopName", alarmDialogBusStop)
                                         intent.putExtra("headsign", alarmDialogBusNum)
                                         intent.putExtra("ALARMS", true)
