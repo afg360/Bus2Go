@@ -163,7 +163,6 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
                     .show()
             }
         }
-
     }
 
     override fun onDestroyView() {
@@ -264,7 +263,6 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
             is TrainData -> {
                 view.tag as TrainData
             }
-
             else -> throw IllegalStateException("The item view tag has not been initialised!!!")
         }
     }

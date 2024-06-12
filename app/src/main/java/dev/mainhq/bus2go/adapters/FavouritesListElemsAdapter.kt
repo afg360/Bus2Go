@@ -70,17 +70,22 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
 
         if (info.agency == TransitAgency.EXO_TRAIN){
             info.transitData as TrainData
+            holder.trainNumberTextView.text = holder.itemView.context
+                .getString(R.string.train_to, info.transitData.trainNum.toString(), info.transitData.directionId.toString())
+            holder.trainNumberTextView.visibility = VISIBLE
             holder.itemView.tag = info.transitData
             holder.stopNameTextView.text = info.transitData.stopName
             holder.tripHeadsignTextView.text = info.transitData.routeName
             //FIXME for testing purposes, the below is added
             holder.tripHeadsignTextView.tag = info.transitData.directionId
             holder.tripHeadsignTextView.setTextColor(holder.itemView.resources
-                .getColor(R.color.basic_purple, null))
+                .getColor(R.color.orange, null))
             holder.stopNameTextView.setTextColor(holder.itemView.resources
-                .getColor(R.color.basic_purple,null))
+                .getColor(R.color.orange,null))
         }
         else {
+            holder.trainNumberTextView.text = ""
+            holder.trainNumberTextView.visibility = GONE
             //add the agency data in the tag
             holder.itemView.tag = info.agency
             info.transitData as BusData
@@ -182,10 +187,10 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
         val container = viewGroup[0] as ViewGroup
         favouritesBusInfo.arrivalTime?.also {
             ((container[1] as ViewGroup)[2] as MaterialTextView).text = favouritesBusInfo.arrivalTime.toString()
-            ((container[1] as ViewGroup)[1] as MaterialTextView).text = getTimeRemaining(it)
-            if (it.timeRemaining()?.compareTo(Time(0,3,59)) == -1) ((container[1] as ViewGroup)[1] as MaterialTextView)
+            ((container[1] as ViewGroup)[3] as MaterialTextView).text = getTimeRemaining(it)
+            if (it.timeRemaining()?.compareTo(Time(0,3,59)) == -1) ((container[1] as ViewGroup)[3] as MaterialTextView)
                 .setTextColor(viewGroup.resources.getColor(R.color.red, null))
-            else ((container[1] as ViewGroup)[1] as MaterialTextView).setTextColor(viewGroup.resources.getColor(R.color.light, null))
+            else ((container[1] as ViewGroup)[3] as MaterialTextView).setTextColor(viewGroup.resources.getColor(R.color.light, null))
         }
     }
 
@@ -242,12 +247,14 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
         val stopNameTextView : MaterialTextView
         val arrivalTimeTextView : MaterialTextView
         val timeRemainingTextView : MaterialTextView
+        val trainNumberTextView : MaterialTextView
         init{
             tripHeadsignTextView = view.findViewById(R.id.favouritesTripheadsignTextView)
             stopNameTextView = view.findViewById(R.id.favouritesStopNameTextView)
             arrivalTimeTextView = view.findViewById(R.id.favouritesBusTimeTextView)
             timeRemainingTextView = view.findViewById(R.id.favouritesBusTimeRemainingTextView)
             checkBoxView = view.findViewById(R.id.favourites_check_box)
+            trainNumberTextView = view.findViewById(R.id.favouritesTrainNumber)
         }
 
         /** This onLongClick function serves as a selection interface (entering selection mode) for the recycler view items, so that
@@ -320,11 +327,11 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
 fun setMargins(constraintLayout : ConstraintLayout, left : Int, right : Int){
     for (i in 0..< constraintLayout.size){
         val materialTextView = constraintLayout[i] as MaterialTextView
-        if (i == 0 || i == 3){
+        if (i == 0 || i == 1 || i == 4){
             (materialTextView.layoutParams as ViewGroup.MarginLayoutParams)
                 .setMargins(left, 0, 0, 0)
         }
-        else if (i == 1 || i == 2){
+        else if (i == 2 || i == 3){
             (materialTextView.layoutParams as ViewGroup.MarginLayoutParams)
                 .setMargins(0, 0, right, 0)
         }

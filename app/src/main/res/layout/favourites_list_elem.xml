@@ -25,10 +25,22 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             >
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/favouritesTrainNumber"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:textSize="15sp"
+                android:text="Train"
+                android:textColor="@color/orange"
+                android:visibility="gone"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                />
             <!-- Add a textview where n/s/e/w mean something (from where to where), before map implementation comes in-->
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/favouritesTripheadsignTextView"
-                android:layout_width="wrap_content"
+                android:layout_width="200dp"
                 android:layout_height="wrap_content"
                 android:text="TRIPHEADSIGN"
                 android:fontFamily="@font/goli_medium"
@@ -42,7 +54,7 @@
                 android:id="@+id/favouritesBusTimeRemainingTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="BusTimeRemaining"
+                android:text="In 15h, 3min"
                 android:fontFamily="@font/goli_medium"
                 android:textSize="30sp"
                 android:layout_marginEnd="20dp"
