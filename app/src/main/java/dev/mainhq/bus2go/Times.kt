@@ -52,9 +52,10 @@ class Times : BaseActivity() {
         dayString ?: throw IllegalStateException("Cannot have a non day of the week!")
         val curTime = Time(calendar)
         if (agency == TransitAgency.EXO_TRAIN){
-            val routeId = intent.getStringExtra(ROUTE_ID)!!.toInt() //for now, may switch to regular string
+            val routeId = intent.getIntExtra(ROUTE_ID, -1)
+            if (routeId == -1 ) throw java.lang.IllegalStateException("Need to give a routeid for a train!!")
             val directionId = intent.getIntExtra(DIRECTION_ID, -1)
-            if (directionId == -1) throw IllegalStateException("Cannot not give a direction id for a train!!")
+            if (directionId == -1) throw IllegalStateException("Need to give a direction id for a train!!")
             lifecycleScope.launch {
                 //headsign.toInt() is actually the directionId for trains
                 val stopTimes = roomViewModel.getTrainStopTimes(routeId, stopName, directionId, curTime.toString(), dayString)

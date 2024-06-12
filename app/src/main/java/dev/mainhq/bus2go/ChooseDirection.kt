@@ -15,11 +15,15 @@ import kotlinx.coroutines.withContext
 import java.lang.IllegalStateException
 import java.util.ArrayList
 
-const val BUS_NAME = "BUS_NAME"
+const val ROUTE_NAME = "BUS_NAME"
 const val BUS_NUM = "BUS_NUM"
 const val AGENCY = "AGENCY"
+
 /** Only for use with trains! */
+/** Actual route id, as listed in the .txt files */
 const val ROUTE_ID = "ROUTE_ID"
+/** The number in the train route_long_name, e.g. %11% - blablabla */
+const val TRAIN_NUM = "TRAIN_NUM"
 const val DIRECTION_ID = "DIRECTION_ID"
 
 //todo
@@ -33,31 +37,31 @@ class ChooseDirection : BaseActivity() {
     override fun onCreate(savedInstanceState : Bundle?) {
         super.onCreate(savedInstanceState)
         roomViewModel = RoomViewModel(application)
-        val extras : Bundle = this.intent.extras ?: throw AssertionError("Assertion failed")
-        val busName = extras.getString(BUS_NAME) ?: throw AssertionError("BUS_NAME is Null")
-        val busNum = extras.getString(BUS_NUM) ?: throw AssertionError("BUS_NUM is Null")
+        val routeName = intent.extras!!.getString(ROUTE_NAME) ?: throw AssertionError("ROUTE_NAME is Null")
+        val busNum = intent.extras!!.getString(BUS_NUM) ?: throw AssertionError("BUS_NUM is Null")
         agency = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            extras.getSerializable (AGENCY, TransitAgency::class.java) ?: throw AssertionError("AGENCY is Null")
+            intent.extras!!.getSerializable (AGENCY, TransitAgency::class.java) ?: throw AssertionError("AGENCY is Null")
         } else {
-            extras.getSerializable (AGENCY) as TransitAgency? ?: throw AssertionError("AGENCY is Null")
+            intent.extras!!.getSerializable (AGENCY) as TransitAgency? ?: throw AssertionError("AGENCY is Null")
         }
         //set a loading screen first before displaying the correct buttons
         setContentView(R.layout.choose_direction)
         val busNumView: MaterialTextView = findViewById(R.id.chooseBusNum)
         val busNameView: MaterialTextView = findViewById(R.id.chooseBusDir)
-        busNumView.text = busNum;
-        busNameView.text = busName;
+
         //todo need to ignore bus num for trains (use agency with route to check)
         if (agency == TransitAgency.EXO_TRAIN){
+            val trainNum = intent.getIntExtra(TRAIN_NUM, -1)
+            if (trainNum == -1) throw IllegalStateException("Forgot to give a train number to a train!")
+            busNumView.text = trainNum.toString()
+            busNameView.text = routeName
+            val routeId = try {
+                busNum.toInt()
+            }
+            catch (e : TypeCastException){
+                throw TypeCastException("In choose direction, when a train, cannot cast a non-integer route id to an integer!")
+            }
             lifecycleScope.launch{
-                //directions == 0 or 1 (used in the queries, may be different???)
-                val routeId = try {
-                    busNum.toInt()
-                }
-                catch (e : TypeCastException){
-                    throw TypeCastException("In choose direction, when a train, cannot cast a non-integer route id to an integer!")
-                }
-
                 val stopNames = roomViewModel.getTrainStopNames(this, routeId)
                 val dir0 = stopNames.first.await()
                 val dir1 = stopNames.second.await()
@@ -66,11 +70,13 @@ class ChooseDirection : BaseActivity() {
                 val headsign1 = dir1.last()
                 withContext(Dispatchers.Main){
                     val intent = Intent(applicationContext, ChooseStop::class.java)
-                    findViewById<MaterialTextView>(R.id.description_route_0).text = headsign0 //FIXME???
+                    findViewById<MaterialTextView>(R.id.description_route_0).text = headsign0
                     findViewById<MaterialButton>(R.id.route_0).setOnClickListener {
                         intent.putStringArrayListExtra("stops", dir0 as ArrayList<String>)
                         intent.putExtra(DIRECTION_ID, 0)
-                        intent.putExtra(ROUTE_ID, routeId.toString())
+                        intent.putExtra(ROUTE_ID, routeId)
+                        intent.putExtra(TRAIN_NUM, trainNum)
+                        intent.putExtra(ROUTE_NAME, routeName)
                         intent.putExtra(AGENCY, agency)
                         startActivity(intent)
                     }
@@ -78,7 +84,9 @@ class ChooseDirection : BaseActivity() {
                     findViewById<MaterialButton>(R.id.route_1).setOnClickListener {
                         intent.putStringArrayListExtra("stops", dir1 as ArrayList<String>)
                         intent.putExtra(DIRECTION_ID, 1)
-                        intent.putExtra(ROUTE_ID, routeId.toString())
+                        intent.putExtra(ROUTE_ID, routeId)
+                        intent.putExtra(TRAIN_NUM, trainNum)
+                        intent.putExtra(ROUTE_NAME, routeName)
                         intent.putExtra(AGENCY, agency)
                         startActivity(intent)
                     }
@@ -86,6 +94,8 @@ class ChooseDirection : BaseActivity() {
             }
         }
         else {
+            busNumView.text = busNum
+            busNameView.text = routeName
             setButtons(busNum)
         }
     }

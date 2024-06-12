@@ -1,8 +1,6 @@
 package dev.mainhq.bus2go.preferences
 
 import androidx.datastore.core.Serializer
-import dev.mainhq.bus2go.MainActivity
-import dev.mainhq.bus2go.utils.Time
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
@@ -33,7 +31,7 @@ data class Alarm(
     /** Name of the alarm given. Should be unique */
     val title : String,
     /** Suppose to be the same as buses in the favourites */
-    val busInfo : BusInfo,
+    val busInfo : BusData,
     /** Time set for the alarm to ring before the  */
     val timeBefore : SerializableTime,
     /** Days when the alarm will have to ring */

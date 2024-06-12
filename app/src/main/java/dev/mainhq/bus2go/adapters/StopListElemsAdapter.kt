@@ -12,15 +12,16 @@ import dev.mainhq.bus2go.DIRECTION_ID
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.ROUTE_ID
 import dev.mainhq.bus2go.Times
-import dev.mainhq.bus2go.preferences.BusInfo
-import dev.mainhq.bus2go.preferences.TrainInfo
-import dev.mainhq.bus2go.preferences.TransitInfo
+import dev.mainhq.bus2go.preferences.BusData
+import dev.mainhq.bus2go.preferences.TrainData
+import dev.mainhq.bus2go.preferences.TransitData
 import dev.mainhq.bus2go.utils.TransitAgency
 import dev.mainhq.bus2go.viewmodels.FavouritesViewModel
 
 
-class StopListElemsAdapter(private val data: List<String>, private val list: List<TransitInfo>,
-                           private val headsign: String?, private val routeId : String?,
+class StopListElemsAdapter(private val data: List<String>, private val list: List<TransitData>,
+                           private val headsign: String?, private val routeId: Int?,
+                           private val trainNum : Int?, private val routeName : String?,
                            private val directionId : Int?, private val agency: TransitAgency,
                            private val favouritesViewModel: FavouritesViewModel)
     : RecyclerView.Adapter<StopListElemsAdapter.ViewHolder>() {
@@ -38,7 +39,7 @@ class StopListElemsAdapter(private val data: List<String>, private val list: Lis
         holder.stopNameTextView.text = data
         /** Initialise the right type of favourite button */
         if (agency == TransitAgency.EXO_TRAIN){
-            if (list.contains(TrainInfo(holder.stopNameTextView.text.toString(), routeId!!, directionId!!))){
+            if (list.contains(TrainData(data, routeId!!, trainNum!!, routeName!!, directionId!!))){
                 holder.favouriteSelectedView.tag = "on"
                 holder.favouriteSelectedView.setBackgroundResource(R.drawable.favourite_drawable_on)
             }
@@ -46,17 +47,17 @@ class StopListElemsAdapter(private val data: List<String>, private val list: Lis
                 if (view.tag.equals("off")) {
                     view.setBackgroundResource(R.drawable.favourite_drawable_on)
                     view.tag = "on"
-                    favouritesViewModel.addFavouriteTrains(agency, data, routeId, directionId)
+                    favouritesViewModel.addFavouriteTrains(agency, data, routeId, trainNum, routeName, directionId)
                 } else {
                     view.setBackgroundResource(R.drawable.favourite_drawable_off)
                     view.tag = "off"
                     //todo add to favourites
-                    favouritesViewModel.removeFavouriteTrains(agency, data, routeId, directionId)
+                    favouritesViewModel.removeFavouriteTrains(agency, data, routeId, trainNum, routeName, directionId)
                 }
             }
         }
         else{
-            if (list.contains(BusInfo(holder.stopNameTextView.text.toString(), headsign!!))){
+            if (list.contains(BusData(holder.stopNameTextView.text.toString(), headsign!!))){
                 holder.favouriteSelectedView.tag = "on"
                 holder.favouriteSelectedView.setBackgroundResource(R.drawable.favourite_drawable_on)
             }
@@ -81,7 +82,7 @@ class StopListElemsAdapter(private val data: List<String>, private val list: Lis
         return this.data.size
     }
 
-    class ViewHolder(view: View, private val headsign : String?, private val routeId : String?,
+    class ViewHolder(view: View, private val headsign : String?, private val routeId : Int?,
                      private val directionId : Int?, private val agency: TransitAgency) : RecyclerView.ViewHolder(view) {
         //TODO INSTEAD ADD A COLUMN IN DATABASE TO SET AS FAVOURITE A CERTAIN STOP, AND AFFICHER ONLY THE NEXT STOP
         val stopNameTextView: MaterialTextView

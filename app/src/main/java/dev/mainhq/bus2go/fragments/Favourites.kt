@@ -20,12 +20,12 @@ import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.preferences.BusInfo
+import dev.mainhq.bus2go.preferences.BusData
 import dev.mainhq.bus2go.utils.Time
 import dev.mainhq.bus2go.adapters.FavouritesListElemsAdapter
 import dev.mainhq.bus2go.adapters.setMargins
-import dev.mainhq.bus2go.preferences.TrainInfo
-import dev.mainhq.bus2go.preferences.TransitInfo
+import dev.mainhq.bus2go.preferences.TrainData
+import dev.mainhq.bus2go.preferences.TransitData
 import dev.mainhq.bus2go.utils.TransitAgency
 import dev.mainhq.bus2go.viewmodels.FavouritesViewModel
 import dev.mainhq.bus2go.viewmodels.RoomViewModel
@@ -143,7 +143,7 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
                         dialog.cancel()
                     }
                     .setPositiveButton(resources.getString(R.string.remove_confirmation_dialog_accept)) { dialog, _ ->
-                        val toRemoveList = mutableListOf<TransitInfo>()
+                        val toRemoveList = mutableListOf<TransitData>()
                         //TODO add agencies to know from which list to remove
                         recyclerView.forEach {
                             if ((recyclerView.adapter as FavouritesListElemsAdapter).isSelected(it as ViewGroup)){
@@ -174,7 +174,7 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
     }
 
     /** Used to get the required data to make a list of favouriteBusInfo, adding dates to busInfo elements */
-    private suspend fun toFavouriteTransitInfoList(list : List<TransitInfo>, agency: TransitAgency) : MutableList<FavouriteTransitInfo> {
+    private suspend fun toFavouriteTransitInfoList(list : List<TransitData>, agency: TransitAgency) : MutableList<FavouriteTransitInfo> {
         val times : MutableList<FavouriteTransitInfo> = mutableListOf()
         val calendar = Calendar.getInstance()
         val dayString = when (calendar.get(Calendar.DAY_OF_WEEK)) {
@@ -253,23 +253,21 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
     }
 
     //find a way to get data for trains as welll
-    private fun busInfoFromView(view : ViewGroup) : TransitInfo {
+    private fun busInfoFromView(view : ViewGroup) : TransitData {
         return when (view.tag) {
-            TransitAgency.EXO_TRAIN -> {
-                TrainInfo(view.findViewById<MaterialTextView>(R.id.favouritesStopNameTextView).text.toString(),
-                    view.findViewById<MaterialTextView>(R.id.favouritesTripheadsignTextView).text.toString(),
-                    view.findViewById<MaterialTextView>(R.id.favouritesTripheadsignTextView).tag as Int)
-            }
-            TransitAgency.STM, TransitAgency.EXO_OTHER -> {
-                BusInfo(
+            is TransitAgency -> {
+                BusData(
                     view.findViewById<MaterialTextView>(R.id.favouritesStopNameTextView).text.toString(),
                     view.findViewById<MaterialTextView>(R.id.favouritesTripheadsignTextView).text.toString()
                 )
             }
+            is TrainData -> {
+                view.tag as TrainData
+            }
+
             else -> throw IllegalStateException("The item view tag has not been initialised!!!")
         }
     }
-
 }
 
-data class FavouriteTransitInfo(val transitInfo: TransitInfo, val arrivalTime : Time?, val agency : TransitAgency)
+data class FavouriteTransitInfo(val transitData: TransitData, val arrivalTime : Time?, val agency : TransitAgency)

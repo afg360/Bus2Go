@@ -3,18 +3,17 @@ package dev.mainhq.bus2go.adapters
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.ActionBarDrawerToggle.Delegate
 import androidx.core.view.forEach
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.radiobutton.MaterialRadioButton
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.fragments.AlarmCreationDialogBottomNavBar
-import dev.mainhq.bus2go.preferences.BusInfo
+import dev.mainhq.bus2go.preferences.BusData
 
 //FIXME may need to get rid of these references
-class AlarmDialogListElemsAdapter(private val list : List<BusInfo>, private val recyclerView: RecyclerView,
-    private val bottomNavBar: AlarmCreationDialogBottomNavBar)
+class AlarmDialogListElemsAdapter(private val list : List<BusData>, private val recyclerView: RecyclerView,
+                                  private val bottomNavBar: AlarmCreationDialogBottomNavBar)
     : RecyclerView.Adapter<AlarmDialogListElemsAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view){

@@ -29,7 +29,7 @@ suspend fun setup(coroutineScope: CoroutineScope, query : String, fragment : Fra
         val routes = dbSTM.routesDao()
         val list = routes.getBusRouteInfo(FuzzyQuery(query))
         list.toMutableList().map {
-            BusInfo(it.routeId, it.routeName, TransitAgency.STM)
+            TransitInfo(it.routeId, it.routeName, null, TransitAgency.STM)
         }
     }
     val jobExo = coroutineScope.async {
@@ -38,8 +38,17 @@ suspend fun setup(coroutineScope: CoroutineScope, query : String, fragment : Fra
         val list = routes.getBusRouteInfo(FuzzyQuery(query, true))
         list.toMutableList().map {
             val tmp = it.routeId.split("-", limit = 2)
-            if (tmp[0] == "trains") BusInfo(tmp[1], it.routeName, TransitAgency.EXO_TRAIN)
-            else BusInfo(tmp[1], it.routeName, TransitAgency.EXO_OTHER)
+            if (tmp[0] == "trains") {
+                val values = it.routeName.split(" - ", limit = 2)
+                TransitInfo(
+                    tmp[1],
+                    /** Parsed train name */
+                    values[1],
+                    /** Train number (WHICH IS != TO THE ROUTE_ID */
+                    values[0].toInt(),
+                    TransitAgency.EXO_TRAIN)
+            }
+            else TransitInfo(tmp[1], it.routeName, null, TransitAgency.EXO_OTHER)
         }
     }
     val list = jobSTM.await() + jobExo.await()
@@ -63,14 +72,14 @@ suspend fun setup(query : String, activity : AppCompatActivity, color : Int?){
         val routes = dbSTM.routesDao()
         val list = routes.getBusRouteInfo(FuzzyQuery(query))
         list.toMutableList().map {
-            BusInfo(it.routeId, it.routeName, TransitAgency.STM)
+            TransitInfo(it.routeId, it.routeName, null, TransitAgency.STM)
         }
     }
     val jobExo = activity.lifecycleScope.async {
         val routes = dbExo.routesDao()
         val list = routes.getBusRouteInfo(FuzzyQuery(query, true))
         list.toMutableList().map {
-            BusInfo(it.routeId.split("-", limit = 2)[1], it.routeName, TransitAgency.EXO_OTHER)
+            TransitInfo(it.routeId.split("-", limit = 2)[1], it.routeName, null, TransitAgency.EXO_OTHER)
         }
     }
     val list = jobSTM.await() + jobExo.await()
@@ -79,7 +88,7 @@ suspend fun setup(query : String, activity : AppCompatActivity, color : Int?){
     dbExo.close()
 }
 
-private suspend fun displayBuses(list : List<BusInfo>, activity: AppCompatActivity, color : Int?){
+private suspend fun displayBuses(list : List<TransitInfo>, activity: AppCompatActivity, color : Int?){
     //todo
     //need to handle queries where french accents are needed
     //val parsable = Parser.toParsable(query)
@@ -112,7 +121,8 @@ fun toParsable(txt: String): String {
     return str
 }
 
-data class BusInfo(val routeId : String, val routeName : String, val transitAgency: TransitAgency)
+
+data class TransitInfo(val routeId : String, val routeName : String, val trainNum : Int?, val transitAgency: TransitAgency)
 
 enum class TransitAgency : java.io.Serializable{
     STM, EXO_TRAIN, EXO_OTHER

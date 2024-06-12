@@ -24,7 +24,9 @@ class ChooseStop() : BaseActivity() {
 
     private lateinit var agency: TransitAgency
     private var directionId : Int? = null
-    private var routeId : String? = null
+    private var routeId : Int? = null
+    private var trainNum : Int? = null
+    private var routeName : String? = null
     private var headsign : String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,7 +50,11 @@ class ChooseStop() : BaseActivity() {
             if (agency == TransitAgency.EXO_TRAIN){
                 directionId = intent.getIntExtra(DIRECTION_ID, -1)
                 if (directionId == -1) throw IllegalStateException("Forgot to give a direction id to a train!")
-                routeId = intent.getStringExtra(ROUTE_ID) ?: throw IllegalStateException("Forgot to give a route id to a train!")
+                routeId = intent.getIntExtra(ROUTE_ID, -1)
+                if (routeId == -1) throw IllegalStateException("Forgot to give a route id to a train!")
+                trainNum = intent.getIntExtra(TRAIN_NUM, -1)
+                if (trainNum == -1) throw IllegalStateException("Forgot to give a train num to a train!")
+                routeName = intent.getStringExtra(ROUTE_NAME) ?: throw IllegalStateException("Forgot to give a route name to a train!")
             }
             else{
                 headsign = intent.getStringExtra("headsign")!!
@@ -60,7 +66,7 @@ class ChooseStop() : BaseActivity() {
                 val favourites = favouritesViewModel.stmBusInfo.value + favouritesViewModel.exoBusInfo.value +
                         favouritesViewModel.exoTrainInfo.value
                 withContext(Dispatchers.Main){
-                    recyclerView.adapter = StopListElemsAdapter(data, favourites, headsign, routeId, directionId, agency, favouritesViewModel)
+                    recyclerView.adapter = StopListElemsAdapter(data, favourites, headsign, routeId, trainNum, routeName, directionId, agency, favouritesViewModel)
                     layoutManager.orientation = LinearLayoutManager.VERTICAL
                     recyclerView.layoutManager = layoutManager
                 }

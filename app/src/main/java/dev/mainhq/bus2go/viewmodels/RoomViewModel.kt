@@ -6,12 +6,12 @@ import androidx.room.Room
 import dev.mainhq.bus2go.database.exo_data.AppDatabaseExo
 import dev.mainhq.bus2go.database.stm_data.AppDatabaseSTM
 import dev.mainhq.bus2go.fragments.FavouriteTransitInfo
-import dev.mainhq.bus2go.preferences.BusInfo
+import dev.mainhq.bus2go.preferences.BusData
 import dev.mainhq.bus2go.utils.TransitAgency
 import dev.mainhq.bus2go.utils.Time
 import android.icu.util.Calendar
-import dev.mainhq.bus2go.preferences.TrainInfo
-import dev.mainhq.bus2go.preferences.TransitInfo
+import dev.mainhq.bus2go.preferences.TrainData
+import dev.mainhq.bus2go.preferences.TransitData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -24,11 +24,11 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
     private val exoDataBase : AppDatabaseExo = Room.databaseBuilder(application, AppDatabaseExo::class.java, "exo_info.db")
         .createFromAsset("database/exo_info.db").build()
 
-    suspend fun getFavouriteStopTimes(list : List<TransitInfo>, agency : TransitAgency, dayString : String,
+    suspend fun getFavouriteStopTimes(list : List<TransitData>, agency : TransitAgency, dayString : String,
                                       calendar : Calendar, times : MutableList<FavouriteTransitInfo>) : MutableList<FavouriteTransitInfo> {
         when(agency){
             TransitAgency.STM -> {
-                list as List<BusInfo>
+                list as List<BusData>
                 val stopsInfoDAO = stmDatabase.stopsInfoDao()
                 list.forEach {busInfo ->
                     stopsInfoDAO.getFavouriteStopTime(busInfo.stopName, dayString, Time(calendar).toString(), busInfo.tripHeadsign)
@@ -37,7 +37,7 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
                 return times
             }
             TransitAgency.EXO_TRAIN -> {
-                list as List<TrainInfo>
+                list as List<TrainData>
                 val stopsTimesDAO = exoDataBase.stopTimesDao()
                 list.forEach {trainInfo ->
                     stopsTimesDAO.getFavouriteTrainStopTime(trainInfo.routeId.toInt(), trainInfo.stopName, trainInfo.directionId, Time(calendar).toString(), dayString)
@@ -46,7 +46,7 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
                 return times
             }
             TransitAgency.EXO_OTHER -> {
-                list as List<BusInfo>
+                list as List<BusData>
                 val stopTimesDAO = exoDataBase.stopTimesDao()
                 list.forEach {busInfo ->
                     stopTimesDAO.getFavouriteBusStopTime(busInfo.stopName, dayString, Time(calendar).toString(), busInfo.tripHeadsign)

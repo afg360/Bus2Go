@@ -4,7 +4,6 @@ import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
-import android.view.View.OnClickListener
 import android.view.View.OnLongClickListener
 import android.view.View.VISIBLE
 import android.view.ViewGroup
@@ -27,9 +26,8 @@ import dev.mainhq.bus2go.ROUTE_ID
 import dev.mainhq.bus2go.Times
 import dev.mainhq.bus2go.fragments.FavouriteTransitInfo
 import dev.mainhq.bus2go.fragments.Home
-import dev.mainhq.bus2go.preferences.BusInfo
-import dev.mainhq.bus2go.preferences.TrainInfo
-import dev.mainhq.bus2go.preferences.TransitInfo
+import dev.mainhq.bus2go.preferences.BusData
+import dev.mainhq.bus2go.preferences.TrainData
 import dev.mainhq.bus2go.utils.TransitAgency
 import dev.mainhq.bus2go.utils.Time
 import java.lang.ref.WeakReference
@@ -55,8 +53,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val info = list[position]
-        //add the agency data in the tag
-        holder.itemView.tag = info.agency
+
         holder.arrivalTimeTextView.text = info.arrivalTime.toString()
         if (info.arrivalTime == null){
             holder.timeRemainingTextView.text =
@@ -72,22 +69,25 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
         }
 
         if (info.agency == TransitAgency.EXO_TRAIN){
-            info.transitInfo as TrainInfo
-            holder.stopNameTextView.text = info.transitInfo.stopName
-            holder.tripHeadsignTextView.text = info.transitInfo.routeId
+            info.transitData as TrainData
+            holder.itemView.tag = info.transitData
+            holder.stopNameTextView.text = info.transitData.stopName
+            holder.tripHeadsignTextView.text = info.transitData.routeName
             //FIXME for testing purposes, the below is added
-            holder.tripHeadsignTextView.tag = info.transitInfo.directionId
+            holder.tripHeadsignTextView.tag = info.transitData.directionId
             holder.tripHeadsignTextView.setTextColor(holder.itemView.resources
                 .getColor(R.color.basic_purple, null))
             holder.stopNameTextView.setTextColor(holder.itemView.resources
                 .getColor(R.color.basic_purple,null))
         }
         else {
-            info.transitInfo as BusInfo
-            holder.stopNameTextView.text = info.transitInfo.stopName
+            //add the agency data in the tag
+            holder.itemView.tag = info.agency
+            info.transitData as BusData
+            holder.stopNameTextView.text = info.transitData.stopName
             when (info.agency) {
                 TransitAgency.STM -> {
-                    holder.tripHeadsignTextView.text = info.transitInfo.tripHeadsign
+                    holder.tripHeadsignTextView.text = info.transitData.tripHeadsign
                     holder.tripHeadsignTextView.setTextColor(holder.itemView.resources
                         .getColor(R.color.basic_blue, null))
                     holder.stopNameTextView.setTextColor(
@@ -100,7 +100,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
 
                 TransitAgency.EXO_OTHER -> {
                     holder.tripHeadsignTextView.text =
-                        info.transitInfo.tripHeadsign
+                        info.transitData.tripHeadsign
                     holder.tripHeadsignTextView.setTextColor(
                         holder.itemView.resources.getColor(
                             R.color.basic_purple,
@@ -224,12 +224,12 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
         intent.putExtra("stopName", holder.stopNameTextView.text as String)
         intent.putExtra(AGENCY, info.agency)
         if (info.agency == TransitAgency.EXO_TRAIN){
-            info.transitInfo as TrainInfo
-            intent.putExtra(DIRECTION_ID, info.transitInfo.directionId)
-            intent.putExtra(ROUTE_ID, info.transitInfo.routeId)
+            info.transitData as TrainData
+            intent.putExtra(DIRECTION_ID, info.transitData.directionId)
+            intent.putExtra(ROUTE_ID, info.transitData.routeId)
         }
         else {
-            info.transitInfo as BusInfo
+            info.transitData as BusData
             intent.putExtra("headsign", holder.tripHeadsignTextView.text as String)
         }
         view.context.startActivity(intent)
