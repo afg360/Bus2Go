@@ -18,9 +18,9 @@ interface StopTimesDAO {
     @Query("SELECT DISTINCT stop_name FROM StopTimes " +
             "JOIN Stops ON StopTimes.stop_id = Stops.stop_id " +
             "JOIN Trips on StopTimes.trip_id = Trips.trip_id " +
-            "WHERE route_id = (:routeId) AND trips.trip_id LIKE 'trains%' " +
+            "WHERE route_id = (:routeId) " +
             "AND direction_id = (:directionId) ORDER BY stop_seq;")
-    suspend fun getTrainStopNames(routeId : Int, directionId : Int) : List<String>
+    suspend fun getTrainStopNames(routeId : String, directionId : Int) : List<String>
 
     @Query("SELECT DISTINCT arrival_time FROM StopTimes " +
             "JOIN  Stops ON StopTimes.stop_id = Stops.stop_id " +
@@ -54,19 +54,19 @@ interface StopTimesDAO {
             "JOIN Stops ON StopTimes.stop_id = Stops.stop_id " +
             "JOIN Trips ON Stoptimes.trip_id = Trips.trip_id " +
             "JOIN Calendar ON Calendar.service_id = Trips.service_id " +
-            "WHERE route_id = (:routeId) AND Trips.trip_id LIKE 'trains%' " +
+            "WHERE route_id = (:routeId) " +
             "AND direction_id = (:directionId) AND arrival_time >= (:time) " +
             "AND stop_name = (:stopName) AND days LIKE '%' || (:day) || '%' " +
             "ORDER BY stoptimes.stop_seq,arrival_time;")
-    suspend fun getTrainStopTimes(routeId: Int, stopName: String, directionId: Int, time: String, day : String) : List<Time>
+    suspend fun getTrainStopTimes(routeId: String, stopName: String, directionId: Int, time: String, day : String) : List<Time>
 
     @Query("SELECT MIN(arrival_time) FROM StopTimes " +
             "JOIN Stops ON StopTimes.stop_id = Stops.stop_id " +
             "JOIN Trips ON Stoptimes.trip_id = Trips.trip_id " +
             "JOIN Calendar ON Calendar.service_id = Trips.service_id " +
-            "WHERE route_id = (:routeId) AND Trips.trip_id LIKE 'trains%' " +
+            "WHERE route_id = (:routeId) " +
             "AND direction_id = (:directionId) AND arrival_time >= (:time) " +
             "AND stop_name = (:stopName) AND days LIKE '%' || (:day) || '%' " +
             "ORDER BY stoptimes.stop_seq,arrival_time;")
-    suspend fun getFavouriteTrainStopTime(routeId: Int, stopName: String, directionId: Int, time: String, day : String) : Time?
+    suspend fun getFavouriteTrainStopTime(routeId: String, stopName: String, directionId: Int, time: String, day : String) : Time?
 }

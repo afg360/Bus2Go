@@ -41,7 +41,7 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
                 list as List<TrainData>
                 val stopsTimesDAO = exoDataBase.stopTimesDao()
                 list.forEach {trainInfo ->
-                    stopsTimesDAO.getFavouriteTrainStopTime(trainInfo.routeId.toInt(), trainInfo.stopName, trainInfo.directionId, Time(calendar).toString(), dayString)
+                    stopsTimesDAO.getFavouriteTrainStopTime("trains-${trainInfo.routeId}", trainInfo.stopName, trainInfo.directionId, Time(calendar).toString(), dayString)
                         .also { time -> times.add(FavouriteTransitInfo(trainInfo, time, agency)) }
                 }
                 return times
@@ -98,7 +98,7 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     suspend fun getTrainStopTimes(routeId: Int, stopName: String, directionId : Int, curTime : String, dayString: String) : List<Time>{
-        return exoDataBase.stopTimesDao().getTrainStopTimes(routeId, stopName, directionId, curTime, dayString)
+        return exoDataBase.stopTimesDao().getTrainStopTimes("trains-$routeId", stopName, directionId, curTime, dayString)
     }
 
     //FIXME TEMPORARY SOLUTION
@@ -118,8 +118,8 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
     //FIXME may need direction_id in the arguments...?
     suspend fun getTrainStopNames(coroutineScope: CoroutineScope, routeId : Int)
     : Pair<Deferred<List<String>>, Deferred<List<String>>> {
-        val job1 = coroutineScope.async { exoDataBase.stopTimesDao().getTrainStopNames(routeId, 0) }
-        val job2 = coroutineScope.async { exoDataBase.stopTimesDao().getTrainStopNames(routeId, 1) }
+        val job1 = coroutineScope.async { exoDataBase.stopTimesDao().getTrainStopNames("trains-$routeId", 0) }
+        val job2 = coroutineScope.async { exoDataBase.stopTimesDao().getTrainStopNames("trains-$routeId", 1) }
         return Pair(job1, job2)
     }
 

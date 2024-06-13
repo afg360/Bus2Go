@@ -76,7 +76,6 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
                     recyclerViewTmp?.tag = "unselected"
                     recyclerViewTmp?.adapter = recyclerViewTmp?.let { FavouritesListElemsAdapter(list, WeakReference(it) ) }
                 }
-
             }
         }
 
