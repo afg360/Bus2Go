@@ -76,7 +76,7 @@ class AlarmCreationChooseBusDialog(private val favouritesViewModel: FavouritesVi
                     }
                     time?.also {time ->
                         setFragmentResult("requestKey", bundleOf("ALARM_BUS_INFO" to AlarmBusInfo(
-                            ExoBusData(alarmDialogBusStop, alarmDialogBusNum),
+                            ExoBusData(alarmDialogBusStop, alarmDialogBusNum, ""),
                             time)))
                         dismiss()
                     }

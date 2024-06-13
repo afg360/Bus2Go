@@ -16,8 +16,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.lang.IllegalStateException
 
-const val DIRECTION = "DIRECTION"
-
 //todo
 //instead of doing a huge query on getting the time, we could first retrieve
 //all the possible stations (ordered by id, and prob based on localisation? -> not privacy friendly
@@ -25,10 +23,7 @@ const val DIRECTION = "DIRECTION"
 //todo add possibility of searching amongst all the stops
 class ChooseStop() : BaseActivity() {
 
-    private lateinit var agency: TransitAgency
     private var routeName : String? = null
-    private var headsign : String? = null
-    private var direction : String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,7 +34,7 @@ class ChooseStop() : BaseActivity() {
         //terminus (i.e. to destination) = data.last(), needed for exo because some of the headsigns are the same
         val stopNames : List<String> = intent.getStringArrayListExtra("stops") ?: listOf()
 
-        agency = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        val agency = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.getSerializableExtra (AGENCY, TransitAgency::class.java) ?: throw AssertionError("AGENCY is Null")
         } else {
             intent.getSerializableExtra (AGENCY) as TransitAgency? ?: throw AssertionError("AGENCY is Null")
@@ -48,20 +43,16 @@ class ChooseStop() : BaseActivity() {
             val recyclerView: RecyclerView = findViewById(R.id.stop_recycle_view)
             val layoutManager = LinearLayoutManager(applicationContext)
             val directionId = intent.extras?.getInt(DIRECTION_ID)
-            val routeId = intent.extras?.getInt(ROUTE_ID)
+            val routeId = intent.extras?.getInt(ROUTE_ID, -1)
             val trainNum = intent.extras?.getInt(TRAIN_NUM)
+            val direction = intent.getStringExtra(DIRECTION)!!
+            val lastStop = intent.getStringExtra(LAST_STOP)
+            val headsign = intent.getStringExtra("headsign")
             if (agency == TransitAgency.EXO_TRAIN){
                 routeName = intent.getStringExtra(ROUTE_NAME) ?: throw IllegalStateException("Forgot to give a route name to a train!")
             }
-            else{
-                if (agency == TransitAgency.STM) {
-                    if (routeId == -1) throw IllegalStateException("Forgot to give a route id to an stm bus!")
-                    direction = intent.getStringExtra(DIRECTION)!!
-                }
-                else{
-                    headsign = intent.getStringExtra("headsign")!!
-                }
-            }
+            else if (agency == TransitAgency.STM && routeId == -1)
+                    throw IllegalStateException("Forgot to give a route id to an stm bus!")
 
             lifecycleScope.launch {
                 //the datastore may be closed!
@@ -70,14 +61,13 @@ class ChooseStop() : BaseActivity() {
                         favouritesViewModel.exoTrainInfo.value
                 withContext(Dispatchers.Main){
                     recyclerView.adapter = StopListElemsAdapter(stopNames, favourites, headsign, routeId,
-                        trainNum, routeName, directionId, direction, agency, favouritesViewModel)
+                        trainNum, routeName, directionId, direction, lastStop, agency, favouritesViewModel)
                     layoutManager.orientation = LinearLayoutManager.VERTICAL
                     recyclerView.layoutManager = layoutManager
                 }
             }
         }
         else{
-            Toast.makeText(this, "No stops were found...", Toast.LENGTH_SHORT).show()
             TODO("Display message saying no stops found")
         }
     }

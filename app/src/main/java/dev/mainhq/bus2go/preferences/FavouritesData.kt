@@ -94,12 +94,13 @@ class PersistentTrainInfoListSerializer(private val serializer: KSerializer<Trai
 }
 
 @Serializable
-data class StmBusData(val stopName: String, val busNum : Int, val directionId: Int, val direction : String)
+data class StmBusData(val stopName: String, val busNum : Int, val directionId: Int, val direction : String, val lastStop : String)
     : Parcelable, TransitData {
     constructor(parcel: Parcel) : this(
         parcel.readString()!!,
         parcel.readInt(),
         parcel.readInt(),
+        parcel.readString()!!,
         parcel.readString()!!
     )
 
@@ -112,6 +113,7 @@ data class StmBusData(val stopName: String, val busNum : Int, val directionId: I
         dest.writeInt(busNum)
         dest.writeInt(directionId)
         dest.writeString(direction)
+        dest.writeString(lastStop)
     }
 
     companion object CREATOR : Parcelable.Creator<StmBusData> {

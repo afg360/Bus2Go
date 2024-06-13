@@ -24,8 +24,8 @@ import dev.mainhq.bus2go.viewmodels.FavouritesViewModel
 class StopListElemsAdapter(private val stopNames: List<String>, private val list: List<TransitData>,
                            private val headsign: String?, private val routeId: Int?,
                            private val trainNum : Int?, private val routeName : String?,
-                           private val directionId : Int?, private val direction : String?,
-                           private val agency: TransitAgency,
+                           private val directionId : Int?, private val direction : String,
+                           private val lastStop : String?, private val agency: TransitAgency,
                            private val favouritesViewModel: FavouritesViewModel)
     : RecyclerView.Adapter<StopListElemsAdapter.ViewHolder>() {
 
@@ -43,7 +43,7 @@ class StopListElemsAdapter(private val stopNames: List<String>, private val list
         /** Initialise the right type of favourite button */
         when (agency) {
             TransitAgency.EXO_TRAIN -> {
-                if (list.contains(TrainData(stopName, routeId!!, trainNum!!, routeName!!, directionId!!))){
+                if (list.contains(TrainData(stopName, routeId!!, trainNum!!, routeName!!, directionId!!, direction))){
                     holder.favouriteSelectedView.tag = "on"
                     holder.favouriteSelectedView.setBackgroundResource(R.drawable.favourite_drawable_on)
                 }
@@ -51,17 +51,17 @@ class StopListElemsAdapter(private val stopNames: List<String>, private val list
                     if (view.tag.equals("off")) {
                         view.setBackgroundResource(R.drawable.favourite_drawable_on)
                         view.tag = "on"
-                        favouritesViewModel.addFavourites(TrainData(stopName, routeId, trainNum, routeName, directionId))
+                        favouritesViewModel.addFavourites(TrainData(stopName, routeId, trainNum, routeName, directionId, direction))
                     } else {
                         view.setBackgroundResource(R.drawable.favourite_drawable_off)
                         view.tag = "off"
                         //todo add to favourites
-                        favouritesViewModel.removeFavourites(TrainData(stopName, routeId, trainNum, routeName, directionId))
+                        favouritesViewModel.removeFavourites(TrainData(stopName, routeId, trainNum, routeName, directionId, direction))
                     }
                 }
             }
             TransitAgency.STM -> {
-                if (list.contains(StmBusData(stopName, routeId!!, directionId!!, direction!!))){
+                if (list.contains(StmBusData(stopName, routeId!!, directionId!!, direction, lastStop!!))){
                     holder.favouriteSelectedView.tag = "on"
                     holder.favouriteSelectedView.setBackgroundResource(R.drawable.favourite_drawable_on)
                 }
@@ -69,18 +69,18 @@ class StopListElemsAdapter(private val stopNames: List<String>, private val list
                     if (view.tag.equals("off")) {
                         view.setBackgroundResource(R.drawable.favourite_drawable_on)
                         view.tag = "on"
-                        favouritesViewModel.addFavourites(StmBusData(stopName, routeId, directionId, direction))
+                        favouritesViewModel.addFavourites(StmBusData(stopName, routeId, directionId, direction, lastStop))
                     }
                     else {
                         view.setBackgroundResource(R.drawable.favourite_drawable_off)
                         view.tag = "off"
                         //todo add to favourites
-                        favouritesViewModel.removeFavourites(StmBusData(stopName, routeId, directionId, direction))
+                        favouritesViewModel.removeFavourites(StmBusData(stopName, routeId, directionId, direction, lastStop))
                     }
                 }
             }
             TransitAgency.EXO_OTHER -> {
-                if (list.contains(ExoBusData(holder.stopNameTextView.text.toString(), headsign!!))){
+                if (list.contains(ExoBusData(holder.stopNameTextView.text.toString(), headsign!!, direction))){
                     holder.favouriteSelectedView.tag = "on"
                     holder.favouriteSelectedView.setBackgroundResource(R.drawable.favourite_drawable_on)
                 }
@@ -88,13 +88,13 @@ class StopListElemsAdapter(private val stopNames: List<String>, private val list
                     if (view.tag.equals("off")) {
                         view.setBackgroundResource(R.drawable.favourite_drawable_on)
                         view.tag = "on"
-                        favouritesViewModel.addFavourites(ExoBusData(stopName, headsign))
+                        favouritesViewModel.addFavourites(ExoBusData(stopName, headsign, direction))
                     }
                     else {
                         view.setBackgroundResource(R.drawable.favourite_drawable_off)
                         view.tag = "off"
                         //todo add to favourites
-                        favouritesViewModel.removeFavourites(ExoBusData(stopName, headsign))
+                        favouritesViewModel.removeFavourites(ExoBusData(stopName, headsign, direction))
                     }
                 }
             }
@@ -119,15 +119,17 @@ class StopListElemsAdapter(private val stopNames: List<String>, private val list
                 val stopName = (it as MaterialTextView).text as String
                 val intent = Intent(view.context, Times::class.java)
                 intent.putExtra("stopName", stopName)
-                if (agency == TransitAgency.EXO_TRAIN) {
-                    intent.putExtra(DIRECTION_ID, directionId!!)
-                    intent.putExtra(ROUTE_ID, routeId!!)
+                when (agency) {
+                    TransitAgency.EXO_TRAIN -> {
+                        intent.putExtra(DIRECTION_ID, directionId!!)
+                        intent.putExtra(ROUTE_ID, routeId!!)
+                    }
+                    TransitAgency.STM -> {
+                        intent.putExtra(DIRECTION, direction!!)
+                        intent.putExtra(ROUTE_ID, routeId!!)
+                    }
+                    else -> intent.putExtra("headsign", headsign!!)
                 }
-                else if (agency == TransitAgency.STM) {
-                    intent.putExtra(DIRECTION, direction!!)
-                    intent.putExtra(ROUTE_ID, routeId!!)
-                }
-                else intent.putExtra("headsign", headsign!!)
                 intent.putExtra(AGENCY, agency)
                 it.context.startActivity(intent)
                 it.clearFocus()
