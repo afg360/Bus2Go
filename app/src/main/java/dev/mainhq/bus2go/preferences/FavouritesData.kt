@@ -23,10 +23,10 @@ import java.lang.Exception
 
 @Serializable
 data class FavouritesData(
-    @Serializable(with = PersistentBusInfoListSerializer::class)
-    val listSTM : PersistentList<BusData> = persistentListOf(),
-    @Serializable(with = PersistentBusInfoListSerializer::class)
-    val listExo : PersistentList<BusData> = persistentListOf(),
+    @Serializable(with = PersistentExoBusInfoListSerializer::class)
+    val listSTM : PersistentList<StmBusData> = persistentListOf(),
+    @Serializable(with = PersistentExoBusInfoListSerializer::class)
+    val listExo : PersistentList<ExoBusData> = persistentListOf(),
     //TODO MAY BE REMOVED
     @Serializable(with = PersistentTrainInfoListSerializer::class)
     val listExoTrain : PersistentList<TrainData> = persistentListOf()
@@ -94,8 +94,62 @@ class PersistentTrainInfoListSerializer(private val serializer: KSerializer<Trai
 }
 
 @Serializable
+data class StmBusData(val stopName: String, val busNum : Int, val directionId: Int, val direction : String)
+    : Parcelable, TransitData {
+    constructor(parcel: Parcel) : this(
+        parcel.readString()!!,
+        parcel.readInt(),
+        parcel.readInt(),
+        parcel.readString()!!
+    )
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    override fun writeToParcel(dest: Parcel, flags: Int) {
+        dest.writeString(stopName)
+        dest.writeInt(busNum)
+        dest.writeInt(directionId)
+        dest.writeString(direction)
+    }
+
+    companion object CREATOR : Parcelable.Creator<StmBusData> {
+        override fun createFromParcel(parcel: Parcel): StmBusData {
+            return StmBusData(parcel)
+        }
+
+        override fun newArray(size: Int): Array<StmBusData?> {
+            return arrayOfNulls(size)
+        }
+    }
+}
+
+@Suppress("EXTERNAL_SERIALIZER_USELESS")
+@OptIn(ExperimentalSerializationApi::class)
+@kotlinx.serialization.Serializer(forClass = PersistentList::class)
+class PersistentStmBusInfoListSerializer(private val serializer: KSerializer<StmBusData>) : KSerializer<PersistentList<StmBusData>> {
+
+    private class PersistentListDescriptor :
+        SerialDescriptor by serialDescriptor<List<StmBusData>>() {
+        @ExperimentalSerializationApi
+        override val serialName: String = "kotlinx.serialization.immutable.persistentList"
+    }
+
+    override val descriptor: SerialDescriptor = PersistentListDescriptor()
+
+    override fun serialize(encoder: Encoder, value: PersistentList<StmBusData>) {
+        return ListSerializer(serializer).serialize(encoder, value)
+    }
+
+    override fun deserialize(decoder: Decoder): PersistentList<StmBusData> {
+        return ListSerializer(serializer).deserialize(decoder).toPersistentList()
+    }
+}
+
+@Serializable
 //FIXME could improve the data stored inside for better ease of use
-data class BusData(val stopName : String, val tripHeadsign : String, val direction: String)
+data class ExoBusData(val stopName : String, val tripHeadsign : String, val direction: String)
     : Parcelable, TransitData {
     constructor(parcel: Parcel) : this(
         parcel.readString()!!,
@@ -113,12 +167,12 @@ data class BusData(val stopName : String, val tripHeadsign : String, val directi
         dest.writeString(direction)
     }
 
-    companion object CREATOR : Parcelable.Creator<BusData> {
-        override fun createFromParcel(parcel: Parcel): BusData {
-            return BusData(parcel)
+    companion object CREATOR : Parcelable.Creator<ExoBusData> {
+        override fun createFromParcel(parcel: Parcel): ExoBusData {
+            return ExoBusData(parcel)
         }
 
-        override fun newArray(size: Int): Array<BusData?> {
+        override fun newArray(size: Int): Array<ExoBusData?> {
             return arrayOfNulls(size)
         }
     }
@@ -127,21 +181,21 @@ data class BusData(val stopName : String, val tripHeadsign : String, val directi
 @Suppress("EXTERNAL_SERIALIZER_USELESS")
 @OptIn(ExperimentalSerializationApi::class)
 @kotlinx.serialization.Serializer(forClass = PersistentList::class)
-class PersistentBusInfoListSerializer(private val serializer: KSerializer<BusData>) : KSerializer<PersistentList<BusData>> {
+class PersistentExoBusInfoListSerializer(private val serializer: KSerializer<ExoBusData>) : KSerializer<PersistentList<ExoBusData>> {
 
     private class PersistentListDescriptor :
-        SerialDescriptor by serialDescriptor<List<BusData>>() {
+        SerialDescriptor by serialDescriptor<List<ExoBusData>>() {
         @ExperimentalSerializationApi
         override val serialName: String = "kotlinx.serialization.immutable.persistentList"
     }
 
     override val descriptor: SerialDescriptor = PersistentListDescriptor()
 
-    override fun serialize(encoder: Encoder, value: PersistentList<BusData>) {
+    override fun serialize(encoder: Encoder, value: PersistentList<ExoBusData>) {
         return ListSerializer(serializer).serialize(encoder, value)
     }
 
-    override fun deserialize(decoder: Decoder): PersistentList<BusData> {
+    override fun deserialize(decoder: Decoder): PersistentList<ExoBusData> {
         return ListSerializer(serializer).deserialize(decoder).toPersistentList()
     }
 }

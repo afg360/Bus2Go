@@ -25,9 +25,6 @@ const val ROUTE_ID = "ROUTE_ID"
 /** The number in the train route_long_name, e.g. %11% - blablabla */
 const val TRAIN_NUM = "TRAIN_NUM"
 const val DIRECTION_ID = "DIRECTION_ID"
-/** Although similar to direction, a key represents the last station the vehicle is heading to as a string */
-const val DIRECTION = "DIRECTION"
-
 
 //todo
 //change appbar to be only a back button
@@ -114,17 +111,82 @@ class ChooseDirection : BaseActivity() {
                 Toast.makeText(this@ChooseDirection, "Metro not implemented yet...", Toast.LENGTH_SHORT).show()
                 return@launch
             }
-            val jobs = roomViewModel.getStopNames(this, agency, dirs)
-            val headsign0 = dirs[0]
-            val headsign1 = dirs[1]
+            //FIXME TRIPS_HEADSIGN HAS CHANGED FOR STM, ONLY SHOWS DIRECTION
+
+
             when (agency) {
                 TransitAgency.STM -> {
+                    dirs as List<DirectionInfo>
+                    val jobs = roomViewModel.getStopNames(this, agency, dirs.map { it.tripHeadSign }, bus)
                     val orientation =
-                        if (dirs[0].last() == 'E' || dirs[0].last() == 'O') Orientation.HORIZONTAL
+                        //already in alphabetical order
+                        if (dirs.first().tripHeadSign == "Est" || dirs.first().tripHeadSign == "Ouest") Orientation.HORIZONTAL
                         else Orientation.VERTICAL
-                    setListeners(orientation, jobs.first.await(), jobs.second.await(), headsign0, headsign1)
+                    withContext(Dispatchers.Main){
+                        val leftButton : MaterialButton = findViewById(R.id.route_0)
+                        val leftDescr : MaterialTextView = findViewById(R.id.description_route_0)
+                        val rightButton : MaterialButton = findViewById(R.id.route_1)
+                        val rightDescr : MaterialTextView = findViewById(R.id.description_route_1)
+                        val intent = Intent(applicationContext, ChooseStop::class.java)
+                        //east or north
+                        val stops0 = jobs.first.await()
+                        //west or south
+                        val stops1 = jobs.second.await()
+                        when (orientation){
+                            Orientation.HORIZONTAL -> {
+                                leftButton.text = getString(R.string.west)
+                                rightButton.text = getString(R.string.east)
+                                leftDescr.text = getString(R.string.from_to, stops1.first(), stops1.last())
+                                rightDescr.text = getString(R.string.from_to, stops0.first(), stops0.last())
+                                //FIXME CHANGE DIRECTION TERMINOLOGY TO BE MORE CONSISTENT
+                                leftButton.setOnClickListener {
+                                    intent.putStringArrayListExtra("stops", stops1 as ArrayList<String>)
+                                    intent.putExtra(ROUTE_ID, bus.toInt())
+                                    intent.putExtra(DIRECTION, "Ouest")
+                                    intent.putExtra(DIRECTION_ID, dirs.last().directionId)
+                                    intent.putExtra(AGENCY, agency)
+                                    startActivity(intent)
+                                }
+                                rightButton.setOnClickListener {
+                                    intent.putStringArrayListExtra("stops", stops0 as ArrayList<String>)
+                                    intent.putExtra(ROUTE_ID, bus.toInt())
+                                    intent.putExtra(DIRECTION, "Est")
+                                    intent.putExtra(DIRECTION_ID, dirs.first().directionId)
+                                    intent.putExtra(AGENCY, agency)
+                                    startActivity(intent)
+                                }
+                            }
+                            Orientation.VERTICAL -> {
+                                leftButton.text = getString(R.string.north)
+                                rightButton.text = getString(R.string.south)
+
+                                leftDescr.text = getString(R.string.from_to, stops0.first(), stops0.last())
+                                rightDescr.text = getString(R.string.from_to, stops1.first(), stops1.last())
+                                leftButton.setOnClickListener {
+                                    intent.putStringArrayListExtra("stops", stops1 as ArrayList<String>)
+                                    intent.putExtra(ROUTE_ID, bus.toInt())
+                                    intent.putExtra(DIRECTION, "Nord")
+                                    intent.putExtra(DIRECTION_ID, dirs.first().directionId)
+                                    intent.putExtra(AGENCY, agency)
+                                    startActivity(intent)
+                                }
+                                rightButton.setOnClickListener {
+                                    intent.putStringArrayListExtra("stops", stops1 as ArrayList<String>)
+                                    intent.putExtra(ROUTE_ID, bus.toInt())
+                                    intent.putExtra(DIRECTION, "Sud")
+                                    intent.putExtra(DIRECTION_ID, dirs.last().directionId)
+                                    intent.putExtra(AGENCY, agency)
+                                    startActivity(intent)
+                                }
+                            }
+                        }
+                    }
                 }
                 TransitAgency.EXO_OTHER -> {
+                    dirs as List<String>
+                    val jobs = roomViewModel.getStopNames(this, agency, dirs, bus)
+                    val headsign0 = dirs[0]
+                    val headsign1 = dirs[1]
                     val intent = Intent(applicationContext, ChooseStop::class.java)
                     val dir0 = jobs.first.await()
                     val dir1 = jobs.second.await()
@@ -141,47 +203,6 @@ class ChooseDirection : BaseActivity() {
                 }
                 else -> {
                     throw IllegalStateException("Wrong agency given for getting directions!")
-                }
-            }
-        }
-    }
-
-    private suspend fun setListeners(orientation: Orientation, dir0 : List<String>, dir1 : List<String>,
-                                     headsign0 : String, headsign1: String){
-        withContext(Dispatchers.Main){
-            val leftButton : MaterialButton = findViewById(R.id.route_0)
-            val leftDescr : MaterialTextView = findViewById(R.id.description_route_0)
-            val rightButton : MaterialButton = findViewById(R.id.route_1)
-            val rightDescr : MaterialTextView = findViewById(R.id.description_route_1)
-            val intent = Intent(applicationContext, ChooseStop::class.java)
-            when (orientation){
-                Orientation.HORIZONTAL -> {
-                    leftButton.text = getString(R.string.west)
-                    rightButton.text = getString(R.string.east)
-                }
-                Orientation.VERTICAL -> {
-                    leftButton.text = getString(R.string.north)
-                    rightButton.text = getString(R.string.south)
-                }
-            }
-            if (dir0[0].last() == 'W' || dir0[0].last() == 'N') {
-                leftDescr.text = getString(R.string.from_to, dir0[0], dir0.last())
-                rightDescr.text = getString(R.string.from_to, dir1[0], dir1.last())
-                leftButton.setOnClickListener {
-                    setIntent(intent, dir0 as ArrayList<String>, headsign0, dir0.last(), agency)
-                }
-                rightButton.setOnClickListener {
-                    setIntent(intent, dir1 as ArrayList<String>, headsign1, dir1.last(), agency)
-                }
-            }
-            else{
-                leftDescr.text = getString(R.string.from_to, dir1[0], dir1.last())
-                rightDescr.text = getString(R.string.from_to, dir0[0], dir0.last())
-                leftButton.setOnClickListener {
-                    setIntent(intent, dir1 as ArrayList<String>, headsign1, dir1.last(), agency)
-                }
-                rightButton.setOnClickListener {
-                    setIntent(intent, dir0 as ArrayList<String>, headsign0, dir0.last(), agency)
                 }
             }
         }

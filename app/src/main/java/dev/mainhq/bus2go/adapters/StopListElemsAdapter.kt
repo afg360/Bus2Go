@@ -8,70 +8,94 @@ import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.AGENCY
+import dev.mainhq.bus2go.DIRECTION
 import dev.mainhq.bus2go.DIRECTION_ID
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.ROUTE_ID
 import dev.mainhq.bus2go.Times
-import dev.mainhq.bus2go.preferences.BusData
+import dev.mainhq.bus2go.preferences.ExoBusData
+import dev.mainhq.bus2go.preferences.StmBusData
 import dev.mainhq.bus2go.preferences.TrainData
 import dev.mainhq.bus2go.preferences.TransitData
 import dev.mainhq.bus2go.utils.TransitAgency
 import dev.mainhq.bus2go.viewmodels.FavouritesViewModel
 
 
-class StopListElemsAdapter(private val data: List<String>, private val list: List<TransitData>,
+class StopListElemsAdapter(private val stopNames: List<String>, private val list: List<TransitData>,
                            private val headsign: String?, private val routeId: Int?,
                            private val trainNum : Int?, private val routeName : String?,
-                           private val directionId : Int?, private val direction : String,
-                           private val agency: TransitAgency, private val favouritesViewModel: FavouritesViewModel)
+                           private val directionId : Int?, private val direction : String?,
+                           private val agency: TransitAgency,
+                           private val favouritesViewModel: FavouritesViewModel)
     : RecyclerView.Adapter<StopListElemsAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
             LayoutInflater.from(parent.context)
             .inflate(R.layout.elem_stop_list, parent, false),
-            headsign, routeId, directionId, agency
+            headsign, routeId, directionId, direction, agency
         )
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val data = this.data[position]
-        holder.stopNameTextView.text = data
+        val stopName = stopNames[position]
+        holder.stopNameTextView.text = stopName
         /** Initialise the right type of favourite button */
-        if (agency == TransitAgency.EXO_TRAIN){
-            if (list.contains(TrainData(data, routeId!!, trainNum!!, routeName!!, directionId!!, direction))){
-                holder.favouriteSelectedView.tag = "on"
-                holder.favouriteSelectedView.setBackgroundResource(R.drawable.favourite_drawable_on)
-            }
-            holder.favouriteSelectedView.setOnClickListener { view ->
-                if (view.tag.equals("off")) {
-                    view.setBackgroundResource(R.drawable.favourite_drawable_on)
-                    view.tag = "on"
-                    favouritesViewModel.addFavouriteTrains(agency, data, routeId, trainNum, routeName, directionId, direction)
-                } else {
-                    view.setBackgroundResource(R.drawable.favourite_drawable_off)
-                    view.tag = "off"
-                    //todo add to favourites
-                    favouritesViewModel.removeFavouriteTrains(agency, data, routeId, trainNum, routeName, directionId, direction)
+        when (agency) {
+            TransitAgency.EXO_TRAIN -> {
+                if (list.contains(TrainData(stopName, routeId!!, trainNum!!, routeName!!, directionId!!))){
+                    holder.favouriteSelectedView.tag = "on"
+                    holder.favouriteSelectedView.setBackgroundResource(R.drawable.favourite_drawable_on)
+                }
+                holder.favouriteSelectedView.setOnClickListener { view ->
+                    if (view.tag.equals("off")) {
+                        view.setBackgroundResource(R.drawable.favourite_drawable_on)
+                        view.tag = "on"
+                        favouritesViewModel.addFavourites(TrainData(stopName, routeId, trainNum, routeName, directionId))
+                    } else {
+                        view.setBackgroundResource(R.drawable.favourite_drawable_off)
+                        view.tag = "off"
+                        //todo add to favourites
+                        favouritesViewModel.removeFavourites(TrainData(stopName, routeId, trainNum, routeName, directionId))
+                    }
                 }
             }
-        }
-        else{
-            if (list.contains(BusData(data, headsign!!, direction))){
-                holder.favouriteSelectedView.tag = "on"
-                holder.favouriteSelectedView.setBackgroundResource(R.drawable.favourite_drawable_on)
-            }
-            holder.favouriteSelectedView.setOnClickListener { view ->
-                if (view.tag.equals("off")) {
-                    view.setBackgroundResource(R.drawable.favourite_drawable_on)
-                    view.tag = "on"
-                    favouritesViewModel.addFavourites(agency, data, headsign, direction)
+            TransitAgency.STM -> {
+                if (list.contains(StmBusData(stopName, routeId!!, directionId!!, direction!!))){
+                    holder.favouriteSelectedView.tag = "on"
+                    holder.favouriteSelectedView.setBackgroundResource(R.drawable.favourite_drawable_on)
                 }
-                else {
-                    view.setBackgroundResource(R.drawable.favourite_drawable_off)
-                    view.tag = "off"
-                    //todo add to favourites
-                    favouritesViewModel.removeFavouriteBuses(agency, data, headsign, direction)
+                holder.favouriteSelectedView.setOnClickListener { view ->
+                    if (view.tag.equals("off")) {
+                        view.setBackgroundResource(R.drawable.favourite_drawable_on)
+                        view.tag = "on"
+                        favouritesViewModel.addFavourites(StmBusData(stopName, routeId, directionId, direction))
+                    }
+                    else {
+                        view.setBackgroundResource(R.drawable.favourite_drawable_off)
+                        view.tag = "off"
+                        //todo add to favourites
+                        favouritesViewModel.removeFavourites(StmBusData(stopName, routeId, directionId, direction))
+                    }
+                }
+            }
+            TransitAgency.EXO_OTHER -> {
+                if (list.contains(ExoBusData(holder.stopNameTextView.text.toString(), headsign!!))){
+                    holder.favouriteSelectedView.tag = "on"
+                    holder.favouriteSelectedView.setBackgroundResource(R.drawable.favourite_drawable_on)
+                }
+                holder.favouriteSelectedView.setOnClickListener { view ->
+                    if (view.tag.equals("off")) {
+                        view.setBackgroundResource(R.drawable.favourite_drawable_on)
+                        view.tag = "on"
+                        favouritesViewModel.addFavourites(ExoBusData(stopName, headsign))
+                    }
+                    else {
+                        view.setBackgroundResource(R.drawable.favourite_drawable_off)
+                        view.tag = "off"
+                        //todo add to favourites
+                        favouritesViewModel.removeFavourites(ExoBusData(stopName, headsign))
+                    }
                 }
             }
         }
@@ -79,22 +103,28 @@ class StopListElemsAdapter(private val data: List<String>, private val list: Lis
     }
 
     override fun getItemCount(): Int {
-        return this.data.size
+        return this.stopNames.size
     }
 
     class ViewHolder(view: View, private val headsign : String?, private val routeId : Int?,
-                     private val directionId : Int?, private val agency: TransitAgency) : RecyclerView.ViewHolder(view) {
+                     private val directionId : Int?, private val direction: String?,
+                     private val agency: TransitAgency) : RecyclerView.ViewHolder(view) {
         //TODO INSTEAD ADD A COLUMN IN DATABASE TO SET AS FAVOURITE A CERTAIN STOP, AND AFFICHER ONLY THE NEXT STOP
         val stopNameTextView: MaterialTextView
         val favouriteSelectedView : ImageView
         init {
             stopNameTextView = view.findViewById(R.id.stop)
+            //FIXME NEED TO ADD SOME SHIT OVER HERE FOR THE INTENTS
             stopNameTextView.setOnClickListener{
                 val stopName = (it as MaterialTextView).text as String
                 val intent = Intent(view.context, Times::class.java)
                 intent.putExtra("stopName", stopName)
                 if (agency == TransitAgency.EXO_TRAIN) {
                     intent.putExtra(DIRECTION_ID, directionId!!)
+                    intent.putExtra(ROUTE_ID, routeId!!)
+                }
+                else if (agency == TransitAgency.STM) {
+                    intent.putExtra(DIRECTION, direction!!)
                     intent.putExtra(ROUTE_ID, routeId!!)
                 }
                 else intent.putExtra("headsign", headsign!!)

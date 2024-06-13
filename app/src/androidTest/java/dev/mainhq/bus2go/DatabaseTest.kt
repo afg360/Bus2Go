@@ -33,7 +33,7 @@ class DatabaseTest {
 
     @Test
     fun nonEmptyTrips() = runBlocking {
-        val res = tripsDao.getTripHeadsigns(6)
+        val res = tripsDao.getDirectionInfo(6)
         Log.d("Res", res.toString())
         assert(res.isNotEmpty())
     }

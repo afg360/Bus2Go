@@ -31,7 +31,7 @@ data class Alarm(
     /** Name of the alarm given. Should be unique */
     val title : String,
     /** Suppose to be the same as buses in the favourites */
-    val busInfo : BusData,
+    val busInfo : ExoBusData,
     /** Time set for the alarm to ring before the  */
     val timeBefore : SerializableTime,
     /** Days when the alarm will have to ring */

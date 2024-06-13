@@ -4,6 +4,7 @@ import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
+import android.view.View.OnLongClickListener
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.LinearLayout
@@ -25,7 +26,8 @@ import dev.mainhq.bus2go.ROUTE_ID
 import dev.mainhq.bus2go.Times
 import dev.mainhq.bus2go.fragments.FavouriteTransitInfo
 import dev.mainhq.bus2go.fragments.Home
-import dev.mainhq.bus2go.preferences.BusData
+import dev.mainhq.bus2go.preferences.ExoBusData
+import dev.mainhq.bus2go.preferences.StmBusData
 import dev.mainhq.bus2go.preferences.TrainData
 import dev.mainhq.bus2go.utils.TransitAgency
 import dev.mainhq.bus2go.utils.Time
@@ -67,55 +69,61 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
             }
         }
 
-        if (info.agency == TransitAgency.EXO_TRAIN){
-            info.transitData as TrainData
-            holder.directionTextView.text = holder.itemView.context
-                .getString(R.string.train_to, info.transitData.trainNum.toString(), info.transitData.direction)
-            holder.itemView.tag = info.transitData
-            holder.stopNameTextView.text = info.transitData.stopName
-            holder.tripHeadsignTextView.text = info.transitData.routeName
-            //FIXME for testing purposes, the below is added
-            holder.tripHeadsignTextView.tag = info.transitData.direction
-            holder.tripHeadsignTextView.setTextColor(holder.itemView.resources
-                .getColor(R.color.orange, null))
-            holder.stopNameTextView.setTextColor(holder.itemView.resources
-                .getColor(R.color.orange,null))
-            holder.directionTextView.setTextColor(holder.itemView.resources
-                .getColor(R.color.orange,null))
-        }
-        else {
-            //add the agency data in the tag
-            info.transitData as BusData
-            holder.itemView.tag = info.transitData
-            holder.directionTextView.text = "To ${info.transitData.direction}"
-            holder.stopNameTextView.text = info.transitData.stopName
-            when (info.agency) {
-                TransitAgency.STM -> {
-                    holder.tripHeadsignTextView.text = info.transitData.tripHeadsign
-                    holder.tripHeadsignTextView.setTextColor(holder.itemView.resources
-                        .getColor(R.color.basic_blue, null))
-                    holder.stopNameTextView.setTextColor(
-                        holder.itemView.resources.getColor(R.color.basic_blue, null)
-                    )
-                    holder.directionTextView.setTextColor(
-                        holder.itemView.resources.getColor(R.color.basic_blue, null)
-                    )
-                }
+        when(info.agency) {
+            TransitAgency.EXO_TRAIN -> {
+                info.transitData as TrainData
+                holder.directionTextView.text = holder.itemView.context
+                    .getString(R.string.train_to, info.transitData.trainNum.toString(), info.transitData.directionId.toString())
+                holder.itemView.tag = info.transitData
+                holder.stopNameTextView.text = info.transitData.stopName
+                holder.tripHeadsignTextView.text = info.transitData.routeName
+                //FIXME for testing purposes, the below is added
+                holder.tripHeadsignTextView.tag = info.transitData.direction
+                holder.tripHeadsignTextView.setTextColor(
+                    holder.itemView.resources
+                        .getColor(R.color.orange, null)
+                )
+                holder.stopNameTextView.setTextColor(
+                    holder.itemView.resources
+                        .getColor(R.color.orange, null)
+                )
+                holder.directionTextView.setTextColor(holder.itemView.resources
+                    .getColor(R.color.orange,null))
+            }
 
-                TransitAgency.EXO_OTHER -> {
-                    holder.tripHeadsignTextView.text =
-                        info.transitData.tripHeadsign
-                    holder.tripHeadsignTextView.setTextColor(
-                        holder.itemView.resources.getColor(R.color.basic_purple, null)
-                    )
-                    holder.stopNameTextView.setTextColor(
-                        holder.itemView.resources.getColor(R.color.basic_purple, null)
-                    )
-                    holder.directionTextView.setTextColor(
-                        holder.itemView.resources.getColor(R.color.basic_purple, null)
-                    )
-                }
-                else -> TODO("Not yet implemented")
+            TransitAgency.STM -> {
+                info.transitData as StmBusData
+                holder.itemView.tag = info.transitData
+                holder.directionTextView.text = "To ${info.transitData.direction}"
+                holder.tripHeadsignTextView.text = info.transitData.busNum.toString()
+                holder.tripHeadsignTextView.setTextColor(
+                    holder.itemView.resources
+                        .getColor(R.color.basic_blue, null)
+                )
+                holder.stopNameTextView.text = info.transitData.stopName
+                holder.stopNameTextView.setTextColor(
+                    holder.itemView.resources.getColor(R.color.basic_blue, null)
+                )
+                holder.directionTextView.setTextColor(
+                    holder.itemView.resources.getColor(R.color.basic_blue, null)
+                )
+            }
+
+            TransitAgency.EXO_OTHER -> {
+                info.transitData as ExoBusData
+                holder.itemView.tag = info.transitData
+                holder.stopNameTextView.text = info.transitData.stopName
+                holder.tripHeadsignTextView.text =
+                    info.transitData.tripHeadsign
+                holder.tripHeadsignTextView.setTextColor(
+                    holder.itemView.resources.getColor(R.color.basic_purple, null)
+                )
+                holder.stopNameTextView.setTextColor(
+                    holder.itemView.resources.getColor(R.color.basic_purple, null)
+                )
+                holder.directionTextView.setTextColor(
+                    holder.itemView.resources.getColor(R.color.basic_purple, null)
+                )
             }
         }
 
@@ -264,11 +272,11 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
         intent.putExtra(AGENCY, info.agency)
         if (info.agency == TransitAgency.EXO_TRAIN){
             info.transitData as TrainData
-            intent.putExtra(DIRECTION_ID, info.transitData.direction)
+            intent.putExtra(DIRECTION_ID, info.transitData.directionId)
             intent.putExtra(ROUTE_ID, info.transitData.routeId)
         }
         else {
-            info.transitData as BusData
+            info.transitData as ExoBusData
             intent.putExtra("headsign", holder.tripHeadsignTextView.text as String)
         }
         view.context.startActivity(intent)
