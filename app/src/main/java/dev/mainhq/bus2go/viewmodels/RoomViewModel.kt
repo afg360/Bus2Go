@@ -64,15 +64,15 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
         return when(agency){
             TransitAgency.STM -> {
                 //East
-                val exe0 = coroutineScope.async { stmDatabase.stopsInfoDao().getStopNames(dirs[0], routeId!!) }
+                val stm0 = coroutineScope.async { stmDatabase.stopsInfoDao().getStopNames(dirs[0], routeId!!) }
                 //West
-                val exe1 = coroutineScope.async { stmDatabase.stopsInfoDao().getStopNames(dirs.last(), routeId!!) }
-                Pair(exe0, exe1)
+                val stm1 = coroutineScope.async { stmDatabase.stopsInfoDao().getStopNames(dirs.last(), routeId!!) }
+                Pair(stm0, stm1)
             }
             TransitAgency.EXO_OTHER -> {
-                val exe0 = coroutineScope.async { exoDataBase.stopTimesDao().getStopNames(dirs[0]) }
-                val exe1 = coroutineScope.async { exoDataBase.stopTimesDao().getStopNames(dirs.last()) }
-                Pair(exe0, exe1)
+                val exo0 = coroutineScope.async { exoDataBase.stopTimesDao().getStopNames(dirs[0]) }
+                val exo1 = coroutineScope.async { exoDataBase.stopTimesDao().getStopNames(dirs.last()) }
+                Pair(exo0, exo1)
             }
             else -> throw IllegalArgumentException("Cannot use the fxn getStopNames for ${agency}.")
         }

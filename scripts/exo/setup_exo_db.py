@@ -187,7 +187,7 @@ def stop_times_table(conn, agency):
         i = 1
         for line in file:
             list = line.split(",")
-            chunk.append((f"{agency}-{list[0]}",list[1],list[2],f"{agency}-{list[3]}",list[4]))
+            chunk.append((list[0],list[1],list[2],f"{agency}-{list[3]}",list[4]))
             if len(chunk) >= chunk_size:
                 print(f"Created chunk #{i}, executing query")
                 cursor.executemany(sql, chunk)
