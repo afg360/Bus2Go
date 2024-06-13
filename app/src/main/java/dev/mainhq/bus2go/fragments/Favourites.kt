@@ -1,5 +1,6 @@
 package dev.mainhq.bus2go.fragments
 
+import android.annotation.SuppressLint
 import android.icu.util.Calendar
 import android.os.Bundle
 import android.view.View
@@ -20,10 +21,11 @@ import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.preferences.BusData
+import dev.mainhq.bus2go.preferences.ExoBusData
 import dev.mainhq.bus2go.utils.Time
 import dev.mainhq.bus2go.adapters.FavouritesListElemsAdapter
 import dev.mainhq.bus2go.adapters.setMargins
+import dev.mainhq.bus2go.preferences.StmBusData
 import dev.mainhq.bus2go.preferences.TrainData
 import dev.mainhq.bus2go.preferences.TransitData
 import dev.mainhq.bus2go.utils.TransitAgency
@@ -46,6 +48,7 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
     var updateJob : Job? = null
     private lateinit var listener : ViewTreeObserver.OnGlobalLayoutListener
 
+    @SuppressLint("SuspiciousIndentation")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         lifecycleScope.launch {
@@ -151,7 +154,7 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
                             }
                         }
                         lifecycleScope.launch {
-                            favouritesViewModel.removeFavouriteBuses(toRemoveList)
+                            favouritesViewModel.removeFavourites(toRemoveList)
                             val list = toFavouriteTransitInfoList(favouritesViewModel.stmBusInfo.value, TransitAgency.STM) +
                                     toFavouriteTransitInfoList(favouritesViewModel.exoBusInfo.value, TransitAgency.EXO_OTHER) +
                                     toFavouriteTransitInfoList(favouritesViewModel.exoTrainInfo.value, TransitAgency.EXO_TRAIN)
@@ -251,18 +254,12 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
         appBar.children.elementAt(0).visibility = View.VISIBLE
     }
 
-    //find a way to get data for trains as welll
+    //find a way to get data for trains as well
     private fun busInfoFromView(view : ViewGroup) : TransitData {
         return when (view.tag) {
-            is TransitAgency -> {
-                BusData(
-                    view.findViewById<MaterialTextView>(R.id.favouritesStopNameTextView).text.toString(),
-                    view.findViewById<MaterialTextView>(R.id.favouritesTripheadsignTextView).text.toString()
-                )
-            }
-            is TrainData -> {
-                view.tag as TrainData
-            }
+            is ExoBusData -> view.tag as ExoBusData
+            is StmBusData -> view.tag as StmBusData
+            is TrainData -> view.tag as TrainData
             else -> throw IllegalStateException("The item view tag has not been initialised!!!")
         }
     }

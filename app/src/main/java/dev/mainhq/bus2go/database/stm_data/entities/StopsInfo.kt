@@ -6,11 +6,12 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(indices = [Index(name="StopsInfoIndex", value = ["trip_headsign", "stop_name"])], foreignKeys = [])
+@Entity(indices = [Index(name="StopsInfoIndex", value = ["route_id", "stop_name"])], foreignKeys = [])
 data class StopsInfo (
     @PrimaryKey val id : Int,
     //todo MAY NEED TO REMOVE THE FOREIGN KEY...?
     @ColumnInfo(name="stop_name") val stopName : String,
+    @ColumnInfo(name="route_id") val routeId : Int,
     @ColumnInfo(name="trip_headsign") val tripHeadsign : String,
     @ColumnInfo(name="days") val days : String,
     @ColumnInfo(name="arrival_time") val arrivalTime : String,

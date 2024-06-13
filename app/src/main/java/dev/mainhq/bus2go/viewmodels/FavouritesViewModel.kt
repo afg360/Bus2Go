@@ -6,9 +6,10 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.dataStore
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import dev.mainhq.bus2go.preferences.BusData
+import dev.mainhq.bus2go.preferences.ExoBusData
 import dev.mainhq.bus2go.preferences.FavouritesData
 import dev.mainhq.bus2go.preferences.SettingsSerializer
+import dev.mainhq.bus2go.preferences.StmBusData
 import dev.mainhq.bus2go.preferences.TrainData
 import dev.mainhq.bus2go.preferences.TransitData
 import dev.mainhq.bus2go.utils.TransitAgency
@@ -27,11 +28,11 @@ val Context.favouritesDataStore : DataStore<FavouritesData> by dataStore(
 
 class FavouritesViewModel(private val application: Application) : AndroidViewModel(application){
 
-    private val _stmBusInfo : MutableStateFlow<List<BusData>> = MutableStateFlow(listOf())
-    val stmBusInfo : StateFlow<List<BusData>> get() = _stmBusInfo
+    private val _stmBusInfo : MutableStateFlow<List<StmBusData>> = MutableStateFlow(listOf())
+    val stmBusInfo : StateFlow<List<StmBusData>> get() = _stmBusInfo
 
-    private val _exoBusInfo : MutableStateFlow<List<BusData>> = MutableStateFlow(listOf())
-    val exoBusInfo : StateFlow<List<BusData>> get() = _exoBusInfo
+    private val _exoBusInfo : MutableStateFlow<List<ExoBusData>> = MutableStateFlow(listOf())
+    val exoBusInfo : StateFlow<List<ExoBusData>> get() = _exoBusInfo
 
     private val _exoTrainInfo : MutableStateFlow<List<TrainData>> = MutableStateFlow(listOf())
     val exoTrainInfo : StateFlow<List<TrainData>> get() = _exoTrainInfo
@@ -43,9 +44,9 @@ class FavouritesViewModel(private val application: Application) : AndroidViewMod
         _exoTrainInfo.value = data.listExoTrain
     }
 
-    fun getAllBusInfo() : List<BusData> = stmBusInfo.value + exoBusInfo.value
+    fun getAllBusInfo() = (stmBusInfo.value + exoBusInfo.value + exoTrainInfo.value) as List<TransitData>
 
-    suspend fun removeFavouriteBuses(toRemoveList : List<TransitData>){
+    suspend fun removeFavourites(toRemoveList : List<TransitData>){
         //update data inside the json file
         application.favouritesDataStore.updateData { favouritesData ->
             favouritesData.copy(listSTM = favouritesData.listSTM.mutate {
@@ -67,90 +68,72 @@ class FavouritesViewModel(private val application: Application) : AndroidViewMod
         loadData()
     }
 
-    suspend fun removeFavouriteTrains(toRemoveList : List<TrainData>){
+
+    /** Used inside StopListElemsAdapter */
+    fun removeFavourites(data : ExoBusData){
+        viewModelScope.launch {
+            application.favouritesDataStore.updateData { favourites ->
+                favourites.copy(listExo = favourites.listExo.mutate {
+                    it.remove(data)
+                })
+            }
+        }
+    }
+
+    fun removeFavourites(data : StmBusData){
+        viewModelScope.launch {
+            application.favouritesDataStore.updateData { favourites ->
+                favourites.copy(listSTM = favourites.listSTM.mutate {
+                    //maybe add a tripid or some identifier so that it is a unique thing deleted
+                    it.remove(data)
+                })
+            }
+        }
+    }
+
+    fun removeFavourites(data : TrainData){
         viewModelScope.launch {
             application.favouritesDataStore.updateData {favourites ->
                 favourites.copy(listExoTrain = favourites.listExoTrain.mutate {
                     //maybe add a tripid or some identifier so that it is a unique thing deleted
-                    it.removeIf { trainInfo -> toRemoveList.contains(trainInfo) }
+                    it.remove(data)
                 })
             }
         }
-        loadData()
     }
 
-    /** Used inside StopListElemsAdapter */
-    fun removeFavouriteBuses(agency : TransitAgency, data : String, headsign : String){
+    fun addFavourites(data : StmBusData){
         viewModelScope.launch {
             application.favouritesDataStore.updateData { favourites ->
-                when(agency){
-                    TransitAgency.STM -> {
-                        favourites.copy(listSTM = favourites.listSTM.mutate {
-                            //maybe add a tripid or some identifier so that it is a unique thing deleted
-                            it.remove(BusData(data, headsign))
-                        })
-                    }
-                    TransitAgency.EXO_OTHER -> {
-                        favourites.copy(listExo = favourites.listExo.mutate {
-                            //maybe add a tripid or some identifier so that it is a unique thing deleted
-                            it.remove(BusData(data, headsign))
-                        })
-                    }
-                    else -> throw IllegalArgumentException("Cannot give another kind of agency to this function")
-                }
+                favourites.copy(listSTM = favourites.listSTM.mutate {
+                    //maybe add a tripid or some identifier so that it is a unique thing deleted
+                    it.add(data)
+                })
             }
+            _stmBusInfo.value = application.favouritesDataStore.data.first().listSTM
         }
     }
 
-    fun removeFavouriteTrains(agency : TransitAgency, stopName : String, routeId : Int, trainNum: Int, routeName : String, directionId : Int){
-        if (agency == TransitAgency.EXO_TRAIN) {
-            viewModelScope.launch {
-                application.favouritesDataStore.updateData {favourites ->
-                    favourites.copy(listExoTrain = favourites.listExoTrain.mutate {
-                        //maybe add a tripid or some identifier so that it is a unique thing deleted
-                        it.remove(TrainData(stopName, routeId, trainNum, routeName, directionId))
-                    })
-                }
+    fun addFavourites(data : ExoBusData){
+        viewModelScope.launch {
+            application.favouritesDataStore.updateData {favourites ->
+                favourites.copy(listExo = favourites.listExo.mutate {
+                    //maybe add a tripid or some identifier so that it is a unique thing deleted
+                    it.add(data)
+                })
             }
+            _exoBusInfo.value = application.favouritesDataStore.data.first().listExo
         }
-        else throw IllegalArgumentException("This function must only be used by trains!")
     }
 
-    fun addFavourites(agency : TransitAgency, data : String, headsign : String){
+    fun addFavourites(data : TrainData){
         viewModelScope.launch {
             application.favouritesDataStore.updateData { favourites ->
-                when(agency){
-                    TransitAgency.STM -> {
-                        favourites.copy(listSTM = favourites.listSTM.mutate {
-                            //maybe add a tripid or some identifier so that it is a unique thing deleted
-
-                            it.add(BusData(data, headsign))
-                        })
-                    }
-                    TransitAgency.EXO_OTHER -> {
-                        favourites.copy(listExo = favourites.listExo.mutate {
-                            //maybe add a tripid or some identifier so that it is a unique thing deleted
-                            it.add(BusData(data, headsign))
-                        })
-                    }
-                    else -> throw IllegalArgumentException("Cannot give another type of agency to this method")
-                }
+                favourites.copy(listExoTrain = favourites.listExoTrain.mutate {
+                    it.add(data)
+                })
             }
-            loadData()
+            _exoTrainInfo.value = application.favouritesDataStore.data.first().listExoTrain
         }
-    }
-
-    fun addFavouriteTrains(agency : TransitAgency, stopName : String, routeId : Int, trainNum : Int, routeName: String, directionId : Int){
-        if (agency == TransitAgency.EXO_TRAIN)  {
-            viewModelScope.launch {
-                application.favouritesDataStore.updateData { favourites ->
-                    favourites.copy(listExoTrain = favourites.listExoTrain.mutate {
-                        it.add(TrainData(stopName, routeId, trainNum, routeName, directionId))
-                    })
-                }
-                loadData()
-            }
-        }
-        else throw IllegalArgumentException("Cannot call this method on a non-train agency")
     }
 }

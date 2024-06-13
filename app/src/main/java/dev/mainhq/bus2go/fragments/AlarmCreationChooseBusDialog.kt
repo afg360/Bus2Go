@@ -21,7 +21,7 @@ import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.Times
 import dev.mainhq.bus2go.adapters.AlarmDialogListElemsAdapter
-import dev.mainhq.bus2go.preferences.BusData
+import dev.mainhq.bus2go.preferences.ExoBusData
 import dev.mainhq.bus2go.utils.Time
 import dev.mainhq.bus2go.viewmodels.FavouritesViewModel
 import kotlinx.coroutines.Dispatchers
@@ -31,9 +31,9 @@ import kotlinx.coroutines.withContext
 
 class AlarmCreationChooseBusDialog(private val favouritesViewModel: FavouritesViewModel) : DialogFragment(R.layout.fragment_create_alarms_choose_stop_dialog) {
 
-    data class AlarmBusInfo(val busInfo : BusData, val time : Time) : Parcelable {
+    data class AlarmBusInfo(val busInfo : ExoBusData, val time : Time) : Parcelable {
         constructor(parcel: Parcel) : this(
-            parcel.readParcelable(BusData::class.java.classLoader)!!,
+            parcel.readParcelable(ExoBusData::class.java.classLoader)!!,
             parcel.readParcelable(Time::class.java.classLoader)!!
         )
 
@@ -76,7 +76,7 @@ class AlarmCreationChooseBusDialog(private val favouritesViewModel: FavouritesVi
                     }
                     time?.also {time ->
                         setFragmentResult("requestKey", bundleOf("ALARM_BUS_INFO" to AlarmBusInfo(
-                            BusData(alarmDialogBusStop, alarmDialogBusNum),
+                            ExoBusData(alarmDialogBusStop, alarmDialogBusNum),
                             time)))
                         dismiss()
                     }
@@ -130,7 +130,7 @@ class AlarmCreationChooseBusDialog(private val favouritesViewModel: FavouritesVi
                      recyclerView = view.findViewById(R.id.alarmDialogRecyclerView)
                      val layoutManager = LinearLayoutManager(it)
                      layoutManager.orientation = LinearLayoutManager.VERTICAL
-                     recyclerView.adapter = AlarmDialogListElemsAdapter(list, recyclerView, bottomNavBar)
+                     //recyclerView.adapter = AlarmDialogListElemsAdapter(list, recyclerView, bottomNavBar)
                      recyclerView.layoutManager = layoutManager
                 }
             }

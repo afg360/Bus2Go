@@ -1,10 +1,2 @@
-/agency/agency.txt
-/calendar/calendar.txt
-/calendar-dates/calendar_dates.txt
-/feed-info/feed_info.txt
-/routes/routes.txt
-/shapes/shapes.txt
-/stop-times/stop_times.txt
-/stops/stops.txt
-/trips/trips.txt
+*.txt
 stm_info.db

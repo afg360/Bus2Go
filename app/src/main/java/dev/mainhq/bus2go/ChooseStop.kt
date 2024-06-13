@@ -2,6 +2,7 @@ package dev.mainhq.bus2go
 
 import android.os.Build
 import android.os.Bundle
+import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,6 +16,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.lang.IllegalStateException
 
+const val DIRECTION = "DIRECTION"
+
 //todo
 //instead of doing a huge query on getting the time, we could first retrieve
 //all the possible stations (ordered by id, and prob based on localisation? -> not privacy friendly
@@ -23,11 +26,9 @@ import java.lang.IllegalStateException
 class ChooseStop() : BaseActivity() {
 
     private lateinit var agency: TransitAgency
-    private var directionId : Int? = null
-    private var routeId : Int? = null
-    private var trainNum : Int? = null
     private var routeName : String? = null
     private var headsign : String? = null
+    private var direction : String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,28 +37,30 @@ class ChooseStop() : BaseActivity() {
         val loadingJob = lifecycleScope.async { favouritesViewModel.loadData() }
 
         //terminus (i.e. to destination) = data.last(), needed for exo because some of the headsigns are the same
-        val data : List<String> = intent.getStringArrayListExtra("stops") ?: listOf()
+        val stopNames : List<String> = intent.getStringArrayListExtra("stops") ?: listOf()
 
         agency = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.getSerializableExtra (AGENCY, TransitAgency::class.java) ?: throw AssertionError("AGENCY is Null")
         } else {
             intent.getSerializableExtra (AGENCY) as TransitAgency? ?: throw AssertionError("AGENCY is Null")
         }
-        if (data.isNotEmpty()) {
+        if (stopNames.isNotEmpty()) {
             val recyclerView: RecyclerView = findViewById(R.id.stop_recycle_view)
             val layoutManager = LinearLayoutManager(applicationContext)
-
+            val directionId = intent.extras?.getInt(DIRECTION_ID)
+            val routeId = intent.extras?.getInt(ROUTE_ID)
+            val trainNum = intent.extras?.getInt(TRAIN_NUM)
             if (agency == TransitAgency.EXO_TRAIN){
-                directionId = intent.getIntExtra(DIRECTION_ID, -1)
-                if (directionId == -1) throw IllegalStateException("Forgot to give a direction id to a train!")
-                routeId = intent.getIntExtra(ROUTE_ID, -1)
-                if (routeId == -1) throw IllegalStateException("Forgot to give a route id to a train!")
-                trainNum = intent.getIntExtra(TRAIN_NUM, -1)
-                if (trainNum == -1) throw IllegalStateException("Forgot to give a train num to a train!")
                 routeName = intent.getStringExtra(ROUTE_NAME) ?: throw IllegalStateException("Forgot to give a route name to a train!")
             }
             else{
-                headsign = intent.getStringExtra("headsign")!!
+                if (agency == TransitAgency.STM) {
+                    if (routeId == -1) throw IllegalStateException("Forgot to give a route id to an stm bus!")
+                    direction = intent.getStringExtra(DIRECTION)!!
+                }
+                else{
+                    headsign = intent.getStringExtra("headsign")!!
+                }
             }
 
             lifecycleScope.launch {
@@ -66,13 +69,15 @@ class ChooseStop() : BaseActivity() {
                 val favourites = favouritesViewModel.stmBusInfo.value + favouritesViewModel.exoBusInfo.value +
                         favouritesViewModel.exoTrainInfo.value
                 withContext(Dispatchers.Main){
-                    recyclerView.adapter = StopListElemsAdapter(data, favourites, headsign, routeId, trainNum, routeName, directionId, agency, favouritesViewModel)
+                    recyclerView.adapter = StopListElemsAdapter(stopNames, favourites, headsign, routeId,
+                        trainNum, routeName, directionId, direction, agency, favouritesViewModel)
                     layoutManager.orientation = LinearLayoutManager.VERTICAL
                     recyclerView.layoutManager = layoutManager
                 }
             }
         }
         else{
+            Toast.makeText(this, "No stops were found...", Toast.LENGTH_SHORT).show()
             TODO("Display message saying no stops found")
         }
     }
