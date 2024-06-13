@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.navigation.NavigationBarView
 import dev.mainhq.bus2go.fragments.AlarmReceiver
 import dev.mainhq.bus2go.fragments.Alarms
+import dev.mainhq.bus2go.fragments.ComingSoon
 import dev.mainhq.bus2go.fragments.Home
 import dev.mainhq.bus2go.fragments.Map
 import dev.mainhq.bus2go.viewmodels.AlarmCreationViewModel
@@ -60,7 +61,8 @@ class MainActivity() : BaseActivity() {
                 R.id.mapButton -> {
                     // Respond to navigation item 2 click
                     if (activityType != ActivityType.MAP) {
-                        supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer, Map()).commit()
+                        //supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer, Map()).commit()
+                        supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer, ComingSoon()).commit()
                         activityType = ActivityType.MAP
                     }
                     true
@@ -68,8 +70,9 @@ class MainActivity() : BaseActivity() {
                 R.id.alarmsButton -> {
                     // Respond to navigation item 2 click
                     if (activityType != ActivityType.ALARMS) {
-                        supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer,
-                            Alarms(alarmViewModel, favouritesViewModel)).commit()
+                        //supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer,
+                        //    Alarms(alarmViewModel, favouritesViewModel)).commit()
+                        supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer, ComingSoon()).commit()
                         activityType = ActivityType.ALARMS
                     }
                     true
