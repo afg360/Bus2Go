@@ -32,21 +32,23 @@ import dev.mainhq.bus2go.utils.TransitAgency
 import dev.mainhq.bus2go.viewmodels.FavouritesViewModel
 import dev.mainhq.bus2go.viewmodels.RoomViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.lang.ref.WeakReference
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
 
 
 class Favourites(private val favouritesViewModel: FavouritesViewModel,
     private val roomViewModel : RoomViewModel) : Fragment(R.layout.fragment_favourites) {
 
-    var executor : ScheduledExecutorService? = null
-    var updateJob : Job? = null
+    private var executor : ScheduledExecutorService? = null
+    private lateinit var recyclerView : RecyclerView
     private lateinit var listener : ViewTreeObserver.OnGlobalLayoutListener
+    private var scheduledTask: ScheduledFuture<*>? = null
+    private lateinit var onBackPressedCallback: OnBackPressedCallback
 
     @SuppressLint("SuspiciousIndentation")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -81,9 +83,7 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
 
         val appBar = (parentFragment as Home).view?.findViewById<AppBarLayout>(R.id.mainAppBar)
         /** This part allows us to press the back button when in selection mode of favourites to get out of it */
-
-        //FIXME activity?. instead???
-        requireActivity().onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
+        onBackPressedCallback = object : OnBackPressedCallback(true) {
             /** Hides all the checkboxes of the items in the recyclerview, deselects them, and puts back the searchbar as the nav bar */
             override fun handleOnBackPressed() {
                 val recyclerView = view.findViewById<RecyclerView>(R.id.favouritesRecyclerView)
@@ -100,38 +100,40 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
                 }
                 appBar?.apply { changeAppBar(this) }
             }
-        })
+        }
+        requireActivity().onBackPressedDispatcher.addCallback(onBackPressedCallback)
 
-        val recyclerView : RecyclerView = view.findViewById(R.id.favouritesRecyclerView)
+        recyclerView = view.findViewById(R.id.favouritesRecyclerView)
+
         /** This part allows us to update each recyclerview item from favourites in "real time", i.e. the user can see
          *  an updated time left displayed */
         listener = object : ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
                 recyclerView.viewTreeObserver.removeOnGlobalLayoutListener(this)
+
                 executor = Executors.newSingleThreadScheduledExecutor()
-                //TODO check if inrealtime is on.
+                //TODO check if in realtime is on.
                 //FIXME this part crashes/creates a memory leak!!!!!!!
-                executor!!.scheduleAtFixedRate({
+                scheduledTask = executor!!.scheduleAtFixedRate({
                     val tmpListSTM = favouritesViewModel.stmBusInfo.value
                     val tmpListExo = favouritesViewModel.exoBusInfo.value
                     val tmpListTrain = favouritesViewModel.exoTrainInfo.value
+
                     if (tmpListSTM.isNotEmpty() || tmpListExo.isNotEmpty() || tmpListTrain.isNotEmpty()) {
-                        //FIXME we only want to change the time left data, NOT the background colors etc
                         lifecycleScope.launch{
                             val mutableList = toFavouriteTransitInfoList(tmpListSTM, TransitAgency.STM) + toFavouriteTransitInfoList(tmpListExo, TransitAgency.EXO_OTHER) +
                                     toFavouriteTransitInfoList(tmpListTrain, TransitAgency.EXO_TRAIN)
                             withContext(Dispatchers.Main){
-                                //FIXME nullPointerException bug is at line below
                                 val favouritesListElemsAdapter = recyclerView.adapter as FavouritesListElemsAdapter?
                                 for (i in 0 until recyclerView.size) {
                                     favouritesListElemsAdapter?.updateTime(recyclerView[i] as ViewGroup, mutableList[i])
                                 }
                             }
                         }
-                        //FIXME WE COULD REMOVE THAT LINE OF CODE?
-                        //else setEmpty(view)
-                    } }, 0, 1, TimeUnit.SECONDS)
-            } }
+                    }
+                }, 0, 1, TimeUnit.SECONDS)
+            }
+        }
         recyclerView.viewTreeObserver?.addOnGlobalLayoutListener(listener)
 
         selectAllFavouritesOnClickListener(recyclerView)
@@ -169,9 +171,12 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
 
     override fun onDestroyView() {
         super.onDestroyView()
-        //recyclerView.viewTreeObserver?.removeOnGlobalLayoutListener(listener)
-        updateJob?.cancel()
+        onBackPressedCallback.remove()
+
+        scheduledTask?.cancel(true)
         executor?.shutdown()
+        recyclerView.viewTreeObserver?.removeOnGlobalLayoutListener(listener)
+
     }
 
     /** Used to get the required data to make a list of favouriteBusInfo, adding dates to busInfo elements */
