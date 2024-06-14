@@ -19,6 +19,7 @@ import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.AGENCY
+import dev.mainhq.bus2go.DIRECTION
 import dev.mainhq.bus2go.DIRECTION_ID
 import dev.mainhq.bus2go.MainActivity
 import dev.mainhq.bus2go.R
@@ -270,16 +271,25 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
         val intent = Intent(view.context, Times::class.java)
         intent.putExtra("stopName", holder.stopNameTextView.text as String)
         intent.putExtra(AGENCY, info.agency)
-        if (info.agency == TransitAgency.EXO_TRAIN){
-            info.transitData as TrainData
-            intent.putExtra(DIRECTION_ID, info.transitData.directionId)
-            intent.putExtra(ROUTE_ID, info.transitData.routeId)
+        when (info.agency) {
+            TransitAgency.EXO_TRAIN -> {
+                info.transitData as TrainData
+                intent.putExtra(DIRECTION_ID, info.transitData.directionId)
+                intent.putExtra(ROUTE_ID, info.transitData.routeId)
+            }
+            TransitAgency.STM -> {
+                info.transitData as StmBusData
+                intent.putExtra(ROUTE_ID, info.transitData.busNum)
+                intent.putExtra(DIRECTION, info.transitData.direction)
+
+            }
+            TransitAgency.EXO_OTHER -> {
+                info.transitData as ExoBusData
+                intent.putExtra(ROUTE_ID, info.transitData.direction)
+                intent.putExtra("headsign", holder.tripHeadsignTextView.text as String)
+            }
         }
-        else {
-            info.transitData as ExoBusData
-            intent.putExtra("headsign", holder.tripHeadsignTextView.text as String)
-        }
-        view.context.startActivity(intent)
+        holder.itemView.context.startActivity(intent)
         view.clearFocus()
     }
 
