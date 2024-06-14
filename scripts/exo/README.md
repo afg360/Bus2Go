@@ -16,7 +16,7 @@ Database Schema for each agency:
       "start_date": "INTEGER NOT NULL",
       "end_date": "INTEGER NOT NULL"
     },
-    "descr": "From calendar.txt, lists all the working days for each agency."
+    "descr": "From calendar.txt, lists all the working days for each agency in exo."
   },
   {
     "table": "Forms",
@@ -24,7 +24,8 @@ Database Schema for each agency:
       "id": "INTEGER PRIMARY KEY",
       "shape_id": "TEXT UNIQUE NOT NULL"
     },
-    "descr": "From shapes.txt, lists all the unique shape_ids for each agency. shape_id syntax : 'agency-shape_id_val' "
+    "descr": "From shapes.txt, lists all the unique shape_ids for each agency in exo.",
+    "syntax": "shape_id = 'agency-shape_id_val'"
   },
   {
     "table": "Routes",
@@ -36,7 +37,8 @@ Database Schema for each agency:
       "route_color": "TEXT NOT NULL",
       "route_text_color": "TEXT NOT NULL"
     },
-    "descr": "Data routes.txt, lists all the available routes for each agency."
+    "descr": "Data routes.txt, lists all the available routes for each agency in exo.",
+    "syntax": "route_id = 'agency-route_id_val'"
   },
   {
     "table": "Shapes",
@@ -47,7 +49,7 @@ Database Schema for each agency:
       "long": "REAL NOT NULL",
       "sequence": "INTEGER NOT NULL"
     },
-    "descr": "From shapes.txt, lists all the points to form a shape for each route of each agency."
+    "descr": "From shapes.txt, lists all the points to form a shape for each route of each agency in exo."
   },
   {
     "table": "StopTimes",
@@ -59,7 +61,8 @@ Database Schema for each agency:
       "stop_id": "TEXT NOT NULL REFERENCES Stops(stop_id)",
       "stop_seq": "INTEGER NOT NULL"
     },
-    "descr": "From stop_times.txt, lists all the stop times for each trip of each agency."
+    "descr": "From stop_times.txt, lists all the stop times for each trip of each agency in exo.",
+    "syntax": "stop_id = 'agency-stop_id_val'"
   },
   {
     "table": "Stops",
@@ -72,7 +75,8 @@ Database Schema for each agency:
       "stop_code": "TEXT NOT NULL",
       "wheelchair": "INTEGER NOT NULL"
     },
-    "descr": "From stops.txt, lists all the available stops for each agency."
+    "descr": "From stops.txt, lists all the available stops for each agency in exo.",
+    "syntax": "stop_id = 'agency-stop_id_val'"
   },
   {
     "table": "Trips",
@@ -86,7 +90,8 @@ Database Schema for each agency:
       "shape_id": "TEXT NOT NULL REFERENCES Forms(shape_id)",
       "wheelchair": "INTEGER NOT NULL"
     },
-    "descr": "From trips.txt, lists all the available trips for each agency."
+    "descr": "From trips.txt, lists all the available trips for each agency in exo.",
+    "syntax": "route_id = 'agency-route_id_val'"
   }
 ]
 ```

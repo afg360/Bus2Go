@@ -4,128 +4,70 @@
 #the database inside your project
 #e.g. project=$PROJECT_FOLDER/src/main/assets/database
 project=/absolute/path/to/your/project/database/folder
-#The below could look like path=$PROJECT_FOLDER/scripts/sql
-path=/absolute/path/to/scripts/folder/scripts/sql
+#The below could look like path=$PROJECT_FOLDER/scripts/
+#path=/absolute/path/to/scripts/folder/scripts
 
 execute_stm(){
-  list=$(find . -type f -name "*.txt" | grep -v 'note[s]\?.txt')
-    #download them if the user chooses to. Curl and unzip must be installed to proceed
-    if [ -z "$list" ]; then
-        echo "No matching txt data files found in the subdirectories."
-            echo -n "Do you wish to download them now? [y/n] (no will abort the script) -> "
-            read -r answer
-            if [[ $answer = "y" || $answer = "yes" ]]; then
-                if ! command unzip &> /dev/null; then
-                    echo "unzip is not installed on this system. You must install it before running this script. Aborting."
-                    exit 2
-                fi
-                curl -L https://www.stm.info/sites/default/files/gtfs/gtfs_stm.zip -o data.zip
-                unzip data.zip
-                if [[ $? -eq 0 ]]; then
-                    rm agency.txt calendar_dates.txt feed_info.txt data.zip
-                else
-                    echo "An error occured trying to unzip the data file. Aborting the script"
-                    exit $?
-                fi
-                #move the unzip files to the correct directory, named similarly
-                for file in *.txt; do
-                    if [[ -f $file ]]; then
-                        if [[ $file = "stop_times.txt" ]]; then
-                            mv "$file" "./stm/stop-times"
-                        else
-                                base_name="./stm/${file%.txt}"
-                            if [[ -d $base_name ]]; then
-                                mv "$file" "$base_name/"
-                            fi
-                        fi
-                    fi
-                done
-                path=$(pwd)/stm
-            else
-                echo "Aborting script"
-                exit 1
-            fi
-    fi
+  if [[ $1 = "--help" ]]; then
+    echo -e "\nDownload and initialise the database only for data from the STM."
+    echo -e "\nUse the --no-download flag to initialise the database if you already have the data from the STM.\n"
+  else
+    #to replace below if needed
+    path=.
 
-    #initialisation of the database starts here
-
-    cd $path
-    for dir in $(ls)
-    do
-      if [[ ! -d $dir ]]; then
-        continue
-      fi
-    	cd $dir
-    	echo "Working on $dir"
-    	echo "Starting script.py"
-    	python3 script.py
-    	#check if python script executed properly
-    	if [[ $? -ne 0 ]]; then
-    		echo -e "Skipping $dir. No python script to run in this folder\n\n"
-    	else
-    		echo -e "Done\n\n"
-    	fi
-    	cd ..
-    done
-
-    cd $path/..
-    #run the python script to create the new table containing better info than stoptimes
-    python3 ./script.py
-    echo "Completed the initialisation of the database"
-
-    #copy to the $project path if the user chooses to
-    echo -n "Would you like to copy the database for the android schedules project? [y/n] -> "
-    read choice
-    if [[ $choice = 'y' || 'yes' ]]; then
-        echo "Copying database to the project"
-    	cp -i 'stm/stm_info.db' $project
+    cd $path/stm
+    rm stm_info.db
+    if [[ $1 = "--no-download" ]]; then
+      python3 setup_stm_db.py "no-download"
     else
-    	echo "No copying. Don't forget to do the process manually"
+      python3 setup_stm_db.py
     fi
-    echo "Completed task"
+    cp -i 'stm_info.db' $project
+    cd ..
+  fi
 }
 
-execute_exo{
+execute_exo(){
   #to replace below if needed
   #path=/project/folder
-  path=.
-
-  cd $path/exo
-  if [[ $1 = "--no-download" ]]; then
-    python3 setup_exo_db.py "no-download"
-  elif [[ $# -gt 2]]; then
-    echo "Too many given arguments!"
+  if [[ $1 = "--help" ]]; then
+    echo -e "\nDownload and initialise the database only for data from Exo."
+    echo -e "\nUse the --no-download flag to initialise the database if you already have the data for Exo.\n"
   else
-    python3 setup_exo_db.py
+    path=.
+    cd $path/exo
+    rm exo_info.db
+    if [[ $1 = "--no-download" ]]; then
+      python3 setup_exo_db.py "no-download"
+    else
+      python3 setup_exo_db.py
+    fi
+    cp -i 'exo_info.db' $project
+    cd ..
   fi
-  cp -i 'exo_info.db' $project
-  exit $?
 }
 
 if [[ $1 = "--help" ]]; then
   echo "Script to initialise databases containing static data from transit agencies.
-      Usage: $ ./initall.sh <agency-name> -> download the data and initialise the database
-                                              only related to the given agency-name.
-             $ ./initall.sh -> download the data from all the agencies and init all the databases.
-             $ ./initall.sh --help -> print this help message
-      E.g.:  $ ./initall.sh stm
-      "
+       Usage: ./initall.ps1 [-help] <agency-name> [<args>]
 
-#stm download
-elif [[ $1 = "stm" ]]; then
-  #check if the txt files exist (assuming they are the correct ones)
-  execute_stm
-  exit $?
+               Giving no agency names will set up all the databases for all the available agencies
+               Available agency names:
+                   exo
+                   stm
+                   Args:
+                       --no-download       Setup the database without redownloading the required files
+           "
 
-elif [[ $1 = "exo" ]]; then
+elif [[ $1 = "stm" && $# -lt 3 ]]; then
+  execute_stm $2
+
+elif [[ $1 = "exo" && $# -lt 3 ]]; then
   execute_exo $2
-  exit $?
 
-#all downloads
-elif [[ $# -eq 0 ]]; then
-  execute_exo
-  execute_stm
-  exit $?
+elif [[ $# -le 1 && ! $1 = "--help" ]]; then
+  execute_stm $1
+  execute_exo $1
 
 else
   echo "Syntax Error!"

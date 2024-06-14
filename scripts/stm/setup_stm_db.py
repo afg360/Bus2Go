@@ -44,9 +44,9 @@ def calendar_table(conn):
 
     sql = """CREATE TABLE Calendar (
     	--id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    	id INTEGER PRIMARY KEY NOT NULL,-- AUTOINCREMENT ,
+    	id INTEGER PRIMARY KEY NOT NULL,
     	service_id TEXT UNIQUE NOT NULL,
-        days TEXT NOT NULL, --could add a constraint
+        days TEXT NOT NULL,
     	--m INTEGER NOT NULL, --Monday
     	--t INTEGER NOT NULL, --Tuesday
     	--w INTEGER NOT NULL, --Wednesday
@@ -95,7 +95,7 @@ def forms_table(conn):
     print("Dropped table forms")
 
     sql = """CREATE TABLE Forms(
-    	id INTEGER PRIMARY KEY NOT NULL,--AUTOINCREMENT,
+    	id INTEGER PRIMARY KEY NOT NULL,
     	shape_id INTEGER UNIQUE NOT NULL --perhaps could add more data
     );"""
     cursor.execute(sql)
@@ -127,8 +127,7 @@ def route_table(conn):
     print("Dropped table routes")
 
     sql = """CREATE TABLE Routes (
-    	--id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    	id INTEGER PRIMARY KEY NOT NULL,-- AUTOINCREMENT ,
+    	id INTEGER PRIMARY KEY NOT NULL,
     	route_id INTEGER UNIQUE NOT NULL,
     	route_long_name TEXT NOT NULL,
     	route_type INTEGER NOT NULL,
@@ -156,7 +155,7 @@ def shapes_table(conn):
     print("Dropped table shapes")
 
     sql = """CREATE TABLE Shapes(
-    	id INTEGER PRIMARY KEY NOT NULL,--AUTOINCREMENT,
+    	id INTEGER PRIMARY KEY NOT NULL,
     	shape_id INTEGER NOT NULL REFERENCES Forms(shape_id),
     	lat REAL NOT NULL,
     	long REAL NOT NULL,
@@ -193,8 +192,7 @@ def stop_times_table(conn):
 
     # init the table
     query = """CREATE TABLE StopTimes (
-    	--id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    	id INTEGER PRIMARY KEY NOT NULL,--AUTOINCREMENT,
+    	id INTEGER PRIMARY KEY NOT NULL,
     	trip_id INTEGER NOT NULL REFERENCES Trips(trip_id),
     	arrival_time TEXT NOT NULL,
     	departure_time TEXT NOT NULL,
@@ -286,7 +284,7 @@ def trips_table(conn):
 
     # init the table
     query = """CREATE TABLE Trips (
-    	id INTEGER PRIMARY KEY NOT NULL,--AUTOINCREMENT,
+    	id INTEGER PRIMARY KEY NOT NULL,
     	trip_id INTEGER NOT NULL,
     	route_id INTEGER NOT NULL REFERENCES Routes(route_id),
     	service_id TEXT NOT NULL REFERENCES Calendar(service_id),
