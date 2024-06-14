@@ -8,34 +8,43 @@ project=/absolute/path/to/your/project/database/folder
 #path=/absolute/path/to/scripts/folder/scripts
 
 execute_stm(){
-  #to replace below if needed
-  path=.
-
-  cd $path/stm
-  rm stm_info.db
-  if [[ $1 = "--no-download" ]]; then
-    python3 setup_stm_db.py "no-download"
+  if [[ $1 = "--help" ]]; then
+    echo -e "\nDownload and initialise the database only for data from the STM."
+    echo -e "\nUse the --no-download flag to initialise the database if you already have the data from the STM.\n"
   else
-    python3 setup_stm_db.py
+    #to replace below if needed
+    path=.
+
+    cd $path/stm
+    rm stm_info.db
+    if [[ $1 = "--no-download" ]]; then
+      python3 setup_stm_db.py "no-download"
+    else
+      python3 setup_stm_db.py
+    fi
+    cp -i 'stm_info.db' $project
+    cd ..
   fi
-  cp -i 'stm_info.db' $project
-  cd ..
 }
 
 execute_exo(){
   #to replace below if needed
   #path=/project/folder
-  path=.
-
-  cd $path/exo
-  rm exo_info.db
-  if [[ $1 = "--no-download" ]]; then
-    python3 setup_exo_db.py "no-download"
+  if [[ $1 = "--help" ]]; then
+    echo -e "\nDownload and initialise the database only for data from Exo."
+    echo -e "\nUse the --no-download flag to initialise the database if you already have the data for Exo.\n"
   else
-    python3 setup_exo_db.py
+    path=.
+    cd $path/exo
+    rm exo_info.db
+    if [[ $1 = "--no-download" ]]; then
+      python3 setup_exo_db.py "no-download"
+    else
+      python3 setup_exo_db.py
+    fi
+    cp -i 'exo_info.db' $project
+    cd ..
   fi
-  cp -i 'exo_info.db' $project
-  cd ..
 }
 
 if [[ $1 = "--help" ]]; then
@@ -50,13 +59,13 @@ if [[ $1 = "--help" ]]; then
                        --no-download       Setup the database without redownloading the required files
            "
 
-elif [[ $1 = "stm" ]]; then
+elif [[ $1 = "stm" && $# -lt 3 ]]; then
   execute_stm $2
 
-elif [[ $1 = "exo" ]]; then
+elif [[ $1 = "exo" && $# -lt 3 ]]; then
   execute_exo $2
 
-elif [[ $# -le 1 ]]; then
+elif [[ $# -le 1 && ! $1 = "--help" ]]; then
   execute_stm $1
   execute_exo $1
 
