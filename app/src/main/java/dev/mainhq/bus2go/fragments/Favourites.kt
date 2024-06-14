@@ -176,7 +176,6 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
         scheduledTask?.cancel(true)
         executor?.shutdown()
         recyclerView.viewTreeObserver?.removeOnGlobalLayoutListener(listener)
-
     }
 
     /** Used to get the required data to make a list of favouriteBusInfo, adding dates to busInfo elements */
