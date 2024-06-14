@@ -73,7 +73,6 @@ class Times : BaseActivity() {
                 val routeId = intent.extras!!.getInt(ROUTE_ID)
                 val directionId = intent.extras!!.getInt(DIRECTION_ID)
                 lifecycleScope.launch {
-                    //headsign.toInt() is actually the directionId for trains
                     val stopTimes = roomViewModel.getTrainStopTimes(routeId, stopName, directionId, curTime.toString(), dayString)
                     withContext(Dispatchers.Main) {
                         //If stopTimes.isEmpty, say that it is empty
@@ -104,7 +103,5 @@ class Times : BaseActivity() {
                 }
             }
         }
-
-
     }
 }

@@ -19,7 +19,7 @@
         <item name="colorSwitchThumbNormal">#f1f1f1</item>
         <item name="android:colorForeground">#42221f</item>
     </style>
-    <color name="basic_blue">#FF0a5af2</color>
+    <color name="basic_blue">#FF0A5AF2</color>
     <color name="basic_purple">#FF8021cb</color>
 
 </resources>

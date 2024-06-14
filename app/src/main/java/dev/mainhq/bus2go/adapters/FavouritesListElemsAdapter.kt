@@ -74,7 +74,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
             TransitAgency.EXO_TRAIN -> {
                 info.transitData as TrainData
                 holder.directionTextView.text = holder.itemView.context
-                    .getString(R.string.train_to, info.transitData.trainNum.toString(), info.transitData.directionId.toString())
+                    .getString(R.string.train_to, info.transitData.trainNum.toString(), info.transitData.direction)
                 holder.itemView.tag = info.transitData
                 holder.stopNameTextView.text = info.transitData.stopName
                 holder.tripHeadsignTextView.text = info.transitData.routeName
