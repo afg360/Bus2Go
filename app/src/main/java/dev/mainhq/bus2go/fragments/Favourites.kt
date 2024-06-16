@@ -1,19 +1,30 @@
 package dev.mainhq.bus2go.fragments
 
 import android.annotation.SuppressLint
+import android.content.ContentValues.TAG
+import android.content.Context
 import android.icu.util.Calendar
+import android.net.ConnectivityManager
+import android.net.LinkProperties
+import android.net.Network
+import android.net.NetworkCapabilities
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.widget.LinearLayout
 import androidx.activity.OnBackPressedCallback
+import androidx.core.app.PendingIntentCompat.send
+import androidx.core.content.getSystemService
 import androidx.core.view.children
 import androidx.core.view.forEach
 import androidx.core.view.get
 import androidx.core.view.size
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.AppBarLayout
@@ -29,9 +40,16 @@ import dev.mainhq.bus2go.preferences.StmBusData
 import dev.mainhq.bus2go.preferences.TrainData
 import dev.mainhq.bus2go.preferences.TransitData
 import dev.mainhq.bus2go.utils.TransitAgency
+import dev.mainhq.bus2go.utils.getDayString
 import dev.mainhq.bus2go.viewmodels.FavouritesViewModel
+import dev.mainhq.bus2go.viewmodels.RealTimeViewModel
 import dev.mainhq.bus2go.viewmodels.RoomViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.lang.ref.WeakReference
@@ -50,9 +68,16 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
     private var scheduledTask: ScheduledFuture<*>? = null
     private lateinit var onBackPressedCallback: OnBackPressedCallback
 
+    private enum class State{
+        LOST, AVAILABLE, UNAVAILABLE, LOSING
+    }
+
     @SuppressLint("SuspiciousIndentation")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val realTimeViewModel = ViewModelProvider(requireActivity())[RealTimeViewModel::class.java]
+        val internetEnabled = PreferenceManager.getDefaultSharedPreferences(requireContext())
+            .getBoolean("real-time-data", true)
         lifecycleScope.launch {
             favouritesViewModel.loadData()
             val listSTM = favouritesViewModel.stmBusInfo.value
@@ -65,18 +90,61 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
                 }
             }
             else {
-                val list = toFavouriteTransitInfoList(listSTM, TransitAgency.STM) + toFavouriteTransitInfoList(listExo, TransitAgency.EXO_OTHER) +
-                        toFavouriteTransitInfoList(listTrain, TransitAgency.EXO_TRAIN)
-                println(list.toString())
-                withContext(Dispatchers.Main){
-                    view.findViewById<MaterialTextView>(R.id.favourites_text_view).text = getText(R.string.favourites)
-                    val layoutManager = LinearLayoutManager(view.context)
-                    layoutManager.orientation = LinearLayoutManager.VERTICAL
-                    val recyclerViewTmp : RecyclerView? = view.findViewById(R.id.favouritesRecyclerView)
-                    recyclerViewTmp?.layoutManager = layoutManager
-                    //TODO need to improve that code to make it more safe
-                    recyclerViewTmp?.tag = "unselected"
-                    recyclerViewTmp?.adapter = recyclerViewTmp?.let { FavouritesListElemsAdapter(list, WeakReference(it) ) }
+                //check if connected to internet
+                val connectivityManager = requireActivity().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                val state = callbackFlow {
+                    val ghol = object : ConnectivityManager.NetworkCallback() {
+                        override fun onAvailable(network : Network) {
+                            super.onAvailable(network)
+                            Log.e(TAG, "The default network is now: $network")
+                            launch { send(State.AVAILABLE) }
+                        }
+
+                        override fun onLosing(network: Network, maxMsToLive: Int) {
+                            super.onLosing(network, maxMsToLive)
+                            launch { send(State.LOSING) }
+                        }
+
+                        override fun onLost(network : Network) {
+                            super.onLost(network)
+                            Log.e(TAG, "The application no longer has a default network. The last default network was $network")
+                            launch { send(State.LOST) }
+                        }
+
+                        override fun onUnavailable() {
+                            super.onUnavailable()
+                            launch { send(State.UNAVAILABLE) }
+                        }
+                    }
+                    connectivityManager.registerDefaultNetworkCallback(ghol)
+                    awaitClose {
+                        connectivityManager.unregisterNetworkCallback(ghol)
+                    }
+                }
+                launch(Dispatchers.IO) {
+                    state.collect {
+                        if (internetEnabled && it == State.AVAILABLE){
+                            val list = listExo + listSTM + listTrain
+                            realTimeViewModel.loadData()
+                            val mutableList = realTimeViewModel.getData(listSTM, TransitAgency.STM)
+                        }
+                        else{
+                            val list = toFavouriteTransitInfoList(listSTM, TransitAgency.STM) + toFavouriteTransitInfoList(listExo, TransitAgency.EXO_OTHER) +
+                                    toFavouriteTransitInfoList(listTrain, TransitAgency.EXO_TRAIN)
+                            println(list.toString())
+                            //if not, do the below
+                            withContext(Dispatchers.Main){
+                                view.findViewById<MaterialTextView>(R.id.favourites_text_view).text = getText(R.string.favourites)
+                                val layoutManager = LinearLayoutManager(view.context)
+                                layoutManager.orientation = LinearLayoutManager.VERTICAL
+                                val recyclerViewTmp : RecyclerView? = view.findViewById(R.id.favouritesRecyclerView)
+                                recyclerViewTmp?.layoutManager = layoutManager
+                                //TODO need to improve that code to make it more safe
+                                recyclerViewTmp?.tag = "unselected"
+                                recyclerViewTmp?.adapter = recyclerViewTmp?.let { FavouritesListElemsAdapter(list, WeakReference(it) ) }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -113,6 +181,11 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
 
                 executor = Executors.newSingleThreadScheduledExecutor()
                 //TODO check if in realtime is on.
+                val connectivityManager = activity?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+                //if connected to internet
+
+
                 //FIXME this part crashes/creates a memory leak!!!!!!!
                 scheduledTask = executor!!.scheduleAtFixedRate({
                     val tmpListSTM = favouritesViewModel.stmBusInfo.value
@@ -182,17 +255,7 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
     private suspend fun toFavouriteTransitInfoList(list : List<TransitData>, agency: TransitAgency) : MutableList<FavouriteTransitInfo> {
         val times : MutableList<FavouriteTransitInfo> = mutableListOf()
         val calendar = Calendar.getInstance()
-        val dayString = when (calendar.get(Calendar.DAY_OF_WEEK)) {
-            Calendar.SUNDAY -> "d"
-            Calendar.MONDAY -> "m"
-            Calendar.TUESDAY -> "t"
-            Calendar.WEDNESDAY -> "w"
-            Calendar.THURSDAY -> "y"
-            Calendar.FRIDAY -> "f"
-            Calendar.SATURDAY -> "s"
-            else -> null
-        }
-        dayString ?: throw IllegalStateException("Cannot have a non day of the week!")
+        val dayString = getDayString(calendar)
         return roomViewModel.getFavouriteStopTimes(list, agency, dayString, calendar, times)
     }
 

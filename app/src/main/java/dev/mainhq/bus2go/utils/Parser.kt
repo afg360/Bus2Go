@@ -1,5 +1,6 @@
 package dev.mainhq.bus2go.utils
 
+import android.icu.util.Calendar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -119,6 +120,19 @@ fun toParsable(txt: String): String {
         .replace("ô", "o")
         .replace("û", "u")
     return str
+}
+
+fun getDayString(calendar : Calendar) : String{
+    return when (calendar.get(Calendar.DAY_OF_WEEK)) {
+        Calendar.SUNDAY -> "d"
+        Calendar.MONDAY -> "m"
+        Calendar.TUESDAY -> "t"
+        Calendar.WEDNESDAY -> "w"
+        Calendar.THURSDAY -> "y"
+        Calendar.FRIDAY -> "f"
+        Calendar.SATURDAY -> "s"
+        else -> throw IllegalStateException("Cannot have a non day of the week!")
+    }
 }
 
 

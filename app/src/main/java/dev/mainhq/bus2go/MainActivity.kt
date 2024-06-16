@@ -5,18 +5,20 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.OnBackPressedCallback
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.navigation.NavigationBarView
 import dev.mainhq.bus2go.fragments.AlarmReceiver
-import dev.mainhq.bus2go.fragments.Alarms
 import dev.mainhq.bus2go.fragments.ComingSoon
 import dev.mainhq.bus2go.fragments.Home
-import dev.mainhq.bus2go.fragments.Map
 import dev.mainhq.bus2go.viewmodels.AlarmCreationViewModel
 import dev.mainhq.bus2go.viewmodels.FavouritesViewModel
 import dev.mainhq.bus2go.viewmodels.RoomViewModel
+import kotlinx.coroutines.launch
 import java.util.Calendar
+
 
 //TODO
 //when updating the app (especially for new stm txt files), will need
