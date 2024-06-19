@@ -32,7 +32,7 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
                 list as List<StmBusData>
                 val stopsInfoDAO = stmDatabase.stopsInfoDao()
                 list.forEach {busInfo ->
-                    stopsInfoDAO.getFavouriteStopTime(busInfo.stopName, dayString, Time(calendar).toString(), busInfo.direction, busInfo.busNum)
+                    stopsInfoDAO.getFavouriteStopTime(busInfo.stopName, dayString, Time(calendar).toString(), busInfo.direction, busInfo.routeId.toInt())
                         .also { time -> times.add(FavouriteTransitInfo(busInfo, time, agency)) }
                 }
                 return times
@@ -50,7 +50,7 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
                 list as List<ExoBusData>
                 val stopTimesDAO = exoDataBase.stopTimesDao()
                 list.forEach {busInfo ->
-                    stopTimesDAO.getFavouriteBusStopTime(busInfo.stopName, dayString, Time(calendar).toString(), busInfo.tripHeadsign)
+                    stopTimesDAO.getFavouriteBusStopTime(busInfo.stopName, dayString, Time(calendar).toString(), busInfo.routeId)
                         .also { time -> times.add(FavouriteTransitInfo(busInfo, time, agency)) }
                 }
                 return times

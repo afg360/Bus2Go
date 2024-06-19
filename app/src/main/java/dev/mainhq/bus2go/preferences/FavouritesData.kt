@@ -32,15 +32,19 @@ data class FavouritesData(
     val listExoTrain : PersistentList<TrainData> = persistentListOf()
 )
 
-interface TransitData
+abstract class TransitData{
+    abstract val routeId : String
+    abstract val stopName : String
+    abstract val direction : String
+}
 
 @Serializable
-data class TrainData(val stopName : String, val routeId : Int, val trainNum : Int, val routeName : String,
-                     val directionId: Int, val direction : String)
-    : Parcelable, TransitData {
+data class TrainData(override val stopName : String, override val routeId : String, val trainNum : Int, val routeName : String,
+                     val directionId: Int, override val direction : String)
+    : Parcelable, TransitData() {
     constructor(parcel: Parcel) : this(
         parcel.readString()!!,
-        parcel.readInt(),
+        parcel.readString()!!,
         parcel.readInt(),
         parcel.readString()!!,
         parcel.readInt(),
@@ -53,7 +57,7 @@ data class TrainData(val stopName : String, val routeId : Int, val trainNum : In
 
     override fun writeToParcel(dest: Parcel, flags: Int) {
         dest.writeString(stopName)
-        dest.writeInt(routeId)
+        dest.writeString(routeId)
         dest.writeInt(trainNum)
         dest.writeString(routeName)
         dest.writeInt(directionId)
@@ -94,11 +98,12 @@ class PersistentTrainInfoListSerializer(private val serializer: KSerializer<Trai
 }
 
 @Serializable
-data class StmBusData(val stopName: String, val busNum : Int, val directionId: Int, val direction : String, val lastStop : String)
-    : Parcelable, TransitData {
+data class StmBusData(override val stopName: String,/** aka busNum */override val routeId : String,
+                      val directionId: Int, override val direction : String, val lastStop : String)
+    : Parcelable, TransitData() {
     constructor(parcel: Parcel) : this(
         parcel.readString()!!,
-        parcel.readInt(),
+        parcel.readString()!!,
         parcel.readInt(),
         parcel.readString()!!,
         parcel.readString()!!
@@ -110,7 +115,7 @@ data class StmBusData(val stopName: String, val busNum : Int, val directionId: I
 
     override fun writeToParcel(dest: Parcel, flags: Int) {
         dest.writeString(stopName)
-        dest.writeInt(busNum)
+        dest.writeString(routeId)
         dest.writeInt(directionId)
         dest.writeString(direction)
         dest.writeString(lastStop)
@@ -151,8 +156,8 @@ class PersistentStmBusInfoListSerializer(private val serializer: KSerializer<Stm
 
 @Serializable
 //FIXME could improve the data stored inside for better ease of use
-data class ExoBusData(val stopName : String, val tripHeadsign : String, val direction: String)
-    : Parcelable, TransitData {
+data class ExoBusData(override val stopName : String,/** aka tripheadSign */override val routeId : String, override val direction: String)
+    : Parcelable, TransitData() {
     constructor(parcel: Parcel) : this(
         parcel.readString()!!,
         parcel.readString()!!,
@@ -165,7 +170,7 @@ data class ExoBusData(val stopName : String, val tripHeadsign : String, val dire
 
     override fun writeToParcel(dest: Parcel, flags: Int) {
         dest.writeString(stopName)
-        dest.writeString(tripHeadsign)
+        dest.writeString(routeId)
         dest.writeString(direction)
     }
 

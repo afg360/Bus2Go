@@ -43,7 +43,7 @@ class ChooseStop() : BaseActivity() {
             val recyclerView: RecyclerView = findViewById(R.id.stop_recycle_view)
             val layoutManager = LinearLayoutManager(applicationContext)
             val directionId = intent.extras?.getInt(DIRECTION_ID)
-            val routeId = intent.extras?.getInt(ROUTE_ID, -1)
+            val routeId = intent.getStringExtra(ROUTE_ID)!!
             val trainNum = intent.extras?.getInt(TRAIN_NUM)
             val direction = intent.getStringExtra(DIRECTION)!!
             val lastStop = intent.getStringExtra(LAST_STOP)
@@ -51,7 +51,7 @@ class ChooseStop() : BaseActivity() {
             if (agency == TransitAgency.EXO_TRAIN){
                 routeName = intent.getStringExtra(ROUTE_NAME) ?: throw IllegalStateException("Forgot to give a route name to a train!")
             }
-            else if (agency == TransitAgency.STM && routeId == -1)
+            else if (agency == TransitAgency.STM && routeId.toInt() == -1)
                     throw IllegalStateException("Forgot to give a route id to an stm bus!")
 
             lifecycleScope.launch {

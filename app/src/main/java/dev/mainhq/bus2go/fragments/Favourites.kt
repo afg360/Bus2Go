@@ -77,7 +77,7 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
         super.onViewCreated(view, savedInstanceState)
         val realTimeViewModel = ViewModelProvider(requireActivity())[RealTimeViewModel::class.java]
         val internetEnabled = PreferenceManager.getDefaultSharedPreferences(requireContext())
-            .getBoolean("real-time-data", true)
+            .getBoolean("real-time-data", false)
         lifecycleScope.launch {
             favouritesViewModel.loadData()
             val listSTM = favouritesViewModel.stmBusInfo.value
@@ -127,22 +127,20 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
                             val list = listExo + listSTM + listTrain
                             realTimeViewModel.loadData()
                             val mutableList = realTimeViewModel.getData(listSTM, TransitAgency.STM)
+                            if (mutableList == null){
+                                //may have a disconnection or something, do it the regular way
+                                recyclerViewDisplay(view, listOf(), true)
+                            }
+                            else{
+                                recyclerViewDisplay(view, mutableList, true)
+                            }
                         }
                         else{
                             val list = toFavouriteTransitInfoList(listSTM, TransitAgency.STM) + toFavouriteTransitInfoList(listExo, TransitAgency.EXO_OTHER) +
                                     toFavouriteTransitInfoList(listTrain, TransitAgency.EXO_TRAIN)
                             println(list.toString())
                             //if not, do the below
-                            withContext(Dispatchers.Main){
-                                view.findViewById<MaterialTextView>(R.id.favourites_text_view).text = getText(R.string.favourites)
-                                val layoutManager = LinearLayoutManager(view.context)
-                                layoutManager.orientation = LinearLayoutManager.VERTICAL
-                                val recyclerViewTmp : RecyclerView? = view.findViewById(R.id.favouritesRecyclerView)
-                                recyclerViewTmp?.layoutManager = layoutManager
-                                //TODO need to improve that code to make it more safe
-                                recyclerViewTmp?.tag = "unselected"
-                                recyclerViewTmp?.adapter = recyclerViewTmp?.let { FavouritesListElemsAdapter(list, WeakReference(it) ) }
-                            }
+                            recyclerViewDisplay(view, list, true)
                         }
                     }
                 }
@@ -250,6 +248,7 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
         executor?.shutdown()
         recyclerView.viewTreeObserver?.removeOnGlobalLayoutListener(listener)
     }
+
 
     /** Used to get the required data to make a list of favouriteBusInfo, adding dates to busInfo elements */
     private suspend fun toFavouriteTransitInfoList(list : List<TransitData>, agency: TransitAgency) : MutableList<FavouriteTransitInfo> {

@@ -2,12 +2,9 @@ package dev.mainhq.bus2go.viewmodels
 
 import android.app.Application
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
-import com.google.transit.realtime.GtfsRealtime
 import com.google.transit.realtime.GtfsRealtime.FeedMessage
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.fragments.FavouriteTransitInfo
@@ -78,24 +75,16 @@ class RealTimeViewModel(application : Application) : AndroidViewModel(applicatio
                         if (it.hasTripUpdate() && it.hasStop()) {
                             val tripUpdate = it.tripUpdate
                             val stop = it.stop
+                            //tripUpdate.stopTimeUpdateList[0].
                             if (tripUpdate.hasTrip()){
                                 val trip = tripUpdate.trip
-                                if (list.contains(StmBusData(stop.stopName.toString(), trip.routeId.toInt(), trip.directionId,
-                                    /* put the last direction */"", ""))){
-                                    println("TRIP: $trip, STOP: $stop")
+                                if (list.contains(StmBusData(stop.stopName.toString(), trip.routeId, trip.directionId,
+                                    /** To be ignored */"", /** To be ignored */"") as TransitData)){
+                                    Log.d("TRIP: ", trip.toString())
+                                    Log.d("STOP: ", stop.toString())
                                 }
-                                if (trip.routeId == "103")
-                                    println("TRIP: $trip, STOP: $stop")
                             }
                         }
-                        /*
-                        if (it.hasAlert()) {
-                            println(it.alert)
-                        }
-                        if (it.hasVehicle()) {
-                            println(it.vehicle)
-                        }
-                         */
                     }
                     return mutableList
                 }
@@ -167,12 +156,9 @@ class RealTimeViewModel(application : Application) : AndroidViewModel(applicatio
                 }
             }
         }
-    }
 
-    /** For testing purposes */
-    suspend fun readFromFile(context : Context, file : Int) : FeedMessage {
-        return coroutineScope {
-            FeedMessage.parseFrom(context.resources.openRawResource(file).readBytes())
+        fun test(){
+
         }
     }
 }

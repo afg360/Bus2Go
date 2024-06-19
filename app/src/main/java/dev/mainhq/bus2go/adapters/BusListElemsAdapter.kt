@@ -11,6 +11,7 @@ import dev.mainhq.bus2go.ROUTE_NAME
 import dev.mainhq.bus2go.BUS_NUM
 import dev.mainhq.bus2go.ChooseDirection
 import dev.mainhq.bus2go.R
+import dev.mainhq.bus2go.ROUTE_ID
 import dev.mainhq.bus2go.TRAIN_NUM
 import dev.mainhq.bus2go.utils.TransitInfo
 
@@ -38,7 +39,7 @@ class BusListElemsAdapter(private val busData: List<TransitInfo>) :
         holder.itemView.setOnClickListener {
             val intent = Intent(it.context, ChooseDirection::class.java)
             intent.putExtra(ROUTE_NAME, data.routeName)
-            intent.putExtra(BUS_NUM, holder.busNumView.text.toString())
+            intent.putExtra(ROUTE_ID, holder.busNumView.text.toString())
             data.trainNum?.apply {
                 intent.putExtra(TRAIN_NUM, this)
             }

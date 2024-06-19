@@ -36,7 +36,7 @@ class AlarmDialogListElemsAdapter(private val list : List<ExoBusData>, private v
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val data = list[position]
-        holder.alarmDialogBusNum.text = data.tripHeadsign
+        holder.alarmDialogBusNum.text = data.routeId
         //holder.alarmDialogBusLine.text = data.busLine
         holder.alarmDialogBusStop.text = data.stopName
         holder.itemView.setOnClickListener {

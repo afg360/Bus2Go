@@ -1,4 +1,6 @@
 # Bus2Go
+<img src="./icon/icon_black_version.svg"/>
+
 An android application allowing users to access data such as bus arrivals with minimal internet connectivity, 
 with a big focus on user privacy.
 For the moment, only data from the [STM](https://stm.info/en) and [Exo](https://exo.quebec/en) is used.

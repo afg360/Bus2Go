@@ -22,7 +22,7 @@ import dev.mainhq.bus2go.viewmodels.FavouritesViewModel
 
 
 class StopListElemsAdapter(private val stopNames: List<String>, private val list: List<TransitData>,
-                           private val headsign: String?, private val routeId: Int?,
+                           private val headsign: String?, private val routeId: String?,
                            private val trainNum : Int?, private val routeName : String?,
                            private val directionId : Int?, private val direction : String,
                            private val lastStop : String?, private val agency: TransitAgency,
@@ -106,7 +106,7 @@ class StopListElemsAdapter(private val stopNames: List<String>, private val list
         return this.stopNames.size
     }
 
-    class ViewHolder(view: View, private val headsign : String?, private val routeId : Int?,
+    class ViewHolder(view: View, private val headsign : String?, private val routeId : String?,
                      private val directionId : Int?, private val direction: String?,
                      private val agency: TransitAgency) : RecyclerView.ViewHolder(view) {
         //TODO INSTEAD ADD A COLUMN IN DATABASE TO SET AS FAVOURITE A CERTAIN STOP, AND AFFICHER ONLY THE NEXT STOP

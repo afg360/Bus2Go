@@ -4,7 +4,6 @@ import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
-import android.view.View.OnLongClickListener
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.LinearLayout
@@ -96,7 +95,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
                 info.transitData as StmBusData
                 holder.itemView.tag = info.transitData
                 holder.directionTextView.text = "To ${info.transitData.lastStop}"
-                holder.tripHeadsignTextView.text = info.transitData.busNum.toString()
+                holder.tripHeadsignTextView.text = info.transitData.routeId.toString()
                 holder.tripHeadsignTextView.setTextColor(
                     holder.itemView.resources
                         .getColor(R.color.basic_blue, null)
@@ -115,7 +114,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
                 holder.itemView.tag = info.transitData
                 holder.stopNameTextView.text = info.transitData.stopName
                 holder.directionTextView.text = "To ${info.transitData.direction}"
-                holder.tripHeadsignTextView.text = info.transitData.tripHeadsign
+                holder.tripHeadsignTextView.text = info.transitData.routeId
                 holder.tripHeadsignTextView.setTextColor(
                     holder.itemView.resources.getColor(R.color.basic_purple, null)
                 )
@@ -279,7 +278,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
             }
             TransitAgency.STM -> {
                 info.transitData as StmBusData
-                intent.putExtra(ROUTE_ID, info.transitData.busNum)
+                intent.putExtra(ROUTE_ID, info.transitData.routeId)
                 intent.putExtra(DIRECTION, info.transitData.direction)
 
             }
