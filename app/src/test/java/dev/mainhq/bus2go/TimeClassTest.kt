@@ -38,7 +38,7 @@ class TimeClassTest {
     fun testSubErr(){
         val time1 = Time(3,2,1)
         val time2 = Time(5,3,23)
-        assertTrue(time2.subtract(time1) == null)
+        assertTrue(time2.subtract(time1) != null)
     }
 
     @Test
@@ -52,5 +52,17 @@ class TimeClassTest {
     @Test
     fun testCompare3(){
         assertTrue(Time(0,3,59).compareTo(Time(0,3,0)) == 1)
+    }
+
+    @Test
+    fun testFromString(){
+        val time1 = Time(23, 37, 26)
+        assertTrue(Time.TimeBuilder.fromString("23:37:26").compareTo(time1)  == 0)
+    }
+
+    @Test
+    fun testUnixTime(){
+        println(Time.TimeBuilder.fromUnix(1718768246))
+        assertTrue(Time.TimeBuilder.fromUnix(1718768246).compareTo(Time.TimeBuilder.fromString("23:37:26")) == 0)
     }
 }
