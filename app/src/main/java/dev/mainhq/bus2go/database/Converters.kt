@@ -7,7 +7,7 @@ import dev.mainhq.bus2go.utils.Time
 class Converters {
     @TypeConverter
     fun toTime(str : String?) : Time? {
-        return str?.let{ Time(it) }
+        return str?.let{ Time.TimeBuilder.fromString(it) }
     }
 
     @TypeConverter

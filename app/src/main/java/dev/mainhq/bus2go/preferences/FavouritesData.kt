@@ -36,6 +36,13 @@ abstract class TransitData{
     abstract val routeId : String
     abstract val stopName : String
     abstract val direction : String
+    /*
+    override fun equals(other : Any?) : Boolean{
+        return if (other is TrainData)
+                    routeId == other.routeId && stopName == other.stopName && direction == other.direction
+               else false
+    }
+     */
 }
 
 @Serializable

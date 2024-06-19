@@ -9,9 +9,9 @@ import kotlinx.serialization.Serializable
 
 /** Allows to do operations more easily on time based formats */
 class Time(hour : Int, min : Int, sec : Int) : Comparable<Time>, Parcelable {
-    var hour : Int
-    var min : Int
-    var sec : Int
+    val hour : Int
+    val min : Int
+    val sec : Int
 
     constructor(parcel: Parcel) : this(
         parcel.readInt(),
@@ -24,14 +24,30 @@ class Time(hour : Int, min : Int, sec : Int) : Comparable<Time>, Parcelable {
         this.min = (min + this.sec / 60) % 60
         this.hour = (hour + this.min / 60)  % 24
     }
-    /** Format of string must be = HH:MM:SS */
-    constructor(time : String) : this(0,0,0) {
-        if (time.isNotEmpty()){
+
+    constructor(calendar: Calendar) : this(
+            calendar.get(Calendar.HOUR_OF_DAY),
+            calendar.get(Calendar.MINUTE),
+            calendar.get(Calendar.SECOND)
+        )
+
+    constructor(serializableTime: SerializableTime) : this(
+            serializableTime.hour,
+            serializableTime.min,
+            serializableTime.sec
+        )
+
+
+    object TimeBuilder{
+        /** Format of string must be = HH:MM:SS */
+        fun fromString(time : String) : Time{
             val list : List<String> = time.split(":")
             try {
-                this.hour = list[0].toInt() % 24
-                this.min = list[1].toInt()
-                this.sec = list[2].toInt()
+                return Time(
+                    hour = list[0].toInt() % 24,
+                    min = list[1].toInt(),
+                    sec = list[2].toInt()
+                )
             }
             catch (ie : IndexOutOfBoundsException){
                 Log.e("TIME INIT","The input str must be of the form HH:MM:SS")
@@ -40,28 +56,14 @@ class Time(hour : Int, min : Int, sec : Int) : Comparable<Time>, Parcelable {
         }
     }
 
-    constructor(calendar : Calendar) : this(0,0,0){
-        this.hour = calendar.get(Calendar.HOUR_OF_DAY)
-        this.min = calendar.get(Calendar.MINUTE)
-        this.sec = calendar.get(Calendar.SECOND)
-    }
-
-    constructor(serializableTime: SerializableTime) : this(0,0,0){
-        this.hour = serializableTime.hour
-        this.min = serializableTime.min
-        this.sec = serializableTime.sec
-    }
 
     /** Returns null if this < time and this > 3 */
     fun subtract(time : Time) : Time?{
         val rel = this.compareTo(time)
-        if (rel == -1) {
-            //TODO if the time is between midnight and 3, + 24
-            if (hour in 0..3) hour += 24
-            else return null
-        } //todo unavailable
+        if (rel == -1 &&  hour !in 0..3) return null
         else if (rel == 0) return Time(0,0,0)
-        val total = this.hour * 3600 + this.min * 60 + this.sec - (time.hour * 3600 + time.min * 60 + time.sec)
+        val realHour = if (hour in 0..3) hour + 24 else hour
+        val total = realHour * 3600 + this.min * 60 + this.sec - (time.hour * 3600 + time.min * 60 + time.sec)
         val hour = total / 3600
         val min = (total - hour * 3600) / 60
         return Time(hour, min, total % 60)
