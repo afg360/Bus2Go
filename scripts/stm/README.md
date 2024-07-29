@@ -80,6 +80,7 @@ Database Schema for each agency:
       "trip_id": "INTEGER NOT NULL",
       "route_id": "INTEGER NOT NULL REFERENCES Routes(route_id)",
       "service_id": "TEXT NOT NULL REFERENCES Calendar(service_id)",
+      #trip_headsign IS ACTUALLY A DIRECTION FOR THE STM!!!
       "trip_headsign": "TEXT NOT NULL",
       "direction_id": "INTEGER NOT NULL",
       "shape_id": "INTEGER NOT NULL REFERENCES Forms(shape_id)",

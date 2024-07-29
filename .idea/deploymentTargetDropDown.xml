@@ -8,7 +8,10 @@
       <entry key="app">
         <State />
       </entry>
-      <entry key="test1()">
+      <entry key="favouriteDataRequest()">
+        <State />
+      </entry>
+      <entry key="localWebRequest()">
         <State />
       </entry>
     </value>

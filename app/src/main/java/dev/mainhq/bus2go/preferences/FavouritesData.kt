@@ -23,7 +23,7 @@ import java.lang.Exception
 
 @Serializable
 data class FavouritesData(
-    @Serializable(with = PersistentExoBusInfoListSerializer::class)
+    @Serializable(with = PersistentStmBusInfoListSerializer::class)
     val listSTM : PersistentList<StmBusData> = persistentListOf(),
     @Serializable(with = PersistentExoBusInfoListSerializer::class)
     val listExo : PersistentList<ExoBusData> = persistentListOf(),

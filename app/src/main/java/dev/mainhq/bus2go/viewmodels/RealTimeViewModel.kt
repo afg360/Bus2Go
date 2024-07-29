@@ -1,92 +1,89 @@
 package dev.mainhq.bus2go.viewmodels
 
 import android.app.Application
-import android.content.Context
-import android.util.Log
-import android.widget.Toast
+import android.os.Build
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.transit.realtime.GtfsRealtime.FeedMessage
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.fragments.FavouriteTransitInfo
 import dev.mainhq.bus2go.preferences.StmBusData
 import dev.mainhq.bus2go.preferences.TransitData
+import dev.mainhq.bus2go.utils.Time
 import dev.mainhq.bus2go.utils.TransitAgency
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.network.sockets.ConnectTimeoutException
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
-import io.ktor.client.request.url
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpHeaders
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
 import java.io.BufferedReader
-import java.io.InputStream
 import java.lang.IllegalStateException
+import java.net.URLEncoder.encode
+import java.time.Duration
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 
 //TODO cache or save the data somewhere in case used and disconnected
 class RealTimeViewModel(application : Application) : AndroidViewModel(application) {
-    private lateinit var EXO_API_KEY: String
-    private lateinit var STM_API_KEY : String
+
     private val _stmData : MutableStateFlow<FeedMessage?> = MutableStateFlow(null)
     val stmData : StateFlow<FeedMessage?> = _stmData
     private val _exoData : MutableStateFlow<FeedMessage?> = MutableStateFlow(null)
     val exoData : StateFlow<FeedMessage?> = _exoData
-
-    init{
-        application.resources.openRawResource(R.raw.config).bufferedReader().lines().forEach {
-            val line = it.split("=", limit = 2)
-            when(line[0]) {
-                "stm_token" -> {
-                    STM_API_KEY = line[1]
-                }
-                "exo_token" -> {
-                    EXO_API_KEY = line[1]
-                }
-                else -> throw IllegalStateException("An invalid line has been written to the raw config file!")
-            }
-        }
-        if (EXO_API_KEY.isEmpty() || STM_API_KEY.isEmpty()) throw IllegalStateException("One of the api keys has not been given for real time data!")
-    }
+    private val domainName : String =
+        BufferedReader(application.applicationContext.resources.openRawResource(R.raw.config).reader()).readLine()
 
     suspend fun loadData(){
         /* For trip updates */
-        _stmData.value = getStmData()
-        _exoData.value = getExoData()
+        //_stmData.value = getStmData()
+        //_exoData.value = getExoData()
     }
 
-    fun getData(list : List<TransitData>, agency: TransitAgency) : MutableList<FavouriteTransitInfo>?{
+    suspend fun getData(list : List<TransitData>, agency: TransitAgency, roomViewModel: RoomViewModel) : MutableList<FavouriteTransitInfo>?{
         val mutableList= mutableListOf<FavouriteTransitInfo>()
         when(agency){
             TransitAgency.STM -> {
                 val data = stmData.value
                 return if (data == null) null
                 else {
-                    val entities = data.entityList
-                    entities.forEach{
+                    list as List<StmBusData>
+                    data.entityList.forEach{
                         if (it.hasTripUpdate() && it.hasStop()) {
                             val tripUpdate = it.tripUpdate
-                            val stop = it.stop
-                            //tripUpdate.stopTimeUpdateList[0].
                             if (tripUpdate.hasTrip()){
                                 val trip = tripUpdate.trip
-                                if (list.contains(StmBusData(stop.stopName.toString(), trip.routeId, trip.directionId,
-                                    /** To be ignored */"", /** To be ignored */"") as TransitData)){
-                                    Log.d("TRIP: ", trip.toString())
-                                    Log.d("STOP: ", stop.toString())
+                                //make a CHUNKED list of jobs
+                                val jobs = mutableListOf<Job>()
+                                list.chunked(50).forEach { innerList ->
+                                    jobs.add(viewModelScope.launch {
+                                        innerList.forEach {
+                                            favourite ->
+                                            tripUpdate.stopTimeUpdateList.forEach { stopTimeUpdate ->
+                                                if (/*favourite.stopName*/ "Côte-Saint-Luc / Rosedale" == roomViewModel.getNames(stopTimeUpdate.stopId.toInt())
+                                                    && /*favourite.routeId*/ "103" == trip.routeId
+                                                    /*&& /*favourite.directionId*/ 0 == trip.directionId*/)
+                                                    mutableList.add(FavouriteTransitInfo(favourite, Time.TimeBuilder.fromUnix(stopTimeUpdate.arrival.time), agency))
+                                            }
+                                        }
+                                    })
                                 }
+                                jobs.forEach { job -> job.join() }
                             }
                         }
                     }
-                    return mutableList
+                    mutableList
                 }
             }
             TransitAgency.EXO_OTHER -> {
@@ -98,55 +95,80 @@ class RealTimeViewModel(application : Application) : AndroidViewModel(applicatio
         }
     }
 
-    private suspend fun getStmData() : FeedMessage{
-        return try {
-            WebRequest.getResponse("${WebRequest.STM_URL}/tripUpdates") {
-                headers {
-                    append("apiKey", STM_API_KEY)
-                    append(HttpHeaders.ContentType, "application/x-protobuf")
+    private suspend fun getStmData(){
+
+    }
+
+    private suspend fun getExoData(){
+
+    }
+
+    suspend fun getDataFromServer(agency: String, routeId : String, tripHeadsign : String, stopName : String) : JsonObject?{
+        val tldUrl = "$domainName:$PORT_NUM/${URL_PATH}"
+        return getHttpResponse(tldUrl, agency, routeId, tripHeadsign, stopName)
+    }
+
+
+    companion object WebRequest {
+        //FIXME this will eventually be the official bus2go domain name, for now only a test ip address
+        //private lateinit var domainName : String
+        const val PORT_NUM = 8000
+        const val URL_PATH = "api/realtime/v1"
+
+
+        private val httpClient = HttpClient(OkHttp){
+            engine {
+                config {
+                    //FIXME this is way too long
+                    readTimeout(30, TimeUnit.SECONDS)
                 }
             }
-            /* For positions
-                *  const val positionsURL = "$STM_URL/vehiclePositions"
-                * */
-        } catch (e: TimeoutException) {
-            TODO("Not implemented yet")
-        }
-    }
-
-    private suspend fun getExoData() : FeedMessage{
-        try {
-            /* For trip updates, don't forget to add agency */
-            return WebRequest.getResponse("${WebRequest.EXO_URL}/TripUpdate.pb?token=$EXO_API_KEY")
-        }
-        catch (e : TimeoutException){
-            TODO("")
-        }
-    }
-
-    private object WebRequest {
-        const val STM_URL = "https://api.stm.info/pub/od/gtfs-rt/ic/v2"
-        const val EXO_URL = "https://opendata.exo.quebec/ServiceGTFSR"
-
-        suspend fun getResponse(url : String) : FeedMessage{
-            return reactResponse(HttpClient(OkHttp).get(url))
         }
 
-        suspend fun getResponse(url : String, requestBuilder: HttpRequestBuilder.() -> Unit) : FeedMessage {
-            return reactResponse(HttpClient(OkHttp).get(url, requestBuilder))
+        suspend fun getHttpResponse(tldUrl : String, agency: String, routeId : String, tripHeadsign : String, stopName : String) : JsonObject? {
+            val url = "$tldUrl/?agency=${encode(agency, "utf-8")}" +
+                    "&route_id=${encode(routeId, "utf-8")}" +
+                    "&trip_headsign=${encode(tripHeadsign, "utf-8")}" +
+                    "&stop_name=${encode(stopName, "utf-8")}"
+            return try{
+                reactResponse(httpClient.get(url))
+            }
+            catch (e : ConnectTimeoutException){
+                println("The database is probably not open...")
+                null
+            }
         }
 
-        private suspend fun reactResponse(response : HttpResponse) : FeedMessage{
+        private suspend fun reactResponse(response : HttpResponse) : JsonObject? {
             when (response.status.value) {
                 in 200..299 -> {
-                    val body : ByteArray = response.body()
-                    return FeedMessage.parseFrom(body)
+                    /**
+                     * Data format:
+                     * {
+                     *      "transit-info":
+                     *      {
+                     *          "agency": str,
+                     *          "route_id": str,
+                     *          "trip_headsign": str,
+                     *          "stop_name": str
+                     *      },
+                     *      "arrival_time: list[str]
+                     * }
+                     */
+                    return Json.decodeFromString(JsonObject.serializer(), response.body())
                 }
                 in 300..399 -> {
                     TODO("REDIRECTION")
                 }
                 in 400..499 -> {
-                    TODO("PAGE DOESNT EXIST / BAD REQUEST")
+                    /**
+                     * Data format:
+                     * {
+                     *      "detail": str
+                     * }
+                     */
+                    return null
+                    //return Json.decodeFromString(JsonObject.serializer(), response.body())
                 }
                 in 500..599 -> {
                     TODO("SERVERSIDE EXCEPTION")
@@ -155,10 +177,6 @@ class RealTimeViewModel(application : Application) : AndroidViewModel(applicatio
                     throw TimeoutException("There seems to be no internet connection for the http request to be sent with")
                 }
             }
-        }
-
-        fun test(){
-
         }
     }
 }

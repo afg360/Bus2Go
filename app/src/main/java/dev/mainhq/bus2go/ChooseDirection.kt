@@ -13,8 +13,8 @@ import dev.mainhq.bus2go.viewmodels.RoomViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.lang.IllegalStateException
-import java.util.ArrayList
+import kotlin.IllegalStateException
+import kotlin.collections.ArrayList
 
 const val ROUTE_NAME = "BUS_NAME"
 const val BUS_NUM = "BUS_NUM"
@@ -58,12 +58,13 @@ class ChooseDirection : BaseActivity() {
             val trainNum = intent.extras!!.getInt(TRAIN_NUM)
             busNumView.text = trainNum.toString()
             busNameView.text = routeName
-            val routeId = try {
-                busNum.toInt()
-            }
-            catch (e : TypeCastException){
-                throw TypeCastException("In choose direction, when a train, cannot cast a non-integer route id to an integer!")
-            }
+            val routeId =
+                try {
+                    busNum.toInt()
+                }
+                catch (e : TypeCastException){
+                    throw TypeCastException("In choose direction, when a train, cannot cast a non-integer route id to an integer!")
+                }
             lifecycleScope.launch{
                 val stopNames = roomViewModel.getTrainStopNames(this, routeId)
                 val dir0 = stopNames.first.await()
@@ -115,7 +116,6 @@ class ChooseDirection : BaseActivity() {
                 return@launch
             }
             //FIXME TRIPS_HEADSIGN HAS CHANGED FOR STM, ONLY SHOWS DIRECTION
-
 
             when (agency) {
                 TransitAgency.STM -> {
@@ -191,21 +191,36 @@ class ChooseDirection : BaseActivity() {
                 }
                 TransitAgency.EXO_OTHER -> {
                     dirs as List<String>
-                    val jobs = roomViewModel.getStopNames(this, agency, dirs, bus)
-                    val headsign0 = dirs[0]
-                    val headsign1 = dirs[1]
+                    //some buses/transit only have 1 direction, so check before assigning
                     val intent = Intent(applicationContext, ChooseStop::class.java)
-                    val dir0 = jobs.first.await()
-                    val dir1 = jobs.second.await()
-                    withContext(Dispatchers.Main) {
-                        findViewById<MaterialTextView>(R.id.description_route_0).text = headsign0
-                        findViewById<MaterialButton>(R.id.route_0).setOnClickListener {
-                            setIntent(intent, dir0 as ArrayList<String>, headsign0, dir0.last(), agency)
+                    intent.putExtra(ROUTE_ID, bus)
+                    
+                    if (dirs.size == 1){
+                        val dir = roomViewModel.getStopNames(this, dirs[0], bus).await()
+                        withContext(Dispatchers.Main) {
+                            //no need for a button in this case
+                            setIntent(intent, dir as ArrayList<String>, dirs[0], dir.last(), agency)
                         }
-                        findViewById<MaterialTextView>(R.id.description_route_1).text = headsign1
-                        findViewById<MaterialButton>(R.id.route_1).setOnClickListener {
-                            setIntent(intent, dir1 as ArrayList<String>, headsign1, dir1.last(), agency)
+                    }
+                    else if (dirs.size > 1){
+                        val jobs = roomViewModel.getStopNames(this, agency, dirs, bus)
+                        val headsign0 = dirs[0]
+                        val headsign1 = dirs[1]
+                        val dir0 = jobs.first.await()
+                        val dir1 = jobs.second.await()
+                        withContext(Dispatchers.Main) {
+                            findViewById<MaterialTextView>(R.id.description_route_0).text = headsign0
+                            findViewById<MaterialButton>(R.id.route_0).setOnClickListener {
+                                setIntent(intent, dir0 as ArrayList<String>, headsign0, dir0.last(), agency)
+                            }
+                            findViewById<MaterialTextView>(R.id.description_route_1).text = headsign1
+                            findViewById<MaterialButton>(R.id.route_1).setOnClickListener {
+                                setIntent(intent, dir1 as ArrayList<String>, headsign1, dir1.last(), agency)
+                            }
                         }
+                    }
+                    else {
+                        throw IllegalStateException("Cannot have no directions for a transit")
                     }
                 }
                 else -> {

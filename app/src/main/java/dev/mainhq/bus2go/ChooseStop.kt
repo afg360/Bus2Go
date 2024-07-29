@@ -42,12 +42,16 @@ class ChooseStop() : BaseActivity() {
         if (stopNames.isNotEmpty()) {
             val recyclerView: RecyclerView = findViewById(R.id.stop_recycle_view)
             val layoutManager = LinearLayoutManager(applicationContext)
+
+            //nullable values
             val directionId = intent.extras?.getInt(DIRECTION_ID)
-            val routeId = intent.getStringExtra(ROUTE_ID)!!
             val trainNum = intent.extras?.getInt(TRAIN_NUM)
-            val direction = intent.getStringExtra(DIRECTION)!!
             val lastStop = intent.getStringExtra(LAST_STOP)
             val headsign = intent.getStringExtra("headsign")
+
+            //non-nullable values
+            val routeId = intent.getStringExtra(ROUTE_ID)!!
+            val direction = intent.getStringExtra(DIRECTION)!!
             if (agency == TransitAgency.EXO_TRAIN){
                 routeName = intent.getStringExtra(ROUTE_NAME) ?: throw IllegalStateException("Forgot to give a route name to a train!")
             }

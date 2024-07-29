@@ -1,0 +1,1 @@
+instead of using enum days, use a string that can have the letter mtwyfsd

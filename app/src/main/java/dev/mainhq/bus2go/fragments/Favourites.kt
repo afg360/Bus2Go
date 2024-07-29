@@ -64,7 +64,7 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
 
     private var executor : ScheduledExecutorService? = null
     private lateinit var recyclerView : RecyclerView
-    private lateinit var listener : ViewTreeObserver.OnGlobalLayoutListener
+    //private lateinit var listener : ViewTreeObserver.OnGlobalLayoutListener
     private var scheduledTask: ScheduledFuture<*>? = null
     private lateinit var onBackPressedCallback: OnBackPressedCallback
 
@@ -125,8 +125,10 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
                     state.collect {
                         if (internetEnabled && it == State.AVAILABLE){
                             val list = listExo + listSTM + listTrain
+                            //FIXME NEEDS TO BE AWAITED FOR
+                            //ONLY LOAD HERE BECAUSE USAGE OF INTERNET ONLY HERE
                             realTimeViewModel.loadData()
-                            val mutableList = realTimeViewModel.getData(listSTM, TransitAgency.STM)
+                            val mutableList = realTimeViewModel.getData(listSTM, TransitAgency.STM, roomViewModel)
                             if (mutableList == null){
                                 //may have a disconnection or something, do it the regular way
                                 recyclerViewDisplay(view, listOf(), true)
@@ -143,10 +145,9 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
                             recyclerViewDisplay(view, list, true)
                         }
                     }
-                }
+                }.join()
             }
         }
-
         val appBar = (parentFragment as Home).view?.findViewById<AppBarLayout>(R.id.mainAppBar)
         /** This part allows us to press the back button when in selection mode of favourites to get out of it */
         onBackPressedCallback = object : OnBackPressedCallback(true) {
@@ -171,6 +172,7 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
 
         recyclerView = view.findViewById(R.id.favouritesRecyclerView)
 
+        /*
         /** This part allows us to update each recyclerview item from favourites in "real time", i.e. the user can see
          *  an updated time left displayed */
         listener = object : ViewTreeObserver.OnGlobalLayoutListener {
@@ -182,7 +184,6 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
                 val connectivityManager = activity?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
                 //if connected to internet
-
 
                 //FIXME this part crashes/creates a memory leak!!!!!!!
                 scheduledTask = executor!!.scheduleAtFixedRate({
@@ -206,6 +207,7 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
             }
         }
         recyclerView.viewTreeObserver?.addOnGlobalLayoutListener(listener)
+         */
 
         selectAllFavouritesOnClickListener(recyclerView)
 
@@ -246,7 +248,7 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
 
         scheduledTask?.cancel(true)
         executor?.shutdown()
-        recyclerView.viewTreeObserver?.removeOnGlobalLayoutListener(listener)
+        //recyclerView.viewTreeObserver?.removeOnGlobalLayoutListener(listener)
     }
 
 

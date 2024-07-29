@@ -10,11 +10,13 @@ import dev.mainhq.bus2go.preferences.ExoBusData
 import dev.mainhq.bus2go.utils.TransitAgency
 import dev.mainhq.bus2go.utils.Time
 import android.icu.util.Calendar
+import androidx.lifecycle.viewModelScope
 import dev.mainhq.bus2go.preferences.StmBusData
 import dev.mainhq.bus2go.preferences.TrainData
 import dev.mainhq.bus2go.preferences.TransitData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 
 class RoomViewModel(application: Application) : AndroidViewModel(application) {
@@ -58,9 +60,15 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    /** Return the jobs made from the async calls, only used with ExoOther when dirs.size == 1 */
+    suspend fun getStopNames(coroutineScope: CoroutineScope, dirs : String, routeId: String?)
+    : Deferred<List<String>>{
+        return coroutineScope.async { exoDataBase.stopTimesDao().getStopNames(dirs) }
+    }
+    
     /** Return the jobs made from the async calls */
     suspend fun getStopNames(coroutineScope: CoroutineScope, agency: TransitAgency, dirs : List<String>, routeId: String?)
-    : Pair<Deferred<List<String>>, Deferred<List<String>>>{
+            : Pair<Deferred<List<String>>, Deferred<List<String>>>{
         return when(agency){
             TransitAgency.STM -> {
                 //East
@@ -77,7 +85,6 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
             else -> throw IllegalArgumentException("Cannot use the fxn getStopNames for ${agency}.")
         }
     }
-
     /** Used for alarm creations */
     suspend fun getStopTimes(stopName : String, dayString : String, headsign : String, agency : TransitAgency, routeId: Int?) : List<Time>{
         return when(agency){
@@ -121,6 +128,11 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
         val job1 = coroutineScope.async { exoDataBase.stopTimesDao().getTrainStopNames("trains-$routeId", 0) }
         val job2 = coroutineScope.async { exoDataBase.stopTimesDao().getTrainStopNames("trains-$routeId", 1) }
         return Pair(job1, job2)
+    }
+
+    /** For STM testing only for now */
+    suspend fun getNames(stopId : Int) : String{
+        return stmDatabase.stopDao().getStopName(stopId)
     }
 
     override fun onCleared() {
