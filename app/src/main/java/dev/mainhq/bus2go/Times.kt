@@ -44,7 +44,8 @@ class Times : BaseActivity() {
         val curTime = Time(calendar)
         when(agency){
             TransitAgency.STM -> {
-                val routeId = intent.extras!!.getInt(ROUTE_ID)
+                //FIXME this may fail in the case the route id is a metro or other stuff?
+                val routeId = intent.extras!!.getString(ROUTE_ID)!!.toInt()
                 val direction = intent.extras!!.getString(DIRECTION)!!
                 //val directionId = intent.extras!!.getInt(DIRECTION_ID)
                 lifecycleScope.launch {

@@ -3,9 +3,7 @@
 #The below should point to the folder where you want to place
 #the database inside your project
 #e.g. project=$PROJECT_FOLDER/src/main/assets/database
-project=/absolute/path/to/your/project/database/folder
-#The below could look like path=$PROJECT_FOLDER/scripts/
-#path=/absolute/path/to/scripts/folder/scripts
+cat .env 2> /dev/null && project="$(sed 's/project=//' .env)" || project="/absolute/path/to/your/project/database"
 
 execute_stm(){
   if [[ $1 = "--help" ]]; then
@@ -47,17 +45,30 @@ execute_exo(){
   fi
 }
 
+clean() {
+	# delete all subdirs inside exo dir
+	[ rm -r $(find ./exo -mindepth 1 -maxdepth 1 -type d) 2> /dev/null ] || echo "Exo files are already deleted"
+	#remove all text files in stm dir
+	[ rm ./stm/*.txt 2> /dev/null ] || echo "Stm files already deleted"
+}
+
 if [[ $1 = "--help" ]]; then
   echo "Script to initialise databases containing static data from transit agencies.
-       Usage: ./initall.ps1 [-help] <agency-name> [<args>]
+       Usage: ./initall.ps1 [--help] <agency-name | command> [<args>]
 
-               Giving no agency names will set up all the databases for all the available agencies
+               Giving no agency names or command will set up all the databases for all the available agencies
                Available agency names:
                    exo
                    stm
                    Args:
                        --no-download       Setup the database without redownloading the required files
+
+				Available commands:
+					clean -> deletes all the txt files in the subdir of this script
            "
+
+elif [[ $1 = "clean" && $# -lt 2 ]]; then
+	clean
 
 elif [[ $1 = "stm" && $# -lt 3 ]]; then
   execute_stm $2

@@ -2,6 +2,7 @@ package dev.mainhq.bus2go.viewmodels
 
 import android.app.Application
 import android.os.Build
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.transit.realtime.GtfsRealtime.FeedMessage
@@ -120,13 +121,13 @@ class RealTimeViewModel(application : Application) : AndroidViewModel(applicatio
             engine {
                 config {
                     //FIXME this is way too long
-                    readTimeout(30, TimeUnit.SECONDS)
+                    //readTimeout(10, TimeUnit.SECONDS)
                 }
             }
         }
 
         suspend fun getHttpResponse(tldUrl : String, agency: String, routeId : String, tripHeadsign : String, stopName : String) : JsonObject? {
-            val url = "$tldUrl/?agency=${encode(agency, "utf-8")}" +
+            val url = "$tldUrl/$URL_PATH/?agency=${encode(agency, "utf-8")}" +
                     "&route_id=${encode(routeId, "utf-8")}" +
                     "&trip_headsign=${encode(tripHeadsign, "utf-8")}" +
                     "&stop_name=${encode(stopName, "utf-8")}"
