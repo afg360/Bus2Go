@@ -36,8 +36,6 @@ import java.lang.ref.WeakReference
 class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, recyclerView: WeakReference<RecyclerView>)
     : RecyclerView.Adapter<FavouritesListElemsAdapter.ViewHolder>(){
 
-        //FIXME shitty implementation for now... using a direct reference
-
     var numSelected : Int = 0
     private val recyclerView = recyclerView.get()!!
 

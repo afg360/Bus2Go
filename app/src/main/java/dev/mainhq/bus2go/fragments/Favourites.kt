@@ -1,22 +1,16 @@
 package dev.mainhq.bus2go.fragments
 
-import android.annotation.SuppressLint
 import android.content.ContentValues.TAG
 import android.content.Context
 import android.icu.util.Calendar
 import android.net.ConnectivityManager
-import android.net.LinkProperties
 import android.net.Network
-import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewTreeObserver
 import android.widget.LinearLayout
 import androidx.activity.OnBackPressedCallback
-import androidx.core.app.PendingIntentCompat.send
-import androidx.core.content.getSystemService
 import androidx.core.view.children
 import androidx.core.view.forEach
 import androidx.core.view.get
@@ -45,19 +39,17 @@ import dev.mainhq.bus2go.viewmodels.FavouritesViewModel
 import dev.mainhq.bus2go.viewmodels.RealTimeViewModel
 import dev.mainhq.bus2go.viewmodels.RoomViewModel
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.lang.ref.WeakReference
-import java.util.concurrent.Executors
-import java.util.concurrent.ScheduledExecutorService
-import java.util.concurrent.ScheduledFuture
-import java.util.concurrent.TimeUnit
 
 
 class Favourites(private val favouritesViewModel: FavouritesViewModel,
@@ -66,6 +58,7 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
     private lateinit var recyclerView : RecyclerView
     //private lateinit var listener : ViewTreeObserver.OnGlobalLayoutListener
     private lateinit var onBackPressedCallback: OnBackPressedCallback
+    private lateinit var realTimeViewModel: RealTimeViewModel
     private var isUpdating = true
 
     private enum class State{
@@ -74,8 +67,8 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val realTimeViewModel = ViewModelProvider(requireActivity())[RealTimeViewModel::class.java]
-        val internetEnabled = PreferenceManager.getDefaultSharedPreferences(requireContext())
+        realTimeViewModel = ViewModelProvider(requireActivity())[RealTimeViewModel::class.java]
+        val isRealtimeEnabled = PreferenceManager.getDefaultSharedPreferences(requireContext())
             .getBoolean("real-time-data", false)
         lifecycleScope.launch {
             favouritesViewModel.loadData()
@@ -92,7 +85,7 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
                 //check if connected to internet
                 val connectivityManager = requireActivity().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
                 val state = callbackFlow {
-                    val ghol = object : ConnectivityManager.NetworkCallback() {
+                    val networkCalleBack = object : ConnectivityManager.NetworkCallback() {
                         override fun onAvailable(network : Network) {
                             super.onAvailable(network)
                             Log.e(TAG, "The default network is now: $network")
@@ -115,34 +108,38 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
                             launch { send(State.UNAVAILABLE) }
                         }
                     }
-                    connectivityManager.registerDefaultNetworkCallback(ghol)
+                    connectivityManager.registerDefaultNetworkCallback(networkCalleBack)
                     awaitClose {
-                        connectivityManager.unregisterNetworkCallback(ghol)
+                        connectivityManager.unregisterNetworkCallback(networkCalleBack)
                     }
                 }
                 launch(Dispatchers.IO) {
                     state.collect {
-                        if (internetEnabled && it == State.AVAILABLE){
-                            val list = listExo + listSTM + listTrain
-                            //FIXME NEEDS TO BE AWAITED FOR
-                            //ONLY LOAD HERE BECAUSE USAGE OF INTERNET ONLY HERE
-                            realTimeViewModel.loadData()
-                            val mutableList = realTimeViewModel.getData(listSTM, TransitAgency.STM, roomViewModel)
-                            if (mutableList == null){
-                                //may have a disconnection or something, do it the regular way
-                                recyclerViewDisplay(view, listOf(), true)
+                        //put inside a fxn so that it can be cancelled and call back in onPause and onResume (or wtv in a fragment)
+                        /** This part allows us to update each recyclerview item from favourites in "real time", i.e. the user can see
+                         *  an updated time left displayed */
+                        //FIXME this may be wrong because wifi connectivity might be changing, doesnt account for that
+                        //doesnt update properly, when deleted doesnt register at the right time
+                        //also keeps doing requests even if the server is off (perhaps could momentarily pause these requests even if raltimeenabled for optimisations
+                        while(isUpdating){
+                            if (isRealtimeEnabled && it == State.AVAILABLE){
+                                val list = toFavouriteTransitInfoList(this, listSTM, TransitAgency.STM, true) +
+                                        toFavouriteTransitInfoList(this, listExo, TransitAgency.EXO_OTHER, true) +
+                                        toFavouriteTransitInfoList(this, listTrain, TransitAgency.EXO_TRAIN, true)
+                                
+                                recyclerViewDisplay(view, list, true)
                             }
                             else{
-                                recyclerViewDisplay(view, mutableList, true)
+                                val list = toFavouriteTransitInfoList(this, listSTM, TransitAgency.STM) +
+                                        toFavouriteTransitInfoList(this, listExo, TransitAgency.EXO_OTHER) +
+                                        toFavouriteTransitInfoList(this, listTrain, TransitAgency.EXO_TRAIN)
+                                println(list.toString())
+                                //if not, do the below
+                                recyclerViewDisplay(view, list, true)
                             }
+                            delay(1000)
                         }
-                        else{
-                            val list = toFavouriteTransitInfoList(listSTM, TransitAgency.STM) + toFavouriteTransitInfoList(listExo, TransitAgency.EXO_OTHER) +
-                                    toFavouriteTransitInfoList(listTrain, TransitAgency.EXO_TRAIN)
-                            println(list.toString())
-                            //if not, do the below
-                            recyclerViewDisplay(view, list, true)
-                        }
+                        
                     }
                 }.join()
             }
@@ -171,32 +168,6 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
 
         recyclerView = view.findViewById(R.id.favouritesRecyclerView)
         
-        /** This part allows us to update each recyclerview item from favourites in "real time", i.e. the user can see
-         *  an updated time left displayed */
-        lifecycleScope.launch(Dispatchers.IO) {
-            val connectivityManager = activity?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-            while(isUpdating){
-                val tmpListSTM = favouritesViewModel.stmBusInfo.value
-                val tmpListExo = favouritesViewModel.exoBusInfo.value
-                val tmpListTrain = favouritesViewModel.exoTrainInfo.value
-                
-                if (tmpListSTM.isNotEmpty() || tmpListExo.isNotEmpty() || tmpListTrain.isNotEmpty()) {
-                    lifecycleScope.launch{
-                        val mutableList = toFavouriteTransitInfoList(tmpListSTM, TransitAgency.STM) + toFavouriteTransitInfoList(tmpListExo, TransitAgency.EXO_OTHER) +
-                                toFavouriteTransitInfoList(tmpListTrain, TransitAgency.EXO_TRAIN)
-                        withContext(Dispatchers.Main){
-                            val favouritesListElemsAdapter = recyclerView.adapter as FavouritesListElemsAdapter?
-                            for (i in 0 until recyclerView.size) {
-                                favouritesListElemsAdapter?.updateTime(recyclerView[i] as ViewGroup, mutableList[i])
-                            }
-                        }
-                    }
-                }
-                delay(1000)
-            }
-        }
-
-        //TODO fix backend integration, memory leak and periodic refreshing
         selectAllFavouritesOnClickListener(recyclerView)
 
         parentFragment?.view?.findViewById<LinearLayout>(R.id.removeItemsWidget)?.setOnClickListener {_ ->
@@ -217,9 +188,9 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
                         }
                         lifecycleScope.launch {
                             favouritesViewModel.removeFavourites(toRemoveList)
-                            val list = (toFavouriteTransitInfoList(favouritesViewModel.stmBusInfo.value, TransitAgency.STM)
-                                    + toFavouriteTransitInfoList(favouritesViewModel.exoBusInfo.value, TransitAgency.EXO_OTHER)
-                                    + toFavouriteTransitInfoList(favouritesViewModel.exoTrainInfo.value, TransitAgency.EXO_TRAIN))
+                            val list = (toFavouriteTransitInfoList(this, favouritesViewModel.stmBusInfo.value, TransitAgency.STM, false)
+                                    + toFavouriteTransitInfoList(this, favouritesViewModel.exoBusInfo.value, TransitAgency.EXO_OTHER, false)
+                                    + toFavouriteTransitInfoList(this, favouritesViewModel.exoTrainInfo.value, TransitAgency.EXO_TRAIN, false))
                                     recyclerViewDisplay(view, list, new = true)
                         }
                         appBar?.apply { changeAppBar(this) }
@@ -229,21 +200,58 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
             }
         }
     }
-
+    
+    /*
+    override fun onResume() {
+        super.onResume()
+        isUpdating = true
+        //call the update fxn again?
+    }
+    
+    override fun onStop() {
+        super.onStop()
+        isUpdating = false
+    }
+     */
+    
     override fun onDestroyView() {
         super.onDestroyView()
         onBackPressedCallback.remove()
-
-        isUpdating = false
     }
 
 
-    /** Used to get the required data to make a list of favouriteBusInfo, adding dates to busInfo elements */
-    private suspend fun toFavouriteTransitInfoList(list : List<TransitData>, agency: TransitAgency) : MutableList<FavouriteTransitInfo> {
+    /** Used to get the required data to make a list of favouriteTransitInfo, adding dates to transitInfo elements */
+    private suspend fun toFavouriteTransitInfoList(coroutineScope: CoroutineScope, list : List<TransitData>, agency: TransitAgency, realTimeEnabled : Boolean = false) : List<FavouriteTransitInfo> {
         val times : MutableList<FavouriteTransitInfo> = mutableListOf()
         val calendar = Calendar.getInstance()
         val dayString = getDayString(calendar)
-        return roomViewModel.getFavouriteStopTimes(list, agency, dayString, calendar, times)
+        return if (realTimeEnabled){
+            //need to make it a pair with the corresponding FavouriteTransitInfo
+            val jobs = list.map { Pair(
+                coroutineScope.async(Dispatchers.IO) { roomViewModel.getFavouriteStopTime(it, agency, dayString, calendar) },
+                coroutineScope.async(Dispatchers.IO) { realTimeViewModel.getArrivalTimes(agency.toString(), it.routeId, it.direction, it.stopName) }
+            )}
+            jobs.map{
+                val staticData = it.first.await()
+                //fixme, tmp only last one choosen
+                val realTimes = it.second.await()
+                if (realTimes.isEmpty()) staticData
+                else {
+                    var toKeep : Time = realTimes.first()//realTimes.last()
+                    realTimes.forEach{ realTime ->
+                            staticData.arrivalTime?.also { staticData ->
+                                val foo = (staticData - realTime)
+                                val bar = (staticData - toKeep)
+                                //FIXME wont work properly when the actual realtime data has been updated
+                                if (foo == null || bar == null) toKeep = staticData
+                                else if (foo < bar) toKeep = realTime
+                            }
+                    }
+                    FavouriteTransitInfo(staticData.transitData, toKeep, agency)
+                }
+            }
+        }
+        else roomViewModel.getFavouriteStopTimes(list, agency, dayString, calendar, times)
     }
 
     private suspend fun recyclerViewDisplay(view : View, times : List<FavouriteTransitInfo>, new : Boolean = false){

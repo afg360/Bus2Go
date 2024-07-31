@@ -37,6 +37,7 @@ class FavouritesViewModel(private val application: Application) : AndroidViewMod
     private val _exoTrainInfo : MutableStateFlow<List<TrainData>> = MutableStateFlow(listOf())
     val exoTrainInfo : StateFlow<List<TrainData>> get() = _exoTrainInfo
 
+    /** Loads the data stored in favourites.json datastore file */
     suspend fun loadData(){
         val data = application.favouritesDataStore.data.first()
         _stmBusInfo.value = data.listSTM

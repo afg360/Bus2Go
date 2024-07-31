@@ -34,7 +34,7 @@ class TimeListElemsAdapter(private val timeData: List<Time>,
         //todo perhaps do that where the recycler is made directly instead
         if (position == 0 && !fromAlarmCreation){
             val curTime = Time(Calendar.getInstance())
-            val remainingTime = time.subtract(curTime)
+            val remainingTime = time - curTime
             if (remainingTime != null) {
                 if (remainingTime.hour == 0) holder.timeLeftTextView.text =
                     holder.itemView.context.getString(R.string.in_min, remainingTime.min.toString())

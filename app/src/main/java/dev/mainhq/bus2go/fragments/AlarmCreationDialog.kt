@@ -180,8 +180,7 @@ class AlarmCreationDialog(private val alarmCreationViewModel : AlarmCreationView
                                     's' -> set(Calendar.DAY_OF_WEEK, Calendar.SATURDAY)
                                     else -> throw IllegalStateException("Cannot have another any other char representing a day of the week")
                                 }
-                                alarmCreationViewModel.alarmBusInfo.value!!.time
-                                    .subtract(beforeTime).also {
+                                (alarmCreationViewModel.alarmBusInfo.value!!.time - beforeTime).also {
                                         if (it == null) throw IllegalStateException("An error occured trying to calculate alarm times to go off")
                                         set(Calendar.HOUR_OF_DAY, it.hour)
                                         set(Calendar.MINUTE, it.min)

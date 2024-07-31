@@ -59,6 +59,31 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+    
+    /** Use to not directly use the for loop like in the getFavouriteStopTimes method. Only used for the internet connectivity shit */
+    suspend fun getFavouriteStopTime(transitData : TransitData, agency : TransitAgency, dayString : String,
+                                      calendar : Calendar) : FavouriteTransitInfo {
+        return when(agency){
+            TransitAgency.STM -> {
+                val stopsInfoDAO = stmDatabase.stopsInfoDao()
+                FavouriteTransitInfo(transitData,
+                    stopsInfoDAO.getFavouriteStopTime(transitData.stopName, dayString, Time(calendar).toString(), transitData.direction, transitData.routeId.toInt()), agency)
+            }
+            TransitAgency.EXO_TRAIN -> {
+                val stopsTimesDAO = exoDataBase.stopTimesDao()
+                val trainInfo = transitData as TrainData
+                FavouriteTransitInfo(transitData,
+                    stopsTimesDAO.getFavouriteTrainStopTime("trains-${trainInfo.routeId}",
+                        trainInfo.stopName, trainInfo.directionId, Time(calendar).toString(), dayString), agency)
+            }
+            TransitAgency.EXO_OTHER -> {
+                val stopTimesDAO = exoDataBase.stopTimesDao()
+                val busInfo = transitData as ExoBusData
+                FavouriteTransitInfo(transitData,
+                    stopTimesDAO.getFavouriteBusStopTime(busInfo.stopName, dayString, Time(calendar).toString(), busInfo.routeId), agency)
+            }
+        }
+    }
 
     /** Return the jobs made from the async calls, only used with ExoOther when dirs.size == 1 */
     suspend fun getStopNames(coroutineScope: CoroutineScope, dirs : String, routeId: String?)
