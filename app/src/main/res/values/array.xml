@@ -6,6 +6,9 @@
         <item>@string/french</item>
         <item>@string/spanish</item>
     </array>
+    <array name="servers">
+        <!-- Add a default? -->
+    </array>
     <array name="themes">
         <item>@string/system</item>
         <item>@string/light</item>

@@ -30,6 +30,21 @@
             app:title="@string/real_time_data_updates"
             app:summary="@string/real_time_data_updates_summary"
             />
+        <!--
+        <Preference
+            app:key="server-choice"
+            app:title="Configure server"
+            app:summary="Configure the server you will connect to when gathering real time data"
+            app:dependency="real-time-data"
+            app:fragment="dev.mainhq.bus2go.fragments.preferences.ServerPreferences"
+            />
+            -->
+        <EditTextPreference
+            app:key="server-choice"
+            app:title="Configure your server"
+            app:dependency="real-time-data"
+            app:defaultValue="0.0.0.0"
+            />
         <SwitchPreferenceCompat
             app:key="auto-updates"
             app:title="@string/auto_updates"

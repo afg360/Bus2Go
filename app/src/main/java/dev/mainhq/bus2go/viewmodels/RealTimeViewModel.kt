@@ -3,6 +3,9 @@ package dev.mainhq.bus2go.viewmodels
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.preference.PreferenceManager
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.utils.Time
 import io.ktor.client.HttpClient
@@ -24,15 +27,21 @@ import java.util.concurrent.TimeoutException
 class RealTimeViewModel(application : Application) : AndroidViewModel(application) {
 
     //perhaps store also the port number in the config/.env file
-    private val domainName : String =
-        BufferedReader(application.applicationContext.resources.openRawResource(R.raw.config).reader()).readLine()
+    //need to update this value when the user makes changes here
+    private val _domainName : MutableLiveData<String> = MutableLiveData("0.0.0.0")
+    private val domainName : LiveData<String> get() = _domainName
+        //BufferedReader(application.applicationContext.resources.openRawResource(R.raw.config).reader()).readLine()
 
+    fun loadDomainName(application: Application) {
+        _domainName.value = PreferenceManager.getDefaultSharedPreferences(application).getString("server-choice", "0.0.0.0")!!
+    }
+    
     /** Make an http request to the backend server to receive the latest arrival times for a certain
      * transit info (stop name of a route).  This method also parses the data received
      **/
     
     suspend fun getArrivalTimes(agency: String, routeId: String, /** AKA direction */tripHeadsign: String, stopName: String) =
-        NetworkClient.getArrivalTimes(domainName, agency, routeId, tripHeadsign, stopName)
+        NetworkClient.getArrivalTimes(domainName.value!!, agency, routeId, tripHeadsign, stopName)
 
     //we could store this inside the favourite view model, and keep a list
     //of realtime data as a private attr

@@ -68,6 +68,7 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         realTimeViewModel = ViewModelProvider(requireActivity())[RealTimeViewModel::class.java]
+        realTimeViewModel.loadDomainName(requireActivity().application)
         val isRealtimeEnabled = PreferenceManager.getDefaultSharedPreferences(requireContext())
             .getBoolean("real-time-data", false)
         lifecycleScope.launch {
@@ -201,7 +202,6 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
         }
     }
     
-    /*
     override fun onResume() {
         super.onResume()
         isUpdating = true
@@ -212,7 +212,6 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
         super.onStop()
         isUpdating = false
     }
-     */
     
     override fun onDestroyView() {
         super.onDestroyView()
