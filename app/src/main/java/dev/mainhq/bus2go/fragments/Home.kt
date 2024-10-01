@@ -70,7 +70,7 @@ class Home(private val favouritesViewModel: FavouritesViewModel, private val roo
             }
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-                //Not needed for our purposes
+            
             }
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 //Not needed for our purposes

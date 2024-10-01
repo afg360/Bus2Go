@@ -2,26 +2,42 @@ package dev.mainhq.bus2go.viewmodels
 
 import android.app.Application
 import android.util.Log
+import android.view.View
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.preference.PreferenceManager
-import dev.mainhq.bus2go.R
+import dev.mainhq.bus2go.preferences.ExoBusData
+import dev.mainhq.bus2go.preferences.StmBusData
+import dev.mainhq.bus2go.preferences.TrainData
 import dev.mainhq.bus2go.utils.Time
+import dev.mainhq.bus2go.utils.TransitAgency
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.network.sockets.ConnectTimeoutException
+import io.ktor.client.plugins.websocket.WebSockets
+import io.ktor.client.plugins.websocket.webSocket
 import io.ktor.client.request.get
+import io.ktor.websocket.Frame
+import io.ktor.websocket.readText
+import io.ktor.websocket.send
+import kotlinx.coroutines.delay
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
-import java.io.BufferedReader
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.encodeToJsonElement
+import okhttp3.OkHttpClient
 import java.io.IOException
 import java.net.ConnectException
+import java.net.SocketTimeoutException
 import java.net.URLEncoder.encode
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeoutException
 
 //TODO cache or save the data somewhere in case used and disconnected
 class RealTimeViewModel(application : Application) : AndroidViewModel(application) {
@@ -30,7 +46,8 @@ class RealTimeViewModel(application : Application) : AndroidViewModel(applicatio
     //need to update this value when the user makes changes here
     private val _domainName : MutableLiveData<String> = MutableLiveData("0.0.0.0")
     private val domainName : LiveData<String> get() = _domainName
-        //BufferedReader(application.applicationContext.resources.openRawResource(R.raw.config).reader()).readLine()
+    private val _stmRealData : MutableLiveData<Map<String, List<String>>> = MutableLiveData(mapOf())
+    val stmRealData: LiveData<Map<String, List<String>>> get() = _stmRealData
 
     fun loadDomainName(application: Application) {
         _domainName.value = PreferenceManager.getDefaultSharedPreferences(application).getString("server-choice", "0.0.0.0")!!
@@ -39,39 +56,136 @@ class RealTimeViewModel(application : Application) : AndroidViewModel(applicatio
     /** Make an http request to the backend server to receive the latest arrival times for a certain
      * transit info (stop name of a route).  This method also parses the data received
      **/
-    
+    @Deprecated("Only a tmp/test method for when the client was making unefficient http requests. " +
+            "Use getRealTime() instead")
     suspend fun getArrivalTimes(agency: String, routeId: String, /** AKA direction */tripHeadsign: String, stopName: String) =
         NetworkClient.getArrivalTimes(domainName.value!!, agency, routeId, tripHeadsign, stopName)
+    
+    /**
+     * Get the real time data from a bus2go server by establishing a websocket with it
+     * */
+    suspend fun getRealTime(data: List<StmBusData>): Int{//, exo: List<ExoBusData>, train: List<TrainData>, view: View) {
+        return NetworkClient.getRealTime(domainName.value!!, data)//, exo, train, view, this)
+    }
 
     //we could store this inside the favourite view model, and keep a list
     //of realtime data as a private attr
-    companion object NetworkClient {
+    /**
+     * For the moment, thic companion object should only be used privately by the parent class RealTimeViewModel
+     * */
+    private companion object NetworkClient {
         //FIXME this will eventually be the official bus2go domain name, for now only a test ip address
         //private lateinit var domainName : String
         const val PORT_NUM = 8000
-        private const val URL_PATH = "api/realtime/v1"
-        private val httpClient = HttpClient(OkHttp) {
+        private const val API_VERSION = "v1"
+        private const val URL_PATH = "api/realtime/$API_VERSION/"
+        private const val TEST = "api/realtime/$API_VERSION/test"
+        private val client = HttpClient(OkHttp) {
+            install(WebSockets)
             engine {
-                config {
-                    //readTimeout(10, TimeUnit.SECONDS)
-                }
+                preconfigured = OkHttpClient.Builder()
+                    .pingInterval(20, TimeUnit.SECONDS)
+                    .build()
             }
         }
         
+        /**
+         * Test to see if websockets work...
+         * */
+        suspend fun test(domainName: String){
+            //client.webSocket(method = HttpMethod.Get, host = domainName, port = PORT_NUM, path = test) {
+            client.webSocket("ws://$domainName:$PORT_NUM/$TEST"){
+                while (true) {
+                    val myMessage = "Hello world"
+                    send(myMessage)
+                    val firstMessage = incoming.receive() as? Frame.Text
+                    println(firstMessage?.readText())
+                    val secondMessage = incoming.receive() as? Frame.Text
+                    val lst : List<Test> = Json.decodeFromString(Foo.serializer(), secondMessage!!.readText()).response
+                    lst.forEach {
+                        println("id: ${it.pId}, message: ${it.myMessage}, lst: ${it.lst}")
+                    }
+                    //attempting deserialisation of json data
+                    delay(5000)
+                }
+            }
+            client.close()
+        }
+        
+        /**
+         * A method use to establish a websocket connection with the server
+         * For the moment only accept list of stmbusdata */
+        suspend fun getRealTime(domainName: String, list: List<StmBusData>): Int{//, exo: List<ExoBusData>, train: List<TrainData>,
+                               //view: View, viewModel : RealTimeViewModel){
+            
+            try{
+                client.webSocket("ws://$domainName:$PORT_NUM/$URL_PATH"){
+                    while (true){
+                        //send the data through a channel?
+                        //val request = list.map{JsonObject(mapOf(
+                        //    "agency" to JsonPrimitive("STM"),
+                        //    "route_id" to JsonPrimitive(it.routeId),
+                        //    "trip_headsign" to JsonPrimitive(it.direction),
+                        //    "stop_name" to JsonPrimitive(it.stopName)
+                        //))}
+                        val request = list.map{
+                            Json.encodeToJsonElement(TransitInfo(TransitAgency.STM, it.routeId, it.direction, it.stopName))
+                        }
+                        println(JsonArray(request).toString())
+                        send(JsonArray(request).toString())
+                        //TODO ensure that data exchange is not fragmented!
+                        val othersMessage = incoming.receive() as? Frame.Text
+                        //check error status and response
+                        othersMessage?.also {
+                            println("Data received: ${it.readText()}")
+                            //val tmp = Json.decodeFromString(Response.serializer(), it.readText()).response
+                            val response = Json.decodeFromString<JsonObject>(it.readText())
+                            println(response)
+                            val arr = Json.decodeFromJsonElement<JsonArray>(response["response"]!!)
+                            arr.forEach{element ->
+                                println(element)
+                            }
+                            //viewModel._stmRealData.value = data
+                            //FIXME change or add a new field for favourite view models instead, when done with parsing
+                        }
+                        //task(view, othersMessage, true)
+                        delay(5000)
+                    }
+                }
+                client.close()
+                return 0
+            }
+            catch (se: SocketTimeoutException){
+                println("Could not connect to the server. Perhaps the server is not running... or does not accept connections")
+                println(se.message)
+                client.close()
+                return 1
+            }
+            catch (e: ConnectException){
+                println("There was an error trying to connect to the server")
+                println(e.message)
+                client.close()
+                return 1
+            }
+        }
+        
+        /**
+         * A test/tmp method that establishes an http request
+         * */
         suspend fun getArrivalTimes(domainName: String, agency: String,
-            routeId: String, tripHeadsign: String, stopName: String ): List<Time> {
+            routeId: String, tripHeadsign: String, stopName: String) :List<Time> {
             //FIXME temporarily HTTP instead of HTTPS
             val url = "http://$domainName:$PORT_NUM/$URL_PATH/?agency=${encode(agency, "utf-8")}" +
                     "&route_id=${encode(routeId, "utf-8")}" +
                     "&trip_headsign=${encode(tripHeadsign, "utf-8")}" +
                     "&stop_name=${encode(stopName, "utf-8")}"
             return try {
-                val response = httpClient.get(url)
+                val response = client.get(url)
                 when (response.status.value) {
                     in 200..299 -> {
                         /**
                          * Data format:
-                         * {
+                         * listOf {
                          *      "transit-info":
                          *      {
                          *          "agency": str,
@@ -126,3 +240,39 @@ class RealTimeViewModel(application : Application) : AndroidViewModel(applicatio
         }
     }
 }
+
+@Serializable
+data class Response(val response: List<JsonTransitTime>)
+
+@Serializable
+data class JsonTransitTime(
+    @SerialName("transit_info")
+    val transitInfo: TransitInfo,
+    @SerialName("arrival_time")
+    //val arrivalTime: List<String>
+    //tmp make it ints instead
+    val arrivalTime: List<Int>
+)
+
+@Serializable
+data class TransitInfo(val agency: TransitAgency,
+                       @SerialName("route_id")
+                       val routeId: String,
+                       @SerialName("trip_headsign")
+                       val tripHeadsign: String,
+                       @SerialName("stop_name")
+                       val stopName: String
+)
+
+//object Foo : JsonTransformingSerializer<TransitInfo>(TransitInfo.serializer())
+
+@Serializable
+data class Foo(val response: List<Test>)
+
+@Serializable
+data class Test(
+    @SerialName("id")
+    val pId: Int,
+    @SerialName("message")
+    val myMessage: String, val lst: List<String>)
+

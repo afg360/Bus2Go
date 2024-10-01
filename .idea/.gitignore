@@ -1,4 +1,8 @@
 # Default ignored files
 /shelf/
 /workspace.xml
+android*
+other.xml
+deployment*
+asset*
 

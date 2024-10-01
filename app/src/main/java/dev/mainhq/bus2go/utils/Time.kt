@@ -58,8 +58,7 @@ class Time(hour : Int, min : Int, sec : Int) : Parcelable {
                 )
             }
             catch (ie : IndexOutOfBoundsException){
-                Log.e("TIME INIT","The input str must be of the form HH:MM:SS")
-                throw Exception()
+                throw IllegalArgumentException("The input str must be of the form HH:MM:SS")
             }
         }
 
@@ -79,7 +78,7 @@ class Time(hour : Int, min : Int, sec : Int) : Parcelable {
 
     /** Returns null if this < time and this > 3, may need to allow negative times? */
     operator fun minus(time : Time) : Time?{
-        if (this < time &&  hour !in 0..3) return null
+        if (this < time && hour !in 0..3) return null
         else if (this == time) return Time(0,0,0)
         val realHour = if (hour in 0..3) hour + 24 else hour
         val total = realHour * 3600 + this.min * 60 + this.sec - (time.hour * 3600 + time.min * 60 + time.sec)
@@ -140,10 +139,7 @@ class Time(hour : Int, min : Int, sec : Int) : Parcelable {
     }
 
     override fun hashCode(): Int {
-        var result = hour
-        result = 31 * result + min
-        result = 31 * result + sec
-        return result
+        return hour * 3600 + min * 60 + sec
     }
 
     companion object CREATOR : Parcelable.Creator<Time> {

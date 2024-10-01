@@ -1,13 +1,10 @@
 package dev.mainhq.bus2go
 
-import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.transit.realtime.GtfsRealtime.FeedEntity
 import dev.mainhq.bus2go.preferences.StmBusData
-import dev.mainhq.bus2go.utils.Time
 import dev.mainhq.bus2go.viewmodels.RealTimeViewModel
-import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -71,6 +68,23 @@ class NetworkClientTest {
         )
     )
 
+    @Test
+    fun testWebSocket(){
+        runBlocking {
+            RealTimeViewModel.NetworkClient.test("0.0.0.0")
+        }
+    }
+    
+    @Test
+    fun testRealTime(){
+        runBlocking {
+            RealTimeViewModel.NetworkClient.getRealTime("0.0.0.0", "STM", "103",
+                "Ouest", "Côte-Saint-Luc / Hudson") {
+                
+            }
+        }
+    }
+    
     //Used for testing parsing of gtfs-realtime protobuffer
     //@Before
     //fun setupWebRequest() {

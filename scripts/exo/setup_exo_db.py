@@ -296,9 +296,7 @@ def main():
     jobs = []
 
     import sys
-    if (len(sys.argv) > 1 and sys.argv[1] == "no-download"):
-        pass
-    else:
+    if not (len(sys.argv) > 1 and sys.argv[1] == "no-download"):
         for file in files:
             thread = threading.Thread(target=download, args=(
                 "https://exo.quebec/xdata/" + file + "/google_transit.zip", file

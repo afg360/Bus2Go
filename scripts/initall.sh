@@ -1,9 +1,14 @@
 #!/bin/bash
 
+if ! python3 --version > /dev/null 2> /dev/null; then
+	echo "This script needs python to be able to run"
+	exit 1
+fi
+
 #The below should point to the folder where you want to place
 #the database inside your project
 #e.g. project=$PROJECT_FOLDER/src/main/assets/database
-cat .env 2> /dev/null && project="$(sed 's/project=//' .env)" || project="/absolute/path/to/your/project/database"
+cat .env > /dev/null 2> /dev/null && project="$(sed 's/project=//' .env | sed 's/\"//g')" || project="/absolute/path/to/your/project/database"
 
 execute_stm(){
   if [[ $1 = "--help" ]]; then
@@ -20,7 +25,7 @@ execute_stm(){
     else
       python3 setup_stm_db.py
     fi
-    cp -i 'stm_info.db' $project
+    cp -i 'stm_info.db' "$project"
     cd ..
   fi
 }
@@ -40,7 +45,7 @@ execute_exo(){
     else
       python3 setup_exo_db.py
     fi
-    cp -i 'exo_info.db' $project
+    cp -i 'exo_info.db' "$project"
     cd ..
   fi
 }
@@ -54,18 +59,18 @@ clean() {
 
 if [[ $1 = "--help" ]]; then
   echo "Script to initialise databases containing static data from transit agencies.
-       Usage: ./initall.ps1 [--help] <agency-name | command> [<args>]
+Usage: ./initall.sh [--help] <agency-name | command> [<args>]
 
-               Giving no agency names or command will set up all the databases for all the available agencies
-               Available agency names:
-                   exo
-                   stm
-                   Args:
-                       --no-download       Setup the database without redownloading the required files
+Giving no agency names or command will set up all the databases for all the available agencies
+Available agency names:
+   exo
+   stm
+   Args:
+	   --no-download       Setup the database without redownloading the required files
 
-				Available commands:
-					clean -> deletes all the txt files in the subdir of this script
-           "
+Available commands:
+	clean -> deletes all the txt files in the subdir of this script
+   "
 
 elif [[ $1 = "clean" && $# -lt 2 ]]; then
 	clean

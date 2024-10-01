@@ -49,10 +49,4 @@ object WebRequest {
             }
         }
     }
-
-    suspend fun readFromFile(context : Context) : TripUpdate{
-        return coroutineScope {
-            TripUpdate.parseFrom(context.resources.openRawResource(R.raw.response).readBytes())
-        }
-    }
 }

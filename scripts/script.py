@@ -26,7 +26,7 @@ sql = """INSERT INTO StopsInfo(stop_name,trip_headsign,days,arrival_time,stop_se
 SELECT stops.stop_name,trips.trip_headsign,calendar.days,arrival_time,stoptimes.stop_seq 
 FROM stoptimes JOIN trips ON stoptimes.trip_id = trips.trip_id 
 JOIN calendar ON calendar.service_id = trips.service_id 
-JOIN stops ON stoptimes.stop_id = stops.stop_code;
+JOIN stops ON stoptimes.stop_id = stops.stop_id;
 """
 print("Inserting data into StopsInfo")
 cur.execute(sql)

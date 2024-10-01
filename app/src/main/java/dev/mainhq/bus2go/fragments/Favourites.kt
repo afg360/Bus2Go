@@ -5,16 +5,17 @@ import android.content.Context
 import android.icu.util.Calendar
 import android.net.ConnectivityManager
 import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.core.view.children
 import androidx.core.view.forEach
-import androidx.core.view.get
-import androidx.core.view.size
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -39,13 +40,9 @@ import dev.mainhq.bus2go.viewmodels.FavouritesViewModel
 import dev.mainhq.bus2go.viewmodels.RealTimeViewModel
 import dev.mainhq.bus2go.viewmodels.RoomViewModel
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -60,6 +57,7 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
     private lateinit var onBackPressedCallback: OnBackPressedCallback
     private lateinit var realTimeViewModel: RealTimeViewModel
     private var isUpdating = true
+    private var isUsingRealTime = false
 
     private enum class State{
         LOST, AVAILABLE, UNAVAILABLE, LOSING
@@ -70,7 +68,10 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
         realTimeViewModel = ViewModelProvider(requireActivity())[RealTimeViewModel::class.java]
         realTimeViewModel.loadDomainName(requireActivity().application)
         val isRealtimeEnabled = PreferenceManager.getDefaultSharedPreferences(requireContext())
-            .getBoolean("real-time-data", false)
+                                .getBoolean("real-time-data", false)
+        
+        recyclerView = view.findViewById(R.id.favouritesRecyclerView)
+        
         lifecycleScope.launch {
             favouritesViewModel.loadData()
             val listSTM = favouritesViewModel.stmBusInfo.value
@@ -85,64 +86,54 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
             else {
                 //check if connected to internet
                 val connectivityManager = requireActivity().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-                val state = callbackFlow {
-                    val networkCalleBack = object : ConnectivityManager.NetworkCallback() {
-                        override fun onAvailable(network : Network) {
-                            super.onAvailable(network)
-                            Log.e(TAG, "The default network is now: $network")
-                            launch { send(State.AVAILABLE) }
-                        }
-
-                        override fun onLosing(network: Network, maxMsToLive: Int) {
-                            super.onLosing(network, maxMsToLive)
-                            launch { send(State.LOSING) }
-                        }
-
-                        override fun onLost(network : Network) {
-                            super.onLost(network)
-                            Log.e(TAG, "The application no longer has a default network. The last default network was $network")
-                            launch { send(State.LOST) }
-                        }
-
-                        override fun onUnavailable() {
-                            super.onUnavailable()
-                            launch { send(State.UNAVAILABLE) }
+                val networkRequest = NetworkRequest.Builder()
+                    .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                    .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                    //.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+                    .build()
+                
+                val networkCallback = object: ConnectivityManager.NetworkCallback() {
+                    // do your websocketing shit here, not outside of it
+                    override fun onAvailable(network: Network) {
+                        super.onAvailable(network)
+                        println("A network became available")
+                        //do some work in a thread?
+                        lifecycleScope.launch {
+                            if (isRealtimeEnabled){
+                                isUsingRealTime = true
+                                //getRealTime will never return if the connection is alright since it is an infinite loop
+                                //need to deal with it with perhaps an exception
+                                if (realTimeViewModel.getRealTime(listSTM) == 1) {
+                                    Toast.makeText( context, "An error occured trying to connect to the bus2go server",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
+                            else
+                                recyclerViewDisplay(view, toFavouriteTransitInfoList(this, listSTM, TransitAgency.STM), new=true)
                         }
                     }
-                    connectivityManager.registerDefaultNetworkCallback(networkCalleBack)
-                    awaitClose {
-                        connectivityManager.unregisterNetworkCallback(networkCalleBack)
+                    
+                    // Network capabilities have changed for the network
+                    override fun onCapabilitiesChanged( network: Network, networkCapabilities: NetworkCapabilities ) {
+                        super.onCapabilitiesChanged(network, networkCapabilities)
+                        val unmetered = networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
+                    }
+                    
+                    // lost network connection
+                    override fun onLost(network: Network) {
+                        super.onLost(network)
+                        println("Lost connection to network")
+                        isUsingRealTime = false
+                    }
+                    
+                    override fun onUnavailable() {
+                        super.onUnavailable()
+                        println("Networks are unavailable")
+                        isUsingRealTime = false
                     }
                 }
-                launch(Dispatchers.IO) {
-                    state.collect {
-                        //put inside a fxn so that it can be cancelled and call back in onPause and onResume (or wtv in a fragment)
-                        /** This part allows us to update each recyclerview item from favourites in "real time", i.e. the user can see
-                         *  an updated time left displayed */
-                        //FIXME this may be wrong because wifi connectivity might be changing, doesnt account for that
-                        //doesnt update properly, when deleted doesnt register at the right time
-                        //also keeps doing requests even if the server is off (perhaps could momentarily pause these requests even if raltimeenabled for optimisations
-                        while(isUpdating){
-                            if (isRealtimeEnabled && it == State.AVAILABLE){
-                                val list = toFavouriteTransitInfoList(this, listSTM, TransitAgency.STM, true) +
-                                        toFavouriteTransitInfoList(this, listExo, TransitAgency.EXO_OTHER, true) +
-                                        toFavouriteTransitInfoList(this, listTrain, TransitAgency.EXO_TRAIN, true)
-                                
-                                recyclerViewDisplay(view, list, true)
-                            }
-                            else{
-                                val list = toFavouriteTransitInfoList(this, listSTM, TransitAgency.STM) +
-                                        toFavouriteTransitInfoList(this, listExo, TransitAgency.EXO_OTHER) +
-                                        toFavouriteTransitInfoList(this, listTrain, TransitAgency.EXO_TRAIN)
-                                println(list.toString())
-                                //if not, do the below
-                                recyclerViewDisplay(view, list, true)
-                            }
-                            delay(1000)
-                        }
-                        
-                    }
-                }.join()
+                connectivityManager.registerNetworkCallback(networkRequest, networkCallback)
             }
         }
         val appBar = (parentFragment as Home).view?.findViewById<AppBarLayout>(R.id.mainAppBar)
@@ -166,8 +157,6 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
             }
         }
         requireActivity().onBackPressedDispatcher.addCallback(onBackPressedCallback)
-
-        recyclerView = view.findViewById(R.id.favouritesRecyclerView)
         
         selectAllFavouritesOnClickListener(recyclerView)
 
@@ -200,6 +189,7 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
                     .show()
             }
         }
+        
     }
     
     override fun onResume() {
@@ -248,6 +238,7 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
                     }
                     FavouriteTransitInfo(staticData.transitData, toKeep, agency)
                 }
+                
             }
         }
         else roomViewModel.getFavouriteStopTimes(list, agency, dayString, calendar, times)
