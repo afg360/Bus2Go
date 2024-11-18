@@ -4,6 +4,7 @@ import android.content.ContentValues.TAG
 import android.content.Context
 import android.icu.util.Calendar
 import android.net.ConnectivityManager
+import android.net.ConnectivityManager.NetworkCallback
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
@@ -16,6 +17,8 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.core.view.children
 import androidx.core.view.forEach
+import androidx.core.view.get
+import androidx.core.view.size
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -41,27 +44,33 @@ import dev.mainhq.bus2go.viewmodels.RealTimeViewModel
 import dev.mainhq.bus2go.viewmodels.RoomViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.lang.ref.WeakReference
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.ScheduledFuture
+import java.util.concurrent.TimeUnit
 
 
 class Favourites(private val favouritesViewModel: FavouritesViewModel,
     private val roomViewModel : RoomViewModel) : Fragment(R.layout.fragment_favourites) {
 
     private lateinit var recyclerView : RecyclerView
-    //private lateinit var listener : ViewTreeObserver.OnGlobalLayoutListener
     private lateinit var onBackPressedCallback: OnBackPressedCallback
     private lateinit var realTimeViewModel: RealTimeViewModel
+    private var connectivityManager: ConnectivityManager? = null
+    private var networkCallback: NetworkCallback? = null
     private var isUpdating = true
     private var isUsingRealTime = false
-
-    private enum class State{
-        LOST, AVAILABLE, UNAVAILABLE, LOSING
-    }
+    private var executor : ScheduledExecutorService? = null
+    private var scheduledTask: ScheduledFuture<*>? = null
+    //may perhaps be not required?
+    private var job: Job? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -71,7 +80,6 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
                                 .getBoolean("real-time-data", false)
         
         recyclerView = view.findViewById(R.id.favouritesRecyclerView)
-        
         lifecycleScope.launch {
             favouritesViewModel.loadData()
             val listSTM = favouritesViewModel.stmBusInfo.value
@@ -85,14 +93,14 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
             }
             else {
                 //check if connected to internet
-                val connectivityManager = requireActivity().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                connectivityManager = requireActivity().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
                 val networkRequest = NetworkRequest.Builder()
                     .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
                     .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
                     //.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
                     .build()
                 
-                val networkCallback = object: ConnectivityManager.NetworkCallback() {
+                networkCallback = object: NetworkCallback() {
                     // do your websocketing shit here, not outside of it
                     override fun onAvailable(network: Network) {
                         super.onAvailable(network)
@@ -110,7 +118,7 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
                                 }
                             }
                             else
-                                recyclerViewDisplay(view, toFavouriteTransitInfoList(this, listSTM, TransitAgency.STM), new=true)
+                                recyclerViewDisplay(view, toFavouriteTransitInfoList(this, listSTM, TransitAgency.STM, false), new=true)
                         }
                     }
                     
@@ -125,17 +133,25 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
                         super.onLost(network)
                         println("Lost connection to network")
                         isUsingRealTime = false
+                        //tmp solution for now. needs to adapt to data already received by server if it exists
+                        lifecycleScope.launch {
+                            recyclerViewDisplay(view, toFavouriteTransitInfoList(this, listSTM, TransitAgency.STM, false), new=true)
+                        }
                     }
                     
                     override fun onUnavailable() {
                         super.onUnavailable()
                         println("Networks are unavailable")
                         isUsingRealTime = false
+                        lifecycleScope.launch {
+                            recyclerViewDisplay(view, toFavouriteTransitInfoList(this, listSTM, TransitAgency.STM, false), new=true)
+                        }
                     }
                 }
-                connectivityManager.registerNetworkCallback(networkRequest, networkCallback)
+                connectivityManager!!.registerNetworkCallback(networkRequest, networkCallback!!)
             }
         }
+        
         val appBar = (parentFragment as Home).view?.findViewById<AppBarLayout>(R.id.mainAppBar)
         /** This part allows us to press the back button when in selection mode of favourites to get out of it */
         onBackPressedCallback = object : OnBackPressedCallback(true) {
@@ -158,8 +174,33 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
         }
         requireActivity().onBackPressedDispatcher.addCallback(onBackPressedCallback)
         
+        executor = Executors.newSingleThreadScheduledExecutor()
+        //TODO check if in realtime is on.
+        //FIXME this part crashes/creates a memory leak!!!!!!!
+        val weakRefRecyclerView = WeakReference(recyclerView)
+        scheduledTask = executor!!.scheduleWithFixedDelay({
+            val tmpListSTM = favouritesViewModel.stmBusInfo.value
+            val tmpListExo = favouritesViewModel.exoBusInfo.value
+            val tmpListTrain = favouritesViewModel.exoTrainInfo.value
+            
+            if (tmpListSTM.isNotEmpty() || tmpListExo.isNotEmpty() || tmpListTrain.isNotEmpty()) {
+                job = lifecycleScope.launch{
+                    //for now assume realtime doesn't work
+                    val mutableList = toFavouriteTransitInfoList(this, tmpListSTM, TransitAgency.STM) + toFavouriteTransitInfoList(this, tmpListExo, TransitAgency.EXO_OTHER) +
+                            toFavouriteTransitInfoList(this, tmpListTrain, TransitAgency.EXO_TRAIN)
+                    withContext(Dispatchers.Main){
+                        weakRefRecyclerView.get()?.also {
+                            val favouritesListElemsAdapter = it.adapter as FavouritesListElemsAdapter?
+                            for (i in 0 until it.size) {
+                                favouritesListElemsAdapter?.updateTime(it[i] as ViewGroup, mutableList[i])
+                            }
+                        }
+                    }
+                }
+            }
+        }, 0, 1, TimeUnit.SECONDS)
+        
         selectAllFavouritesOnClickListener(recyclerView)
-
         parentFragment?.view?.findViewById<LinearLayout>(R.id.removeItemsWidget)?.setOnClickListener {_ ->
             this.context?.also { context ->
                 MaterialAlertDialogBuilder(context)
@@ -206,6 +247,13 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
     override fun onDestroyView() {
         super.onDestroyView()
         onBackPressedCallback.remove()
+        networkCallback?.also{
+            connectivityManager?.unregisterNetworkCallback(it)
+        }
+        
+        job?.cancel()
+        scheduledTask?.cancel(true)
+        executor?.shutdown()
     }
 
 

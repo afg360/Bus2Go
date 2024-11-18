@@ -222,7 +222,9 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
         }
     }
 
-    /** Only applies for when the arrival time exists (for some buses, some days do not have any trips */
+    /**
+     * Update the current time for each favourite
+     * Only applies for when the arrival time exists (for some buses, some days do not have any trips */
     fun updateTime(viewGroup : ViewGroup, favouritesBusInfo: FavouriteTransitInfo){
         val container = viewGroup[0] as ViewGroup
         favouritesBusInfo.arrivalTime?.also {

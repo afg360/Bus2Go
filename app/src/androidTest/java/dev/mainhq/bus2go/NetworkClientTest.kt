@@ -76,12 +76,25 @@ class NetworkClientTest {
     }
     
     @Test
-    fun testRealTime(){
+    fun testRandomRealTimeData(){
         runBlocking {
-            RealTimeViewModel.NetworkClient.getRealTime("0.0.0.0", "STM", "103",
-                "Ouest", "Côte-Saint-Luc / Hudson") {
-                
-            }
+            RealTimeViewModel.NetworkClient.getRandom("0.0.0.0")
+        }
+    }
+    
+    @Test
+    fun testRealTimeData() {
+        runBlocking {
+            RealTimeViewModel.NetworkClient.getRealTime("0.0.0.0",
+                listOf(
+                    StmBusData(
+                        "de Monkland / Royal",
+                        "103",
+                        0,
+                        "Est",
+                        "foo"
+                    )
+                ))
         }
     }
     

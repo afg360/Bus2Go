@@ -73,7 +73,7 @@ class RealTimeViewModel(application : Application) : AndroidViewModel(applicatio
     /**
      * For the moment, thic companion object should only be used privately by the parent class RealTimeViewModel
      * */
-    private companion object NetworkClient {
+    companion object NetworkClient {
         //FIXME this will eventually be the official bus2go domain name, for now only a test ip address
         //private lateinit var domainName : String
         const val PORT_NUM = 8000
@@ -112,6 +112,17 @@ class RealTimeViewModel(application : Application) : AndroidViewModel(applicatio
             client.close()
         }
         
+        suspend fun getRandom(domainName: String){
+            client.webSocket("ws://$domainName:$PORT_NUM/$TEST/random") {
+                while(true){
+                    val message = incoming.receive() as? Frame.Text
+                    println(message?.readText())
+                    val ghol = Json.decodeFromString<Response>(message!!.readText())
+                    println(ghol)
+                }
+            }
+        }
+        
         /**
          * A method use to establish a websocket connection with the server
          * For the moment only accept list of stmbusdata */
@@ -121,13 +132,6 @@ class RealTimeViewModel(application : Application) : AndroidViewModel(applicatio
             try{
                 client.webSocket("ws://$domainName:$PORT_NUM/$URL_PATH"){
                     while (true){
-                        //send the data through a channel?
-                        //val request = list.map{JsonObject(mapOf(
-                        //    "agency" to JsonPrimitive("STM"),
-                        //    "route_id" to JsonPrimitive(it.routeId),
-                        //    "trip_headsign" to JsonPrimitive(it.direction),
-                        //    "stop_name" to JsonPrimitive(it.stopName)
-                        //))}
                         val request = list.map{
                             Json.encodeToJsonElement(TransitInfo(TransitAgency.STM, it.routeId, it.direction, it.stopName))
                         }
@@ -137,14 +141,9 @@ class RealTimeViewModel(application : Application) : AndroidViewModel(applicatio
                         val othersMessage = incoming.receive() as? Frame.Text
                         //check error status and response
                         othersMessage?.also {
-                            println("Data received: ${it.readText()}")
-                            //val tmp = Json.decodeFromString(Response.serializer(), it.readText()).response
-                            val response = Json.decodeFromString<JsonObject>(it.readText())
-                            println(response)
-                            val arr = Json.decodeFromJsonElement<JsonArray>(response["response"]!!)
-                            arr.forEach{element ->
-                                println(element)
-                            }
+                            val response = Json.decodeFromString<Response>(it.readText())
+                            println("Data received: $response")
+                            
                             //viewModel._stmRealData.value = data
                             //FIXME change or add a new field for favourite view models instead, when done with parsing
                         }
