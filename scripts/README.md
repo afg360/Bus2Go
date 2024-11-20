@@ -11,7 +11,7 @@ For linux users, ensure the script is executable by running:
 ```bash
 chmod u+x initall.sh
 ```
-** The script for linux should be ran under bash. Before using the script for linux, be sure to initialise the right _$path_
+**The script for linux should be ran under bash. Before using the script for linux, be sure to initialise the right _$path_
 and _$project_ variables either inside the initall.sh.**
 
 # Syntax

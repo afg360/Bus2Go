@@ -2,12 +2,12 @@ package dev.mainhq.bus2go
 
 import android.os.Build
 import android.os.Bundle
-import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import dev.mainhq.bus2go.adapters.StopListElemsAdapter
+import dev.mainhq.bus2go.utils.BusExtrasInfo
 import dev.mainhq.bus2go.utils.TransitAgency
 import dev.mainhq.bus2go.viewmodels.FavouritesViewModel
 import kotlinx.coroutines.Dispatchers
@@ -35,25 +35,25 @@ class ChooseStop() : BaseActivity() {
         val stopNames : List<String> = intent.getStringArrayListExtra("stops") ?: listOf()
 
         val agency = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getSerializableExtra (AGENCY, TransitAgency::class.java) ?: throw AssertionError("AGENCY is Null")
+            intent.getSerializableExtra (BusExtrasInfo.AGENCY.name, TransitAgency::class.java) ?: throw AssertionError("AGENCY is Null")
         } else {
-            intent.getSerializableExtra (AGENCY) as TransitAgency? ?: throw AssertionError("AGENCY is Null")
+            intent.getSerializableExtra (BusExtrasInfo.AGENCY.name) as TransitAgency? ?: throw AssertionError("AGENCY is Null")
         }
         if (stopNames.isNotEmpty()) {
             val recyclerView: RecyclerView = findViewById(R.id.stop_recycle_view)
             val layoutManager = LinearLayoutManager(applicationContext)
 
             //nullable values
-            val directionId = intent.extras?.getInt(DIRECTION_ID)
-            val trainNum = intent.extras?.getInt(TRAIN_NUM)
-            val lastStop = intent.getStringExtra(LAST_STOP)
+            val directionId = intent.extras?.getInt(BusExtrasInfo.DIRECTION_ID.name)
+            val trainNum = intent.extras?.getInt(BusExtrasInfo.TRAIN_NUM.name)
+            val lastStop = intent.getStringExtra(BusExtrasInfo.LAST_STOP.name)
             val headsign = intent.getStringExtra("headsign")
 
             //non-nullable values
-            val routeId = intent.getStringExtra(ROUTE_ID)!!
-            val direction = intent.getStringExtra(DIRECTION)!!
+            val routeId = intent.getStringExtra(BusExtrasInfo.ROUTE_ID.name)!!
+            val direction = intent.getStringExtra(BusExtrasInfo.DIRECTION.name)!!
             if (agency == TransitAgency.EXO_TRAIN){
-                routeName = intent.getStringExtra(ROUTE_NAME) ?: throw IllegalStateException("Forgot to give a route name to a train!")
+                routeName = intent.getStringExtra(BusExtrasInfo.ROUTE_NAME.name) ?: throw IllegalStateException("Forgot to give a route name to a train!")
             }
             else if (agency == TransitAgency.STM && routeId.toInt() == -1)
                     throw IllegalStateException("Forgot to give a route id to an stm bus!")

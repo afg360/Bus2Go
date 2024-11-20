@@ -6,13 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textview.MaterialTextView
-import dev.mainhq.bus2go.AGENCY
-import dev.mainhq.bus2go.ROUTE_NAME
-import dev.mainhq.bus2go.BUS_NUM
 import dev.mainhq.bus2go.ChooseDirection
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.ROUTE_ID
-import dev.mainhq.bus2go.TRAIN_NUM
+import dev.mainhq.bus2go.utils.BusExtrasInfo
 import dev.mainhq.bus2go.utils.TransitAgency
 import dev.mainhq.bus2go.utils.TransitInfo
 
@@ -39,12 +35,12 @@ class BusListElemsAdapter(private val busData: List<TransitInfo>) :
         holder.busDirView.text = data.routeName
         holder.itemView.setOnClickListener {
             val intent = Intent(it.context, ChooseDirection::class.java)
-            intent.putExtra(ROUTE_NAME, data.routeName)
-            intent.putExtra(ROUTE_ID, holder.busNumView.text.toString())
+            intent.putExtra(BusExtrasInfo.ROUTE_NAME.name, data.routeName)
+            intent.putExtra(BusExtrasInfo.ROUTE_ID.name, holder.busNumView.text.toString())
             data.trainNum?.apply {
-                intent.putExtra(TRAIN_NUM, this)
+                intent.putExtra(BusExtrasInfo.TRAIN_NUM.name, this)
             }
-            intent.putExtra(AGENCY, data.transitAgency)
+            intent.putExtra(BusExtrasInfo.AGENCY.name, data.transitAgency)
             it.context.startActivity(intent)
             it.clearFocus()
         }

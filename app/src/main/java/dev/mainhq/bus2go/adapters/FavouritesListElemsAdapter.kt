@@ -17,18 +17,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.textview.MaterialTextView
-import dev.mainhq.bus2go.AGENCY
-import dev.mainhq.bus2go.DIRECTION
-import dev.mainhq.bus2go.DIRECTION_ID
 import dev.mainhq.bus2go.MainActivity
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.ROUTE_ID
 import dev.mainhq.bus2go.Times
 import dev.mainhq.bus2go.fragments.FavouriteTransitInfo
 import dev.mainhq.bus2go.fragments.Home
 import dev.mainhq.bus2go.preferences.ExoBusData
 import dev.mainhq.bus2go.preferences.StmBusData
 import dev.mainhq.bus2go.preferences.TrainData
+import dev.mainhq.bus2go.utils.BusExtrasInfo
 import dev.mainhq.bus2go.utils.TransitAgency
 import dev.mainhq.bus2go.utils.Time
 import java.lang.ref.WeakReference
@@ -269,22 +266,22 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
     private fun startTimes(holder : ViewHolder, view : View, info : FavouriteTransitInfo){
         val intent = Intent(view.context, Times::class.java)
         intent.putExtra("stopName", holder.stopNameTextView.text as String)
-        intent.putExtra(AGENCY, info.agency)
+        intent.putExtra(BusExtrasInfo.AGENCY.name, info.agency)
         when (info.agency) {
             TransitAgency.EXO_TRAIN -> {
                 info.transitData as TrainData
-                intent.putExtra(DIRECTION_ID, info.transitData.directionId)
-                intent.putExtra(ROUTE_ID, info.transitData.routeId)
+                intent.putExtra(BusExtrasInfo.DIRECTION_ID.name, info.transitData.directionId)
+                intent.putExtra(BusExtrasInfo.ROUTE_ID.name, info.transitData.routeId)
             }
             TransitAgency.STM -> {
                 info.transitData as StmBusData
-                intent.putExtra(ROUTE_ID, info.transitData.routeId)
-                intent.putExtra(DIRECTION, info.transitData.direction)
+                intent.putExtra(BusExtrasInfo.ROUTE_ID.name, info.transitData.routeId)
+                intent.putExtra(BusExtrasInfo.DIRECTION.name, info.transitData.direction)
 
             }
             TransitAgency.EXO_OTHER -> {
                 info.transitData as ExoBusData
-                intent.putExtra(ROUTE_ID, info.transitData.direction)
+                intent.putExtra(BusExtrasInfo.ROUTE_ID.name, info.transitData.direction)
                 intent.putExtra("headsign", holder.tripHeadsignTextView.text as String)
             }
         }

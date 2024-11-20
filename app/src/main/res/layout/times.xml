@@ -15,6 +15,15 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         />
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/no_available_transit_left_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:textAlignment="center"
+        android:text="No available transit left for today"
+        android:textSize="15pt"
+        />
     
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"

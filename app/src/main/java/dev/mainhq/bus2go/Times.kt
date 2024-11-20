@@ -11,11 +11,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import android.icu.util.Calendar
 import android.os.Build
+import android.view.View
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.textview.MaterialTextView
+import dev.mainhq.bus2go.utils.BusExtrasInfo
 import dev.mainhq.bus2go.utils.TransitAgency
 import dev.mainhq.bus2go.utils.getDayString
 import dev.mainhq.bus2go.viewmodels.RoomViewModel
+import io.ktor.http.CacheControl
 
 //todo
 //must be careful when dealing with hours AFTER 23:59:59
@@ -31,71 +34,70 @@ class Times : BaseActivity() {
         val stopName = intent.getStringExtra("stopName")!!
         assert (stopName.isNotEmpty())
         val agency = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getSerializableExtra (AGENCY, TransitAgency::class.java) ?: throw AssertionError("AGENCY is Null")
+            intent.getSerializableExtra (BusExtrasInfo.AGENCY.name, TransitAgency::class.java) ?: throw AssertionError("AGENCY is Null")
         } else {
-            intent.getSerializableExtra (AGENCY) as TransitAgency? ?: throw AssertionError("AGENCY is Null")
+            intent.getSerializableExtra (BusExtrasInfo.AGENCY.name) as TransitAgency? ?: throw AssertionError("AGENCY is Null")
         }
         fromAlarmCreation = intent.getBooleanExtra("ALARMS", false)
 
-        //val routeId = intent.extras?.getInt(ROUTE_ID)
+        //val routeId = intent.extras?.getInt(BusExtrasInfo.ROUTE_ID.name)
         val roomViewModel = ViewModelProvider(this)[RoomViewModel::class.java]
         val calendar : Calendar = Calendar.getInstance()
         val dayString = getDayString(calendar)
         val curTime = Time(calendar)
+        val textView = findViewById<MaterialTextView>(R.id.time_title_text_view)
         when(agency){
             TransitAgency.STM -> {
                 //FIXME this may fail in the case the route id is a metro or other stuff?
-                val routeId = intent.extras!!.getString(ROUTE_ID)!!.toInt()
-                val direction = intent.extras!!.getString(DIRECTION)!!
-                //val directionId = intent.extras!!.getInt(DIRECTION_ID)
-                val textView = findViewById<MaterialTextView>(R.id.time_title_text_view)
+                val routeId = intent.extras!!.getString(BusExtrasInfo.ROUTE_ID.name)!!.toInt()
+                val direction = intent.extras!!.getString(BusExtrasInfo.DIRECTION.name)!!
+                //val directionId = intent.extras!!.getInt(BusExtrasInfo.DIRECTION.name_ID)
                 textView.text = "$routeId $direction - $stopName"
                 lifecycleScope.launch {
                     val stopTimes = roomViewModel.getStopTimes(stopName, dayString, curTime.toString(), direction, agency, routeId)
-                    withContext(Dispatchers.Main) {
-                        //If stopTimes.isEmpty, say that it is empty
-                        val recyclerView: RecyclerView = findViewById(R.id.time_recycle_view)
-                        val layoutManager = LinearLayoutManager(applicationContext)
-                        layoutManager.orientation = LinearLayoutManager.VERTICAL
-                        recyclerView.layoutManager = layoutManager
-                        //need to improve that code to make it more safe
-                        recyclerView.adapter = TimeListElemsAdapter(stopTimes, fromAlarmCreation)
-                    }
+                    displayRecyclerView(stopTimes)
                 }
             }
             TransitAgency.EXO_TRAIN -> {
-                val routeId = intent.extras!!.getInt(ROUTE_ID)
-                val directionId = intent.extras!!.getInt(DIRECTION_ID)
+                val routeId = intent.extras!!.getInt(BusExtrasInfo.ROUTE_ID.name)
+                val directionId = intent.extras!!.getInt(BusExtrasInfo.DIRECTION_ID.name)
+                textView.text = "$routeId $directionId - $stopName"
                 lifecycleScope.launch {
                     val stopTimes = roomViewModel.getTrainStopTimes(routeId, stopName, directionId, curTime.toString(), dayString)
-                    withContext(Dispatchers.Main) {
-                        //If stopTimes.isEmpty, say that it is empty
-                        val recyclerView: RecyclerView = findViewById(R.id.time_recycle_view)
-                        val layoutManager = LinearLayoutManager(applicationContext)
-                        layoutManager.orientation = LinearLayoutManager.VERTICAL
-                        recyclerView.layoutManager = layoutManager
-                        //need to improve that code to make it more safe
-                        recyclerView.adapter = TimeListElemsAdapter(stopTimes, fromAlarmCreation)
-                    }
+                    displayRecyclerView(stopTimes)
                 }
             }
 
             TransitAgency.EXO_OTHER -> {
-                val routeId = intent.extras!!.getInt(ROUTE_ID)
+                val routeId = intent.extras!!.getInt(BusExtrasInfo.ROUTE_ID.name)
                 val headsign = intent.getStringExtra("headsign")!!
+                textView.text = "$routeId $headsign - $stopName"
                 lifecycleScope.launch {
                     val stopTimes = roomViewModel.getStopTimes(stopName, dayString, curTime.toString(), headsign, agency, routeId)
-                    withContext(Dispatchers.Main) {
-                        //If stopTimes.isEmpty, say that it is empty
-                        val recyclerView: RecyclerView = findViewById(R.id.time_recycle_view)
-                        val layoutManager = LinearLayoutManager(applicationContext)
-                        layoutManager.orientation = LinearLayoutManager.VERTICAL
-                        recyclerView.layoutManager = layoutManager
-                        //need to improve that code to make it more safe
-                        recyclerView.adapter = TimeListElemsAdapter(stopTimes, fromAlarmCreation)
-                    }
+                    displayRecyclerView(stopTimes)
                 }
             }
         }
+    }
+    
+    private suspend fun displayRecyclerView(stopTimes: List<Time>){
+        withContext(Dispatchers.Main) {
+            //If stopTimes.isEmpty, say that it is empty
+            val recyclerView: RecyclerView = findViewById(R.id.time_recycle_view)
+            if (stopTimes.isEmpty()){
+                recyclerView.visibility = View.GONE
+                val textView = findViewById<MaterialTextView>(R.id.no_available_transit_left_text_view)
+                textView.visibility = View.VISIBLE
+                textView.text
+            }
+            else{
+                val layoutManager = LinearLayoutManager(applicationContext)
+                layoutManager.orientation = LinearLayoutManager.VERTICAL
+                recyclerView.layoutManager = layoutManager
+                //need to improve that code to make it more safe
+                recyclerView.adapter = TimeListElemsAdapter(stopTimes, fromAlarmCreation)
+            }
+        }
+        
     }
 }

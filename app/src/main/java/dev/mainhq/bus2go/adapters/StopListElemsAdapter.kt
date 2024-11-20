@@ -7,16 +7,13 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textview.MaterialTextView
-import dev.mainhq.bus2go.AGENCY
-import dev.mainhq.bus2go.DIRECTION
-import dev.mainhq.bus2go.DIRECTION_ID
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.ROUTE_ID
 import dev.mainhq.bus2go.Times
 import dev.mainhq.bus2go.preferences.ExoBusData
 import dev.mainhq.bus2go.preferences.StmBusData
 import dev.mainhq.bus2go.preferences.TrainData
 import dev.mainhq.bus2go.preferences.TransitData
+import dev.mainhq.bus2go.utils.BusExtrasInfo
 import dev.mainhq.bus2go.utils.TransitAgency
 import dev.mainhq.bus2go.viewmodels.FavouritesViewModel
 
@@ -124,16 +121,16 @@ class StopListElemsAdapter(private val stopNames: List<String>, private val list
                 intent.putExtra("stopName", stopName)
                 when (agency) {
                     TransitAgency.EXO_TRAIN -> {
-                        intent.putExtra(DIRECTION_ID, directionId!!)
-                        intent.putExtra(ROUTE_ID, routeId!!)
+                        intent.putExtra(BusExtrasInfo.DIRECTION_ID.name, directionId!!)
+                        intent.putExtra(BusExtrasInfo.ROUTE_ID.name, routeId!!)
                     }
                     TransitAgency.STM -> {
-                        intent.putExtra(DIRECTION, direction!!)
-                        intent.putExtra(ROUTE_ID, routeId!!)
+                        intent.putExtra(BusExtrasInfo.DIRECTION.name, direction!!)
+                        intent.putExtra(BusExtrasInfo.ROUTE_ID.name, routeId!!)
                     }
                     else -> intent.putExtra("headsign", headsign!!)
                 }
-                intent.putExtra(AGENCY, agency)
+                intent.putExtra(BusExtrasInfo.AGENCY.name, agency)
                 it.context.startActivity(intent)
                 it.clearFocus()
             }
