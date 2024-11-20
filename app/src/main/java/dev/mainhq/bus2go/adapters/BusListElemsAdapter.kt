@@ -13,6 +13,7 @@ import dev.mainhq.bus2go.ChooseDirection
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.ROUTE_ID
 import dev.mainhq.bus2go.TRAIN_NUM
+import dev.mainhq.bus2go.utils.TransitAgency
 import dev.mainhq.bus2go.utils.TransitInfo
 
 //TODO
@@ -46,6 +47,21 @@ class BusListElemsAdapter(private val busData: List<TransitInfo>) :
             intent.putExtra(AGENCY, data.transitAgency)
             it.context.startActivity(intent)
             it.clearFocus()
+        }
+        
+        when(data.transitAgency){
+            TransitAgency.STM -> {
+                holder.busNumView.setTextColor(holder.itemView.resources .getColor(R.color.basic_blue, null))
+                holder.busDirView.setTextColor(holder.itemView.resources .getColor(R.color.basic_blue, null))
+            }
+            TransitAgency.EXO_TRAIN -> {
+                holder.busNumView.setTextColor(holder.itemView.resources .getColor(R.color.orange, null))
+                holder.busDirView.setTextColor(holder.itemView.resources .getColor(R.color.orange, null))
+            }
+            TransitAgency.EXO_OTHER -> {
+                holder.busNumView.setTextColor(holder.itemView.resources .getColor(R.color.basic_purple, null))
+                holder.busDirView.setTextColor(holder.itemView.resources .getColor(R.color.basic_purple, null))
+            }
         }
     }
 

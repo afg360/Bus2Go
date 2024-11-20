@@ -12,6 +12,7 @@ import kotlinx.coroutines.withContext
 import android.icu.util.Calendar
 import android.os.Build
 import androidx.lifecycle.ViewModelProvider
+import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.utils.TransitAgency
 import dev.mainhq.bus2go.utils.getDayString
 import dev.mainhq.bus2go.viewmodels.RoomViewModel
@@ -23,14 +24,13 @@ import dev.mainhq.bus2go.viewmodels.RoomViewModel
 class Times : BaseActivity() {
 
     private var fromAlarmCreation = false
-    private lateinit var agency: TransitAgency
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.times)
         val stopName = intent.getStringExtra("stopName")!!
         assert (stopName.isNotEmpty())
-        agency = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        val agency = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.getSerializableExtra (AGENCY, TransitAgency::class.java) ?: throw AssertionError("AGENCY is Null")
         } else {
             intent.getSerializableExtra (AGENCY) as TransitAgency? ?: throw AssertionError("AGENCY is Null")
@@ -48,6 +48,8 @@ class Times : BaseActivity() {
                 val routeId = intent.extras!!.getString(ROUTE_ID)!!.toInt()
                 val direction = intent.extras!!.getString(DIRECTION)!!
                 //val directionId = intent.extras!!.getInt(DIRECTION_ID)
+                val textView = findViewById<MaterialTextView>(R.id.time_title_text_view)
+                textView.text = "$routeId $direction - $stopName"
                 lifecycleScope.launch {
                     val stopTimes = roomViewModel.getStopTimes(stopName, dayString, curTime.toString(), direction, agency, routeId)
                     withContext(Dispatchers.Main) {

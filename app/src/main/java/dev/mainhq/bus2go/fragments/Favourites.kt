@@ -60,12 +60,11 @@ import java.util.concurrent.TimeUnit
 class Favourites(private val favouritesViewModel: FavouritesViewModel,
     private val roomViewModel : RoomViewModel) : Fragment(R.layout.fragment_favourites) {
 
-    private lateinit var recyclerView : RecyclerView
     private lateinit var onBackPressedCallback: OnBackPressedCallback
     private lateinit var realTimeViewModel: RealTimeViewModel
     private var connectivityManager: ConnectivityManager? = null
     private var networkCallback: NetworkCallback? = null
-    private var isUpdating = true
+    //private var isUpdating = true
     private var isUsingRealTime = false
     private var executor : ScheduledExecutorService? = null
     private var scheduledTask: ScheduledFuture<*>? = null
@@ -79,7 +78,7 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
         val isRealtimeEnabled = PreferenceManager.getDefaultSharedPreferences(requireContext())
                                 .getBoolean("real-time-data", false)
         
-        recyclerView = view.findViewById(R.id.favouritesRecyclerView)
+        val recyclerView = view.findViewById<RecyclerView>(R.id.favouritesRecyclerView)
         lifecycleScope.launch {
             favouritesViewModel.loadData()
             val listSTM = favouritesViewModel.stmBusInfo.value
@@ -94,6 +93,12 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
             else {
                 //check if connected to internet
                 connectivityManager = requireActivity().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                if (connectivityManager?.activeNetwork == null){
+                    println("Not connected to the internet yet")
+                    lifecycleScope.launch {
+                        recyclerViewDisplay(view, toFavouriteTransitInfoList(this, listSTM, TransitAgency.STM, false), new=true)
+                    }
+                }
                 val networkRequest = NetworkRequest.Builder()
                     .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
                     .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
@@ -126,6 +131,7 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
                     override fun onCapabilitiesChanged( network: Network, networkCapabilities: NetworkCapabilities ) {
                         super.onCapabilitiesChanged(network, networkCapabilities)
                         val unmetered = networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
+                        //println("Network Capabilities have changed")
                     }
                     
                     // lost network connection
@@ -157,16 +163,16 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
         onBackPressedCallback = object : OnBackPressedCallback(true) {
             /** Hides all the checkboxes of the items in the recyclerview, deselects them, and puts back the searchbar as the nav bar */
             override fun handleOnBackPressed() {
-                val recyclerView = view.findViewById<RecyclerView>(R.id.favouritesRecyclerView)
-                recyclerView.tag?.also {recTag ->
+                val innerRecyclerView = view.findViewById<RecyclerView>(R.id.favouritesRecyclerView)
+                innerRecyclerView.tag?.also {recTag ->
                     /** Establish original layout (i.e. margins) */
                     if (recTag as String == "selected"){
-                        recyclerView.forEach {
-                            (recyclerView.adapter as FavouritesListElemsAdapter).unSelect(it as ViewGroup)
+                        innerRecyclerView.forEach {
+                            (innerRecyclerView.adapter as FavouritesListElemsAdapter).unSelect(it as ViewGroup)
                             it.findViewById<MaterialCheckBox>(R.id.favourites_check_box).visibility = View.GONE
                             setMargins(it.findViewById(R.id.favouritesDataContainer), 20, 20)
                         }
-                        recyclerView.tag = "unselected"
+                        innerRecyclerView.tag = "unselected"
                     }
                 }
                 appBar?.apply { changeAppBar(this) }
@@ -176,7 +182,6 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
         
         executor = Executors.newSingleThreadScheduledExecutor()
         //TODO check if in realtime is on.
-        //FIXME this part crashes/creates a memory leak!!!!!!!
         val weakRefRecyclerView = WeakReference(recyclerView)
         scheduledTask = executor!!.scheduleWithFixedDelay({
             val tmpListSTM = favouritesViewModel.stmBusInfo.value
@@ -233,6 +238,7 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
         
     }
     
+    /*
     override fun onResume() {
         super.onResume()
         isUpdating = true
@@ -243,6 +249,7 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
         super.onStop()
         isUpdating = false
     }
+     */
     
     override fun onDestroyView() {
         super.onDestroyView()

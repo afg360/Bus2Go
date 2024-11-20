@@ -64,45 +64,7 @@ suspend fun setup(coroutineScope: CoroutineScope, query : String, fragment : Fra
     dbExo.close()
 }
 
-suspend fun setup(query : String, activity : AppCompatActivity, color : Int?){
-    val dbSTM = Room.databaseBuilder(activity, AppDatabaseSTM::class.java, "stm_info")
-        .createFromAsset("database/stm_info.db").build()
-    val dbExo =Room.databaseBuilder(activity, AppDatabaseExo::class.java, "exo_info")
-        .createFromAsset("database/exo_info.db").build()
-    val jobSTM = activity.lifecycleScope.async {
-        val routes = dbSTM.routesDao()
-        val list = routes.getBusRouteInfo(FuzzyQuery(query))
-        list.toMutableList().map {
-            TransitInfo(it.routeId, it.routeName, null, TransitAgency.STM)
-        }
-    }
-    val jobExo = activity.lifecycleScope.async {
-        val routes = dbExo.routesDao()
-        val list = routes.getBusRouteInfo(FuzzyQuery(query, true))
-        list.toMutableList().map {
-            TransitInfo(it.routeId.split("-", limit = 2)[1], it.routeName, null, TransitAgency.EXO_OTHER)
-        }
-    }
-    val list = jobSTM.await() + jobExo.await()
-    displayBuses(list, activity, color)
-    dbSTM.close()
-    dbExo.close()
-}
 
-private suspend fun displayBuses(list : List<TransitInfo>, activity: AppCompatActivity, color : Int?){
-    //todo
-    //need to handle queries where french accents are needed
-    //val parsable = Parser.toParsable(query)
-    //todo need to implement fuzzyquery
-    withContext(Dispatchers.Main){
-        val recyclerView : RecyclerView = activity.findViewById(R.id.search_recycle_view)
-        val layoutManager = LinearLayoutManager(activity.applicationContext)
-        //color?.let { recyclerView.setBackgroundColor(activity.resources.getColor(it, null)) }
-        recyclerView.adapter = BusListElemsAdapter(list)
-        layoutManager.orientation = LinearLayoutManager.VERTICAL
-        recyclerView.layoutManager = layoutManager
-    }
-}
 
 /** Deals with french characters **/
 fun toParsable(txt: String): String {
