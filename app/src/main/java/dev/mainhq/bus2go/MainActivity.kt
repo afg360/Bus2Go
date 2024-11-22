@@ -28,7 +28,6 @@ import java.util.Calendar
 class MainActivity() : BaseActivity() {
 
     private lateinit var activityType : ActivityType
-    //var realTime : Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,14 +36,9 @@ class MainActivity() : BaseActivity() {
         //    startActivity(intent)
         //}
 
-        /* THEME must be set before setContentView */
-        //TODO must also setup the color of all the drawables needed
-        //AppThemeState.setTheme(this)
         setContentView(R.layout.main_activity)
-        val favouritesViewModel = ViewModelProvider(this)[FavouritesViewModel::class.java]
-        val roomViewModel = ViewModelProvider(this)[RoomViewModel::class.java]
         activityType = ActivityType.HOME
-        val home = Home(favouritesViewModel, roomViewModel)
+        val home = Home()
         supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer, home).commit()
 
         val alarmViewModel = ViewModelProvider(this)[AlarmCreationViewModel::class.java]
@@ -55,7 +49,7 @@ class MainActivity() : BaseActivity() {
                     // Respond to navigation item 1 click
                     if (activityType != ActivityType.HOME) {
                         supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer,
-                            Home(favouritesViewModel, roomViewModel)).commit()
+                            Home()).commit()
                         activityType = ActivityType.HOME
                     }
                     true

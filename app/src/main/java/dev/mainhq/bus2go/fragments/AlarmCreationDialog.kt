@@ -16,6 +16,7 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.setFragmentResultListener
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.textview.MaterialTextView
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.MaterialTimePicker.INPUT_MODE_KEYBOARD
@@ -31,8 +32,8 @@ import java.lang.IllegalStateException
 private const val UNSELECTED = "UNSELECTED"
 private const val SELECTED = "SELECTED"
 
-class AlarmCreationDialog(private val alarmCreationViewModel : AlarmCreationViewModel,
-    private val favouritesViewModel: FavouritesViewModel) : DialogFragment(R.layout.fragment_create_alarms_dialog) {
+class AlarmCreationDialog() : DialogFragment(R.layout.fragment_create_alarms_dialog) {
+    private lateinit var alarmCreationViewModel : AlarmCreationViewModel
 
     private lateinit var bottomNavBar: AlarmCreationDialogBottomNavBar
 
@@ -42,14 +43,15 @@ class AlarmCreationDialog(private val alarmCreationViewModel : AlarmCreationView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setStyle(STYLE_NORMAL, R.style.MaterialTheme_Bus2Go_Dark)
+        //setStyle(STYLE_NORMAL, R.style.MaterialTheme_Bus2Go_Dark)
+        alarmCreationViewModel = ViewModelProvider(requireActivity())[AlarmCreationViewModel::class.java]
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         view.findViewById<MaterialTextView>(R.id.textViewChooseStop).setOnClickListener { _ ->
-            val alarmCreationChooseBusDialog = AlarmCreationChooseBusDialog(favouritesViewModel)
+            val alarmCreationChooseBusDialog = AlarmCreationChooseBusDialog()
             //TODO DEPRECATED FOR DATA EXCHANGE alarmCreationDialog.setTargetFragment(this@Alarms, 0)
             val transaction = parentFragmentManager.beginTransaction()
             transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)

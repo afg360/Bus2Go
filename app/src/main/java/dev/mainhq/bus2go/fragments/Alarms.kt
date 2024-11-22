@@ -12,6 +12,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.setFragmentResultListener
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -29,14 +30,18 @@ import kotlinx.coroutines.withContext
 
 
 /* For the moment, the user can only add an alarm to a favourite bus */
-class Alarms(val alarmViewModel : AlarmCreationViewModel, private val favouritesViewModel: FavouritesViewModel)
+class Alarms()
     : Fragment(R.layout.fragment_alarms)  {
 
     private lateinit var list : List<Alarm>
     private lateinit var recyclerView: RecyclerView
+    lateinit var alarmViewModel : AlarmCreationViewModel
+    private lateinit var favouritesViewModel: FavouritesViewModel
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        alarmViewModel = ViewModelProvider(requireActivity())[AlarmCreationViewModel::class.java]
+        favouritesViewModel = ViewModelProvider(requireActivity())[FavouritesViewModel::class.java]
 
         val menuBar = view.findViewById<MaterialToolbar>(R.id.alarmsMaterialToolBar)
         menuBar.setOnMenuItemClickListener {
@@ -75,7 +80,7 @@ class Alarms(val alarmViewModel : AlarmCreationViewModel, private val favourites
                         view.findViewById<FloatingActionButton>(R.id.floatingActionButton).setOnClickListener {_ ->
                             //Create a popup containing the recyclerview of each buses in favourites
                             context?.also {
-                                val alarmCreationDialog = AlarmCreationDialog(alarmViewModel, favouritesViewModel)
+                                val alarmCreationDialog = AlarmCreationDialog()
                                 //TODO DEPRECATED FOR DATA EXCHANGE alarmCreationDialog.setTargetFragment(this@Alarms, 0)
                                 val transaction = parentFragmentManager.beginTransaction()
                                 transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)

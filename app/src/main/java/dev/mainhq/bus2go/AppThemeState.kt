@@ -1,18 +1,18 @@
 package dev.mainhq.bus2go
 
-import android.content.Context
+import androidx.appcompat.app.AppCompatDelegate
 import kotlin.properties.Delegates
 
 object AppThemeState {
 
-    var prevVal by Delegates.notNull<Boolean>()
+    private var prevVal by Delegates.notNull<Boolean>()
 
     /** Basic init function to be called when setting up a theme
      *  on the oncreate of an activity */
-    fun setTheme(activityContext : Context, isDark : Boolean){
+    fun setTheme(isDark : Boolean){
         prevVal = isDark
-        if (prevVal) activityContext.setTheme(R.style.MaterialTheme_Bus2Go_Dark)
-        else activityContext.setTheme(R.style.MaterialTheme_Bus2Go)
+        if (prevVal) AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+        else AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
     }
 
     /** Called to see if the theme of the whole app changed

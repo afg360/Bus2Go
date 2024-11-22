@@ -14,6 +14,7 @@ import androidx.core.os.bundleOf
 import androidx.core.view.forEach
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.setFragmentResult
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -29,8 +30,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 
-class AlarmCreationChooseBusDialog(private val favouritesViewModel: FavouritesViewModel) : DialogFragment(R.layout.fragment_create_alarms_choose_stop_dialog) {
-
+class AlarmCreationChooseBusDialog() : DialogFragment(R.layout.fragment_create_alarms_choose_stop_dialog) {
     data class AlarmBusInfo(val busInfo : ExoBusData, val time : Time) : Parcelable {
         constructor(parcel: Parcel) : this(
             parcel.readParcelable(ExoBusData::class.java.classLoader)!!,
@@ -61,11 +61,14 @@ class AlarmCreationChooseBusDialog(private val favouritesViewModel: FavouritesVi
     private lateinit var activityResultLauncher : ActivityResultLauncher<Intent>
     private lateinit var alarmDialogBusStop : String
     private lateinit var alarmDialogBusNum : String
+    private lateinit var favouritesViewModel: FavouritesViewModel
+
     private var time : Time? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setStyle(STYLE_NORMAL, R.style.MaterialTheme_Bus2Go_Dark)
+        favouritesViewModel = ViewModelProvider(requireActivity())[FavouritesViewModel::class.java]
+        setStyle(STYLE_NORMAL, R.style.MaterialTheme_Bus2Go)//R.style.MaterialTheme_Bus2Go_Dark)
         (context as Activity).also {
             activityResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
                 if (result.resultCode == Activity.RESULT_OK) {

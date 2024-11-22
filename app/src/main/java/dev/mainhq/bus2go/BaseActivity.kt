@@ -14,17 +14,15 @@ open class BaseActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         isDark = PreferenceManager.getDefaultSharedPreferences(this)
             .getBoolean("dark-mode", true)
-        AppThemeState.setTheme(this, isDark)
+        AppThemeState.setTheme(isDark)
     }
 
     override fun onResume() {
         super.onResume()
-        //if the theme changed, must destroy the activity and recreate it
         isDark = PreferenceManager.getDefaultSharedPreferences(this)
             .getBoolean("dark-mode", true)
-        if (AppThemeState.hasThemeChanged(isDark)){
-            finish()
-            startActivity(intent)
-        }
+        //if the theme changed, must destroy the activity and recreate it, which is already done with AppDelegate thing
+        if (AppThemeState.hasThemeChanged(isDark))
+            AppThemeState.setTheme(isDark)
     }
 }

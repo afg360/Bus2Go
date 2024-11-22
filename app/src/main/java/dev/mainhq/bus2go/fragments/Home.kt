@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -29,8 +30,8 @@ import dev.mainhq.bus2go.viewmodels.FavouritesViewModel
 import dev.mainhq.bus2go.viewmodels.RoomViewModel
 import kotlinx.coroutines.launch
 
-//FIXME CANNOT SUPPORT VERY FAST CHANGES BETWEEN THIS FRAG AND THE OTHERS -> APP CRASHES BECAUSE NO VIEW IS RETURNED
-class Home(private val favouritesViewModel: FavouritesViewModel, private val roomViewModel: RoomViewModel) : Fragment(R.layout.fragment_home) {
+//We must have an empty constructor and instead pass elements inside the bundle??
+class Home() : Fragment(R.layout.fragment_home) {
     //todo could use a favourites list here to use in other methods
     private lateinit var searchView : SearchView
 
@@ -45,7 +46,7 @@ class Home(private val favouritesViewModel: FavouritesViewModel, private val roo
                     childFragmentManager.beginTransaction()
                         .replace(
                             R.id.favouritesFragmentContainer,
-                            Favourites(favouritesViewModel, roomViewModel)
+                            Favourites()
                         ).commit()
                 }
             }

@@ -1,11 +1,13 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Can customise the action bar, etc.-->
 
+    <!--
     <style name="Theme.Bus2Go" parent="Theme.AppCompat.Light.NoActionBar">
 
     </style>
+    -->
 
-    <style name="MaterialTheme.Bus2Go" parent="Theme.Material3.Light.NoActionBar">
+    <style name="MaterialTheme.Bus2Go" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorPrimary">@color/dark_blue</item>
         <item name="editTextColor">@color/light</item>
 

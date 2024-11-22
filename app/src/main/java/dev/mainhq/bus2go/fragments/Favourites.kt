@@ -57,8 +57,7 @@ import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
 
 
-class Favourites(private val favouritesViewModel: FavouritesViewModel,
-    private val roomViewModel : RoomViewModel) : Fragment(R.layout.fragment_favourites) {
+class Favourites() : Fragment(R.layout.fragment_favourites) {
 
     private lateinit var onBackPressedCallback: OnBackPressedCallback
     private lateinit var realTimeViewModel: RealTimeViewModel
@@ -68,11 +67,17 @@ class Favourites(private val favouritesViewModel: FavouritesViewModel,
     private var isUsingRealTime = false
     private var executor : ScheduledExecutorService? = null
     private var scheduledTask: ScheduledFuture<*>? = null
+
+    private lateinit var favouritesViewModel: FavouritesViewModel
+    private lateinit var roomViewModel: RoomViewModel
     //may perhaps be not required?
     private var job: Job? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        favouritesViewModel = ViewModelProvider(requireActivity())[FavouritesViewModel::class.java]
+        roomViewModel = ViewModelProvider(requireActivity())[RoomViewModel::class.java]
+
         realTimeViewModel = ViewModelProvider(requireActivity())[RealTimeViewModel::class.java]
         realTimeViewModel.loadDomainName(requireActivity().application)
         val isRealtimeEnabled = PreferenceManager.getDefaultSharedPreferences(requireContext())
