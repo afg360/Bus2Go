@@ -12,13 +12,21 @@ import kotlinx.coroutines.withContext
 import android.icu.util.Calendar
 import android.os.Build
 import android.view.View
+import android.view.ViewGroup
+import androidx.core.view.get
+import androidx.core.view.size
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.textview.MaterialTextView
+import dev.mainhq.bus2go.adapters.FavouritesListElemsAdapter
 import dev.mainhq.bus2go.utils.BusExtrasInfo
 import dev.mainhq.bus2go.utils.TransitAgency
 import dev.mainhq.bus2go.utils.getDayString
 import dev.mainhq.bus2go.viewmodels.RoomViewModel
-import io.ktor.http.CacheControl
+import kotlinx.coroutines.Job
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.ScheduledFuture
+import java.util.concurrent.TimeUnit
 
 //todo
 //must be careful when dealing with hours AFTER 23:59:59
@@ -27,6 +35,11 @@ import io.ktor.http.CacheControl
 class Times : BaseActivity() {
 
     private var fromAlarmCreation = false
+
+    private var executor : ScheduledExecutorService? = null
+    private var scheduledTask: ScheduledFuture<*>? = null
+    //may perhaps be not required?
+    private var job: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,6 +53,7 @@ class Times : BaseActivity() {
         }
         fromAlarmCreation = intent.getBooleanExtra("ALARMS", false)
 
+        executor = Executors.newSingleThreadScheduledExecutor()
         //val routeId = intent.extras?.getInt(BusExtrasInfo.ROUTE_ID.name)
         val roomViewModel = ViewModelProvider(this)[RoomViewModel::class.java]
         val calendar : Calendar = Calendar.getInstance()
@@ -56,6 +70,7 @@ class Times : BaseActivity() {
                 lifecycleScope.launch {
                     val stopTimes = roomViewModel.getStopTimes(stopName, dayString, curTime.toString(), direction, agency, routeId)
                     displayRecyclerView(stopTimes)
+                    setupScheduledTask(stopTimes)
                 }
             }
             TransitAgency.EXO_TRAIN -> {
@@ -65,6 +80,7 @@ class Times : BaseActivity() {
                 lifecycleScope.launch {
                     val stopTimes = roomViewModel.getTrainStopTimes(routeId, stopName, directionId, curTime.toString(), dayString)
                     displayRecyclerView(stopTimes)
+                    setupScheduledTask(stopTimes)
                 }
             }
 
@@ -75,9 +91,31 @@ class Times : BaseActivity() {
                 lifecycleScope.launch {
                     val stopTimes = roomViewModel.getStopTimes(stopName, dayString, curTime.toString(), headsign, agency, routeId)
                     displayRecyclerView(stopTimes)
+                    setupScheduledTask(stopTimes)
                 }
             }
         }
+    }
+
+    //or perhaps it is onStop we need to override instead?
+    override fun onDestroy() {
+        super.onDestroy()
+
+        job?.cancel()
+        scheduledTask?.cancel(true)
+        executor?.shutdown()
+
+    }
+
+    //FIXME: Although this implementation works, we need to get rid of the recyclerViewItem once we go beyond
+    //the time... unless that is already dealt with?
+    private fun setupScheduledTask(stopTimes: List<Time>){
+        scheduledTask = executor?.scheduleWithFixedDelay({
+            job = lifecycleScope.launch{
+                displayRecyclerView(stopTimes)
+            }
+        }, 0, 1, TimeUnit.SECONDS)
+
     }
     
     private suspend fun displayRecyclerView(stopTimes: List<Time>){
@@ -98,6 +136,5 @@ class Times : BaseActivity() {
                 recyclerView.adapter = TimeListElemsAdapter(stopTimes, fromAlarmCreation)
             }
         }
-        
     }
 }

@@ -65,11 +65,11 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
     private var networkCallback: NetworkCallback? = null
     //private var isUpdating = true
     private var isUsingRealTime = false
-    private var executor : ScheduledExecutorService? = null
-    private var scheduledTask: ScheduledFuture<*>? = null
-
     private lateinit var favouritesViewModel: FavouritesViewModel
     private lateinit var roomViewModel: RoomViewModel
+
+    private var executor : ScheduledExecutorService? = null
+    private var scheduledTask: ScheduledFuture<*>? = null
     //may perhaps be not required?
     private var job: Job? = null
 
