@@ -1,2 +1,4 @@
 *.txt
 stm_info.db
+*.sh
+test*
