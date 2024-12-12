@@ -11,10 +11,10 @@ open class BaseActivity : AppCompatActivity() {
     private var isDark by Delegates.notNull<Boolean>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
         isDark = PreferenceManager.getDefaultSharedPreferences(this)
             .getBoolean("dark-mode", true)
         AppThemeState.setTheme(isDark)
+        super.onCreate(savedInstanceState)
     }
 
     override fun onResume() {
