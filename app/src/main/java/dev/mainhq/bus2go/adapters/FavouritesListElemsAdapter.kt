@@ -1,6 +1,8 @@
 package dev.mainhq.bus2go.adapters
 
 import android.content.Intent
+import android.graphics.Color
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
@@ -16,10 +18,12 @@ import androidx.fragment.app.FragmentContainerView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.checkbox.MaterialCheckBox
+import com.google.android.material.color.MaterialColors
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.MainActivity
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.Times
+import dev.mainhq.bus2go.database.exo_data.dao.Colors
 import dev.mainhq.bus2go.fragments.FavouriteTransitInfo
 import dev.mainhq.bus2go.fragments.Home
 import dev.mainhq.bus2go.preferences.ExoBusData
@@ -60,7 +64,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
             if (info.arrivalTime.timeRemaining()?.compareTo(Time(0,3,59)) == -1)
                 holder.timeRemainingTextView.setTextColor(holder.itemView.resources.getColor(R.color.red, null))
             else {
-                holder.timeRemainingTextView.setTextColor(holder.itemView.resources.getColor(R.color.light, null))
+                holder.timeRemainingTextView.setTextColor(MaterialColors.getColor(holder.itemView, android.R.attr.editTextColor))
             }
         }
 
@@ -229,7 +233,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
             ((container[1] as ViewGroup)[3] as MaterialTextView).text = favouritesBusInfo.arrivalTime.toString()
             if (it.timeRemaining()?.compareTo(Time(0,3,59)) == -1) ((container[1] as ViewGroup)[2] as MaterialTextView)
                 .setTextColor(viewGroup.resources.getColor(R.color.red, null))
-            else ((container[1] as ViewGroup)[3] as MaterialTextView).setTextColor(viewGroup.resources.getColor(R.color.light, null))
+            else ((container[1] as ViewGroup)[3] as MaterialTextView).setTextColor(MaterialColors.getColor(viewGroup, android.R.attr.editTextColor))
         }
     }
 
