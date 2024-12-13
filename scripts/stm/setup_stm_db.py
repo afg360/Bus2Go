@@ -4,6 +4,22 @@ import threading
 import zipfile
 import os
 import sqlite3
+import datetime
+
+class Date():
+    def __init__(self, date: str):
+        #print(date)
+        self.year = int(date[0:4])
+        self.month = int(date[4:6])
+        self.day = int(date[6:8])
+
+    def __eq__(self, obj: object, /) -> bool:
+        if isinstance(obj, Date):
+            return self.year == obj.year and self.month == obj.month and self.day == obj.day
+        return False
+
+    def __repr__(self) -> str:
+        return f"{self.year}-{self.month}-{self.day}"
 
 def download(url : str): #destination : str) -> None:
     """download and create respective directories"""
@@ -43,17 +59,9 @@ def calendar_table(conn):
     print("Dropped table Calendar")
 
     sql = """CREATE TABLE Calendar (
-    	--id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     	id INTEGER PRIMARY KEY NOT NULL,
     	service_id TEXT UNIQUE NOT NULL,
         days TEXT NOT NULL,
-    	--m INTEGER NOT NULL, --Monday
-    	--t INTEGER NOT NULL, --Tuesday
-    	--w INTEGER NOT NULL, --Wednesday
-    	--y INTEGER NOT NULL, --Thursday
-    	--f INTEGER NOT NULL, --Friday
-    	--s INTEGER NOT NULL, --Saturday
-    	--d INTEGER NOT NULL, --Sunday
     	start_date INTEGER NOT NULL,
     	end_date INTEGER NOT NULL
     );"""
@@ -63,8 +71,23 @@ def calendar_table(conn):
     print("Inserting table and adding data")
     with open("calendar.txt", "r", encoding="utf-8") as file:
         file.readline()
+        #we will be skipping calendar dates that are beyond today's date...
+        #TEST, MIGHT BREAK STUFF
+        today = datetime.datetime.today()
         for line in file:
             tokens = line.replace("\n", "").replace("'", "''").split(",")
+            date = Date(tokens[9])
+            #print(f"Today: {today}")
+            #print(f"Calendar date: {date}")
+            #for now, skip calendars where start_date == end_date
+            if date == Date(tokens[8]):
+                continue
+            if date.year < today.year:
+                continue
+            elif date.year == today.year and date.month < today.month:
+                continue
+            elif date.year == today.today and date.month == today.month and date.day < today.day:
+                continue
             #check all the possible letters
             days = ""
             if tokens[1] == "1":
@@ -326,12 +349,14 @@ def stops_info_table(conn):
         print("Dropping index stopsinfo")
         cursor.execute("DROP INDEX IF EXISTS StopsInfoIndex")
 
+        #save the calendar.service_id instead....?
         create = """CREATE TABLE IF NOT EXISTS StopsInfo(
         id INTEGER PRIMARY KEY NOT NULL,
         stop_name TEXT NOT NULL,
         route_id INTEGER NOT NULL,
         trip_headsign TEXT NOT NULL,
-        days TEXT NOT NULL,
+        --days TEXT NOT NULL,
+        service_id TEXT NOT NULL REFERENCES Calendar(service_id),
         arrival_time TEXT NOT NULL,
         stop_seq INTEGER NOT NULL
         );
@@ -339,8 +364,10 @@ def stops_info_table(conn):
         print("Creating table StopsInfo")
         cursor.execute(create)
 
-        sql = """INSERT INTO StopsInfo(stop_name,route_id,trip_headsign,days,arrival_time,stop_seq)
-        SELECT stops.stop_name,trips.route_id,trips.trip_headsign,calendar.days,arrival_time,stoptimes.stop_seq
+        #sql = """INSERT INTO StopsInfo(stop_name,route_id,trip_headsign,days,arrival_time,stop_seq)
+        sql = """INSERT INTO StopsInfo(stop_name,route_id,trip_headsign,service_id,arrival_time,stop_seq)
+        SELECT stops.stop_name,trips.route_id,trips.trip_headsign,calendar.service_id,arrival_time,stoptimes.stop_seq
+        --SELECT stops.stop_name,trips.route_id,trips.trip_headsign,calendar.days,arrival_time,stoptimes.stop_seq
         FROM stoptimes JOIN trips ON stoptimes.trip_id = trips.trip_id
         JOIN calendar ON calendar.service_id = trips.service_id
         JOIN stops ON stoptimes.stop_id = stops.stop_code;

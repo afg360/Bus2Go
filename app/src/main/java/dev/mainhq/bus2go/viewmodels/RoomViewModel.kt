@@ -14,6 +14,7 @@ import androidx.lifecycle.viewModelScope
 import dev.mainhq.bus2go.preferences.StmBusData
 import dev.mainhq.bus2go.preferences.TrainData
 import dev.mainhq.bus2go.preferences.TransitData
+import dev.mainhq.bus2go.utils.getDayString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -29,12 +30,14 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
 
     suspend fun getFavouriteStopTimes(list : List<TransitData>, agency : TransitAgency, dayString : String,
                                       calendar : Calendar, times : MutableList<FavouriteTransitInfo>) : MutableList<FavouriteTransitInfo> {
+        //must be a string of form YYYYMMDD
+        val today = "${calendar.get(Calendar.YEAR)}${calendar.get(Calendar.MONTH)}${calendar.get(Calendar.DAY_OF_MONTH)}"
         when(agency){
             TransitAgency.STM -> {
                 list as List<StmBusData>
                 val stopsInfoDAO = stmDatabase.stopsInfoDao()
                 list.forEach {busInfo ->
-                    stopsInfoDAO.getFavouriteStopTime(busInfo.stopName, dayString, Time(calendar).toString(), busInfo.direction, busInfo.routeId.toInt())
+                    stopsInfoDAO.getFavouriteStopTime(busInfo.stopName, dayString, Time(calendar).toString(), busInfo.direction, busInfo.routeId.toInt(), today)
                         .also { time -> times.add(FavouriteTransitInfo(busInfo, time, agency)) }
                 }
                 return times
@@ -63,11 +66,13 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
     /** Use to not directly use the for loop like in the getFavouriteStopTimes method. Only used for the internet connectivity shit */
     suspend fun getFavouriteStopTime(transitData : TransitData, agency : TransitAgency, dayString : String,
                                       calendar : Calendar) : FavouriteTransitInfo {
+        //must be a string of form YYYYMMDD
+        val today = "${calendar.get(Calendar.YEAR)}${calendar.get(Calendar.MONTH)}${calendar.get(Calendar.DAY_OF_MONTH)}"
         return when(agency){
             TransitAgency.STM -> {
                 val stopsInfoDAO = stmDatabase.stopsInfoDao()
                 FavouriteTransitInfo(transitData,
-                    stopsInfoDAO.getFavouriteStopTime(transitData.stopName, dayString, Time(calendar).toString(), transitData.direction, transitData.routeId.toInt()), agency)
+                    stopsInfoDAO.getFavouriteStopTime(transitData.stopName, dayString, Time(calendar).toString(), transitData.direction, transitData.routeId.toInt(), today), agency)
             }
             TransitAgency.EXO_TRAIN -> {
                 val stopsTimesDAO = exoDataBase.stopTimesDao()
@@ -111,26 +116,31 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
     /** Used for alarm creations */
-    suspend fun getStopTimes(stopName : String, dayString : String, headsign : String, agency : TransitAgency, routeId: Int?) : List<Time>{
+    suspend fun getStopTimes(stopName : String, calendar : Calendar, headsign : String, agency : TransitAgency, routeId: Int?, today: String) : List<Time>{
+        val dayString = getDayString(calendar)
         return when(agency){
-            TransitAgency.STM -> stmDatabase.stopsInfoDao().getStopTimes(stopName, dayString, headsign, routeId!!)
+            TransitAgency.STM -> stmDatabase.stopsInfoDao().getStopTimes(stopName, dayString, headsign, routeId!!, today)
             TransitAgency.EXO_OTHER -> exoDataBase.stopTimesDao().getStopTimes(stopName, dayString, headsign)
             else -> throw IllegalArgumentException("Cannot use the fxn getStopTimes for ${agency}.")
         }
     }
 
     /** */
-    suspend fun getStopTimes(stopName : String, dayString : String,
-                             curTime : String, headsign : String, agency : TransitAgency, routeId: Int?) : List<Time>{
+    suspend fun getStopTimes(stopName : String, calendar: Calendar, headsign : String,
+                             agency : TransitAgency, routeId: Int?) : List<Time>{
+        val curTime = Time(calendar).toString()
+        val dayString = getDayString(calendar)
+        //must be a string of form YYYYMMDD
+        val today = "${calendar.get(Calendar.YEAR)}${calendar.get(Calendar.MONTH)}${calendar.get(Calendar.DAY_OF_MONTH)}"
         return when(agency){
-            TransitAgency.STM -> stmDatabase.stopsInfoDao().getStopTimes(stopName, dayString, curTime, headsign, routeId!!)
+            TransitAgency.STM -> stmDatabase.stopsInfoDao().getStopTimes(stopName, dayString, curTime, headsign, routeId!!, today)
             TransitAgency.EXO_OTHER -> exoDataBase.stopTimesDao().getStopTimes(stopName, dayString, curTime, headsign)
             else -> throw IllegalArgumentException("Cannot use the fxn getStopNames for ${agency}.")
         }
     }
 
-    suspend fun getTrainStopTimes(routeId: Int, stopName: String, directionId : Int, curTime : String, dayString: String) : List<Time>{
-        return exoDataBase.stopTimesDao().getTrainStopTimes("trains-$routeId", stopName, directionId, curTime, dayString)
+    suspend fun getTrainStopTimes(routeId: Int, stopName: String, directionId : Int, calendar: Calendar) : List<Time>{
+        return exoDataBase.stopTimesDao().getTrainStopTimes("trains-$routeId", stopName, directionId, Time(calendar).toString(), getDayString(calendar))
     }
 
     //FIXME TEMPORARY SOLUTION

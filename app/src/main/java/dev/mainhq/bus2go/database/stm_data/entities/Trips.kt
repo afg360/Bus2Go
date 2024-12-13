@@ -5,6 +5,7 @@ import androidx.room.Entity;
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey;
 
+//Way too much data seems to be stored in here, since StopsInfo is already designed to avoid joining with here...
 @Entity (indices = [],
     foreignKeys = [
         ForeignKey(entity = Routes::class, parentColumns = ["route_id"], childColumns = ["route_id"]),

@@ -21,11 +21,10 @@ execute_stm(){
 		cd $path/stm
 		rm stm_info.db
 		if [[ $1 = "--no-download" ]]; then
-			python3 setup_stm_db.py "no-download"
+			python3 setup_stm_db.py "no-download" && cp -i 'stm_info.db' "$project" 
 		else
-			python3 setup_stm_db.py
+			python3 setup_stm_db.py && cp -i 'stm_info.db' "$project"
 		fi
-		cp -i 'stm_info.db' "$project"
 		cd ..
 	fi
 }

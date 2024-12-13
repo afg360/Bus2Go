@@ -57,8 +57,6 @@ class Times : BaseActivity() {
         //val routeId = intent.extras?.getInt(BusExtrasInfo.ROUTE_ID.name)
         val roomViewModel = ViewModelProvider(this)[RoomViewModel::class.java]
         val calendar : Calendar = Calendar.getInstance()
-        val dayString = getDayString(calendar)
-        val curTime = Time(calendar)
         val textView = findViewById<MaterialTextView>(R.id.time_title_text_view)
         when(agency){
             TransitAgency.STM -> {
@@ -68,7 +66,7 @@ class Times : BaseActivity() {
                 //val directionId = intent.extras!!.getInt(BusExtrasInfo.DIRECTION.name_ID)
                 textView.text = "$routeId $direction - $stopName"
                 lifecycleScope.launch {
-                    val stopTimes = roomViewModel.getStopTimes(stopName, dayString, curTime.toString(), direction, agency, routeId)
+                    val stopTimes = roomViewModel.getStopTimes(stopName, calendar, direction, agency, routeId)
                     displayRecyclerView(stopTimes)
                     setupScheduledTask(stopTimes)
                 }
@@ -78,7 +76,7 @@ class Times : BaseActivity() {
                 val directionId = intent.extras!!.getInt(BusExtrasInfo.DIRECTION_ID.name)
                 textView.text = "$routeId $directionId - $stopName"
                 lifecycleScope.launch {
-                    val stopTimes = roomViewModel.getTrainStopTimes(routeId, stopName, directionId, curTime.toString(), dayString)
+                    val stopTimes = roomViewModel.getTrainStopTimes(routeId, stopName, directionId, calendar)
                     displayRecyclerView(stopTimes)
                     setupScheduledTask(stopTimes)
                 }
@@ -89,7 +87,7 @@ class Times : BaseActivity() {
                 val headsign = intent.getStringExtra("headsign")!!
                 textView.text = "$routeId $headsign - $stopName"
                 lifecycleScope.launch {
-                    val stopTimes = roomViewModel.getStopTimes(stopName, dayString, curTime.toString(), headsign, agency, routeId)
+                    val stopTimes = roomViewModel.getStopTimes(stopName, calendar, headsign, agency, routeId)
                     displayRecyclerView(stopTimes)
                     setupScheduledTask(stopTimes)
                 }

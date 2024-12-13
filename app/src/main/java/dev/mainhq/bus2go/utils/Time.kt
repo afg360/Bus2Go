@@ -3,23 +3,20 @@ package dev.mainhq.bus2go.utils
 import android.icu.util.Calendar
 import android.os.Parcel
 import android.os.Parcelable
-import android.util.Log
 import dev.mainhq.bus2go.preferences.SerializableTime
-import kotlinx.serialization.Serializable
 import java.text.SimpleDateFormat
-import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
 /** Allows to do operations more easily on time based formats */
 class Time(hour : Int, min : Int, sec : Int) : Parcelable {
-    val hour : Int
-    val min : Int
-    val sec : Int
+    private val _hour : Int
+    val hour get() = _hour
+    private val _min : Int
+    val min get() = _min
+    private val _sec : Int
+    val sec get() = _sec
 
     constructor(parcel: Parcel) : this(
         parcel.readInt(),
@@ -28,9 +25,9 @@ class Time(hour : Int, min : Int, sec : Int) : Parcelable {
     )
 
     init {
-        this.sec = sec % 60
-        this.min = (min + this.sec / 60) % 60
-        this.hour = (hour + this.min / 60)  % 24
+        this._sec = sec % 60
+        this._min = (min + this._sec / 60) % 60
+        this._hour = (hour + this._min / 60)  % 24
     }
 
     constructor(calendar: Calendar) : this(
@@ -78,10 +75,10 @@ class Time(hour : Int, min : Int, sec : Int) : Parcelable {
 
     /** Returns null if this < time and this > 3, may need to allow negative times? */
     operator fun minus(time : Time) : Time?{
-        if (this < time && hour !in 0..3) return null
+        if (this < time && _hour !in 0..3) return null
         else if (this == time) return Time(0,0,0)
-        val realHour = if (hour in 0..3) hour + 24 else hour
-        val total = realHour * 3600 + this.min * 60 + this.sec - (time.hour * 3600 + time.min * 60 + time.sec)
+        val realHour = if (_hour in 0..3) _hour + 24 else _hour
+        val total = realHour * 3600 + this._min * 60 + this._sec - (time._hour * 3600 + time._min * 60 + time._sec)
         val hour = total / 3600
         val min = (total - hour * 3600) / 60
         return Time(hour, min, total % 60)
@@ -95,14 +92,14 @@ class Time(hour : Int, min : Int, sec : Int) : Parcelable {
      *   0 : this == other,
      *   1 : this > other */
     operator fun compareTo(other : Time): Int {
-        return if (this.hour < other.hour) -1
-        else if (this.hour > other.hour) 1
+        return if (this._hour < other._hour) -1
+        else if (this._hour > other._hour) 1
         else {
-            if (this.min < other.min) -1
-            else if (this.min > other.min) 1
+            if (this._min < other._min) -1
+            else if (this._min > other._min) 1
             else{
-                if (this.sec < other.sec) -1
-                else if (this.sec > other.sec) 1
+                if (this._sec < other._sec) -1
+                else if (this._sec > other._sec) 1
                 else 0
             }
         }
@@ -110,14 +107,14 @@ class Time(hour : Int, min : Int, sec : Int) : Parcelable {
     
 
     override fun toString(): String {
-        val hour = if (this.hour >= 10) this.hour.toString() else "0" + this.hour.toString()
-        val min = if (this.min >= 10) this.min.toString() else "0" + this.min.toString()
-        val sec = if (this.sec >= 10) this.sec.toString() else "0" + this.sec.toString()
+        val hour = if (this._hour >= 10) this._hour.toString() else "0" + this._hour.toString()
+        val min = if (this._min >= 10) this._min.toString() else "0" + this._min.toString()
+        val sec = if (this._sec >= 10) this._sec.toString() else "0" + this._sec.toString()
         return "$hour:$min:$sec"
     }
 
     fun toSerializableTime() : SerializableTime{
-        return SerializableTime(hour, min, sec)
+        return SerializableTime(_hour, _min, _sec)
     }
 
     override fun describeContents(): Int {
@@ -125,21 +122,21 @@ class Time(hour : Int, min : Int, sec : Int) : Parcelable {
     }
 
     override fun writeToParcel(dest: Parcel, flags: Int) {
-        dest.writeInt(hour)
-        dest.writeInt(min)
-        dest.writeInt(sec)
+        dest.writeInt(_hour)
+        dest.writeInt(_min)
+        dest.writeInt(_sec)
     }
 
     override fun equals(other: Any?): Boolean {
         if (other is Time){
             val tmp : Time = other
-            return this.hour == tmp.hour && this.min == tmp.min && this.sec == this.sec
+            return this._hour == tmp._hour && this._min == tmp._min && this._sec == this._sec
         }
         return false
     }
 
     override fun hashCode(): Int {
-        return hour * 3600 + min * 60 + sec
+        return _hour * 3600 + _min * 60 + _sec
     }
 
     companion object CREATOR : Parcelable.Creator<Time> {
