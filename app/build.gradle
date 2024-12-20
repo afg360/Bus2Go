@@ -12,6 +12,7 @@ android {
     compileSdk 34
 
     sourceSets {
+        androidTest.assets.srcDirs += files("$projectDir/schemas".toString())
         main {
             proto {
                 srcDirs 'src/main/protobuf'
@@ -128,6 +129,7 @@ dependencies {
 
     def room_version = "2.6.1"
     implementation "androidx.room:room-runtime:$room_version"
+    implementation "androidx.room:room-testing:$room_version"
     annotationProcessor "androidx.room:room-compiler:$room_version"
 
     // To use Kotlin annotation processing tool (kapt)

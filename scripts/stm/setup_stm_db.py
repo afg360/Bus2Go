@@ -44,6 +44,7 @@ def download(url : str): #destination : str) -> None:
 def db_data_init(conn) -> None:
     """Initialise the data in the database associated to that agency"""
     calendar_table(conn)
+    calendar_dates_table(conn)
     route_table(conn)
     forms_table(conn)
     shapes_table(conn)
@@ -59,8 +60,8 @@ def calendar_table(conn):
     print("Dropped table Calendar")
 
     sql = """CREATE TABLE Calendar (
-    	id INTEGER PRIMARY KEY NOT NULL,
-    	service_id TEXT UNIQUE NOT NULL,
+    	--id INTEGER PRIMARY KEY NOT NULL,
+    	service_id TEXT PRIMARY KEY NOT NULL,
         days TEXT NOT NULL,
     	start_date INTEGER NOT NULL,
     	end_date INTEGER NOT NULL
@@ -109,6 +110,35 @@ def calendar_table(conn):
             conn.commit()
     print("Successfully inserted table")
 
+    cursor.close()
+
+def calendar_dates_table(conn):
+    cursor = conn.cursor()
+    cursor.execute("DROP TABLE IF EXISTS CalendarDates;")
+    print("Dropped table CalendarDates")
+
+    sql = """CREATE TABLE CalendarDates (
+    	service_id TEXT REFERENCES Calendar(service_id),
+        date TEXT NOT NULL,
+        exception_type INTEGER NOT NULL,
+        PRIMARY KEY (service_id, date)
+    );"""
+    cursor.execute(sql)
+    print("Initialised table CalendarDates")
+
+    print("Inserting table and adding data")
+    with open("calendar_dates.txt", "r", encoding="utf-8") as file:
+        file.readline()
+        #try to add a row. if it doesn't exist in calendar, 
+        #simply skip (may be because we deleted the 
+        #original thing because past the date)
+        for line in file:
+            tokens = line.replace("\n", "").replace("'", "''").split(",")
+            sql = f"INSERT INTO CalendarDates (service_id,date,exception_type) VALUES (?,?,?);"
+            cursor.execute(sql, (tokens[0], tokens[1], tokens[2]))
+            conn.commit()
+
+    print("Successfully inserted table")
     cursor.close()
 
 

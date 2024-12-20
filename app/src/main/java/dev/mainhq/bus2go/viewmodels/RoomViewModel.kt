@@ -23,7 +23,9 @@ import kotlinx.coroutines.async
 class RoomViewModel(application: Application) : AndroidViewModel(application) {
 
     private val stmDatabase : AppDatabaseSTM = Room.databaseBuilder(application, AppDatabaseSTM::class.java, "stm_info.db")
-    .createFromAsset("database/stm_info.db").build()
+        .createFromAsset("database/stm_info.db")
+        .addMigrations(AppDatabaseSTM.MIGRATION_1_2)
+        .build()
 
     private val exoDataBase : AppDatabaseExo = Room.databaseBuilder(application, AppDatabaseExo::class.java, "exo_info.db")
         .createFromAsset("database/exo_info.db").build()
