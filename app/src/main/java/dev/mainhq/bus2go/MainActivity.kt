@@ -1,12 +1,17 @@
 package dev.mainhq.bus2go
 
 import android.app.AlarmManager
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.OnBackPressedCallback
+import androidx.annotation.RequiresApi
+import androidx.core.app.NotificationCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.navigation.NavigationBarView
@@ -29,7 +34,7 @@ class MainActivity() : BaseActivity() {
 
     private lateinit var activityType : ActivityType
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+	override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //if (false) { //TODO check if config file exists
         //    val intent = Intent(applicationContext, Config::class.java)
@@ -37,6 +42,8 @@ class MainActivity() : BaseActivity() {
         //}
 
         setContentView(R.layout.main_activity)
+
+
         activityType = ActivityType.HOME
         val home = Home()
         supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer, home).commit()

@@ -8,8 +8,16 @@ import android.widget.Toast
 import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import androidx.work.BackoffPolicy
+import androidx.work.Constraints
+import androidx.work.ExistingWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.Settings
+import dev.mainhq.bus2go.updates.UpdateManagerWorker
+import java.util.concurrent.TimeUnit
 
 class SettingsPreferences : PreferenceFragmentCompat() ,
     SharedPreferences.OnSharedPreferenceChangeListener {
@@ -19,7 +27,7 @@ class SettingsPreferences : PreferenceFragmentCompat() ,
         //temporarily output the current software version
          findPreference<Preference?>("info")?.let {
             val packageInfo: PackageInfo = requireContext().packageManager.getPackageInfo(requireContext().packageName, 0)
-            val versionName = packageInfo.versionName
+            val versionName = packageInfo.versionName ?: throw IllegalStateException("Cannot have a null value version name!")
             it.summary = "Software version: $versionName"
         }
         
@@ -60,10 +68,33 @@ class SettingsPreferences : PreferenceFragmentCompat() ,
                     Log.d("REALTIME", "feedback clicked")
                 }
                 "update-notifications" -> {
-                    Log.d("UPDATES", "Notifications enabled")
+                    val isOn = sharedPreferences.getBoolean("update-notifications", false)
+                    if (isOn) {
+                        Log.d("UPDATES", "Notifications enabled")
+                        context?.also{ context ->
+                            WorkManager.getInstance(context).enqueue(
+                                PeriodicWorkRequestBuilder<UpdateManagerWorker>(1, TimeUnit.DAYS)
+                                    .setConstraints(
+                                        Constraints.Builder()
+                                            .setRequiredNetworkType(NetworkType.UNMETERED)
+                                            .build()
+                                    )
+                                    .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 10, TimeUnit.MINUTES)
+                                    .addTag(UpdateManagerWorker.TAG)
+                                    .build()
+                            )
+                        }
+                    }
+                    else {
+                        Log.d("UPDATES", "Disabled notifications")
+                        context?.also { context ->
+                            WorkManager.getInstance(context)
+                                .cancelAllWorkByTag(UpdateManagerWorker.TAG)
+                        }
+                    }
                 }
                 "dark-mode" -> {
-                    Log.d("Preferences", "Dark-mode enabled")
+                    Log.d("Preferences", "Switched dark-mode state")
                     (host as Settings).changeTheme()
                 }
             }

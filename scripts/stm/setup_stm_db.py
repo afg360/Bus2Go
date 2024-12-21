@@ -118,7 +118,7 @@ def calendar_dates_table(conn):
     print("Dropped table CalendarDates")
 
     sql = """CREATE TABLE CalendarDates (
-    	service_id TEXT REFERENCES Calendar(service_id),
+    	service_id TEXT REFERENCES Calendar(service_id) NOT NULL,
         date TEXT NOT NULL,
         exception_type INTEGER NOT NULL,
         PRIMARY KEY (service_id, date)

@@ -115,6 +115,11 @@ dependencies {
 
     //Preference manager
     implementation "androidx.preference:preference-ktx:1.2.1"
+    
+    //WorkManager
+    def work_version = "2.9.1"
+    implementation "androidx.work:work-runtime-ktx:$work_version"
+    
 
     def data_store_version = "1.1.1"
     //DataStore

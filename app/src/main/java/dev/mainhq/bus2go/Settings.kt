@@ -2,6 +2,7 @@ package dev.mainhq.bus2go
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.IntentSanitizer
 import androidx.datastore.preferences.core.mutablePreferencesOf
 import androidx.preference.PreferenceManager
 import com.google.android.material.appbar.MaterialToolbar

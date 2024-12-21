@@ -46,17 +46,17 @@
             app:defaultValue="0.0.0.0"
             />
         <SwitchPreferenceCompat
-            app:key="auto-updates"
-            app:title="@string/auto_updates"
-            app:icon="@drawable/baseline_update_24"
-            app:summary="@string/auto_updates_summary"
-            />
-        <SwitchPreferenceCompat
             app:key="update-notifications"
             app:title="@string/update_notifications"
             app:icon="@drawable/baseline_notifications_24"
             app:summary="@string/update_notifications_summary"
-            app:dependency="auto-updates"
+            />
+        <SwitchPreferenceCompat
+            app:key="auto-updates"
+            app:title="@string/auto_updates"
+            app:icon="@drawable/baseline_update_24"
+            app:summary="@string/auto_updates_summary"
+            app:dependency="update-notifications"
             />
     </PreferenceCategory>
 
