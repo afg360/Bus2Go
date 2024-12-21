@@ -25,10 +25,14 @@ import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.SearchBus
 import dev.mainhq.bus2go.Settings
 import dev.mainhq.bus2go.adapters.BusListElemsAdapter
-import dev.mainhq.bus2go.utils.setup
-import dev.mainhq.bus2go.viewmodels.FavouritesViewModel
+import dev.mainhq.bus2go.utils.FuzzyQuery
+import dev.mainhq.bus2go.utils.TransitAgency
+import dev.mainhq.bus2go.utils.TransitInfo
 import dev.mainhq.bus2go.viewmodels.RoomViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 //We must have an empty constructor and instead pass elements inside the bundle??
 class Home() : Fragment(R.layout.fragment_home) {
@@ -38,6 +42,7 @@ class Home() : Fragment(R.layout.fragment_home) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val roomViewModel = ViewModelProvider(this)[RoomViewModel::class.java]
         //TODO check wtf this code does again... the refreshing seems to get fucked when the bus just passed (which is why it shows 0min even for the new bus)
         lifecycle.addObserver(object : DefaultLifecycleObserver {
             override fun onResume(owner: LifecycleOwner) {
@@ -55,8 +60,8 @@ class Home() : Fragment(R.layout.fragment_home) {
         searchView = view.findViewById(R.id.main_search_view)
         searchView.editText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(editable: Editable?) {
-                editable.toString().also{
-                    if (it.isEmpty()){
+                editable.toString().also{ query ->
+                    if (query.isEmpty()){
                         val recyclerView = view.findViewById<RecyclerView>(R.id.search_recycle_view)
                         val layoutManager = LinearLayoutManager(this@Home.context)
                         recyclerView.adapter = BusListElemsAdapter(ArrayList())
@@ -64,7 +69,38 @@ class Home() : Fragment(R.layout.fragment_home) {
                     }
                     else {
                         lifecycleScope.launch {
-                            setup(this, it, this@Home)
+                            val jobSTM = async {
+                                val list = roomViewModel.queryStmRoutes(FuzzyQuery(query))
+                                list.toMutableList().map {
+                                    TransitInfo(it.routeId, it.routeName, null, TransitAgency.STM)
+                                }
+                            }
+                            val jobExo = async {
+                                //TODO FIRST CHECK IF IT IS A TRAIN OR SOMETHING ELSE
+                                val list = roomViewModel.queryExoRoutes(FuzzyQuery(query, true))
+                                list.toMutableList().map {
+                                    val tmp = it.routeId.split("-", limit = 2)
+                                    if (tmp[0] == "trains") {
+                                        val values = it.routeName.split(" - ", limit = 2)
+                                        TransitInfo(
+                                            tmp[1],
+                                            /** Parsed train name */
+                                            values[1],
+                                            /** Train number (WHICH IS != TO THE ROUTE_ID */
+                                            values[0].toInt(),
+                                            TransitAgency.EXO_TRAIN)
+                                    }
+                                    else TransitInfo(tmp[1], it.routeName, null, TransitAgency.EXO_OTHER)
+                                }
+                            }
+                            val list = jobSTM.await() + jobExo.await()
+                            withContext(Dispatchers.Main){
+                                val recyclerView : RecyclerView = requireView().findViewById(R.id.search_recycle_view)
+                                val layoutManager = LinearLayoutManager(requireContext().applicationContext)
+                                recyclerView.adapter = BusListElemsAdapter(list)
+                                layoutManager.orientation = LinearLayoutManager.VERTICAL
+                                recyclerView.layoutManager = layoutManager
+                            }
                         }
                     }
                 }

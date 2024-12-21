@@ -20,51 +20,6 @@ import java.util.Locale
 //right now only for the main activities
 //todo may use db operations instead
 
-/** Sets up the activity data from the database and then displays it to the user **/
-suspend fun setup(coroutineScope: CoroutineScope, query : String, fragment : Fragment){
-    val dbSTM = Room.databaseBuilder(fragment.requireContext(), AppDatabaseSTM::class.java, "stm_info")
-        .createFromAsset("database/stm_info.db").build()
-    val dbExo =Room.databaseBuilder(fragment.requireContext(), AppDatabaseExo::class.java, "exo_info")
-        .createFromAsset("database/exo_info.db").build()
-    val jobSTM = coroutineScope.async {
-        val routes = dbSTM.routesDao()
-        val list = routes.getBusRouteInfo(FuzzyQuery(query))
-        list.toMutableList().map {
-            TransitInfo(it.routeId, it.routeName, null, TransitAgency.STM)
-        }
-    }
-    val jobExo = coroutineScope.async {
-        //TODO FIRST CHECK IF IT IS A TRAIN OR SOMETHING ELSE
-        val routes = dbExo.routesDao()
-        val list = routes.getBusRouteInfo(FuzzyQuery(query, true))
-        list.toMutableList().map {
-            val tmp = it.routeId.split("-", limit = 2)
-            if (tmp[0] == "trains") {
-                val values = it.routeName.split(" - ", limit = 2)
-                TransitInfo(
-                    tmp[1],
-                    /** Parsed train name */
-                    values[1],
-                    /** Train number (WHICH IS != TO THE ROUTE_ID */
-                    values[0].toInt(),
-                    TransitAgency.EXO_TRAIN)
-            }
-            else TransitInfo(tmp[1], it.routeName, null, TransitAgency.EXO_OTHER)
-        }
-    }
-    val list = jobSTM.await() + jobExo.await()
-    withContext(Dispatchers.Main){
-        val recyclerView : RecyclerView = fragment.requireView().findViewById(R.id.search_recycle_view)
-        val layoutManager = LinearLayoutManager(fragment.requireContext().applicationContext)
-        recyclerView.adapter = BusListElemsAdapter(list)
-        layoutManager.orientation = LinearLayoutManager.VERTICAL
-        recyclerView.layoutManager = layoutManager
-    }
-    dbSTM.close()
-    dbExo.close()
-}
-
-
 
 /** Deals with french characters **/
 fun toParsable(txt: String): String {

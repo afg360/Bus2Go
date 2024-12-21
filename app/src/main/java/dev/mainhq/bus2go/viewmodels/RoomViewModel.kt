@@ -11,9 +11,11 @@ import dev.mainhq.bus2go.utils.TransitAgency
 import dev.mainhq.bus2go.utils.Time
 import android.icu.util.Calendar
 import androidx.lifecycle.viewModelScope
+import dev.mainhq.bus2go.database.stm_data.dao.BusRouteInfo
 import dev.mainhq.bus2go.preferences.StmBusData
 import dev.mainhq.bus2go.preferences.TrainData
 import dev.mainhq.bus2go.preferences.TransitData
+import dev.mainhq.bus2go.utils.FuzzyQuery
 import dev.mainhq.bus2go.utils.getDayString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -27,6 +29,7 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
         .addMigrations(AppDatabaseSTM.MIGRATION_1_2)
         .build()
 
+    //FIXME no migration for exo yet, next time must set a new migration
     private val exoDataBase : AppDatabaseExo = Room.databaseBuilder(application, AppDatabaseExo::class.java, "exo_info.db")
         .createFromAsset("database/exo_info.db").build()
 
@@ -167,6 +170,13 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
         return Pair(job1, job2)
     }
 
+    suspend fun queryStmRoutes(query: FuzzyQuery) : List<BusRouteInfo> {
+        return stmDatabase.routesDao().getBusRouteInfo(query)
+    }
+
+    suspend fun queryExoRoutes(query: FuzzyQuery) : List<BusRouteInfo> {
+        return exoDataBase.routesDao().getBusRouteInfo(query)
+    }
     /** For STM testing only for now */
     suspend fun getNames(stopId : Int) : String{
         return stmDatabase.stopDao().getStopName(stopId)
