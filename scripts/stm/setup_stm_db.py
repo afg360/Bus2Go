@@ -1,25 +1,14 @@
 #this script is to create a table with more info than stoptimes
 import requests
-import threading
+import sys
 import zipfile
 import os
 import sqlite3
 import datetime
 
-class Date():
-    def __init__(self, date: str):
-        #print(date)
-        self.year = int(date[0:4])
-        self.month = int(date[4:6])
-        self.day = int(date[6:8])
-
-    def __eq__(self, obj: object, /) -> bool:
-        if isinstance(obj, Date):
-            return self.year == obj.year and self.month == obj.month and self.day == obj.day
-        return False
-
-    def __repr__(self) -> str:
-        return f"{self.year}-{self.month}-{self.day}"
+def convert_str_to_date(date: str) -> datetime.datetime:
+    """Convert the time string to a datetime"""
+    return datetime.datetime(int(date[0:4]), int(date[4:6]), int(date[6:8]))
 
 def download(url : str): #destination : str) -> None:
     """download and create respective directories"""
@@ -77,11 +66,11 @@ def calendar_table(conn):
         today = datetime.datetime.today()
         for line in file:
             tokens = line.replace("\n", "").replace("'", "''").split(",")
-            date = Date(tokens[9])
-            #print(f"Today: {today}")
-            #print(f"Calendar date: {date}")
+            date = convert_str_to_date(tokens[9])
+            #date = Date(tokens[9])
             #for now, skip calendars where start_date == end_date
-            if date == Date(tokens[8]):
+            #also, we skip dates that have passed the current date from when the script is being run
+            if date == convert_str_to_date(tokens[8]):
                 continue
             if date.year < today.year:
                 continue
@@ -418,10 +407,7 @@ def stops_info_table(conn):
 
 
 def main():
-    import sys
-    if (len(sys.argv) > 1 and sys.argv[1] == "no-download"):
-        pass
-    else:
+    if not (len(sys.argv) > 1 and sys.argv[1] == "no-download"):
         download("https://www.stm.info/sites/default/files/gtfs/gtfs_stm.zip")
 
     conn = sqlite3.connect("./stm_info.db")
@@ -432,7 +418,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
