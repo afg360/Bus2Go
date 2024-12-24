@@ -13,6 +13,5 @@
         <item name="colorAccent">@color/basic_blue</item>
         <item name="fontFamily">@font/goli_regular</item>
     </style>
-
-
+    
 </resources>

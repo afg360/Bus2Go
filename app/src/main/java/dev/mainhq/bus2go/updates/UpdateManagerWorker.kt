@@ -2,10 +2,16 @@ package dev.mainhq.bus2go.updates
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.util.Log
+import android.widget.Toast
 import androidx.core.app.NotificationCompat
+import androidx.core.content.FileProvider
+import androidx.preference.PreferenceManager
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import dev.mainhq.bus2go.R
@@ -14,21 +20,34 @@ import io.ktor.client.call.body
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
+import io.ktor.client.request.prepareGet
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpHeaders
+import io.ktor.http.contentLength
+import io.ktor.utils.io.ByteReadChannel
+import io.ktor.utils.io.core.isEmpty
+import io.ktor.utils.io.core.readBytes
+import io.ktor.utils.io.errors.IOException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import java.io.File
 
 
 class UpdateManagerWorker(context: Context, workerParams: WorkerParameters) : CoroutineWorker(context, workerParams ) {
 
 	companion object {
 		const val TAG = "CHECK-FOR-UPDATES"
+		const val NOTIF_ID = 1
 	}
+
+	//for latest, DOES NOT INCLUDE PRE-RELEASES
+	//https://api.github.com/repos/afg360/bus2go/releases/latest
 
 	override suspend fun doWork(): Result {
 		//temporarily, fetch new releases from github releases bus2go page
@@ -53,37 +72,74 @@ class UpdateManagerWorker(context: Context, workerParams: WorkerParameters) : Co
 					.versionName ?: throw IllegalStateException("Cannot have a nulled value version name!"))
 
 				val channelId = "Updates"
-				val notificationManager: NotificationManager =
-					applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+				val notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-					val channel = NotificationChannel( channelId, "Software Update", NotificationManager.IMPORTANCE_DEFAULT )
+					val channel = NotificationChannel(channelId, "Software Updates", NotificationManager.IMPORTANCE_DEFAULT)
 					notificationManager.createNotificationChannel(channel)
 				}
 
 				if (localVersionName < tagVersion){
 					Log.d("UPDATES", "Seems that you need to update!")
+					val isAutoUpdate = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+						.getBoolean("auto-updates", false)
+					//if autoUpdate is not on, notification click will send to browser -> website where to download
+					//(for now github, eventually server or even fdroid managed)
 
-					val notification = NotificationCompat.Builder(applicationContext, channelId)
-						.setSmallIcon(R.drawable.bus2go_dark_ic_launcher_foreground)
-						.setContentTitle("Updates")
-						.setContentText("New update available: $tagVersion")
-						.setPriority(NotificationCompat.PRIORITY_DEFAULT)
-						.build()
+					//FIXME for now we have bus2go-debug.apk as names...
+					val appRegexName = Regex("bus2go-debug.*\\.apk")
+					val downloadLink = (latestRelease["assets"] as JsonArray)
+						//perhaps no need to map, since latest would be the first element?
+						.map { it as JsonObject }
+						.find{ it["content_type"]?.jsonPrimitive?.content == "application/vnd.android.package-archive"
+								&& it["name"]?.jsonPrimitive?.content?.contains(appRegexName) == true
+						}?.get("url") ?: throw IllegalStateException("Expected a non null value for the github download link")
 
-					notificationManager.notify(1, notification)
+					if (isAutoUpdate){
+						//perhaps send a pop up notif before download to let know of user that install happens soon
+						//which may fuck up what they are doing
+						val notification = NotificationCompat.Builder(applicationContext, channelId)
+							.setSmallIcon(R.drawable.bus2go_dark_ic_launcher_foreground)
+							.setContentTitle("Auto Update")
+							.setContentText("Auto updating Bus2Go...")
+							.setPriority(NotificationCompat.PRIORITY_DEFAULT)
+							.build()
+						notificationManager.notify(NOTIF_ID, notification)
+
+						autoUpdate(client, downloadLink.jsonPrimitive.content, notificationManager, channelId)
+					}
+					else{
+						val intent = Intent(Intent.ACTION_VIEW, Uri.parse(downloadLink.jsonPrimitive.content))
+						val pendingIntent = PendingIntent.getActivity(applicationContext, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+
+						val notification = NotificationCompat.Builder(applicationContext, channelId)
+							.setSmallIcon(R.drawable.bus2go_dark_ic_launcher_foreground)
+							.setContentTitle("Bus2Go $tagVersion now available")
+							.setContentText("Tap to download the latest version")
+							.setPriority(NotificationCompat.PRIORITY_DEFAULT)
+							.setContentIntent(pendingIntent)
+							.build()
+
+						notificationManager.notify(NOTIF_ID, notification)
+					}
 				}
 				else{
-					Log.d("UPDATES", "Version seems to be up to date")
 					//FIXME for testing only, at release comment this
 					/*
+					Log.d("UPDATES", "Version seems to be up to date")
+					val downloadLink = "https://github.com/afg360/Bus2Go/releases/download/v1.1.0-alpha/bus2go-debug.apk"
+					val intent = Intent(Intent.ACTION_VIEW, Uri.parse(downloadLink))
+					val pendingIntent = PendingIntent.getActivity(applicationContext, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+
 					val notification = NotificationCompat.Builder(applicationContext, channelId)
 						.setSmallIcon(R.drawable.bus2go_dark_ic_launcher_foreground)
-						.setContentTitle("Updates")
-						.setContentText("No new updates found")
+						.setContentTitle("Bus2Go $tagVersion now available")
+						.setContentText("Tap to download the latest version")
 						.setPriority(NotificationCompat.PRIORITY_DEFAULT)
+						.setContentIntent(pendingIntent)
 						.build()
 
-					notificationManager.notify(1, notification)
+					notificationManager.notify(NOTIF_ID, notification)
+					//autoUpdate(client, downloadLink, notificationManager, channelId)
 					 */
 				}
 				return Result.success()
@@ -93,10 +149,77 @@ class UpdateManagerWorker(context: Context, workerParams: WorkerParameters) : Co
 				return Result.failure()
 			}
 		}
+	}
 
-		//for latest, DOES NOT INCLUDE PRE-RELEASES
-		//https://api.github.com/repos/afg360/bus2go/releases/latest
+	private suspend fun autoUpdate(client: HttpClient, downloadLink : String, notificationManager: NotificationManager, channelId: String){
+		val file = withContext(Dispatchers.IO) {
+			File.createTempFile("bus2go-update-", ".apk.part")
+		}
 
+		val updatedNotificationBuilder = NotificationCompat.Builder(applicationContext, channelId)
+			.setContentTitle("Downloading file")
+			.setContentText("Downloading in progress...")
+			.setSmallIcon(R.drawable.bus2go_dark_ic_launcher_foreground)
+			.setOngoing(true) //since dont want to remove notif from downloading process
+
+		//TODO handle requests when not connected to internet, or sudden loss of connection
+		try {
+			client.prepareGet(downloadLink).execute { httpResponse ->
+				val channel: ByteReadChannel = httpResponse.body()
+				var downloadedSize: Long = 0
+				var lastProgress = 0
+				val threshold = 3
+				while (!channel.isClosedForRead) {
+					val packet = channel.readRemaining(DEFAULT_BUFFER_SIZE.toLong())
+					while (!packet.isEmpty) {
+						val bytes = packet.readBytes()
+						file.appendBytes(bytes)
+
+						downloadedSize += bytes.size
+						val progress =
+							(channel.totalBytesRead * 100 / httpResponse.contentLength()!!).toInt()
+						if (progress >= lastProgress + threshold) {
+							lastProgress = progress
+							val updatedNotification = updatedNotificationBuilder
+								.setProgress(100, progress, false)
+								.build()
+
+							notificationManager.notify(NOTIF_ID, updatedNotification)
+						}
+					}
+				}
+			}
+		}
+		catch (ioE: IOException){
+			//TODO finish handling of IO errors
+			Log.e("UPDATE", "IO exception during downloading")
+			Toast.makeText(applicationContext, "Error during update download", Toast.LENGTH_SHORT).show()
+			//delete tmp file?
+			file.delete()
+			return
+		}
+		//remove the notif and replace it with this
+		val updatedNotification = updatedNotificationBuilder
+			.setContentTitle("Download complete")
+			.setContentText("Download done")
+			.setOngoing(false)
+			.build()
+		notificationManager.notify(NOTIF_ID, updatedNotification)
+
+		//process to installation of the apk (convert the apk.part to .apk if it correctly downloaded
+		//compare checksums?
+		//val apkFile = File(Uri.fromFile(file))
+		//FIXME
+		val intent = Intent(Intent.ACTION_VIEW)
+		intent.setDataAndType(
+			FileProvider.getUriForFile(applicationContext,
+				applicationContext.packageName + ".provider", file),
+			"application/vnd.android.package-archive"
+		)
+		intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+		applicationContext.sendBroadcast(intent)
+
+		//delete the downloaded file...
 	}
 
 	private class VersionName(name : String){
