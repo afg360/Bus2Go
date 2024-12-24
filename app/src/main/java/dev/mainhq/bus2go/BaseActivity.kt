@@ -1,8 +1,18 @@
 package dev.mainhq.bus2go
 
+import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
+import dev.mainhq.bus2go.updates.UpdateManagerWorker.Companion.FILE_NAME
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
 import kotlin.properties.Delegates
 
 /** Base activity class defining the correct theme to apply */
@@ -15,6 +25,7 @@ open class BaseActivity : AppCompatActivity() {
             .getBoolean("dark-mode", true)
         AppThemeState.setTheme(isDark)
         super.onCreate(savedInstanceState)
+
     }
 
     override fun onResume() {

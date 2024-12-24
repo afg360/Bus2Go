@@ -44,6 +44,7 @@ class UpdateManagerWorker(context: Context, workerParams: WorkerParameters) : Co
 	companion object {
 		const val TAG = "CHECK-FOR-UPDATES"
 		const val NOTIF_ID = 1
+		const val FILE_NAME = "bus2go-update.apk"
 	}
 
 	//for latest, DOES NOT INCLUDE PRE-RELEASES
@@ -95,12 +96,13 @@ class UpdateManagerWorker(context: Context, workerParams: WorkerParameters) : Co
 						}?.get("url") ?: throw IllegalStateException("Expected a non null value for the github download link")
 
 					if (isAutoUpdate){
-						//perhaps send a pop up notif before download to let know of user that install happens soon
-						//which may fuck up what they are doing
+						//before dowloading, check if a correct apk already exists, and jump to installation
+						//if already there...
 						val notification = NotificationCompat.Builder(applicationContext, channelId)
-							.setSmallIcon(R.drawable.bus2go_dark_ic_launcher_foreground)
 							.setContentTitle("Auto Update")
 							.setContentText("Auto updating Bus2Go...")
+							.setSmallIcon(R.drawable.baseline_update_24)
+							//.setSmallIcon(R.drawable.bus2go_dark_ic_launcher_foreground)
 							.setPriority(NotificationCompat.PRIORITY_DEFAULT)
 							.build()
 						notificationManager.notify(NOTIF_ID, notification)
@@ -112,9 +114,10 @@ class UpdateManagerWorker(context: Context, workerParams: WorkerParameters) : Co
 						val pendingIntent = PendingIntent.getActivity(applicationContext, 0, intent, PendingIntent.FLAG_IMMUTABLE)
 
 						val notification = NotificationCompat.Builder(applicationContext, channelId)
-							.setSmallIcon(R.drawable.bus2go_dark_ic_launcher_foreground)
 							.setContentTitle("Bus2Go $tagVersion now available")
 							.setContentText("Tap to download the latest version")
+							.setSmallIcon(R.drawable.baseline_update_24)
+							//.setSmallIcon(R.drawable.bus2go_dark_ic_launcher_foreground)
 							.setPriority(NotificationCompat.PRIORITY_DEFAULT)
 							.setContentIntent(pendingIntent)
 							.build()
@@ -124,8 +127,8 @@ class UpdateManagerWorker(context: Context, workerParams: WorkerParameters) : Co
 				}
 				else{
 					//FIXME for testing only, at release comment this
-					/*
 					Log.d("UPDATES", "Version seems to be up to date")
+					/*
 					val downloadLink = "https://github.com/afg360/Bus2Go/releases/download/v1.1.0-alpha/bus2go-debug.apk"
 					val intent = Intent(Intent.ACTION_VIEW, Uri.parse(downloadLink))
 					val pendingIntent = PendingIntent.getActivity(applicationContext, 0, intent, PendingIntent.FLAG_IMMUTABLE)
@@ -136,10 +139,11 @@ class UpdateManagerWorker(context: Context, workerParams: WorkerParameters) : Co
 						.setContentText("Tap to download the latest version")
 						.setPriority(NotificationCompat.PRIORITY_DEFAULT)
 						.setContentIntent(pendingIntent)
+						.setAutoCancel(true)
 						.build()
 
 					notificationManager.notify(NOTIF_ID, notification)
-					//autoUpdate(client, downloadLink, notificationManager, channelId)
+					autoUpdate(client, downloadLink, notificationManager, channelId)
 					 */
 				}
 				return Result.success()
@@ -153,73 +157,90 @@ class UpdateManagerWorker(context: Context, workerParams: WorkerParameters) : Co
 
 	private suspend fun autoUpdate(client: HttpClient, downloadLink : String, notificationManager: NotificationManager, channelId: String){
 		val file = withContext(Dispatchers.IO) {
-			File.createTempFile("bus2go-update-", ".apk.part")
+			File(applicationContext.cacheDir, FILE_NAME)
 		}
 
-		val updatedNotificationBuilder = NotificationCompat.Builder(applicationContext, channelId)
-			.setContentTitle("Downloading file")
-			.setContentText("Downloading in progress...")
-			.setSmallIcon(R.drawable.bus2go_dark_ic_launcher_foreground)
-			.setOngoing(true) //since dont want to remove notif from downloading process
+		//do not redownload apk if already downloaded correctly
+		if (!file.exists()){
+			val tmpFile = withContext(Dispatchers.IO){
+				File(applicationContext.cacheDir, "$FILE_NAME.part")
+			}
 
-		//TODO handle requests when not connected to internet, or sudden loss of connection
-		try {
-			client.prepareGet(downloadLink).execute { httpResponse ->
-				val channel: ByteReadChannel = httpResponse.body()
-				var downloadedSize: Long = 0
-				var lastProgress = 0
-				val threshold = 3
-				while (!channel.isClosedForRead) {
-					val packet = channel.readRemaining(DEFAULT_BUFFER_SIZE.toLong())
-					while (!packet.isEmpty) {
-						val bytes = packet.readBytes()
-						file.appendBytes(bytes)
+			val updatedNotificationBuilder = NotificationCompat.Builder(applicationContext, channelId)
+				.setContentTitle("Downloading file")
+				.setContentText("Downloading in progress...")
+				.setSmallIcon(R.drawable.baseline_update_24)
+				//.setSmallIcon(R.drawable.bus2go_dark_ic_launcher_foreground)
+				.setOngoing(true) //since dont want to remove notif from downloading process
 
-						downloadedSize += bytes.size
-						val progress =
-							(channel.totalBytesRead * 100 / httpResponse.contentLength()!!).toInt()
-						if (progress >= lastProgress + threshold) {
-							lastProgress = progress
-							val updatedNotification = updatedNotificationBuilder
-								.setProgress(100, progress, false)
-								.build()
+			//TODO handle requests when not connected to internet, or sudden loss of connection
+			//if correctly downloaded (maybe by checking check sum), then no need to redownload?
+			try {
+				client.prepareGet(downloadLink).execute { httpResponse ->
+					val channel: ByteReadChannel = httpResponse.body()
+					var downloadedSize: Long = 0
+					var lastProgress = 0
+					val threshold = 3
+					while (!channel.isClosedForRead) {
+						val packet = channel.readRemaining(DEFAULT_BUFFER_SIZE.toLong())
+						while (!packet.isEmpty) {
+							val bytes = packet.readBytes()
+							tmpFile.appendBytes(bytes)
 
-							notificationManager.notify(NOTIF_ID, updatedNotification)
+							downloadedSize += bytes.size
+							val progress =
+								(channel.totalBytesRead * 100 / httpResponse.contentLength()!!).toInt()
+							if (progress >= lastProgress + threshold) {
+								lastProgress = progress
+								val updatedNotification = updatedNotificationBuilder
+									.setProgress(100, progress, false)
+									.build()
+
+								notificationManager.notify(NOTIF_ID, updatedNotification)
+							}
 						}
 					}
 				}
+				tmpFile.renameTo(file)
+			}
+			catch (ioE: IOException){
+				//TODO finish handling of IO errors
+				Log.e("UPDATE", "IO exception during downloading")
+				Toast.makeText(applicationContext, "Error during update download", Toast.LENGTH_SHORT).show()
+				//delete tmp file?
+				tmpFile.delete()
+				return
 			}
 		}
-		catch (ioE: IOException){
-			//TODO finish handling of IO errors
-			Log.e("UPDATE", "IO exception during downloading")
-			Toast.makeText(applicationContext, "Error during update download", Toast.LENGTH_SHORT).show()
-			//delete tmp file?
-			file.delete()
-			return
-		}
-		//remove the notif and replace it with this
-		val updatedNotification = updatedNotificationBuilder
-			.setContentTitle("Download complete")
-			.setContentText("Download done")
-			.setOngoing(false)
-			.build()
-		notificationManager.notify(NOTIF_ID, updatedNotification)
 
-		//process to installation of the apk (convert the apk.part to .apk if it correctly downloaded
-		//compare checksums?
-		//val apkFile = File(Uri.fromFile(file))
+
+		//compare checksums for security purposes?
 		//FIXME
+		notificationManager.cancel(NOTIF_ID)
 		val intent = Intent(Intent.ACTION_VIEW)
 		intent.setDataAndType(
 			FileProvider.getUriForFile(applicationContext,
 				applicationContext.packageName + ".provider", file),
 			"application/vnd.android.package-archive"
 		)
-		intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-		applicationContext.sendBroadcast(intent)
+		intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
+		//applicationContext.sendBroadcast(intent)
+		val pendingIntent = PendingIntent.getActivity(applicationContext, 0, intent, PendingIntent.FLAG_IMMUTABLE)
 
 		//delete the downloaded file...
+		//remove the notif and replace it with this
+		val updatedNotification = NotificationCompat.Builder(applicationContext, channelId)
+			.setContentTitle("Tap to install Bus2Go")
+			.setContentText("Install the downloaded apk")
+			.setOngoing(true)
+			.setSmallIcon(R.drawable.baseline_update_24)
+			//.setSmallIcon(R.drawable.bus2go_dark_ic_launcher_foreground)
+			.setContentIntent(pendingIntent)
+			.setFullScreenIntent(pendingIntent, true)
+			.setAutoCancel(true)
+			.build()
+		notificationManager.notify(NOTIF_ID, updatedNotification)
+
 	}
 
 	private class VersionName(name : String){
