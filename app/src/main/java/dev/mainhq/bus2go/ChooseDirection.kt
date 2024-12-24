@@ -175,12 +175,15 @@ class ChooseDirection : BaseActivity() {
                     //some buses/transit only have 1 direction, so check before assigning
                     val intent = Intent(applicationContext, ChooseStop::class.java)
                     intent.putExtra(BusExtrasInfo.ROUTE_ID.name, bus)
-                    
+
+                    //Not a bug, if only 1 dir, then simply open the activity...
                     if (dirs.size == 1){
                         val dir = roomViewModel.getStopNames(this, dirs[0], bus).await()
                         withContext(Dispatchers.Main) {
                             //no need for a button in this case
+                            finish()
                             setIntent(intent, dir as ArrayList<String>, dirs[0], dir.last(), agency)
+                            Toast.makeText(this@ChooseDirection, "This bus line only contains 1 direction", Toast.LENGTH_SHORT).show()
                         }
                     }
                     else if (dirs.size > 1){
