@@ -5,6 +5,7 @@ import androidx.room.Query;
 import dev.mainhq.bus2go.utils.Time
 
 @Dao
+//FIXME doing today queries instead of calendar seem to dirupt everything...
 interface StopTimesDAO {
 
     //FIXME DID I FORGET DIRECTION_IDS IN getStopNames???

@@ -12,15 +12,17 @@
         android:layout_height="wrap_content"
         android:textSize="9pt"
         app:layout_constraintStart_toStartOf="parent"
+        android:textAlignment="center"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         />
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/no_available_transit_left_text_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:visibility="gone"
         android:textAlignment="center"
+        app:layout_constraintTop_toBottomOf="@id/time_title_text_view"
         android:text="No available transit left for today"
         android:textSize="15pt"
         />

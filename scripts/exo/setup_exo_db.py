@@ -3,6 +3,11 @@ import threading
 import zipfile
 import os
 import sqlite3
+import datetime
+
+def convert_str_to_date(date: str) -> datetime.datetime:
+    """Convert the time string to a datetime"""
+    return datetime.datetime(int(date[0:4]), int(date[4:6]), int(date[6:8]))
 
 
 def download(url : str, destination : str) -> None:
@@ -27,6 +32,7 @@ def download(url : str, destination : str) -> None:
 def db_data_init(conn, agency : str) -> None:
     """Initialise the data in the database associated to that agency"""
     calendar_table(conn, agency)
+    calendar_dates_table(conn, agency)
     route_table(conn, agency)
     forms_table(conn, agency)
     shapes_table(conn, agency)
@@ -39,8 +45,8 @@ def calendar_table(conn, agency) -> None:
     cursor = conn.cursor()
     print("Connected to database exo_info.db")
     sql = """CREATE TABLE IF NOT EXISTS Calendar (
-    	id INTEGER PRIMARY KEY NOT NULL,
-    	service_id TEXT UNIQUE NOT NULL,
+    	--id INTEGER PRIMARY KEY NOT NULL,
+    	service_id TEXT PRIMARY KEY NOT NULL,
         days TEXT NOT NULL,
     	start_date INTEGER NOT NULL,
     	end_date INTEGER NOT NULL
@@ -50,8 +56,19 @@ def calendar_table(conn, agency) -> None:
     print("Inserting table and adding data")
     with open(f"./{agency}/calendar.txt", "r", encoding="utf-8") as file:
         file.readline()
+        today = datetime.datetime.today()
         for line in file:
             tokens = line.replace("\n", "").replace("'", "''").split(",")
+            #TODO we are ignoring one day holidays...
+            date = convert_str_to_date(tokens[9])
+            if date == convert_str_to_date(tokens[8]):
+                continue
+            if date.year < today.year:
+                continue
+            elif date.year == today.year and date.month < today.month:
+                continue
+            elif date.year == today.today and date.month == today.month and date.day < today.day:
+                continue
             #check all the possible letters
             days = ""
             if tokens[1] == "1":
@@ -74,6 +91,34 @@ def calendar_table(conn, agency) -> None:
     print("Successfully inserted table")
     cursor.close()
 
+def calendar_dates_table(conn, agency):
+    cursor = conn.cursor()
+    cursor.execute("DROP TABLE IF EXISTS CalendarDates;")
+    print("Dropped table CalendarDates")
+
+    sql = """CREATE TABLE CalendarDates (
+    	service_id TEXT REFERENCES Calendar(service_id) NOT NULL,
+        date TEXT NOT NULL,
+        exception_type INTEGER NOT NULL,
+        PRIMARY KEY (service_id, date)
+    );"""
+    cursor.execute(sql)
+    print("Initialised table CalendarDates")
+
+    print("Inserting table and adding data")
+    with open(f"./{agency}/calendar_dates.txt", "r", encoding="utf-8") as file:
+        file.readline()
+        #try to add a row. if it doesn't exist in calendar, 
+        #simply skip (may be because we deleted the 
+        #original thing because past the date)
+        for line in file:
+            tokens = line.replace("\n", "").replace("'", "''").split(",")
+            sql = f"INSERT INTO CalendarDates (service_id,date,exception_type) VALUES (?,?,?);"
+            cursor.execute(sql, (tokens[0], tokens[1], tokens[2]))
+            conn.commit()
+
+    print("Successfully inserted table")
+    cursor.close()
 
 def forms_table(conn, agency):
     """Custom table to put together all unique shape_ids"""

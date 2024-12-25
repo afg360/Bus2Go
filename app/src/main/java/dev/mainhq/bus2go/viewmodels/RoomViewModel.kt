@@ -29,9 +29,11 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
         .addMigrations(AppDatabaseSTM.MIGRATION_1_2)
         .build()
 
-    //FIXME no migration for exo yet, next time must set a new migration
+    //FIXME doing the "today" queries seem to disrupt outputs?
     private val exoDataBase : AppDatabaseExo = Room.databaseBuilder(application, AppDatabaseExo::class.java, "exo_info.db")
-        .createFromAsset("database/exo_info.db").build()
+        .createFromAsset("database/exo_info.db")
+        .addMigrations(AppDatabaseExo.MIGRATION_1_2)
+        .build()
 
     suspend fun getFavouriteStopTimes(list : List<TransitData>, agency : TransitAgency, dayString : String,
                                       calendar : Calendar, times : MutableList<FavouriteTransitInfo>) : MutableList<FavouriteTransitInfo> {
