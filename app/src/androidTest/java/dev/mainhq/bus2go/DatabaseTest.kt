@@ -50,7 +50,7 @@ class DatabaseTest {
 
         db = Room.inMemoryDatabaseBuilder(context, AppDatabaseSTM::class.java)
             .createFromAsset("database/stm_info.db")
-            .addMigrations(AppDatabaseSTM.migration1to2)
+            .addMigrations(AppDatabaseSTM.MIGRATION_1_2)
             .build()
         tripsDao = db.tripsDao()
         routesDao = db.routesDao()

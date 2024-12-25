@@ -19,8 +19,8 @@
         android:roundIcon="@mipmap/bus2go_dark_ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/MaterialTheme.Bus2Go"
-        android:versionCode="3"
-        android:versionName="v1.2.0-alpha"
+        android:versionCode="4"
+        android:versionName="v1.2.1-alpha"
         tools:targetApi="31">
         <!-- Used for FileProvider class, to install the downloaded update apk -->
         <provider
