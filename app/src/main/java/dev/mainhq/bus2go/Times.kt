@@ -112,7 +112,7 @@ class Times : BaseActivity() {
             job = lifecycleScope.launch{
                 displayRecyclerView(stopTimes)
             }
-        }, 0, 1, TimeUnit.SECONDS)
+        }, 0, 20, TimeUnit.SECONDS)
 
     }
     
