@@ -62,7 +62,7 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
                 list as List<ExoBusData>
                 val stopTimesDAO = exoDataBase.stopTimesDao()
                 list.forEach {busInfo ->
-                    stopTimesDAO.getFavouriteBusStopTime(busInfo.stopName, dayString, Time(calendar).toString(), busInfo.routeId)
+                    stopTimesDAO.getFavouriteBusStopTime(busInfo.stopName, dayString, Time(calendar).toString(), busInfo.headsign)
                         .also { time -> times.add(FavouriteTransitInfo(busInfo, time, agency)) }
                 }
                 return times
@@ -150,7 +150,9 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
         return exoDataBase.stopTimesDao().getTrainStopTimes("trains-$routeId", stopName, directionId, Time(calendar).toString(), getDayString(calendar))
     }
 
-    //FIXME TEMPORARY SOLUTION
+    /** Fxn that returns a list of DirectionInfo object for Stm,
+     *  a list of String representing ExoBus headsigns,
+     *  or throws an exception for trains */
     suspend fun getDirections(agency: TransitAgency,/** String because some busNums are of the form'T100'*/
                                             bus: String) : List<Any>{
         return when(agency){
@@ -182,6 +184,12 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
     /** For STM testing only for now */
     suspend fun getNames(stopId : Int) : String{
         return stmDatabase.stopDao().getStopName(stopId)
+    }
+
+    suspend fun getMigrationData(headsign: String): Pair<String, String>{
+        val routeId = exoDataBase.tripsDao().getRouteId(headsign)
+        val routeLongName = exoDataBase.routesDao().getBusDir(routeId)
+        return Pair(routeId.substringAfter("-"), routeLongName)
     }
 
     override fun onCleared() {

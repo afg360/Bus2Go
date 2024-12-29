@@ -14,4 +14,8 @@ interface TripsDAO {
 
     @Query("SELECT DISTINCT route_id FROM Trips;")
     suspend fun getRouteId() : List<String>
+
+    /** Used to migrate from favourites.json v1 to v2 */
+    @Query("SELECT DISTINCT route_id FROM Trips WHERE trip_headsign = (:headsign)")
+    suspend fun getRouteId(headsign: String): String
 }

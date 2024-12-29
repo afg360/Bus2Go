@@ -34,6 +34,7 @@ import dev.mainhq.bus2go.preferences.ExoBusData
 import dev.mainhq.bus2go.utils.Time
 import dev.mainhq.bus2go.adapters.FavouritesListElemsAdapter
 import dev.mainhq.bus2go.adapters.setMargins
+import dev.mainhq.bus2go.preferences.ExoBusDataOld
 import dev.mainhq.bus2go.preferences.StmBusData
 import dev.mainhq.bus2go.preferences.TrainData
 import dev.mainhq.bus2go.preferences.TransitData
@@ -88,6 +89,17 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
         
         lifecycleScope.launch {
             favouritesViewModel.loadData()
+            //query db to get needed data to update
+            //be sure to update the data if needed before doing any operations on it
+            if (favouritesViewModel.doesNeedMigration()){
+                val jobs = favouritesViewModel.exoBusInfo.value.map { exoBusInfo ->
+                    async {
+                        //routeLongName has the headsign assigned to it temporarily
+                        return@async roomViewModel.getMigrationData(exoBusInfo.headsign)
+                    }
+                }
+                favouritesViewModel.migrateFavouritesData(jobs.map { it.await() })
+            }
             val listSTM = favouritesViewModel.stmBusInfo.value
             val listExo = favouritesViewModel.exoBusInfo.value
             val listTrain = favouritesViewModel.exoTrainInfo.value

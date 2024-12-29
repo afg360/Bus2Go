@@ -286,7 +286,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
             TransitAgency.EXO_OTHER -> {
                 info.transitData as ExoBusData
                 intent.putExtra(BusExtrasInfo.ROUTE_ID.name, info.transitData.direction)
-                intent.putExtra("headsign", holder.tripHeadsignTextView.text as String)
+                intent.putExtra(BusExtrasInfo.HEADSIGN.name, info.transitData.headsign)
             }
         }
         holder.itemView.context.startActivity(intent)
@@ -295,6 +295,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
 
     class ViewHolder(view : View, private val recyclerView: RecyclerView) : RecyclerView.ViewHolder(view){
         var checkBoxView : MaterialCheckBox
+        /** Will consist of the routeLongName for exo data */
         val tripHeadsignTextView : MaterialTextView
         val stopNameTextView : MaterialTextView
         val arrivalTimeTextView : MaterialTextView

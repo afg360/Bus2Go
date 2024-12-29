@@ -23,6 +23,7 @@ import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.Times
 import dev.mainhq.bus2go.adapters.AlarmDialogListElemsAdapter
 import dev.mainhq.bus2go.preferences.ExoBusData
+import dev.mainhq.bus2go.utils.BusExtrasInfo
 import dev.mainhq.bus2go.utils.Time
 import dev.mainhq.bus2go.viewmodels.FavouritesViewModel
 import kotlinx.coroutines.Dispatchers
@@ -61,6 +62,7 @@ class AlarmCreationChooseBusDialog() : DialogFragment(R.layout.fragment_create_a
     private lateinit var activityResultLauncher : ActivityResultLauncher<Intent>
     private lateinit var alarmDialogBusStop : String
     private lateinit var alarmDialogBusNum : String
+    private lateinit var alarmDialogBusHeadsign : String
     private lateinit var favouritesViewModel: FavouritesViewModel
 
     private var time : Time? = null
@@ -79,7 +81,7 @@ class AlarmCreationChooseBusDialog() : DialogFragment(R.layout.fragment_create_a
                     }
                     time?.also {time ->
                         setFragmentResult("requestKey", bundleOf("ALARM_BUS_INFO" to AlarmBusInfo(
-                            ExoBusData(alarmDialogBusStop, alarmDialogBusNum, ""),
+                            ExoBusData(alarmDialogBusStop, alarmDialogBusNum, "", "", ""),
                             time)))
                         dismiss()
                     }
@@ -109,8 +111,9 @@ class AlarmCreationChooseBusDialog() : DialogFragment(R.layout.fragment_create_a
                                         alarmDialogBusStop = it.findViewById<MaterialTextView>(R.id.alarmDialogBusStop).text.toString()
                                         alarmDialogBusNum = it.findViewById<MaterialTextView>(R.id.alarmDialogBusNum).text.toString()
                                         intent.putExtra("stopName", alarmDialogBusStop)
-                                        intent.putExtra("headsign", alarmDialogBusNum)
+                                        intent.putExtra(BusExtrasInfo.ROUTE_ID.name, alarmDialogBusNum)
                                         intent.putExtra("ALARMS", true)
+                                        intent.putExtra(BusExtrasInfo.HEADSIGN.name, alarmDialogBusNum)
                                         activityResultLauncher.launch(intent)
 
                                         //val resultIntent = Intent()

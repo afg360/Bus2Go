@@ -32,8 +32,8 @@ android {
         applicationId "dev.mainhq.bus2go"
         minSdk 25
         targetSdk 34
-        versionCode 3
-        versionName "v1.2.0-alpha"
+        versionCode 4
+        versionName "v1.2.1-alpha"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -123,7 +123,7 @@ dependencies {
 
     def data_store_version = "1.1.1"
     //DataStore
-    implementation "androidx.datastore:datastore-preferences:$data_store_version"
+    //implementation "androidx.datastore:datastore-preferences:$data_store_version"
     //proto datastore
     implementation "androidx.datastore:datastore:$data_store_version"
 

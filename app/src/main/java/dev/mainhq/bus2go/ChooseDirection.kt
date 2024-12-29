@@ -83,11 +83,11 @@ class ChooseDirection : BaseActivity() {
         else {
             busNumView.text = busNum
             busNameView.text = routeName
-            setButtons(busNum)
+            setButtons(busNum, routeName)
         }
     }
 
-    private fun setButtons(bus : String) {
+    private fun setButtons(bus : String, routeName: String) {
         //if agency == EXO_Train, getTrips will actually give the "stops"
         //^need to check how to get the directions properly for trains...
         lifecycleScope.launch {
@@ -171,25 +171,26 @@ class ChooseDirection : BaseActivity() {
                     }
                 }
                 TransitAgency.EXO_OTHER -> {
-                    dirs as List<String>
+                    val headsigns = dirs as List<String>
                     //some buses/transit only have 1 direction, so check before assigning
                     val intent = Intent(applicationContext, ChooseStop::class.java)
                     intent.putExtra(BusExtrasInfo.ROUTE_ID.name, bus)
+                    intent.putExtra(BusExtrasInfo.ROUTE_NAME.name, routeName)
 
-                    //Not a bug, if only 1 dir, then simply open the activity...
-                    if (dirs.size == 1){
-                        val dir = roomViewModel.getStopNames(this, dirs[0], bus).await()
+                    //Not a bug, if only 1 dir, then simply opens the activity...
+                    if (headsigns.size == 1){
+                        val dir = roomViewModel.getStopNames(this, headsigns[0], bus).await()
                         withContext(Dispatchers.Main) {
                             //no need for a button in this case
                             finish()
-                            setIntent(intent, dir as ArrayList<String>, dirs[0], dir.last(), agency)
+                            setIntent(intent, dir as ArrayList<String>, headsigns[0], dir.last(), agency)
                             Toast.makeText(this@ChooseDirection, "This bus line only contains 1 direction", Toast.LENGTH_SHORT).show()
                         }
                     }
                     else if (dirs.size > 1){
                         val jobs = roomViewModel.getStopNames(this, agency, dirs, bus)
-                        val headsign0 = dirs[0]
-                        val headsign1 = dirs[1]
+                        val headsign0 = headsigns[0]
+                        val headsign1 = headsigns[1]
                         val dir0 = jobs.first.await()
                         val dir1 = jobs.second.await()
                         withContext(Dispatchers.Main) {
@@ -216,7 +217,7 @@ class ChooseDirection : BaseActivity() {
 
     private fun setIntent(intent : Intent, dir : ArrayList<String>, headsign: String, direction : String, agency: TransitAgency){
         intent.putStringArrayListExtra("stops", dir)
-        intent.putExtra("headsign", headsign)
+        intent.putExtra(BusExtrasInfo.HEADSIGN.name, headsign)
         intent.putExtra(BusExtrasInfo.DIRECTION.name, direction)
         intent.putExtra(BusExtrasInfo.AGENCY.name, agency)
         startActivity(intent)

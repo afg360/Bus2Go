@@ -18,8 +18,8 @@ import dev.mainhq.bus2go.utils.TransitAgency
 import dev.mainhq.bus2go.viewmodels.FavouritesViewModel
 
 
-class StopListElemsAdapter(private val stopNames: List<String>, private val list: List<TransitData>,
-                           private val headsign: String?, private val routeId: String?,
+class StopListElemsAdapter(private val stopNames: List<String>, private val favourites: List<TransitData>,
+                           private val headsign: String?, private val routeId: String,
                            private val trainNum : Int?, private val routeName : String?,
                            private val directionId : Int?, private val direction : String,
                            private val lastStop : String?, private val agency: TransitAgency,
@@ -40,8 +40,8 @@ class StopListElemsAdapter(private val stopNames: List<String>, private val list
         /** Initialise the right type of favourite button */
         when (agency) {
             TransitAgency.EXO_TRAIN -> {
-                holder.stopNameTextView.setTextColor(holder.itemView.resources .getColor(R.color.orange, null))
-                if (list.contains(TrainData(stopName, routeId!!, trainNum!!, routeName!!, directionId!!, direction))){
+                holder.stopNameTextView.setTextColor(holder.itemView.resources.getColor(R.color.orange, null))
+                if (favourites.contains(TrainData(stopName, routeId, trainNum!!, routeName!!, directionId!!, direction))){
                     holder.favouriteSelectedView.tag = "on"
                     holder.favouriteSelectedView.setBackgroundResource(R.drawable.favourite_drawable_on)
                 }
@@ -60,7 +60,7 @@ class StopListElemsAdapter(private val stopNames: List<String>, private val list
             }
             TransitAgency.STM -> {
                 holder.stopNameTextView.setTextColor(holder.itemView.resources .getColor(R.color.basic_blue, null))
-                if (list.contains(StmBusData(stopName, routeId!!, directionId!!, direction, lastStop!!))){
+                if (favourites.contains(StmBusData(stopName, routeId, directionId!!, direction, lastStop!!))){
                     holder.favouriteSelectedView.tag = "on"
                     holder.favouriteSelectedView.setBackgroundResource(R.drawable.favourite_drawable_on)
                 }
@@ -80,7 +80,7 @@ class StopListElemsAdapter(private val stopNames: List<String>, private val list
             }
             TransitAgency.EXO_OTHER -> {
                 holder.stopNameTextView.setTextColor(holder.itemView.resources .getColor(R.color.basic_purple, null))
-                if (list.contains(ExoBusData(holder.stopNameTextView.text.toString(), headsign!!, direction))){
+                if (favourites.contains(ExoBusData(holder.stopNameTextView.text.toString(), routeId, direction, routeName!!, headsign!!))){
                     holder.favouriteSelectedView.tag = "on"
                     holder.favouriteSelectedView.setBackgroundResource(R.drawable.favourite_drawable_on)
                 }
@@ -88,13 +88,13 @@ class StopListElemsAdapter(private val stopNames: List<String>, private val list
                     if (view.tag.equals("off")) {
                         view.setBackgroundResource(R.drawable.favourite_drawable_on)
                         view.tag = "on"
-                        favouritesViewModel.addFavourites(ExoBusData(stopName, headsign, direction))
+                        favouritesViewModel.addFavourites(ExoBusData(stopName, routeId, direction, routeName, headsign))
                     }
                     else {
                         view.setBackgroundResource(R.drawable.favourite_drawable_off)
                         view.tag = "off"
                         //todo add to favourites
-                        favouritesViewModel.removeFavourites(ExoBusData(stopName, headsign, direction))
+                        favouritesViewModel.removeFavourites(ExoBusData(stopName, routeId, direction, routeName, headsign))
                     }
                 }
             }

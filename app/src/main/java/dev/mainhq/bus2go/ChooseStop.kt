@@ -47,12 +47,12 @@ class ChooseStop() : BaseActivity() {
             val directionId = intent.extras?.getInt(BusExtrasInfo.DIRECTION_ID.name)
             val trainNum = intent.extras?.getInt(BusExtrasInfo.TRAIN_NUM.name)
             val lastStop = intent.getStringExtra(BusExtrasInfo.LAST_STOP.name)
-            val headsign = intent.getStringExtra("headsign")
+            val headsign = intent.getStringExtra(BusExtrasInfo.HEADSIGN.name)
 
             //non-nullable values
             val routeId = intent.getStringExtra(BusExtrasInfo.ROUTE_ID.name)!!
             val direction = intent.getStringExtra(BusExtrasInfo.DIRECTION.name)!!
-            if (agency == TransitAgency.EXO_TRAIN){
+            if (agency == TransitAgency.EXO_TRAIN || agency == TransitAgency.EXO_OTHER){
                 routeName = intent.getStringExtra(BusExtrasInfo.ROUTE_NAME.name) ?: throw IllegalStateException("Forgot to give a route name to a train!")
             }
             else if (agency == TransitAgency.STM && routeId.toInt() == -1)

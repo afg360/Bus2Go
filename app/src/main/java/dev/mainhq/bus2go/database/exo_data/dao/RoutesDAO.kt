@@ -11,6 +11,9 @@ interface RoutesDAO {
     @Query("SELECT route_long_name FROM Routes;")
     suspend fun getBusDir() : List<String>
 
+    @Query("SELECT DISTINCT route_long_name FROM Routes WHERE route_id = (:routeId);")
+    suspend fun getBusDir(routeId: String) : String
+
     @Query("SELECT DISTINCT route_color AS routeColor,route_text_color AS routeTextColor FROM Routes WHERE route_id = (:routeId);")
     suspend fun getRouteColor(routeId : String) : Colors
 

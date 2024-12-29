@@ -6,7 +6,7 @@ enum class BusExtrasInfo {
     BUS_NUM,
     AGENCY,
     DIRECTION,
-    
+    HEADSIGN,
     /** Only for use with trains! */
     /** Actual route id, as listed in the .txt files */
     ROUTE_ID,
