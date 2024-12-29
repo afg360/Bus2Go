@@ -71,6 +71,8 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
         when(info.agency) {
             TransitAgency.EXO_TRAIN -> {
                 info.transitData as TrainData
+                holder.routeLongNameTextView.text = "" //clear it out even if gone
+                holder.routeLongNameTextView.visibility = GONE
                 holder.directionTextView.text = holder.itemView.context
                     .getString(R.string.train_to, info.transitData.trainNum.toString(), info.transitData.direction)
                 holder.itemView.tag = info.transitData
@@ -92,6 +94,8 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
 
             TransitAgency.STM -> {
                 info.transitData as StmBusData
+                holder.routeLongNameTextView.text = "" //clear it out even if gone
+                holder.routeLongNameTextView.visibility = GONE
                 holder.itemView.tag = info.transitData
                 holder.directionTextView.text = "To ${info.transitData.lastStop}"
                 holder.tripHeadsignTextView.text = info.transitData.routeId.toString()
@@ -108,9 +112,15 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
                 )
             }
 
+            //FIXME some margin issues with bus number and bus route long name
             TransitAgency.EXO_OTHER -> {
                 info.transitData as ExoBusData
                 holder.itemView.tag = info.transitData
+                holder.routeLongNameTextView.text = "Bus: ${info.transitData.routeLongName}"
+                holder.routeLongNameTextView.visibility = VISIBLE
+                holder.routeLongNameTextView.setTextColor(
+                    holder.itemView.resources.getColor(R.color.basic_purple, null)
+                )
                 holder.stopNameTextView.text = info.transitData.stopName
                 holder.directionTextView.text = "To ${info.transitData.direction}"
                 holder.tripHeadsignTextView.text = info.transitData.routeId
@@ -294,21 +304,15 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
     }
 
     class ViewHolder(view : View, private val recyclerView: RecyclerView) : RecyclerView.ViewHolder(view){
-        var checkBoxView : MaterialCheckBox
+        var checkBoxView : MaterialCheckBox = view.findViewById(R.id.favourites_check_box)
         /** Will consist of the routeLongName for exo data */
-        val tripHeadsignTextView : MaterialTextView
-        val stopNameTextView : MaterialTextView
-        val arrivalTimeTextView : MaterialTextView
-        val timeRemainingTextView : MaterialTextView
-        val directionTextView : MaterialTextView
-        init{
-            tripHeadsignTextView = view.findViewById(R.id.favouritesTripheadsignTextView)
-            stopNameTextView = view.findViewById(R.id.favouritesStopNameTextView)
-            arrivalTimeTextView = view.findViewById(R.id.favouritesBusTimeTextView)
-            timeRemainingTextView = view.findViewById(R.id.favouritesBusTimeRemainingTextView)
-            checkBoxView = view.findViewById(R.id.favourites_check_box)
-            directionTextView = view.findViewById(R.id.favouritesDirectionTextView)
-        }
+        val tripHeadsignTextView : MaterialTextView = view.findViewById(R.id.favouritesTripheadsignTextView)
+        val stopNameTextView : MaterialTextView = view.findViewById(R.id.favouritesStopNameTextView)
+        val arrivalTimeTextView : MaterialTextView = view.findViewById(R.id.favouritesBusTimeTextView)
+        val timeRemainingTextView : MaterialTextView = view.findViewById(R.id.favouritesBusTimeRemainingTextView)
+        val directionTextView : MaterialTextView = view.findViewById(R.id.favouritesDirectionTextView)
+        /** Invisible for all except exo buses */
+        val routeLongNameTextView: MaterialTextView = view.findViewById(R.id.favouritesExoRouteLongNameTextView)
 
         fun select(parent : ViewGroup?){
             parent?.findViewById<MaterialCheckBox>(R.id.selectAllCheckbox)?.apply {
