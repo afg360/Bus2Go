@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go.fragments
+package dev.mainhq.bus2go.fragments.alarms
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -19,7 +19,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.Settings
+import dev.mainhq.bus2go.SettingsActivity
 import dev.mainhq.bus2go.adapters.AlarmsListElemAdapter
 import dev.mainhq.bus2go.preferences.Alarm
 import dev.mainhq.bus2go.viewmodels.AlarmCreationViewModel
@@ -47,7 +47,7 @@ class Alarms()
         menuBar.setOnMenuItemClickListener {
             when (it.itemId){
                 R.id.settingsIcon, R.id.addAlarmButton -> {
-                    val intent = Intent(this.context, Settings::class.java)
+                    val intent = Intent(this.context, SettingsActivity::class.java)
                     startActivity(intent)
                     true
                 }

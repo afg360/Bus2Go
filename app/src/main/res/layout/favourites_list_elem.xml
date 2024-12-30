@@ -84,7 +84,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 android:visibility="gone"
                 android:text="hello world"
-                android:textSize="12dp"
+                android:textSize="12sp"
                 />
 
             <com.google.android.material.textview.MaterialTextView

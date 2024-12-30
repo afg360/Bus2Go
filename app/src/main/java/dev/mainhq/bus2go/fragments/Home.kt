@@ -23,7 +23,7 @@ import com.google.android.material.search.SearchView
 import com.google.android.material.search.SearchView.TransitionState
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.SearchBus
-import dev.mainhq.bus2go.Settings
+import dev.mainhq.bus2go.SettingsActivity
 import dev.mainhq.bus2go.adapters.BusListElemsAdapter
 import dev.mainhq.bus2go.utils.FuzzyQuery
 import dev.mainhq.bus2go.utils.TransitAgency
@@ -148,7 +148,7 @@ class Home() : Fragment(R.layout.fragment_home) {
         searchBar.setOnMenuItemClickListener {
             val itemID = it.itemId
             if (itemID == R.id.settingsIcon) {
-                val intent = Intent(this.context, Settings::class.java)
+                val intent = Intent(this.context, SettingsActivity::class.java)
                 startActivity(intent)
                 true
             }

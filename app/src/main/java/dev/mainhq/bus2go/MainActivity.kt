@@ -1,27 +1,27 @@
 package dev.mainhq.bus2go
 
 import android.app.AlarmManager
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.OnBackPressedCallback
-import androidx.annotation.RequiresApi
-import androidx.core.app.NotificationCompat
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.navigation.NavigationBarView
-import dev.mainhq.bus2go.fragments.AlarmReceiver
+import dev.mainhq.bus2go.fragments.alarms.AlarmReceiver
 import dev.mainhq.bus2go.fragments.ComingSoon
 import dev.mainhq.bus2go.fragments.Home
 import dev.mainhq.bus2go.viewmodels.AlarmCreationViewModel
-import dev.mainhq.bus2go.viewmodels.FavouritesViewModel
-import dev.mainhq.bus2go.viewmodels.RoomViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
 import java.util.Calendar
 
 
@@ -30,19 +30,44 @@ import java.util.Calendar
 //to show to user storing favourites of "deprecated buses" that it has changed
 //to another bus (e.g. 435 -> 465)
 
-class MainActivity() : BaseActivity() {
+val Context.firstTimeDataStore: DataStore<Preferences> by preferencesDataStore(
+    name = "application_state.json"
+)
+
+class MainActivity : BaseActivity() {
 
     private lateinit var activityType : ActivityType
 
 	override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //if (false) { //TODO check if config file exists
-        //    val intent = Intent(applicationContext, Config::class.java)
-        //    startActivity(intent)
-        //}
+        //FIXME only for testing dont run the whole code
+        val first = intent.getBooleanExtra("first", true)
+        if (first) {
+            val intent = Intent(applicationContext, ConfigActivity::class.java)
+            finish()
+            startActivity(intent)
+        }
+        else
+            setupActivity()
+        /*
+        //TODO check if need to start configuration activity here
+        lifecycleScope.launch(Dispatchers.IO) {
+            if (isFirstTime()){
+                withContext(Dispatchers.Main){
+                    val intent = Intent(applicationContext, ConfigActivity::class.java)
+                    /** Once the configuration is done, we will automatically start the MainActivity */
+                    startActivity(intent)
+                }
+            }
+            withContext(Dispatchers.Main){
+            }
+        }
+         */
 
+    }
+
+    private fun setupActivity(){
         setContentView(R.layout.main_activity)
-
 
         activityType = ActivityType.HOME
         val home = Home()
@@ -112,6 +137,24 @@ class MainActivity() : BaseActivity() {
         alarmManager.cancel(pendingIntent)
     }
 
+    /** To check if first time opening the app, check for the existence of the PreferenceManager field
+     * 	If false/doesn't exist, then first time.
+     * 	However, for long time users, check if the databases exist. If they don't, then we are sure
+     * 	it is their first time */
+    private suspend fun isFirstTime(): Boolean{
+        val keyName = booleanPreferencesKey("isFirstTime")
+        if  (firstTimeDataStore.data.first().contains(keyName)){
+            return firstTimeDataStore.data.first()[keyName] ?: true
+        }
+        else{
+            //TODO check for the existence of a bus2go database folder/files
+            val directory = File(filesDir, "database")
+            if (directory.exists() && directory.isDirectory){
+                return directory.list()?.isEmpty() ?: true
+            }
+            return true
+        }
+    }
 
     private enum class ActivityType{
         HOME, MAP, ALARMS

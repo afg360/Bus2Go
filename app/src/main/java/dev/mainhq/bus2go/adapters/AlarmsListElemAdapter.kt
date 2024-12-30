@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.materialswitch.MaterialSwitch
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.fragments.Alarms
+import dev.mainhq.bus2go.fragments.alarms.Alarms
 import dev.mainhq.bus2go.preferences.Alarm
 
 class AlarmsListElemAdapter(private val list : List<Alarm>)

@@ -8,7 +8,7 @@ import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.Times
+import dev.mainhq.bus2go.TimesActivity
 import dev.mainhq.bus2go.preferences.ExoBusData
 import dev.mainhq.bus2go.preferences.StmBusData
 import dev.mainhq.bus2go.preferences.TrainData
@@ -117,7 +117,7 @@ class StopListElemsAdapter(private val stopNames: List<String>, private val favo
             //FIXME NEED TO ADD SOME SHIT OVER HERE FOR THE INTENTS
             stopNameTextView.setOnClickListener{
                 val stopName = (it as MaterialTextView).text as String
-                val intent = Intent(view.context, Times::class.java)
+                val intent = Intent(view.context, TimesActivity::class.java)
                 intent.putExtra("stopName", stopName)
                 when (agency) {
                     TransitAgency.EXO_TRAIN -> {

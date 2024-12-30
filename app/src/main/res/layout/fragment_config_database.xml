@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/configDownloadDatabaseTextView"
+        android:layout_width="350dp"
+        android:layout_height="wrap_content"
+        android:text="Select which packages you would like to download and install"
+        android:textSize="30sp"
+        android:textAlignment="center"
+        android:layout_marginTop="50dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+    
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/configStmDatabaseCheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="STM data (recommended)"
+        android:layout_marginTop="50dp"
+        android:layout_marginEnd="50dp"
+        android:checked="true"
+        app:layout_constraintTop_toBottomOf="@id/configDownloadDatabaseTextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
+    
+    <!-- Could have this as the main, but then have collapsed choice for each individual -->
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/configExoDatabaseCheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Exo data (includes trains)"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="50dp"
+        app:layout_constraintTop_toBottomOf="@id/configStmDatabaseCheckBox"
+        app:layout_constraintStart_toStartOf="@id/configStmDatabaseCheckBox"
+        />
+    
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/configDownloadDatabaseContinueButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/config_continue"
+        android:layout_marginTop="120dp"
+        android:textColor="@color/light"
+        android:textSize="20sp"
+        app:layout_constraintTop_toBottomOf="@id/configExoDatabaseCheckBox"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
+    
+    
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,8 +1,6 @@
 package dev.mainhq.bus2go.adapters
 
 import android.content.Intent
-import android.graphics.Color
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
@@ -22,8 +20,7 @@ import com.google.android.material.color.MaterialColors
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.MainActivity
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.Times
-import dev.mainhq.bus2go.database.exo_data.dao.Colors
+import dev.mainhq.bus2go.TimesActivity
 import dev.mainhq.bus2go.fragments.FavouriteTransitInfo
 import dev.mainhq.bus2go.fragments.Home
 import dev.mainhq.bus2go.preferences.ExoBusData
@@ -154,7 +151,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
             }
         }
 
-        /** This onClick either serves to check the remaining times if not in selection mode, or to select/unselect an item of the
+        /** This onClick either serves to check the remaining times_activity.xml if not in selection mode, or to select/unselect an item of the
          *  recycler view if in selection mode (see onLongClick for more detail on the selection mode) */
         holder.itemView.setOnClickListener {
             //FIXME could remove nullability by setting holder.itemview.tag = "unselected"...
@@ -278,7 +275,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
     }
 
     private fun startTimes(holder : ViewHolder, view : View, info : FavouriteTransitInfo){
-        val intent = Intent(view.context, Times::class.java)
+        val intent = Intent(view.context, TimesActivity::class.java)
         intent.putExtra("stopName", holder.stopNameTextView.text as String)
         intent.putExtra(BusExtrasInfo.AGENCY.name, info.agency)
         when (info.agency) {

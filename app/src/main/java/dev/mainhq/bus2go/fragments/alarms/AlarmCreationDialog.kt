@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go.fragments
+package dev.mainhq.bus2go.fragments.alarms
 
 import java.util.Calendar
 import android.os.Build
@@ -25,7 +25,6 @@ import dev.mainhq.bus2go.MainActivity
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.utils.Time
 import dev.mainhq.bus2go.viewmodels.AlarmCreationViewModel
-import dev.mainhq.bus2go.viewmodels.FavouritesViewModel
 import java.lang.IllegalStateException
 
 
@@ -142,7 +141,7 @@ class AlarmCreationDialog() : DialogFragment(R.layout.fragment_create_alarms_dia
 
         bottomNavBar = AlarmCreationDialogBottomNavBar()
         bottomNavBar.setBottomNavBarListener(object :
-            AlarmCreationDialogBottomNavBar.BottomNavBarListener {
+			AlarmCreationDialogBottomNavBar.BottomNavBarListener {
             override fun onCancel() {
                 dismiss()
             }
@@ -183,7 +182,7 @@ class AlarmCreationDialog() : DialogFragment(R.layout.fragment_create_alarms_dia
                                     else -> throw IllegalStateException("Cannot have another any other char representing a day of the week")
                                 }
                                 (alarmCreationViewModel.alarmBusInfo.value!!.time - beforeTime).also {
-                                        if (it == null) throw IllegalStateException("An error occured trying to calculate alarm times to go off")
+                                        if (it == null) throw IllegalStateException("An error occured trying to calculate alarm times_activity.xml to go off")
                                         set(Calendar.HOUR_OF_DAY, it.hour)
                                         set(Calendar.MINUTE, it.min)
                                         set(Calendar.SECOND, it.sec)

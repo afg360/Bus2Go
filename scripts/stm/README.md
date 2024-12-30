@@ -58,7 +58,7 @@ Database Schema for each agency:
       "arrival_time": "TEXT NOT NULL",
       "stop_seq": "INTEGER NOT NULL"
     },
-    "descr": "Data taken from stop_times.txt, trips.txt, calendar.txt and stops.txt. Lists all the stop times for each trip of the STM."
+    "descr": "Data taken from stop_times.txt, trips.txt, calendar.txt and stops.txt. Lists all the stop times_activity.xml for each trip of the STM."
   },
   {
     "table": "Stops",

@@ -1,8 +1,7 @@
-package dev.mainhq.bus2go.fragments
+package dev.mainhq.bus2go.fragments.alarms
 
 import android.os.Bundle
 import android.view.View
-import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R

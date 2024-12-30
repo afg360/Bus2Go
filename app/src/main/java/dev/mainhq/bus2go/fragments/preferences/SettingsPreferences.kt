@@ -10,13 +10,12 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
-import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.Settings
-import dev.mainhq.bus2go.updates.UpdateManagerWorker
+import dev.mainhq.bus2go.SettingsActivity
+import dev.mainhq.bus2go.workers.UpdateManagerWorker
 import java.util.concurrent.TimeUnit
 
 class SettingsPreferences : PreferenceFragmentCompat() ,
@@ -95,7 +94,7 @@ class SettingsPreferences : PreferenceFragmentCompat() ,
                 }
                 "dark-mode" -> {
                     Log.d("Preferences", "Switched dark-mode state")
-                    (host as Settings).changeTheme()
+                    (host as SettingsActivity).changeTheme()
                 }
             }
         }

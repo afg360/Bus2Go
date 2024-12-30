@@ -44,4 +44,6 @@
     <string name="none_for_the_rest_of_the_today">None for the rest of the today</string>
     <string name="train_to">Train #%1$s, to %2$s</string>
     <string name="add_a_new_server">Add a new server</string>
+    <string name="welcome">Welcome to Bus2Go!</string>
+    <string name="config_continue">Continue</string>
 </resources>

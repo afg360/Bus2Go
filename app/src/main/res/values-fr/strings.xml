@@ -41,4 +41,6 @@
     <string name="none_for_the_rest_of_the_today">Aucun pour le restant de la journée</string>
     <string name="train_to">Train #%1$s, vers %2$s</string>
     <string name="add_a_new_server">Ajouter un nouveau serveur</string>
+    <string name="welcome">Bienvenue!</string>
+    <string name="config_continue">Continue</string>
 </resources>

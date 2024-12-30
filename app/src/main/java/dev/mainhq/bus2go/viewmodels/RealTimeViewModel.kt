@@ -53,7 +53,7 @@ class RealTimeViewModel(application : Application) : AndroidViewModel(applicatio
         _domainName.value = PreferenceManager.getDefaultSharedPreferences(application).getString("server-choice", "0.0.0.0")!!
     }
     
-    /** Make an http request to the backend server to receive the latest arrival times for a certain
+    /** Make an http request to the backend server to receive the latest arrival times_activity.xml for a certain
      * transit info (stop name of a route).  This method also parses the data received
      **/
     @Deprecated("Only a tmp/test method for when the client was making unefficient http requests. " +

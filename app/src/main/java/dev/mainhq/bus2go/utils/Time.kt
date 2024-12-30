@@ -73,7 +73,7 @@ class Time(hour : Int, min : Int, sec : Int) : Parcelable {
     }
 
 
-    /** Returns null if this < time and this > 3, may need to allow negative times? */
+    /** Returns null if this < time and this > 3, may need to allow negative times_activity.xml? */
     operator fun minus(time : Time) : Time?{
         if (this < time && _hour !in 0..3) return null
         else if (this == time) return Time(0,0,0)

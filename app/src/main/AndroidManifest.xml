@@ -32,14 +32,17 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths" />
         </provider>
-        <receiver android:name=".fragments.AlarmReceiver" />
+        <receiver android:name=".fragments.alarms.AlarmReceiver" />
+        <activity
+            android:name=".ConfigActivity"
+            android:exported="false"/>
         <activity
             android:name=".ChooseStop"
             android:exported="false"
             >
 
         </activity>
-        <activity android:name=".Times"
+        <activity android:name=".TimesActivity"
             android:exported="false">
 
         </activity>
@@ -53,15 +56,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Config"
-            android:exported="true">
-        </activity>
-        <activity
             android:name=".SearchBus"
             android:exported="false">
         </activity>
         <activity
-            android:name=".Settings"
+            android:name=".SettingsActivity"
             android:exported="false">
         </activity>
         <activity

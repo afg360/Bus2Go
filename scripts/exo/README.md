@@ -61,7 +61,7 @@ Database Schema for each agency:
       "stop_id": "TEXT NOT NULL REFERENCES Stops(stop_id)",
       "stop_seq": "INTEGER NOT NULL"
     },
-    "descr": "From stop_times.txt, lists all the stop times for each trip of each agency in exo.",
+    "descr": "From stop_times.txt, lists all the stop times_activity.xml for each trip of each agency in exo.",
     "syntax": "stop_id = 'agency-stop_id_val'"
   },
   {

@@ -8,7 +8,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import dev.mainhq.bus2go.fragments.AlarmCreationChooseBusDialog.AlarmBusInfo
+import dev.mainhq.bus2go.fragments.alarms.AlarmCreationChooseBusDialog.AlarmBusInfo
 import dev.mainhq.bus2go.preferences.Alarm
 import dev.mainhq.bus2go.preferences.AlarmsData
 import dev.mainhq.bus2go.preferences.AlarmsSerializer

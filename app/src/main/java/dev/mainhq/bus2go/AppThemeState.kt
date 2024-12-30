@@ -3,6 +3,7 @@ package dev.mainhq.bus2go
 import androidx.appcompat.app.AppCompatDelegate
 import kotlin.properties.Delegates
 
+/** Singleton used to control the global theme of the application */
 object AppThemeState {
 
     private var prevVal by Delegates.notNull<Boolean>()

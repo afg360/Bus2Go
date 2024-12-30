@@ -1,14 +1,13 @@
 package dev.mainhq.bus2go
 
 import android.os.Bundle
-import androidx.preference.PreferenceManager
 import com.google.android.material.appbar.MaterialToolbar
 import dev.mainhq.bus2go.fragments.preferences.SettingsPreferences
 
-class Settings : BaseActivity() {
+class SettingsActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.settings)
+        setContentView(R.layout.settings_activity)
 
         val menuBar = findViewById<MaterialToolbar>(R.id.settingsToolBar)
         menuInflater.inflate(R.menu.app_bar_settings, menuBar.menu)

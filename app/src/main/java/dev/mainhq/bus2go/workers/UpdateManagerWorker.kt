@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go.updates
+package dev.mainhq.bus2go.workers
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -196,7 +196,9 @@ class UpdateManagerWorker(context: Context, workerParams: WorkerParameters) : Co
 									.setProgress(100, progress, false)
 									.build()
 
-								notificationManager.notify(NOTIF_ID, updatedNotification)
+								withContext(Dispatchers.Main) {
+									notificationManager.notify(NOTIF_ID, updatedNotification)
+								}
 							}
 						}
 					}
@@ -216,7 +218,6 @@ class UpdateManagerWorker(context: Context, workerParams: WorkerParameters) : Co
 
 		//compare checksums for security purposes?
 		//FIXME
-		notificationManager.cancel(NOTIF_ID)
 		val intent = Intent(Intent.ACTION_VIEW)
 		intent.setDataAndType(
 			FileProvider.getUriForFile(applicationContext,
@@ -239,7 +240,10 @@ class UpdateManagerWorker(context: Context, workerParams: WorkerParameters) : Co
 			.setFullScreenIntent(pendingIntent, true)
 			.setAutoCancel(true)
 			.build()
-		notificationManager.notify(NOTIF_ID, updatedNotification)
+		withContext(Dispatchers.Main){
+			notificationManager.cancel(NOTIF_ID)
+			notificationManager.notify(NOTIF_ID, updatedNotification)
+		}
 
 	}
 

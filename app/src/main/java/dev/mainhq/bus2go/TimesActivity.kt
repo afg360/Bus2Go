@@ -12,15 +12,10 @@ import kotlinx.coroutines.withContext
 import android.icu.util.Calendar
 import android.os.Build
 import android.view.View
-import android.view.ViewGroup
-import androidx.core.view.get
-import androidx.core.view.size
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.textview.MaterialTextView
-import dev.mainhq.bus2go.adapters.FavouritesListElemsAdapter
 import dev.mainhq.bus2go.utils.BusExtrasInfo
 import dev.mainhq.bus2go.utils.TransitAgency
-import dev.mainhq.bus2go.utils.getDayString
 import dev.mainhq.bus2go.viewmodels.RoomViewModel
 import kotlinx.coroutines.Job
 import java.util.concurrent.Executors
@@ -32,7 +27,7 @@ import java.util.concurrent.TimeUnit
 //must be careful when dealing with hours AFTER 23:59:59
 //since they may be considered in a new day in android, but not for stm
 //todo add a home button to go back to the main activity
-class Times : BaseActivity() {
+class TimesActivity : BaseActivity() {
 
     private var fromAlarmCreation = false
 
@@ -43,7 +38,7 @@ class Times : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.times)
+        setContentView(R.layout.times_activity)
         val stopName = intent.getStringExtra("stopName")!!
         assert (stopName.isNotEmpty())
         val agency = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go.fragments
+package dev.mainhq.bus2go.fragments.alarms
 
 import android.app.Activity
 import android.content.Intent
@@ -20,8 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.Times
-import dev.mainhq.bus2go.adapters.AlarmDialogListElemsAdapter
+import dev.mainhq.bus2go.TimesActivity
 import dev.mainhq.bus2go.preferences.ExoBusData
 import dev.mainhq.bus2go.utils.BusExtrasInfo
 import dev.mainhq.bus2go.utils.Time
@@ -82,7 +81,8 @@ class AlarmCreationChooseBusDialog() : DialogFragment(R.layout.fragment_create_a
                     time?.also {time ->
                         setFragmentResult("requestKey", bundleOf("ALARM_BUS_INFO" to AlarmBusInfo(
                             ExoBusData(alarmDialogBusStop, alarmDialogBusNum, "", "", ""),
-                            time)))
+                            time)
+                        ))
                         dismiss()
                     }
                 }
@@ -99,7 +99,8 @@ class AlarmCreationChooseBusDialog() : DialogFragment(R.layout.fragment_create_a
             context?.also {
                 val bottomNavBar = AlarmCreationDialogBottomNavBar()
                 withContext(Dispatchers.Main) {
-                    bottomNavBar.setBottomNavBarListener(object : AlarmCreationDialogBottomNavBar.BottomNavBarListener{
+                    bottomNavBar.setBottomNavBarListener(object :
+                        AlarmCreationDialogBottomNavBar.BottomNavBarListener {
                         override fun onCancel() {
                             dismiss()
                         }
@@ -107,7 +108,7 @@ class AlarmCreationChooseBusDialog() : DialogFragment(R.layout.fragment_create_a
                             if (view.findViewById<MaterialTextView>(R.id.acceptAlarmCreation).tag == AVAILABLE) {
                                 view.findViewById<RecyclerView>(R.id.alarmDialogRecyclerView).forEach {
                                     if (it.findViewById<RadioButton>(R.id.addAlarmBusChoiceRadioButton).isChecked) {
-                                        val intent = Intent(context, Times::class.java)
+                                        val intent = Intent(context, TimesActivity::class.java)
                                         alarmDialogBusStop = it.findViewById<MaterialTextView>(R.id.alarmDialogBusStop).text.toString()
                                         alarmDialogBusNum = it.findViewById<MaterialTextView>(R.id.alarmDialogBusNum).text.toString()
                                         intent.putExtra("stopName", alarmDialogBusStop)
