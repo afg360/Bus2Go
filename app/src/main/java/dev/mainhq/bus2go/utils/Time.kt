@@ -5,10 +5,12 @@ import android.os.Parcel
 import android.os.Parcelable
 import dev.mainhq.bus2go.preferences.SerializableTime
 import java.text.SimpleDateFormat
+import java.time.LocalDateTime
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
+@Deprecated("Use a LocalDateTime object instead of using this class")
 /** Allows to do operations more easily on time based formats */
 class Time(hour : Int, min : Int, sec : Int) : Parcelable {
     private val _hour : Int
@@ -29,6 +31,12 @@ class Time(hour : Int, min : Int, sec : Int) : Parcelable {
         this._min = (min + this._sec / 60) % 60
         this._hour = (hour + this._min / 60)  % 24
     }
+
+    constructor(calendar: LocalDateTime) : this(
+        calendar.second,
+        calendar.minute,
+        calendar.hour
+    )
 
     constructor(calendar: Calendar) : this(
             calendar.get(Calendar.HOUR_OF_DAY),

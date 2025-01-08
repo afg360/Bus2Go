@@ -188,7 +188,7 @@ class AlarmCreationDialog() : DialogFragment(R.layout.fragment_create_alarms_dia
                                         set(Calendar.MINUTE, it.min)
                                         set(Calendar.SECOND, it.sec)
                                     }
-                                (requireActivity() as MainActivity).setAlarm(requireContext(), this)
+                                //(requireActivity() as MainActivity).setAlarm(requireContext(), this)
                             }
 
                         }

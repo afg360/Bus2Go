@@ -1,15 +1,12 @@
 package dev.mainhq.bus2go.fragments
 
-import android.content.ContentValues.TAG
 import android.content.Context
-import android.icu.util.Calendar
 import android.net.ConnectivityManager
 import android.net.ConnectivityManager.NetworkCallback
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
@@ -34,7 +31,6 @@ import dev.mainhq.bus2go.preferences.ExoBusData
 import dev.mainhq.bus2go.utils.Time
 import dev.mainhq.bus2go.adapters.FavouritesListElemsAdapter
 import dev.mainhq.bus2go.adapters.setMargins
-import dev.mainhq.bus2go.preferences.ExoBusDataOld
 import dev.mainhq.bus2go.preferences.StmBusData
 import dev.mainhq.bus2go.preferences.TrainData
 import dev.mainhq.bus2go.preferences.TransitData
@@ -47,11 +43,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.lang.ref.WeakReference
+import java.time.LocalDateTime
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledFuture
@@ -285,10 +280,14 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
     }
 
 
-    /** Used to get the required data to make a list of favouriteTransitInfo, adding dates to transitInfo elements */
+    /**
+     * Used to get the required data to make a list of favouriteTransitInfo,
+     * adding dates to transitInfo elements
+     * */
     private suspend fun toFavouriteTransitInfoList(coroutineScope: CoroutineScope, list : List<TransitData>, agency: TransitAgency, realTimeEnabled : Boolean = false) : List<FavouriteTransitInfo> {
         val times : MutableList<FavouriteTransitInfo> = mutableListOf()
-        val calendar = Calendar.getInstance()
+        //val calendar = Calendar.getInstance()
+        val calendar = LocalDateTime.now()
         val dayString = getDayString(calendar)
         return if (realTimeEnabled){
             //need to make it a pair with the corresponding FavouriteTransitInfo

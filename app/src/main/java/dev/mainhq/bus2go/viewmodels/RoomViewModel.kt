@@ -21,6 +21,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 class RoomViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -36,16 +38,22 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
         .build()
 
     suspend fun getFavouriteStopTimes(list : List<TransitData>, agency : TransitAgency, dayString : String,
-                                      calendar : Calendar, times : MutableList<FavouriteTransitInfo>) : MutableList<FavouriteTransitInfo> {
+                                      calendar : LocalDateTime, times : MutableList<FavouriteTransitInfo>) : MutableList<FavouriteTransitInfo> {
         //must be a string of form YYYYMMDD
-        val today = "${calendar.get(Calendar.YEAR)}${calendar.get(Calendar.MONTH)}${calendar.get(Calendar.DAY_OF_MONTH)}"
+        val today = calendar.format(DateTimeFormatter.BASIC_ISO_DATE)
+        val time = calendar.format(DateTimeFormatter.ISO_LOCAL_TIME)
         when(agency){
             TransitAgency.STM -> {
                 list as List<StmBusData>
                 val stopsInfoDAO = stmDatabase.stopsInfoDao()
                 list.forEach {busInfo ->
-                    stopsInfoDAO.getFavouriteStopTime(busInfo.stopName, dayString, Time(calendar).toString(), busInfo.direction, busInfo.routeId.toInt(), today)
-                        .also { time -> times.add(FavouriteTransitInfo(busInfo, time, agency)) }
+                    times.add(
+                        FavouriteTransitInfo(
+                            busInfo,
+                            stopsInfoDAO.getFavouriteStopTime(busInfo.stopName, dayString, time.toString(), busInfo.direction, busInfo.routeId.toInt(), today),
+                            agency
+                        )
+                    )
                 }
                 return times
             }
@@ -53,7 +61,7 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
                 list as List<TrainData>
                 val stopsTimesDAO = exoDataBase.stopTimesDao()
                 list.forEach {trainInfo ->
-                    stopsTimesDAO.getFavouriteTrainStopTime("trains-${trainInfo.routeId}", trainInfo.stopName, trainInfo.directionId, Time(calendar).toString(), dayString)
+                    stopsTimesDAO.getFavouriteTrainStopTime("trains-${trainInfo.routeId}", trainInfo.stopName, trainInfo.directionId, time.toString(), dayString)
                         .also { time -> times.add(FavouriteTransitInfo(trainInfo, time, agency)) }
                 }
                 return times
@@ -69,33 +77,35 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
-    
+
     /** Use to not directly use the for loop like in the getFavouriteStopTimes method. Only used for the internet connectivity shit */
     suspend fun getFavouriteStopTime(transitData : TransitData, agency : TransitAgency, dayString : String,
-                                      calendar : Calendar) : FavouriteTransitInfo {
+                                     calendar : LocalDateTime) : FavouriteTransitInfo {
         //must be a string of form YYYYMMDD
-        val today = "${calendar.get(Calendar.YEAR)}${calendar.get(Calendar.MONTH)}${calendar.get(Calendar.DAY_OF_MONTH)}"
+        val today = "${calendar.year}${calendar.monthValue}${calendar.dayOfMonth}"
+        val time = calendar.format(DateTimeFormatter.ISO_LOCAL_TIME)
         return when(agency){
             TransitAgency.STM -> {
                 val stopsInfoDAO = stmDatabase.stopsInfoDao()
                 FavouriteTransitInfo(transitData,
-                    stopsInfoDAO.getFavouriteStopTime(transitData.stopName, dayString, Time(calendar).toString(), transitData.direction, transitData.routeId.toInt(), today), agency)
+                    stopsInfoDAO.getFavouriteStopTime(transitData.stopName, dayString, time.toString(), transitData.direction, transitData.routeId.toInt(), today), agency)
             }
             TransitAgency.EXO_TRAIN -> {
                 val stopsTimesDAO = exoDataBase.stopTimesDao()
                 val trainInfo = transitData as TrainData
                 FavouriteTransitInfo(transitData,
                     stopsTimesDAO.getFavouriteTrainStopTime("trains-${trainInfo.routeId}",
-                        trainInfo.stopName, trainInfo.directionId, Time(calendar).toString(), dayString), agency)
+                        trainInfo.stopName, trainInfo.directionId, time.toString(), dayString), agency)
             }
             TransitAgency.EXO_OTHER -> {
                 val stopTimesDAO = exoDataBase.stopTimesDao()
                 val busInfo = transitData as ExoBusData
                 FavouriteTransitInfo(transitData,
-                    stopTimesDAO.getFavouriteBusStopTime(busInfo.stopName, dayString, Time(calendar).toString(), busInfo.routeId), agency)
+                    stopTimesDAO.getFavouriteBusStopTime(busInfo.stopName, dayString, time.toString(), busInfo.routeId), agency)
             }
         }
     }
+
 
     /** Return the jobs made from the async calls, only used with ExoOther when dirs.size == 1 */
     suspend fun getStopNames(coroutineScope: CoroutineScope, dirs : String, routeId: String?)
@@ -132,13 +142,12 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    /** */
-    suspend fun getStopTimes(stopName : String, calendar: Calendar, headsign : String,
+    suspend fun getStopTimes(stopName : String, localDateTime: LocalDateTime, headsign : String,
                              agency : TransitAgency, routeId: Int?) : List<Time>{
-        val curTime = Time(calendar).toString()
-        val dayString = getDayString(calendar)
+        val curTime = localDateTime.format(DateTimeFormatter.ISO_TIME).toString()
+        val dayString = getDayString(localDateTime)
         //must be a string of form YYYYMMDD
-        val today = "${calendar.get(Calendar.YEAR)}${calendar.get(Calendar.MONTH)}${calendar.get(Calendar.DAY_OF_MONTH)}"
+        val today = localDateTime.format(DateTimeFormatter.BASIC_ISO_DATE)
         return when(agency){
             TransitAgency.STM -> stmDatabase.stopsInfoDao().getStopTimes(stopName, dayString, curTime, headsign, routeId!!, today)
             TransitAgency.EXO_OTHER -> exoDataBase.stopTimesDao().getStopTimes(stopName, dayString, curTime, headsign)
@@ -146,8 +155,8 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    suspend fun getTrainStopTimes(routeId: Int, stopName: String, directionId : Int, calendar: Calendar) : List<Time>{
-        return exoDataBase.stopTimesDao().getTrainStopTimes("trains-$routeId", stopName, directionId, Time(calendar).toString(), getDayString(calendar))
+    suspend fun getTrainStopTimes(routeId: Int, stopName: String, directionId : Int, calendar: LocalDateTime) : List<Time>{
+        return exoDataBase.stopTimesDao().getTrainStopTimes("trains-$routeId", stopName, directionId, calendar.format(DateTimeFormatter.ISO_TIME).toString(), getDayString(calendar))
     }
 
     /** Fxn that returns a list of DirectionInfo object for Stm,

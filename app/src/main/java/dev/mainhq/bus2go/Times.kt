@@ -23,6 +23,7 @@ import dev.mainhq.bus2go.utils.TransitAgency
 import dev.mainhq.bus2go.utils.getDayString
 import dev.mainhq.bus2go.viewmodels.RoomViewModel
 import kotlinx.coroutines.Job
+import java.time.LocalDateTime
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledFuture
@@ -56,7 +57,8 @@ class Times : BaseActivity() {
         executor = Executors.newSingleThreadScheduledExecutor()
         //val routeId = intent.extras?.getInt(BusExtrasInfo.ROUTE_ID.name)
         val roomViewModel = ViewModelProvider(this)[RoomViewModel::class.java]
-        val calendar : Calendar = Calendar.getInstance()
+        //val calendar : Calendar = Calendar.getInstance()
+        val calendar = LocalDateTime.now()
         val textView = findViewById<MaterialTextView>(R.id.time_title_text_view)
         when(agency){
             TransitAgency.STM -> {

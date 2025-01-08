@@ -15,6 +15,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
+import java.time.LocalDateTime
 import java.util.Locale
 
 //right now only for the main activities
@@ -39,6 +40,21 @@ fun toParsable(txt: String): String {
     return str
 }
 
+fun getDayString(calendar : LocalDateTime) : String{
+    return when (calendar.dayOfWeek.value) {
+        Calendar.SUNDAY -> "d"
+        Calendar.MONDAY -> "m"
+        Calendar.TUESDAY -> "t"
+        Calendar.WEDNESDAY -> "w"
+        Calendar.THURSDAY -> "y"
+        Calendar.FRIDAY -> "f"
+        Calendar.SATURDAY -> "s"
+        else -> throw IllegalStateException("Cannot have a non day of the week!")
+    }
+}
+
+@Deprecated("Use a LocalDateTime instead of a Calendar object",
+    replaceWith = ReplaceWith("getDayString(calendar : LocalDateTime) : String"))
 fun getDayString(calendar : Calendar) : String{
     return when (calendar.get(Calendar.DAY_OF_WEEK)) {
         Calendar.SUNDAY -> "d"

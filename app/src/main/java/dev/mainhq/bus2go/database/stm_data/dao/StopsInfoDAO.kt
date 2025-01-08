@@ -5,6 +5,9 @@ import androidx.room.Query
 import dev.mainhq.bus2go.utils.Time
 
 @Dao
+/**
+ * DAO used to obtain information such as stop names, stop time arrivals, etc.
+ **/
 interface StopsInfoDAO {
 
     @Query("SELECT DISTINCT stop_name FROM StopsInfo " +
