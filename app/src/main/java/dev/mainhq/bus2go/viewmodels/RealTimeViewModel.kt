@@ -37,6 +37,8 @@ import java.io.IOException
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.net.URLEncoder.encode
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.util.concurrent.TimeUnit
 
 //TODO cache or save the data somewhere in case used and disconnected
@@ -172,7 +174,7 @@ class RealTimeViewModel(application : Application) : AndroidViewModel(applicatio
          * A test/tmp method that establishes an http request
          * */
         suspend fun getArrivalTimes(domainName: String, agency: String,
-            routeId: String, tripHeadsign: String, stopName: String) :List<Time> {
+            routeId: String, tripHeadsign: String, stopName: String) :List<LocalDateTime> {
             //FIXME temporarily HTTP instead of HTTPS
             val url = "http://$domainName:$PORT_NUM/$URL_PATH/?agency=${encode(agency, "utf-8")}" +
                     "&route_id=${encode(routeId, "utf-8")}" +
@@ -195,10 +197,11 @@ class RealTimeViewModel(application : Application) : AndroidViewModel(applicatio
                          *      "arrival_time: list[str]
                          * }
                          */
-                        return (Json.decodeFromString( JsonObject.serializer(),
+                        return (Json.decodeFromString(JsonObject.serializer(),
                                 response.body() )["arrival_time"] as JsonArray?)
                                 ?.filter{it.toString() != ""}
-                                ?.map{ Time.TimeBuilder.fromUnix(it.toString().toLong()) }
+                                //?.map{ Time.TimeBuilder.fromUnix(it.toString().toLong()) }
+                                ?.map{ LocalDateTime.ofEpochSecond(it.toString().toLong(), 0, ZoneOffset.UTC) }
                                 ?: listOf()
                     }
                     

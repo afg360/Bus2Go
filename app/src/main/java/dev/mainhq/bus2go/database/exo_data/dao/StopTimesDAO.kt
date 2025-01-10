@@ -3,6 +3,7 @@ package dev.mainhq.bus2go.database.exo_data.dao;
 import androidx.room.Dao;
 import androidx.room.Query;
 import dev.mainhq.bus2go.utils.Time
+import java.time.LocalTime
 
 @Dao
 //FIXME doing today queries instead of calendar seem to dirupt everything...
@@ -31,7 +32,7 @@ interface StopTimesDAO {
             "AND trip_headsign = (:headsign) " +
             "ORDER BY arrival_time")
     //perhaps also use the agency as a search argument
-    suspend fun getStopTimes(stopName : String, day : String, headsign: String) : List<Time>
+    suspend fun getStopTimes(stopName : String, day : String, headsign: String) : List<LocalTime>
 
     @Query("SELECT DISTINCT arrival_time FROM StopTimes " +
             "JOIN  Stops ON StopTimes.stop_id = Stops.stop_id " +
@@ -41,7 +42,7 @@ interface StopTimesDAO {
             "AND arrival_time >= (:time) AND trip_headsign = (:headsign) " +
             "ORDER BY arrival_time")
     //perhaps also use the agency as a search argument
-    suspend fun getStopTimes(stopName : String, day : String, time : String, headsign: String) : List<Time>
+    suspend fun getStopTimes(stopName : String, day : String, time : String, headsign: String) : List<LocalTime>
 
     @Query("SELECT MIN(arrival_time) AS arrival_time FROM (SELECT arrival_time FROM StopTimes " +
             "JOIN Stops ON StopTimes.stop_id = Stops.stop_id " +
@@ -49,7 +50,7 @@ interface StopTimesDAO {
             "JOIN Calendar ON Calendar.service_id = Trips.service_id " +
             "WHERE stop_name = (:stopName) AND days LIKE '%' || (:day) || '%' " +
             "AND arrival_time >= (:time) AND trip_headsign = (:headsign))")
-    suspend fun getFavouriteBusStopTime(stopName : String, day : String, time : String, headsign: String) : Time?
+    suspend fun getFavouriteBusStopTime(stopName : String, day : String, time : String, headsign: String) : LocalTime?
 
     @Query("SELECT arrival_time FROM StopTimes " +
             "JOIN Stops ON StopTimes.stop_id = Stops.stop_id " +
@@ -59,7 +60,7 @@ interface StopTimesDAO {
             "AND direction_id = (:directionId) AND arrival_time >= (:time) " +
             "AND stop_name = (:stopName) AND days LIKE '%' || (:day) || '%' " +
             "ORDER BY stoptimes.stop_seq,arrival_time;")
-    suspend fun getTrainStopTimes(routeId: String, stopName: String, directionId: Int, time: String, day : String) : List<Time>
+    suspend fun getTrainStopTimes(routeId: String, stopName: String, directionId: Int, time: String, day : String) : List<LocalTime>
 
     @Query("SELECT MIN(arrival_time) FROM StopTimes " +
             "JOIN Stops ON StopTimes.stop_id = Stops.stop_id " +
@@ -69,5 +70,5 @@ interface StopTimesDAO {
             "AND direction_id = (:directionId) AND arrival_time >= (:time) " +
             "AND stop_name = (:stopName) AND days LIKE '%' || (:day) || '%' " +
             "ORDER BY stoptimes.stop_seq,arrival_time;")
-    suspend fun getFavouriteTrainStopTime(routeId: String, stopName: String, directionId: Int, time: String, day : String) : Time?
+    suspend fun getFavouriteTrainStopTime(routeId: String, stopName: String, directionId: Int, time: String, day : String) : LocalTime?
 }

@@ -17,7 +17,7 @@ class Time(hour : Int, min : Int, sec : Int) : Parcelable {
     val hour get() = _hour
     private val _min : Int
     val min get() = _min
-    private val _sec : Int
+    private val _sec = sec % 60
     val sec get() = _sec
 
     constructor(parcel: Parcel) : this(
@@ -27,22 +27,21 @@ class Time(hour : Int, min : Int, sec : Int) : Parcelable {
     )
 
     init {
-        this._sec = sec % 60
         this._min = (min + this._sec / 60) % 60
         this._hour = (hour + this._min / 60)  % 24
     }
 
-    constructor(calendar: LocalDateTime) : this(
-        calendar.second,
-        calendar.minute,
-        calendar.hour
+    constructor(localDateTime: LocalDateTime) : this(
+        localDateTime.second,
+        localDateTime.minute,
+        localDateTime.hour
     )
 
     constructor(calendar: Calendar) : this(
             calendar.get(Calendar.HOUR_OF_DAY),
             calendar.get(Calendar.MINUTE),
             calendar.get(Calendar.SECOND)
-        )
+    )
 
     constructor(serializableTime: SerializableTime) : this(
             serializableTime.hour,

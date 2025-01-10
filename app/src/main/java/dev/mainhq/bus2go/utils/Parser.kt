@@ -1,20 +1,6 @@
 package dev.mainhq.bus2go.utils
 
 import android.icu.util.Calendar
-import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import androidx.room.Room
-import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.adapters.BusListElemsAdapter
-import dev.mainhq.bus2go.database.stm_data.AppDatabaseSTM
-import dev.mainhq.bus2go.database.exo_data.AppDatabaseExo
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
 import java.util.Locale
 
@@ -40,8 +26,9 @@ fun toParsable(txt: String): String {
     return str
 }
 
-fun getDayString(calendar : LocalDateTime) : String{
-    return when (calendar.dayOfWeek.value) {
+//FIXME use LocalDateTime formatter instead
+fun getDayString(localDateTime : LocalDateTime) : String{
+    return when (localDateTime.dayOfWeek.value) {
         Calendar.SUNDAY -> "d"
         Calendar.MONDAY -> "m"
         Calendar.TUESDAY -> "t"

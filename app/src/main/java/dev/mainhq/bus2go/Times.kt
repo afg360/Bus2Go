@@ -4,26 +4,20 @@ import android.os.Bundle
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import dev.mainhq.bus2go.utils.Time
 import dev.mainhq.bus2go.adapters.TimeListElemsAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import android.icu.util.Calendar
 import android.os.Build
 import android.view.View
-import android.view.ViewGroup
-import androidx.core.view.get
-import androidx.core.view.size
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.textview.MaterialTextView
-import dev.mainhq.bus2go.adapters.FavouritesListElemsAdapter
 import dev.mainhq.bus2go.utils.BusExtrasInfo
 import dev.mainhq.bus2go.utils.TransitAgency
-import dev.mainhq.bus2go.utils.getDayString
 import dev.mainhq.bus2go.viewmodels.RoomViewModel
 import kotlinx.coroutines.Job
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledFuture
@@ -58,7 +52,7 @@ class Times : BaseActivity() {
         //val routeId = intent.extras?.getInt(BusExtrasInfo.ROUTE_ID.name)
         val roomViewModel = ViewModelProvider(this)[RoomViewModel::class.java]
         //val calendar : Calendar = Calendar.getInstance()
-        val calendar = LocalDateTime.now()
+        val localDateTime = LocalDateTime.now()
         val textView = findViewById<MaterialTextView>(R.id.time_title_text_view)
         when(agency){
             TransitAgency.STM -> {
@@ -68,7 +62,7 @@ class Times : BaseActivity() {
                 //val directionId = intent.extras!!.getInt(BusExtrasInfo.DIRECTION.name_ID)
                 textView.text = "$routeId $direction - $stopName"
                 lifecycleScope.launch {
-                    val stopTimes = roomViewModel.getStopTimes(stopName, calendar, direction, agency, routeId)
+                    val stopTimes = roomViewModel.getStopTimes(stopName, localDateTime, direction, agency, routeId)
                     displayRecyclerView(stopTimes)
                     setupScheduledTask(stopTimes)
                 }
@@ -78,7 +72,7 @@ class Times : BaseActivity() {
                 val directionId = intent.extras!!.getInt(BusExtrasInfo.DIRECTION_ID.name)
                 textView.text = "$routeId $directionId - $stopName"
                 lifecycleScope.launch {
-                    val stopTimes = roomViewModel.getTrainStopTimes(routeId, stopName, directionId, calendar)
+                    val stopTimes = roomViewModel.getTrainStopTimes(routeId, stopName, directionId, localDateTime)
                     displayRecyclerView(stopTimes)
                     setupScheduledTask(stopTimes)
                 }
@@ -89,7 +83,7 @@ class Times : BaseActivity() {
                 val headsign = intent.getStringExtra("headsign")!!
                 textView.text = "$routeId $headsign - $stopName"
                 lifecycleScope.launch {
-                    val stopTimes = roomViewModel.getStopTimes(stopName, calendar, headsign, agency, routeId)
+                    val stopTimes = roomViewModel.getStopTimes(stopName, localDateTime, headsign, agency, routeId)
                     displayRecyclerView(stopTimes)
                     setupScheduledTask(stopTimes)
                 }
@@ -108,8 +102,9 @@ class Times : BaseActivity() {
     }
 
     //FIXME: Although this implementation works, we need to get rid of the recyclerViewItem once we go beyond
+    //FIXME may need a LocalDateTime
     //the time... unless that is already dealt with?
-    private fun setupScheduledTask(stopTimes: List<Time>){
+    private fun setupScheduledTask(stopTimes: List<LocalTime>){
         scheduledTask = executor?.scheduleWithFixedDelay({
             job = lifecycleScope.launch{
                 displayRecyclerView(stopTimes)
@@ -117,8 +112,9 @@ class Times : BaseActivity() {
         }, 0, 20, TimeUnit.SECONDS)
 
     }
-    
-    private suspend fun displayRecyclerView(stopTimes: List<Time>){
+
+    //FIXME may need a fucking localdatetime instead of a localtime
+    private suspend fun displayRecyclerView(stopTimes: List<LocalTime>){
         withContext(Dispatchers.Main) {
             //If stopTimes.isEmpty, say that it is empty
             val recyclerView: RecyclerView = findViewById(R.id.time_recycle_view)

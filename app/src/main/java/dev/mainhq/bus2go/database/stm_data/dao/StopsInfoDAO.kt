@@ -3,6 +3,7 @@ package dev.mainhq.bus2go.database.stm_data.dao
 import androidx.room.Dao
 import androidx.room.Query
 import dev.mainhq.bus2go.utils.Time
+import java.time.LocalTime
 
 @Dao
 /**
@@ -23,7 +24,7 @@ interface StopsInfoDAO {
             "AND arrival_time >= (:time) AND route_id = (:routeId) " +
             "AND trip_headsign LIKE (:headsign) || '%' " +
             "ORDER BY arrival_time")
-    suspend fun getStopTimes(stopName : String, day : String, time : String, /** i.e. DIRECTION string */ headsign: String, routeId: Int, today: String) : List<Time>
+    suspend fun getStopTimes(stopName : String, day : String, time : String, /** i.e. DIRECTION string */ headsign: String, routeId: Int, today: String) : List<LocalTime>
 
     /** Used for creating new alarm */
     @Query("SELECT DISTINCT arrival_time FROM StopsInfo JOIN " +
@@ -32,7 +33,7 @@ interface StopsInfoDAO {
             "ON StopsInfo.service_id = Calendar.service_id " +
             "WHERE days LIKE '%' || (:day) || '%' AND trip_headsign = (:headsign) AND route_id = (:routeId) " +
             "AND stop_name = (:stopName) ORDER BY arrival_time;" )
-    suspend fun getStopTimes(stopName : String, day : String, headsign: String, routeId: Int, today: String) : List<Time>
+    suspend fun getStopTimes(stopName : String, day : String, headsign: String, routeId: Int, today: String) : List<LocalTime>
 
 
     @Query("SELECT MIN(arrival_time) FROM StopsInfo JOIN " +
@@ -42,5 +43,5 @@ interface StopsInfoDAO {
             "WHERE stop_name = (:stopName) AND days LIKE '%' || (:day) || '%' " +
             "AND arrival_time >= (:time) AND route_id = (:routeId) " +
             "AND trip_headsign = (:headsign)")
-    suspend fun getFavouriteStopTime(stopName : String, day : String, time : String, headsign: String, routeId: Int, today: String) : Time
+    suspend fun getFavouriteStopTime(stopName : String, day : String, time : String, headsign: String, routeId: Int, today: String) : LocalTime?
 }

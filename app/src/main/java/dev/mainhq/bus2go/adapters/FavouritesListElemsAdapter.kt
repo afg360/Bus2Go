@@ -33,6 +33,10 @@ import dev.mainhq.bus2go.utils.BusExtrasInfo
 import dev.mainhq.bus2go.utils.TransitAgency
 import dev.mainhq.bus2go.utils.Time
 import java.lang.ref.WeakReference
+import java.time.Duration
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, recyclerView: WeakReference<RecyclerView>)
     : RecyclerView.Adapter<FavouritesListElemsAdapter.ViewHolder>(){
@@ -61,7 +65,8 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
         }
         else{
             holder.timeRemainingTextView.text = getTimeRemaining(info.arrivalTime)
-            if (info.arrivalTime.timeRemaining()?.compareTo(Time(0,3,59)) == -1)
+            //if (info.arrivalTime.timeRemaining()?.compareTo(Time(0,3,59)) == -1)
+            if (info.arrivalTime.compareTo(LocalTime.parse("00:03:59", DateTimeFormatter.ISO_LOCAL_TIME)) == -1)
                 holder.timeRemainingTextView.setTextColor(holder.itemView.resources.getColor(R.color.red, null))
             else {
                 holder.timeRemainingTextView.setTextColor(MaterialColors.getColor(holder.itemView, android.R.attr.editTextColor))
@@ -239,18 +244,30 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
     fun updateTime(viewGroup : ViewGroup, favouritesBusInfo: FavouriteTransitInfo){
         val container = viewGroup[0] as ViewGroup
         favouritesBusInfo.arrivalTime?.also {
+            ((container[1] as ViewGroup)[2] as MaterialTextView).text = getTimeRemaining(favouritesBusInfo.arrivalTime)
+            ((container[1] as ViewGroup)[3] as MaterialTextView).text = favouritesBusInfo.arrivalTime.toString()
+            if (favouritesBusInfo.arrivalTime.compareTo(LocalTime.parse("00:03:59", DateTimeFormatter.ISO_LOCAL_TIME)) == -1) ((container[1] as ViewGroup)[2] as MaterialTextView)
+                .setTextColor(viewGroup.resources.getColor(R.color.red, null))
+            else ((container[1] as ViewGroup)[3] as MaterialTextView).setTextColor(MaterialColors.getColor(viewGroup, android.R.attr.editTextColor))
+        }
+        /*
+        favouritesBusInfo.arrivalTime?.also {
             ((container[1] as ViewGroup)[2] as MaterialTextView).text = getTimeRemaining(it)
             ((container[1] as ViewGroup)[3] as MaterialTextView).text = favouritesBusInfo.arrivalTime.toString()
             if (it.timeRemaining()?.compareTo(Time(0,3,59)) == -1) ((container[1] as ViewGroup)[2] as MaterialTextView)
                 .setTextColor(viewGroup.resources.getColor(R.color.red, null))
             else ((container[1] as ViewGroup)[3] as MaterialTextView).setTextColor(MaterialColors.getColor(viewGroup, android.R.attr.editTextColor))
         }
+         */
     }
 
-    private fun getTimeRemaining(arrivalTime: Time): String {
-        val remainingTime = arrivalTime.timeRemaining() ?: Time(0, 0, 0) //todo replace that for better handling
-        return if (remainingTime.hour > 0) "In ${remainingTime.hour} h, ${remainingTime.min} min"
-                else "In ${remainingTime.min} min"
+    private fun getTimeRemaining(arrivalTime: LocalTime?): String {
+        val now = LocalDateTime.now()
+        if (arrivalTime == null) return "Wtf"
+        val remainingTime = Duration.between(now.toLocalTime(), arrivalTime)
+        return if (!remainingTime.isNegative && remainingTime.toHours() > 0) "In ${remainingTime.toHours()} h, ${remainingTime.toMinutes() % 60} min"
+                else if (!remainingTime.isNegative) "In ${remainingTime.toMinutes()} min"
+            else "Wtf"
     }
 
     /** This function is used to deselect a container
@@ -271,7 +288,6 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
             numSelected++
         }
     }
-
     fun isSelected(/** Outer view group layout, containing the linear layout (at the moment) for the other components */
                viewGroup : ViewGroup) : Boolean{
         return ((viewGroup[0] as ViewGroup)[0] as MaterialCheckBox).isChecked
