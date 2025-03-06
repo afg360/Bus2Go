@@ -69,7 +69,7 @@ class Times : BaseActivity() {
                 }
             }
             TransitAgency.EXO_TRAIN -> {
-                val routeId = intent.extras!!.getInt(BusExtrasInfo.ROUTE_ID.name)
+                val routeId = intent.extras!!.getString(BusExtrasInfo.ROUTE_ID.name)!!.toInt()
                 val directionId = intent.extras!!.getInt(BusExtrasInfo.DIRECTION_ID.name)
                 textView.text = "$routeId $directionId - $stopName"
                 lifecycleScope.launch {
@@ -81,7 +81,7 @@ class Times : BaseActivity() {
 
             TransitAgency.EXO_OTHER -> {
                 val routeId = intent.extras!!.getInt(BusExtrasInfo.ROUTE_ID.name)
-                val headsign = intent.getStringExtra("headsign")!!
+                val headsign = intent.getStringExtra(BusExtrasInfo.HEADSIGN.name)!!
                 textView.text = "$routeId $headsign - $stopName"
                 lifecycleScope.launch {
                     val stopTimes = roomViewModel.getStopTimes(stopName, time, headsign, agency, routeId)

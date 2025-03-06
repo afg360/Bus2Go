@@ -97,7 +97,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
                 holder.routeLongNameTextView.visibility = GONE
                 holder.itemView.tag = info.transitData
                 holder.directionTextView.text = "To ${info.transitData.lastStop}"
-                holder.tripHeadsignTextView.text = info.transitData.routeId.toString()
+                holder.tripHeadsignTextView.text = info.transitData.routeId
                 holder.tripHeadsignTextView.setTextColor(
                     holder.itemView.resources
                         .getColor(R.color.basic_blue, null)
@@ -153,8 +153,11 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
             }
         }
 
-        /** This onClick either serves to check the remaining times if not in selection mode, or to select/unselect an item of the
-         *  recycler view if in selection mode (see onLongClick for more detail on the selection mode) */
+        /**
+         * This onClick either serves to get to the Times activity if not in selection mode, or to
+         * select/unselect an item of the recycler view if in selection mode (see onLongClick for
+         * more detail on the selection mode)
+         **/
         holder.itemView.setOnClickListener {
             //FIXME could remove nullability by setting holder.itemview.tag = "unselected"...
             val parent = WeakReference((recyclerView.parent.parent.parent.parent.parent.parent as ViewGroup))
@@ -174,9 +177,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
                         }
                     }
                 }
-                else{
-                    startTimes(holder, it, info)
-                }
+                else startTimes(holder, it, info)
             }
 
             parent.get()!!.findViewById<MaterialTextView>(R.id.selectedNumsOfFavourites)
@@ -276,15 +277,22 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
         }
     }
 
-    fun select(/** Outer view group layout, containing the linear layout (at the moment) for the other components */
-               viewGroup : ViewGroup){
+    /**
+     * @param viewGroup Outer view group layout, containing the linear layout (at the moment) for
+     * the other components.
+     **/
+    fun select(viewGroup : ViewGroup){
         if (!((viewGroup[0] as ViewGroup)[0] as MaterialCheckBox).isChecked){
             ((viewGroup[0] as ViewGroup)[0] as MaterialCheckBox).isChecked = true
             numSelected++
         }
     }
-    fun isSelected(/** Outer view group layout, containing the linear layout (at the moment) for the other components */
-               viewGroup : ViewGroup) : Boolean{
+
+    /**
+     * @param viewGroup Outer view group layout, containing the linear layout (at the moment) for
+     * the other components.
+     **/
+    fun isSelected(viewGroup : ViewGroup) : Boolean{
         return ((viewGroup[0] as ViewGroup)[0] as MaterialCheckBox).isChecked
     }
 
@@ -295,8 +303,8 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
         when (info.agency) {
             TransitAgency.EXO_TRAIN -> {
                 info.transitData as TrainData
-                intent.putExtra(BusExtrasInfo.DIRECTION_ID.name, info.transitData.directionId)
                 intent.putExtra(BusExtrasInfo.ROUTE_ID.name, info.transitData.routeId)
+                intent.putExtra(BusExtrasInfo.DIRECTION_ID.name, info.transitData.directionId)
             }
             TransitAgency.STM -> {
                 info.transitData as StmBusData
@@ -346,9 +354,10 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
     }
 }
 
-/** Set the margins for the left margin for the left most items
+/**
+ * Set the margins for the left margin for the left most items
  *  and the right margin for the right most items inside the recycler view
- */
+ **/
 fun setMargins(constraintLayout : ConstraintLayout, left : Int, right : Int){
     for (i in 0..< constraintLayout.size){
         val materialTextView = constraintLayout[i] as MaterialTextView
