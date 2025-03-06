@@ -61,9 +61,9 @@ class Times : BaseActivity() {
                 val routeId = intent.extras!!.getString(BusExtrasInfo.ROUTE_ID.name)!!.toInt()
                 val direction = intent.extras!!.getString(BusExtrasInfo.DIRECTION.name)!!
                 //val directionId = intent.extras!!.getInt(BusExtrasInfo.DIRECTION.name_ID)
-                textView.text = "$routeId $direction - $stopName"
+                textView.text = "$routeId $stopName -> $direction"
                 lifecycleScope.launch {
-                    val stopTimes = roomViewModel.getStopTimes(stopName, time, direction, agency, routeId)
+                    val stopTimes = roomViewModel.getStmStopTimes(stopName, time, direction, routeId)
                     displayRecyclerView(stopTimes)
                     setupScheduledTask(stopTimes)
                 }
@@ -71,7 +71,9 @@ class Times : BaseActivity() {
             TransitAgency.EXO_TRAIN -> {
                 val routeId = intent.extras!!.getString(BusExtrasInfo.ROUTE_ID.name)!!.toInt()
                 val directionId = intent.extras!!.getInt(BusExtrasInfo.DIRECTION_ID.name)
-                textView.text = "$routeId $directionId - $stopName"
+                val trainNum = intent.extras!!.getInt(BusExtrasInfo.TRAIN_NUM.name)
+                val direction = intent.extras!!.getString(BusExtrasInfo.DIRECTION.name)
+                textView.text = "#$trainNum $stopName -> $direction"
                 lifecycleScope.launch {
                     val stopTimes = roomViewModel.getTrainStopTimes(routeId, stopName, directionId, time)
                     displayRecyclerView(stopTimes)
@@ -80,11 +82,12 @@ class Times : BaseActivity() {
             }
 
             TransitAgency.EXO_OTHER -> {
-                val routeId = intent.extras!!.getInt(BusExtrasInfo.ROUTE_ID.name)
+                //FIXME routeId may not always be an int?
+                val routeId = intent.extras!!.getString(BusExtrasInfo.ROUTE_ID.name)!!
                 val headsign = intent.getStringExtra(BusExtrasInfo.HEADSIGN.name)!!
-                textView.text = "$routeId $headsign - $stopName"
+                textView.text = "$routeId $stopName -> $headsign"
                 lifecycleScope.launch {
-                    val stopTimes = roomViewModel.getStopTimes(stopName, time, headsign, agency, routeId)
+                    val stopTimes = roomViewModel.getExoOtherStopTimes(stopName, time, headsign)
                     displayRecyclerView(stopTimes)
                     setupScheduledTask(stopTimes)
                 }

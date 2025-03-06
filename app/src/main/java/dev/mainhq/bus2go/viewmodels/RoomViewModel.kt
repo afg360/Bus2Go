@@ -123,13 +123,12 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    suspend fun getStopTimes(stopName : String, time: Time, headsign : String,
-                             agency : TransitAgency, routeId: Int?) : List<Time>{
-        return when(agency){
-            TransitAgency.STM -> stmDatabase.stopsInfoDao().getStopTimes(stopName, time.getDayString(), time.getTimeString(), headsign, routeId!!, time.getTodayString())
-            TransitAgency.EXO_OTHER -> exoDataBase.stopTimesDao().getStopTimes(stopName, time.getDayString(), time.getTimeString(), headsign)
-            else -> throw IllegalArgumentException("Cannot use the fxn getStopNames for ${agency}.")
-        }
+    suspend fun getStmStopTimes(stopName : String, time: Time, headsign : String, routeId: Int) : List<Time>{
+        return stmDatabase.stopsInfoDao().getStopTimes(stopName, time.getDayString(), time.getTimeString(), headsign, routeId, time.getTodayString())
+    }
+
+    suspend fun getExoOtherStopTimes(stopName : String, time: Time, headsign : String) : List<Time>{
+        return exoDataBase.stopTimesDao().getStopTimes(stopName, time.getDayString(), time.getTimeString(), headsign)
     }
 
     suspend fun getTrainStopTimes(routeId: Int, stopName: String, directionId : Int, time: Time) : List<Time>{

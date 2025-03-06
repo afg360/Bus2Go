@@ -303,18 +303,22 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
         when (info.agency) {
             TransitAgency.EXO_TRAIN -> {
                 info.transitData as TrainData
+                //2 below are for DB queries
                 intent.putExtra(BusExtrasInfo.ROUTE_ID.name, info.transitData.routeId)
                 intent.putExtra(BusExtrasInfo.DIRECTION_ID.name, info.transitData.directionId)
+                //for final destination display
+                intent.putExtra(BusExtrasInfo.DIRECTION.name, info.transitData.direction)
+                intent.putExtra(BusExtrasInfo.TRAIN_NUM.name, info.transitData.trainNum)
             }
             TransitAgency.STM -> {
                 info.transitData as StmBusData
                 intent.putExtra(BusExtrasInfo.ROUTE_ID.name, info.transitData.routeId)
                 intent.putExtra(BusExtrasInfo.DIRECTION.name, info.transitData.direction)
-
             }
             TransitAgency.EXO_OTHER -> {
                 info.transitData as ExoBusData
-                intent.putExtra(BusExtrasInfo.ROUTE_ID.name, info.transitData.direction)
+                intent.putExtra(BusExtrasInfo.ROUTE_ID.name, info.transitData.routeId)
+                //intent.putExtra(BusExtrasInfo.DIRECTION.name, info.transitData.direction)
                 intent.putExtra(BusExtrasInfo.HEADSIGN.name, info.transitData.headsign)
             }
         }
