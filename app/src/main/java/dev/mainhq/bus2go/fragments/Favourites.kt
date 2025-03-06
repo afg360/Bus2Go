@@ -35,7 +35,6 @@ import dev.mainhq.bus2go.preferences.StmBusData
 import dev.mainhq.bus2go.preferences.TrainData
 import dev.mainhq.bus2go.preferences.TransitData
 import dev.mainhq.bus2go.utils.TransitAgency
-import dev.mainhq.bus2go.utils.getDayString
 import dev.mainhq.bus2go.viewmodels.FavouritesViewModel
 import dev.mainhq.bus2go.viewmodels.RealTimeViewModel
 import dev.mainhq.bus2go.viewmodels.RoomViewModel
@@ -46,9 +45,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.lang.ref.WeakReference
-import java.time.Duration
-import java.time.LocalDateTime
-import java.time.LocalTime
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledFuture
@@ -287,7 +283,7 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
      * adding dates to transitInfo elements
      * */
     private suspend fun toFavouriteTransitInfoList(coroutineScope: CoroutineScope, list : List<TransitData>, agency: TransitAgency, realTimeEnabled : Boolean = false) : List<FavouriteTransitInfo> {
-        val times : MutableList<FavouriteTransitInfo> = mutableListOf()
+        //val times : MutableList<FavouriteTransitInfo> = mutableListOf()
         val time = Time.now()
         return if (realTimeEnabled){
             //need to make it a pair with the corresponding FavouriteTransitInfo
@@ -318,7 +314,7 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
                 
             }
         }
-        else roomViewModel.getFavouriteStopTimes(list, agency, time, times)
+        else roomViewModel.getFavouriteStopTimes(list, agency, time)
     }
 
     private suspend fun recyclerViewDisplay(view : View, times : List<FavouriteTransitInfo>, new : Boolean = false){

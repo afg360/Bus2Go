@@ -78,6 +78,11 @@ class TimeClassTest {
     fun testTimeString() {
         val time = Time(LocalTime.of(2, 32, 12))
         assertEquals("02:32:12", time.getTimeString())
+
+        val timeNow = Time.now()
+        println(timeNow.getTimeString())
+        //we want to not consider microsecs, format is HH:MM:SS (length == 8)
+        assert(timeNow.getTimeString().length == 8)
     }
 
     @Test

@@ -55,6 +55,7 @@ class Times : BaseActivity() {
         //val calendar : Calendar = Calendar.getInstance()
         val time = Time.now()
         val textView = findViewById<MaterialTextView>(R.id.time_title_text_view)
+        //FIXME since TransitData is parcelable, pass it around instead (and deal with Agencies to do correct Type Conversions
         when(agency){
             TransitAgency.STM -> {
                 //FIXME this may fail in the case the route id is a metro or other stuff?

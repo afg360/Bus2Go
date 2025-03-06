@@ -27,14 +27,14 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
                                 .addMigrations(AppDatabaseSTM.MIGRATION_1_2)
                                 .build()
 
-    //FIXME doing the "today" queries seem to disrupt outputs?
     private val exoDataBase = Room.databaseBuilder(application, AppDatabaseExo::class.java, "exo_info.db")
                                 .createFromAsset("database/exo_info.db")
                                 .addMigrations(AppDatabaseExo.MIGRATION_1_2)
                                 .build()
 
     suspend fun getFavouriteStopTimes(list : List<TransitData>, agency : TransitAgency,
-                                      time : Time, times : MutableList<FavouriteTransitInfo>) : MutableList<FavouriteTransitInfo> {
+                                      time : Time) : MutableList<FavouriteTransitInfo> {
+        val times = mutableListOf<FavouriteTransitInfo>()
         when(agency){
             TransitAgency.STM -> {
                 list as List<StmBusData>
@@ -128,7 +128,7 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     suspend fun getExoOtherStopTimes(stopName : String, time: Time, headsign : String) : List<Time>{
-        return exoDataBase.stopTimesDao().getStopTimes(stopName, time.getDayString(), time.getTimeString(), headsign)
+        return exoDataBase.stopTimesDao().getStopTimes(stopName, time.getDayString(), time.getTimeString(), headsign, time.getTodayString())
     }
 
     suspend fun getTrainStopTimes(routeId: Int, stopName: String, directionId : Int, time: Time) : List<Time>{

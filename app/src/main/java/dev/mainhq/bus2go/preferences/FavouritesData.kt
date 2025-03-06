@@ -43,7 +43,7 @@ data class FavouritesDataOld(
     val listExoTrain : PersistentList<TrainData> = persistentListOf()
 )
 
-abstract class TransitData{
+abstract class TransitData: Parcelable{
     abstract val routeId : String
     abstract val stopName : String
     abstract val direction : String
@@ -52,7 +52,7 @@ abstract class TransitData{
 @Serializable
 data class TrainData(override val stopName : String, override val routeId : String, val trainNum : Int, val routeName : String,
                      val directionId: Int, override val direction : String)
-    : Parcelable, TransitData() {
+    : TransitData() {
     constructor(parcel: Parcel) : this(
         parcel.readString()!!,
         parcel.readString()!!,
@@ -111,7 +111,7 @@ class PersistentTrainInfoListSerializer(private val serializer: KSerializer<Trai
 @Serializable
 data class StmBusData(override val stopName: String,/** aka busNum */override val routeId : String,
                       val directionId: Int, override val direction : String, val lastStop : String)
-    : Parcelable, TransitData() {
+    : TransitData() {
     constructor(parcel: Parcel) : this(
         parcel.readString()!!,
         parcel.readString()!!,
@@ -168,7 +168,7 @@ class PersistentStmBusInfoListSerializer(private val serializer: KSerializer<Stm
 @Serializable
 @Deprecated("Migrated from this old version to the new below, called ExoBusData")
 data class ExoBusDataOld(override val stopName : String,/** aka tripheadSign */ override val routeId : String, override val direction: String)
-    : Parcelable, TransitData() {
+    : TransitData() {
     constructor(parcel: Parcel) : this(
         parcel.readString()!!,
         parcel.readString()!!,

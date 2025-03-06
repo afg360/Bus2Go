@@ -73,7 +73,8 @@ class Time(localDateTime: LocalDateTime) : Parcelable {
      * @return Format: HH:MM:SS (DateTimeFormatter.ISO_TIME)
      * */
     fun getTimeString(): String{
-        return this.localTime.format(DateTimeFormatter.ISO_TIME)
+        //ignore nanosecs
+        return this.localTime.format(DateTimeFormatter.ISO_TIME).split(".")[0]
     }
 
     /**
