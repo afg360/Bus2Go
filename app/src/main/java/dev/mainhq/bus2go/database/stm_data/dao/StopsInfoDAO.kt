@@ -24,31 +24,35 @@ interface StopsInfoDAO {
 
     @Query("SELECT DISTINCT arrival_time FROM StopsInfo JOIN " +
             "(SELECT service_id, days FROM Calendar " +
-            "WHERE Calendar.start_date <= (:today) AND Calendar.end_date >= (:today)" +
+            "WHERE Calendar.start_date <= (:curDate) AND Calendar.end_date >= (:curDate)" +
             ") AS Calendar " +
             "ON StopsInfo.service_id = Calendar.service_id " +
             "WHERE stop_name = (:stopName) AND days LIKE '%' || (:day) || '%' " +
-            "AND arrival_time >= (:time) AND route_id = (:routeId) " +
+            "AND arrival_time >= (:curTime) AND route_id = (:routeId) " +
             "AND trip_headsign LIKE (:headsign) || '%' " +
             "ORDER BY arrival_time")
-    suspend fun getStopTimes(stopName : String, day : String, time : String, /** i.e. DIRECTION string */ headsign: String, routeId: Int, today: String) : List<Time>
+    suspend fun getStopTimes(stopName : String, day : String, curTime : String, /** i.e. DIRECTION string */ headsign: String, routeId: Int, curDate: String) : List<Time>
 
     /** Used for creating new alarm */
     @Query("SELECT DISTINCT arrival_time FROM StopsInfo JOIN " +
             "(SELECT service_id, days FROM Calendar " +
-            "WHERE Calendar.start_date <= (:today) AND Calendar.end_date >= (:today)) AS Calendar " +
+            "WHERE Calendar.start_date <= (:curDate) AND Calendar.end_date >= (:curDate)" +
+            ") AS Calendar " +
             "ON StopsInfo.service_id = Calendar.service_id " +
-            "WHERE days LIKE '%' || (:day) || '%' AND trip_headsign = (:headsign) AND route_id = (:routeId) " +
-            "AND stop_name = (:stopName) ORDER BY arrival_time;" )
-    suspend fun getStopTimes(stopName : String, day : String, headsign: String, routeId: Int, today: String) : List<Time>
+            "WHERE stop_name = (:stopName) AND days LIKE '%' || (:day) || '%' " +
+            "AND trip_headsign LIKE (:headsign) || '%' " +
+            "AND route_id = (:routeId) " +
+            "ORDER BY arrival_time;" )
+    suspend fun getStopTimes(stopName : String, day : String, headsign: String, routeId: Int, curDate: String) : List<Time>
 
 
     @Query("SELECT MIN(arrival_time) FROM StopsInfo JOIN " +
             "(SELECT service_id, days FROM Calendar " +
-            "WHERE Calendar.start_date <= (:today) AND Calendar.end_date >= (:today)) AS Calendar " +
+            "WHERE Calendar.start_date <= (:curDate) AND Calendar.end_date >= (:curDate)" +
+            ") AS Calendar " +
             "ON StopsInfo.service_id = Calendar.service_id " +
             "WHERE stop_name = (:stopName) AND days LIKE '%' || (:day) || '%' " +
             "AND arrival_time >= (:time) AND route_id = (:routeId) " +
             "AND trip_headsign = (:headsign)")
-    suspend fun getFavouriteStopTime(stopName : String, day : String, time : String, headsign: String, routeId: Int, today: String) : Time?
+    suspend fun getFavouriteStopTime(stopName : String, day : String, time : String, headsign: String, routeId: Int, curDate: String) : Time?
 }

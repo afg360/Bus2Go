@@ -14,20 +14,24 @@ def download(url : str): #destination : str) -> None:
     """download and create respective directories"""
     zip_file = "data.zip"   #f"{destination}.zip"
     print(f"Downloading from {url}")
-    response = requests.get(url)
-    if response.status_code == 200:
-        with open(zip_file, "wb") as file:
-            file.write(response.content)
-        print(f"Downloaded {url} to {zip_file} successfully")
-        #if not os.path.exists(f"./{destination}"):
-        #    os.makedirs(destination)
-        with zipfile.ZipFile(zip_file, "r") as zip:
-            zip.extractall(f"./")#{destination}")
-        print(f"Extracted file from {zip_file}")
-        os.remove(zip_file)
-        print("Removed zip file")
-    else:
-        print(f"Failed to download {url}")
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            with open(zip_file, "wb") as file:
+                file.write(response.content)
+            print(f"Downloaded {url} to {zip_file} successfully")
+            #if not os.path.exists(f"./{destination}"):
+            #    os.makedirs(destination)
+            with zipfile.ZipFile(zip_file, "r") as zip:
+                zip.extractall(f"./")#{destination}")
+            print(f"Extracted file from {zip_file}")
+            os.remove(zip_file)
+            print("Removed zip file")
+        else:
+            print(f"Failed to download {url}")
+    except requests.ConnectionError:
+        print("You are not connected to the internet, aborting the script")
+        exit(1)
 
 
 def db_data_init(conn) -> None:

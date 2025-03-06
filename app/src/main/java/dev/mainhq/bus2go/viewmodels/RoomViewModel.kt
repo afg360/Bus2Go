@@ -54,7 +54,7 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
                 list as List<TrainData>
                 val stopsTimesDAO = exoDataBase.stopTimesDao()
                 list.forEach {trainInfo ->
-                    stopsTimesDAO.getFavouriteTrainStopTime("trains-${trainInfo.routeId}", trainInfo.stopName, trainInfo.directionId, time.getTimeString(), time.getDayString())
+                    stopsTimesDAO.getFavouriteTrainStopTime("trains-${trainInfo.routeId}", trainInfo.stopName, trainInfo.directionId, time.getTimeString(), time.getDayString(), time.getTodayString())
                         .also { time -> times.add(FavouriteTransitInfo(trainInfo, time, agency)) }
                 }
                 return times
@@ -63,7 +63,7 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
                 list as List<ExoBusData>
                 val stopTimesDAO = exoDataBase.stopTimesDao()
                 list.forEach {busInfo ->
-                    stopTimesDAO.getFavouriteBusStopTime(busInfo.stopName, time.getDayString(), time.getTimeString(), busInfo.headsign)
+                    stopTimesDAO.getFavouriteBusStopTime(busInfo.stopName, time.getDayString(), time.getTimeString(), busInfo.headsign, time.getTodayString())
                         .also { time -> times.add(FavouriteTransitInfo(busInfo, time, agency)) }
                 }
                 return times
@@ -85,13 +85,13 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
                 val trainInfo = transitData as TrainData
                 FavouriteTransitInfo(transitData,
                     stopsTimesDAO.getFavouriteTrainStopTime("trains-${trainInfo.routeId}",
-                        trainInfo.stopName, trainInfo.directionId, time.getTimeString(), time.getDayString()), agency)
+                        trainInfo.stopName, trainInfo.directionId, time.getTimeString(), time.getDayString(), time.getTodayString()), agency)
             }
             TransitAgency.EXO_OTHER -> {
                 val stopTimesDAO = exoDataBase.stopTimesDao()
                 val busInfo = transitData as ExoBusData
                 FavouriteTransitInfo(transitData,
-                    stopTimesDAO.getFavouriteBusStopTime(busInfo.stopName, time.getDayString(), time.getTimeString(), busInfo.routeId), agency)
+                    stopTimesDAO.getFavouriteBusStopTime(busInfo.stopName, time.getDayString(), time.getTimeString(), busInfo.routeId, time.getTodayString()), agency)
             }
         }
     }
@@ -132,7 +132,7 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     suspend fun getTrainStopTimes(routeId: Int, stopName: String, directionId : Int, time: Time) : List<Time>{
-        return exoDataBase.stopTimesDao().getTrainStopTimes("trains-$routeId", stopName, directionId, time.getTimeString(), time.getDayString())
+        return exoDataBase.stopTimesDao().getTrainStopTimes("trains-$routeId", stopName, directionId, time.getTimeString(), time.getDayString(), time.getTodayString())
     }
 
     /** Fxn that returns a list of DirectionInfo object for Stm,

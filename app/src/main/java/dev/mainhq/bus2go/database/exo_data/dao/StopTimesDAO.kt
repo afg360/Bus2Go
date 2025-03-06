@@ -5,11 +5,11 @@ import androidx.room.Query;
 import dev.mainhq.bus2go.utils.Time
 
 @Dao
-//FIXME doing today queries instead of calendar seem to dirupt everything...
+//FIXME doing today queries instead of calendar seem to disrupt everything...
 interface StopTimesDAO {
 
-    //FIXME DID I FORGET DIRECTION_IDS IN getStopNames???
-    //FIXME SHOULD ALSO TAKE INTO CONSIDERATION DATES WHEN CHECKING WHICH STOPS ARE AVAILABLE
+    //TODO TAKE INTO CONSIDERATION DATES WHEN CHECKING WHICH STOPS ARE AVAILABLE
+
     @Query("SELECT DISTINCT stop_name FROM StopTimes " +
             "JOIN Stops on Stops.stop_id = StopTimes.stop_id " +
             "JOIN Trips ON Trips.trip_id = StopTimes.trip_id " +
@@ -26,48 +26,68 @@ interface StopTimesDAO {
     @Query("SELECT DISTINCT arrival_time FROM StopTimes " +
             "JOIN  Stops ON StopTimes.stop_id = Stops.stop_id " +
             "JOIN Trips ON StopTimes.trip_id = Trips.trip_id " +
-            "JOIN Calendar ON Calendar.service_id = Trips.service_id " +
+            "JOIN " +
+            "(SELECT service_id, days FROM Calendar " +
+            "WHERE Calendar.start_date <= (:curDate) AND Calendar.end_date >= (:curDate)" +
+            ") AS Calendar " +
+            "ON Calendar.service_id = Trips.service_id " +
             "WHERE stop_name = (:stopName) AND days LIKE '%' || (:day) || '%' " +
             "AND trip_headsign = (:headsign) " +
             "ORDER BY arrival_time")
     //perhaps also use the agency as a search argument
-    suspend fun getStopTimes(stopName : String, day : String, headsign: String) : List<Time>
+    suspend fun getStopTimes(stopName : String, day : String, headsign: String, curDate: String) : List<Time>
 
     @Query("SELECT DISTINCT arrival_time FROM StopTimes " +
             "JOIN  Stops ON StopTimes.stop_id = Stops.stop_id " +
             "JOIN Trips ON StopTimes.trip_id = Trips.trip_id " +
-            "JOIN Calendar ON Calendar.service_id = Trips.service_id " +
+            "JOIN " +
+            "(SELECT service_id, days FROM Calendar " +
+            "WHERE Calendar.start_date <= (:curDate) AND Calendar.end_date >= (:curDate)" +
+            ") AS Calendar " +
+            "ON Calendar.service_id = Trips.service_id " +
             "WHERE stop_name = (:stopName) AND days LIKE '%' || (:day) || '%' " +
-            "AND arrival_time >= (:time) AND trip_headsign = (:headsign) " +
+            "AND arrival_time >= (:curTime) AND trip_headsign = (:headsign) " +
             "ORDER BY arrival_time")
     //perhaps also use the agency as a search argument
-    suspend fun getStopTimes(stopName : String, day : String, time : String, headsign: String) : List<Time>
+    suspend fun getStopTimes(stopName : String, day : String, curTime : String, headsign: String, curDate: String) : List<Time>
 
     @Query("SELECT MIN(arrival_time) AS arrival_time FROM (SELECT arrival_time FROM StopTimes " +
             "JOIN Stops ON StopTimes.stop_id = Stops.stop_id " +
             "JOIN Trips on StopTimes.trip_id = Trips.trip_id " +
-            "JOIN Calendar ON Calendar.service_id = Trips.service_id " +
+            "JOIN " +
+            "(SELECT service_id, days FROM Calendar " +
+            "WHERE Calendar.start_date <= (:curDate) AND Calendar.end_date >= (:curDate)" +
+            ") AS Calendar " +
+            "ON Calendar.service_id = Trips.service_id " +
             "WHERE stop_name = (:stopName) AND days LIKE '%' || (:day) || '%' " +
             "AND arrival_time >= (:time) AND trip_headsign = (:headsign))")
-    suspend fun getFavouriteBusStopTime(stopName : String, day : String, time : String, headsign: String) : Time?
+    suspend fun getFavouriteBusStopTime(stopName : String, day : String, time : String, headsign: String, curDate: String) : Time?
 
     @Query("SELECT arrival_time FROM StopTimes " +
             "JOIN Stops ON StopTimes.stop_id = Stops.stop_id " +
             "JOIN Trips ON Stoptimes.trip_id = Trips.trip_id " +
-            "JOIN Calendar ON Calendar.service_id = Trips.service_id " +
+            "JOIN " +
+            "(SELECT service_id, days FROM Calendar " +
+            "WHERE Calendar.start_date <= (:curDate) AND Calendar.end_date >= (:curDate)" +
+            ") AS Calendar " +
+            "ON Calendar.service_id = Trips.service_id " +
             "WHERE route_id = (:routeId) " +
             "AND direction_id = (:directionId) AND arrival_time >= (:time) " +
             "AND stop_name = (:stopName) AND days LIKE '%' || (:day) || '%' " +
             "ORDER BY stoptimes.stop_seq,arrival_time;")
-    suspend fun getTrainStopTimes(routeId: String, stopName: String, directionId: Int, time: String, day : String) : List<Time>
+    suspend fun getTrainStopTimes(routeId: String, stopName: String, directionId: Int, time: String, day : String, curDate: String) : List<Time>
 
     @Query("SELECT MIN(arrival_time) FROM StopTimes " +
             "JOIN Stops ON StopTimes.stop_id = Stops.stop_id " +
             "JOIN Trips ON Stoptimes.trip_id = Trips.trip_id " +
-            "JOIN Calendar ON Calendar.service_id = Trips.service_id " +
+            "JOIN " +
+            "(SELECT service_id, days FROM Calendar " +
+            "WHERE Calendar.start_date <= (:curDate) AND Calendar.end_date >= (:curDate)" +
+            ") AS Calendar " +
+            "ON Calendar.service_id = Trips.service_id " +
             "WHERE route_id = (:routeId) " +
             "AND direction_id = (:directionId) AND arrival_time >= (:time) " +
             "AND stop_name = (:stopName) AND days LIKE '%' || (:day) || '%' " +
             "ORDER BY stoptimes.stop_seq,arrival_time;")
-    suspend fun getFavouriteTrainStopTime(routeId: String, stopName: String, directionId: Int, time: String, day : String) : Time?
+    suspend fun getFavouriteTrainStopTime(routeId: String, stopName: String, directionId: Int, time: String, day : String, curDate: String) : Time?
 }
