@@ -55,7 +55,8 @@ class ChooseDirection : BaseActivity() {
                 val headsign1 = dir1.last()
                 withContext(Dispatchers.Main){
                     val intent = Intent(applicationContext, ChooseStop::class.java)
-                    findViewById<MaterialTextView>(R.id.description_route_0).text = headsign0
+                    findViewById<MaterialTextView>(R.id.description_route_0).text =
+                        getString(R.string.train_direction, headsign0)
                     findViewById<MaterialButton>(R.id.route_0).setOnClickListener {
                         intent.putStringArrayListExtra("stops", dir0 as ArrayList<String>)
                         intent.putExtra(BusExtrasInfo.DIRECTION_ID.name, 0)
@@ -66,7 +67,9 @@ class ChooseDirection : BaseActivity() {
                         intent.putExtra(BusExtrasInfo.AGENCY.name, agency)
                         startActivity(intent)
                     }
-                    findViewById<MaterialTextView>(R.id.description_route_1).text = headsign1
+
+                    findViewById<MaterialTextView>(R.id.description_route_1).text =
+                        getString(R.string.train_direction, headsign1)
                     findViewById<MaterialButton>(R.id.route_1).setOnClickListener {
                         intent.putStringArrayListExtra("stops", dir1 as ArrayList<String>)
                         intent.putExtra(BusExtrasInfo.DIRECTION_ID.name, 1)
