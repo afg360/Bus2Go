@@ -174,7 +174,7 @@ class RealTimeViewModel(application : Application) : AndroidViewModel(applicatio
          * A test/tmp method that establishes an http request
          * */
         suspend fun getArrivalTimes(domainName: String, agency: String,
-            routeId: String, tripHeadsign: String, stopName: String) :List<LocalDateTime> {
+            routeId: String, tripHeadsign: String, stopName: String) :List<Time> {
             //FIXME temporarily HTTP instead of HTTPS
             val url = "http://$domainName:$PORT_NUM/$URL_PATH/?agency=${encode(agency, "utf-8")}" +
                     "&route_id=${encode(routeId, "utf-8")}" +
@@ -201,7 +201,7 @@ class RealTimeViewModel(application : Application) : AndroidViewModel(applicatio
                                 response.body() )["arrival_time"] as JsonArray?)
                                 ?.filter{it.toString() != ""}
                                 //?.map{ Time.TimeBuilder.fromUnix(it.toString().toLong()) }
-                                ?.map{ LocalDateTime.ofEpochSecond(it.toString().toLong(), 0, ZoneOffset.UTC) }
+                                ?.map{ Time.fromUnix(it.toString().toLong()) }
                                 ?: listOf()
                     }
                     

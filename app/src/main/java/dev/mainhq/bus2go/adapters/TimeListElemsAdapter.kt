@@ -20,7 +20,7 @@ import java.time.Period
 //TODO
 //could add view/ontouchlistener to handle touch holding, etc.
 //may need to use a recycler view, but implement a base adapter instead...?
-class TimeListElemsAdapter(private val timeData: List<LocalTime>,
+class TimeListElemsAdapter(private val timeData: List<Time>,
                            private val fromAlarmCreation : Boolean)
     : RecyclerView.Adapter<TimeListElemsAdapter.ViewHolder>() {
 
@@ -32,17 +32,17 @@ class TimeListElemsAdapter(private val timeData: List<LocalTime>,
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val time = timeData[position]
-        holder.timeTextView.text = time.toString()
+        holder.timeTextView.text = time.getTimeString()
         if (position == 0 && !fromAlarmCreation){
             //TODO may need to use a LocalDateTime here...
-            val curTime = LocalDateTime.now().toLocalTime()
+            val curTime = Time(LocalDateTime.now())
             //Duration.between =! arg1 - arg2, == arg2 - arg1
-            val remainingTime = Duration.between(curTime, time)
+            val remainingTime = time - curTime
             //val remainingTime = time.minusHours(curTime.hour).minusMinutes(curTime.minute).minusSeconds(curTime.second)
             //if (remainingTime != null) {
-            if (!remainingTime.isNegative) {
-                if (remainingTime.toHours().toInt() == 0) holder.timeLeftTextView.text =
-                    holder.itemView.context.getString(R.string.in_min, remainingTime.toMinutes().toString())
+            if (remainingTime != null) {
+                if (remainingTime.hour == 0) holder.timeLeftTextView.text =
+                    holder.itemView.context.getString(R.string.in_min, remainingTime.minute.toString())
                 else holder.timeLeftTextView.text = holder.itemView.context.getString(R.string.in_more_than_an_hour)//todo
             }
             else{

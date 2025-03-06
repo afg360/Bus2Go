@@ -1,8 +1,6 @@
 package dev.mainhq.bus2go.adapters
 
 import android.content.Intent
-import android.graphics.Color
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
@@ -23,7 +21,6 @@ import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.MainActivity
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.Times
-import dev.mainhq.bus2go.database.exo_data.dao.Colors
 import dev.mainhq.bus2go.fragments.FavouriteTransitInfo
 import dev.mainhq.bus2go.fragments.Home
 import dev.mainhq.bus2go.preferences.ExoBusData
@@ -33,10 +30,7 @@ import dev.mainhq.bus2go.utils.BusExtrasInfo
 import dev.mainhq.bus2go.utils.TransitAgency
 import dev.mainhq.bus2go.utils.Time
 import java.lang.ref.WeakReference
-import java.time.Duration
-import java.time.LocalDateTime
 import java.time.LocalTime
-import java.time.format.DateTimeFormatter
 
 class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, recyclerView: WeakReference<RecyclerView>)
     : RecyclerView.Adapter<FavouritesListElemsAdapter.ViewHolder>(){
@@ -58,15 +52,15 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val info = list[position]
 
-        holder.arrivalTimeTextView.text = info.arrivalTime.toString()
+        holder.arrivalTimeTextView.text = info.arrivalTime?.getTimeString()
         if (info.arrivalTime == null){
             holder.timeRemainingTextView.text =
-                holder.itemView.context.getString(R.string.none_for_the_rest_of_the_today)
+                holder.itemView.context.getString(R.string.none_for_the_rest_of_the_day)
         }
         else{
             holder.timeRemainingTextView.text = getTimeRemaining(info.arrivalTime)
             //if (info.arrivalTime.timeRemaining()?.compareTo(Time(0,3,59)) == -1)
-            if (info.arrivalTime.compareTo(LocalTime.parse("00:03:59", DateTimeFormatter.ISO_LOCAL_TIME)) == -1)
+            if (info.arrivalTime < Time(LocalTime.of(0, 3, 59)))
                 holder.timeRemainingTextView.setTextColor(holder.itemView.resources.getColor(R.color.red, null))
             else {
                 holder.timeRemainingTextView.setTextColor(MaterialColors.getColor(holder.itemView, android.R.attr.editTextColor))
@@ -245,15 +239,17 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
         val container = viewGroup[0] as ViewGroup
         favouritesBusInfo.arrivalTime?.also {
             ((container[1] as ViewGroup)[2] as MaterialTextView).text = getTimeRemaining(favouritesBusInfo.arrivalTime)
-            ((container[1] as ViewGroup)[3] as MaterialTextView).text = favouritesBusInfo.arrivalTime.toString()
-            if (favouritesBusInfo.arrivalTime.compareTo(LocalTime.parse("00:03:59", DateTimeFormatter.ISO_LOCAL_TIME)) == -1) ((container[1] as ViewGroup)[2] as MaterialTextView)
+            ((container[1] as ViewGroup)[3] as MaterialTextView).text = favouritesBusInfo.arrivalTime.getTimeString()
+
+            //set the color to red if the time remaining is less than 3min 59sec (warning)
+            if (favouritesBusInfo.arrivalTime < Time(LocalTime.of(0, 3, 59))) ((container[1] as ViewGroup)[2] as MaterialTextView)
                 .setTextColor(viewGroup.resources.getColor(R.color.red, null))
             else ((container[1] as ViewGroup)[3] as MaterialTextView).setTextColor(MaterialColors.getColor(viewGroup, android.R.attr.editTextColor))
         }
         /*
         favouritesBusInfo.arrivalTime?.also {
             ((container[1] as ViewGroup)[2] as MaterialTextView).text = getTimeRemaining(it)
-            ((container[1] as ViewGroup)[3] as MaterialTextView).text = favouritesBusInfo.arrivalTime.toString()
+            ((container[1] as ViewGroup)[3] as MaterialTextView).text = favouritesBusInfo.arrivalTime.getTimeString()
             if (it.timeRemaining()?.compareTo(Time(0,3,59)) == -1) ((container[1] as ViewGroup)[2] as MaterialTextView)
                 .setTextColor(viewGroup.resources.getColor(R.color.red, null))
             else ((container[1] as ViewGroup)[3] as MaterialTextView).setTextColor(MaterialColors.getColor(viewGroup, android.R.attr.editTextColor))
@@ -261,13 +257,12 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
          */
     }
 
-    private fun getTimeRemaining(arrivalTime: LocalTime?): String {
-        val now = LocalDateTime.now()
+    private fun getTimeRemaining(arrivalTime: Time?): String {
         if (arrivalTime == null) return "Wtf"
-        val remainingTime = Duration.between(now.toLocalTime(), arrivalTime)
-        return if (!remainingTime.isNegative && remainingTime.toHours() > 0) "In ${remainingTime.toHours()} h, ${remainingTime.toMinutes() % 60} min"
-                else if (!remainingTime.isNegative) "In ${remainingTime.toMinutes()} min"
-            else "Wtf"
+        val remainingTime = arrivalTime.timeRemaining()
+        return if (remainingTime != null && remainingTime.hour > 0) "In ${remainingTime.hour} h, ${remainingTime.minute} min"
+                else if (remainingTime != null) "In ${remainingTime.minute} min"
+            else "Bus has passed??"
     }
 
     /** This function is used to deselect a container

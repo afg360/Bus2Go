@@ -288,13 +288,11 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
      * */
     private suspend fun toFavouriteTransitInfoList(coroutineScope: CoroutineScope, list : List<TransitData>, agency: TransitAgency, realTimeEnabled : Boolean = false) : List<FavouriteTransitInfo> {
         val times : MutableList<FavouriteTransitInfo> = mutableListOf()
-        //val calendar = Calendar.getInstance()
-        val localDateTime = LocalDateTime.now()
-        val dayString = getDayString(localDateTime)
+        val time = Time.now()
         return if (realTimeEnabled){
             //need to make it a pair with the corresponding FavouriteTransitInfo
             val jobs = list.map { Pair(
-                coroutineScope.async(Dispatchers.IO) { roomViewModel.getFavouriteStopTime(it, agency, dayString, localDateTime) },
+                coroutineScope.async(Dispatchers.IO) { roomViewModel.getFavouriteStopTime(it, agency, time) },
                 coroutineScope.async(Dispatchers.IO) { realTimeViewModel.getArrivalTimes(agency.toString(), it.routeId, it.direction, it.stopName) }
             )}
             jobs.map{
@@ -303,16 +301,16 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
                 val realTimes = it.second.await()
                 if (realTimes.isEmpty()) staticData
                 else {
-                    var toKeep : LocalTime = realTimes.first().toLocalTime()//realTimes.last()
+                    var toKeep = realTimes.first()//realTimes.last()
                     realTimes.forEach{ realTime ->
                             staticData.arrivalTime?.also { staticData ->
-                                val foo = Duration.between(staticData, realTime)
-                                val bar = Duration.between(staticData, toKeep)
+                                val foo = staticData - realTime
+                                val bar = staticData - toKeep
                                 //val foo = (staticData - realTime)
                                 //val bar = (staticData - toKeep)
                                 //FIXME wont work properly when the actual realtime data has been updated
-                                if (foo.isNegative || bar.isNegative) toKeep = staticData
-                                else if (foo < bar) toKeep = realTime.toLocalTime()
+                                if (foo == null || bar == null) toKeep = staticData
+                                else if (foo < bar) toKeep = realTime
                             }
                     }
                     FavouriteTransitInfo(staticData.transitData, toKeep, agency)
@@ -320,7 +318,7 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
                 
             }
         }
-        else roomViewModel.getFavouriteStopTimes(list, agency, dayString, localDateTime, times)
+        else roomViewModel.getFavouriteStopTimes(list, agency, time, times)
     }
 
     private suspend fun recyclerViewDisplay(view : View, times : List<FavouriteTransitInfo>, new : Boolean = false){
@@ -395,4 +393,4 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
     }
 }
 
-data class FavouriteTransitInfo(val transitData: TransitData, val arrivalTime : LocalTime?, val agency : TransitAgency)
+data class FavouriteTransitInfo(val transitData: TransitData, val arrivalTime : Time?, val agency : TransitAgency)

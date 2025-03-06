@@ -33,7 +33,7 @@ data class Alarm(
     /** Suppose to be the same as buses in the favourites */
     val busInfo : ExoBusData,
     /** Time set for the alarm to ring before the  */
-    val timeBefore : SerializableTime,
+    //val timeBefore : SerializableTime, //FIXME use a Duration perhaps...
     /** Days when the alarm will have to ring */
     val ringDays : Map<Char, Boolean>,
     /** Stores if it's on or off */

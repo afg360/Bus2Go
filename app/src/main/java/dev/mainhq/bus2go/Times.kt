@@ -13,6 +13,7 @@ import android.view.View
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.utils.BusExtrasInfo
+import dev.mainhq.bus2go.utils.Time
 import dev.mainhq.bus2go.utils.TransitAgency
 import dev.mainhq.bus2go.viewmodels.RoomViewModel
 import kotlinx.coroutines.Job
@@ -52,7 +53,7 @@ class Times : BaseActivity() {
         //val routeId = intent.extras?.getInt(BusExtrasInfo.ROUTE_ID.name)
         val roomViewModel = ViewModelProvider(this)[RoomViewModel::class.java]
         //val calendar : Calendar = Calendar.getInstance()
-        val localDateTime = LocalDateTime.now()
+        val time = Time.now()
         val textView = findViewById<MaterialTextView>(R.id.time_title_text_view)
         when(agency){
             TransitAgency.STM -> {
@@ -62,7 +63,7 @@ class Times : BaseActivity() {
                 //val directionId = intent.extras!!.getInt(BusExtrasInfo.DIRECTION.name_ID)
                 textView.text = "$routeId $direction - $stopName"
                 lifecycleScope.launch {
-                    val stopTimes = roomViewModel.getStopTimes(stopName, localDateTime, direction, agency, routeId)
+                    val stopTimes = roomViewModel.getStopTimes(stopName, time, direction, agency, routeId)
                     displayRecyclerView(stopTimes)
                     setupScheduledTask(stopTimes)
                 }
@@ -72,7 +73,7 @@ class Times : BaseActivity() {
                 val directionId = intent.extras!!.getInt(BusExtrasInfo.DIRECTION_ID.name)
                 textView.text = "$routeId $directionId - $stopName"
                 lifecycleScope.launch {
-                    val stopTimes = roomViewModel.getTrainStopTimes(routeId, stopName, directionId, localDateTime)
+                    val stopTimes = roomViewModel.getTrainStopTimes(routeId, stopName, directionId, time)
                     displayRecyclerView(stopTimes)
                     setupScheduledTask(stopTimes)
                 }
@@ -83,7 +84,7 @@ class Times : BaseActivity() {
                 val headsign = intent.getStringExtra("headsign")!!
                 textView.text = "$routeId $headsign - $stopName"
                 lifecycleScope.launch {
-                    val stopTimes = roomViewModel.getStopTimes(stopName, localDateTime, headsign, agency, routeId)
+                    val stopTimes = roomViewModel.getStopTimes(stopName, time, headsign, agency, routeId)
                     displayRecyclerView(stopTimes)
                     setupScheduledTask(stopTimes)
                 }
@@ -104,7 +105,7 @@ class Times : BaseActivity() {
     //FIXME: Although this implementation works, we need to get rid of the recyclerViewItem once we go beyond
     //FIXME may need a LocalDateTime
     //the time... unless that is already dealt with?
-    private fun setupScheduledTask(stopTimes: List<LocalTime>){
+    private fun setupScheduledTask(stopTimes: List<Time>){
         scheduledTask = executor?.scheduleWithFixedDelay({
             job = lifecycleScope.launch{
                 displayRecyclerView(stopTimes)
@@ -114,7 +115,7 @@ class Times : BaseActivity() {
     }
 
     //FIXME may need a fucking localdatetime instead of a localtime
-    private suspend fun displayRecyclerView(stopTimes: List<LocalTime>){
+    private suspend fun displayRecyclerView(stopTimes: List<Time>){
         withContext(Dispatchers.Main) {
             //If stopTimes.isEmpty, say that it is empty
             val recyclerView: RecyclerView = findViewById(R.id.time_recycle_view)

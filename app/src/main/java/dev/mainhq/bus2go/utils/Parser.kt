@@ -26,19 +26,6 @@ fun toParsable(txt: String): String {
     return str
 }
 
-//FIXME use LocalDateTime formatter instead
-fun getDayString(localDateTime : LocalDateTime) : String{
-    return when (localDateTime.dayOfWeek.value) {
-        Calendar.SUNDAY -> "d"
-        Calendar.MONDAY -> "m"
-        Calendar.TUESDAY -> "t"
-        Calendar.WEDNESDAY -> "w"
-        Calendar.THURSDAY -> "y"
-        Calendar.FRIDAY -> "f"
-        Calendar.SATURDAY -> "s"
-        else -> throw IllegalStateException("Cannot have a non day of the week!")
-    }
-}
 
 @Deprecated("Use a LocalDateTime instead of a Calendar object",
     replaceWith = ReplaceWith("getDayString(calendar : LocalDateTime) : String"))
