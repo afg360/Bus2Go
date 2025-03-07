@@ -3,7 +3,6 @@ package dev.mainhq.bus2go.viewmodels
 import android.app.Application
 import android.content.Context
 import androidx.datastore.core.DataMigration
-import androidx.datastore.core.DataStore
 import androidx.datastore.dataStore
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,7 +14,6 @@ import dev.mainhq.bus2go.preferences.SettingsSerializerOld
 import dev.mainhq.bus2go.preferences.StmBusData
 import dev.mainhq.bus2go.preferences.TrainData
 import dev.mainhq.bus2go.preferences.TransitData
-import io.ktor.util.reflect.instanceOf
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.mutate
 import kotlinx.collections.immutable.toPersistentList

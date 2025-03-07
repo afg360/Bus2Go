@@ -1,15 +1,12 @@
 package dev.mainhq.bus2go.fragments
 
-import android.content.ContentValues.TAG
 import android.content.Context
-import android.icu.util.Calendar
 import android.net.ConnectivityManager
 import android.net.ConnectivityManager.NetworkCallback
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
@@ -34,12 +31,10 @@ import dev.mainhq.bus2go.preferences.ExoBusData
 import dev.mainhq.bus2go.utils.Time
 import dev.mainhq.bus2go.adapters.FavouritesListElemsAdapter
 import dev.mainhq.bus2go.adapters.setMargins
-import dev.mainhq.bus2go.preferences.ExoBusDataOld
 import dev.mainhq.bus2go.preferences.StmBusData
 import dev.mainhq.bus2go.preferences.TrainData
 import dev.mainhq.bus2go.preferences.TransitData
 import dev.mainhq.bus2go.utils.TransitAgency
-import dev.mainhq.bus2go.utils.getDayString
 import dev.mainhq.bus2go.viewmodels.FavouritesViewModel
 import dev.mainhq.bus2go.viewmodels.RealTimeViewModel
 import dev.mainhq.bus2go.viewmodels.RoomViewModel
@@ -47,8 +42,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.lang.ref.WeakReference
@@ -285,15 +278,17 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
     }
 
 
-    /** Used to get the required data to make a list of favouriteTransitInfo, adding dates to transitInfo elements */
+    /**
+     * Used to get the required data to make a list of favouriteTransitInfo,
+     * adding dates to transitInfo elements
+     * */
     private suspend fun toFavouriteTransitInfoList(coroutineScope: CoroutineScope, list : List<TransitData>, agency: TransitAgency, realTimeEnabled : Boolean = false) : List<FavouriteTransitInfo> {
-        val times : MutableList<FavouriteTransitInfo> = mutableListOf()
-        val calendar = Calendar.getInstance()
-        val dayString = getDayString(calendar)
+        //val times : MutableList<FavouriteTransitInfo> = mutableListOf()
+        val time = Time.now()
         return if (realTimeEnabled){
             //need to make it a pair with the corresponding FavouriteTransitInfo
             val jobs = list.map { Pair(
-                coroutineScope.async(Dispatchers.IO) { roomViewModel.getFavouriteStopTime(it, agency, dayString, calendar) },
+                coroutineScope.async(Dispatchers.IO) { roomViewModel.getFavouriteStopTime(it, agency, time) },
                 coroutineScope.async(Dispatchers.IO) { realTimeViewModel.getArrivalTimes(agency.toString(), it.routeId, it.direction, it.stopName) }
             )}
             jobs.map{
@@ -302,11 +297,13 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
                 val realTimes = it.second.await()
                 if (realTimes.isEmpty()) staticData
                 else {
-                    var toKeep : Time = realTimes.first()//realTimes.last()
+                    var toKeep = realTimes.first()//realTimes.last()
                     realTimes.forEach{ realTime ->
                             staticData.arrivalTime?.also { staticData ->
-                                val foo = (staticData - realTime)
-                                val bar = (staticData - toKeep)
+                                val foo = staticData - realTime
+                                val bar = staticData - toKeep
+                                //val foo = (staticData - realTime)
+                                //val bar = (staticData - toKeep)
                                 //FIXME wont work properly when the actual realtime data has been updated
                                 if (foo == null || bar == null) toKeep = staticData
                                 else if (foo < bar) toKeep = realTime
@@ -317,7 +314,7 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
                 
             }
         }
-        else roomViewModel.getFavouriteStopTimes(list, agency, dayString, calendar, times)
+        else roomViewModel.getFavouriteStopTimes(list, agency, time)
     }
 
     private suspend fun recyclerViewDisplay(view : View, times : List<FavouriteTransitInfo>, new : Boolean = false){

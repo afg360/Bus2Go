@@ -87,7 +87,7 @@ class AlarmCreationDialog() : DialogFragment(R.layout.fragment_create_alarms_dia
                             allZero = timePicker.hour == 0 && timePicker.minute == 0
                             if (!allUnselected && !allZero) {
                                 bottomNavBar.activateAcceptAlarmButton()
-                                beforeTime = Time(timePicker.hour, timePicker.minute, 0)
+                                //beforeTime = Time(timePicker.hour, timePicker.minute, 0)
                             }
                             else bottomNavBar.deActivateAcceptAlarmButton()
                         }
@@ -184,10 +184,10 @@ class AlarmCreationDialog() : DialogFragment(R.layout.fragment_create_alarms_dia
                                 (alarmCreationViewModel.alarmBusInfo.value!!.time - beforeTime).also {
                                         if (it == null) throw IllegalStateException("An error occured trying to calculate alarm times_activity.xml to go off")
                                         set(Calendar.HOUR_OF_DAY, it.hour)
-                                        set(Calendar.MINUTE, it.min)
-                                        set(Calendar.SECOND, it.sec)
+                                        //set(Calendar.MINUTE, it.min)
+                                        //set(Calendar.SECOND, it.sec)
                                     }
-                                (requireActivity() as MainActivity).setAlarm(requireContext(), this)
+                                //(requireActivity() as MainActivity).setAlarm(requireContext(), this)
                             }
 
                         }

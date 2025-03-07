@@ -38,7 +38,7 @@ class AlarmsListElemAdapter(private val list : List<Alarm>)
         holder.itemView.tag = data.id
         holder.alarmTitle.text = data.title
         holder.alarmBusInfo.text = data.busInfo.stopName
-        holder.alarmTimeBefore.text = "${data.timeBefore.hour}h, ${data.timeBefore.min}"
+        //holder.alarmTimeBefore.text = "${data.timeBefore.hour}h, ${data.timeBefore.min}"
         val list = mutableListOf<Char>()
         //TODO if M-F -> "Weekdays", if all days: "week"
         data.ringDays.forEach{ if (it.value) list.add(it.key) }

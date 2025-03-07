@@ -4,20 +4,21 @@ import android.os.Bundle
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import dev.mainhq.bus2go.utils.Time
 import dev.mainhq.bus2go.adapters.TimeListElemsAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import android.icu.util.Calendar
 import android.os.Build
 import android.view.View
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.utils.BusExtrasInfo
+import dev.mainhq.bus2go.utils.Time
 import dev.mainhq.bus2go.utils.TransitAgency
 import dev.mainhq.bus2go.viewmodels.RoomViewModel
 import kotlinx.coroutines.Job
+import java.time.LocalDateTime
+import java.time.LocalTime
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledFuture
@@ -51,38 +52,43 @@ class TimesActivity : BaseActivity() {
         executor = Executors.newSingleThreadScheduledExecutor()
         //val routeId = intent.extras?.getInt(BusExtrasInfo.ROUTE_ID.name)
         val roomViewModel = ViewModelProvider(this)[RoomViewModel::class.java]
-        val calendar : Calendar = Calendar.getInstance()
+        //val calendar : Calendar = Calendar.getInstance()
+        val time = Time.now()
         val textView = findViewById<MaterialTextView>(R.id.time_title_text_view)
+        //FIXME since TransitData is parcelable, pass it around instead (and deal with Agencies to do correct Type Conversions
         when(agency){
             TransitAgency.STM -> {
                 //FIXME this may fail in the case the route id is a metro or other stuff?
                 val routeId = intent.extras!!.getString(BusExtrasInfo.ROUTE_ID.name)!!.toInt()
                 val direction = intent.extras!!.getString(BusExtrasInfo.DIRECTION.name)!!
                 //val directionId = intent.extras!!.getInt(BusExtrasInfo.DIRECTION.name_ID)
-                textView.text = "$routeId $direction - $stopName"
+                textView.text = "$routeId $stopName -> $direction"
                 lifecycleScope.launch {
-                    val stopTimes = roomViewModel.getStopTimes(stopName, calendar, direction, agency, routeId)
+                    val stopTimes = roomViewModel.getStmStopTimes(stopName, time, direction, routeId)
                     displayRecyclerView(stopTimes)
                     setupScheduledTask(stopTimes)
                 }
             }
             TransitAgency.EXO_TRAIN -> {
-                val routeId = intent.extras!!.getInt(BusExtrasInfo.ROUTE_ID.name)
+                val routeId = intent.extras!!.getString(BusExtrasInfo.ROUTE_ID.name)!!.toInt()
                 val directionId = intent.extras!!.getInt(BusExtrasInfo.DIRECTION_ID.name)
-                textView.text = "$routeId $directionId - $stopName"
+                val trainNum = intent.extras!!.getInt(BusExtrasInfo.TRAIN_NUM.name)
+                val direction = intent.extras!!.getString(BusExtrasInfo.DIRECTION.name)
+                textView.text = "#$trainNum $stopName -> $direction"
                 lifecycleScope.launch {
-                    val stopTimes = roomViewModel.getTrainStopTimes(routeId, stopName, directionId, calendar)
+                    val stopTimes = roomViewModel.getTrainStopTimes(routeId, stopName, directionId, time)
                     displayRecyclerView(stopTimes)
                     setupScheduledTask(stopTimes)
                 }
             }
 
             TransitAgency.EXO_OTHER -> {
-                val routeId = intent.extras!!.getInt(BusExtrasInfo.ROUTE_ID.name)
-                val headsign = intent.getStringExtra("headsign")!!
-                textView.text = "$routeId $headsign - $stopName"
+                //FIXME routeId may not always be an int?
+                val routeId = intent.extras!!.getString(BusExtrasInfo.ROUTE_ID.name)!!
+                val headsign = intent.getStringExtra(BusExtrasInfo.HEADSIGN.name)!!
+                textView.text = "$routeId $stopName -> $headsign"
                 lifecycleScope.launch {
-                    val stopTimes = roomViewModel.getStopTimes(stopName, calendar, headsign, agency, routeId)
+                    val stopTimes = roomViewModel.getExoOtherStopTimes(stopName, time, headsign)
                     displayRecyclerView(stopTimes)
                     setupScheduledTask(stopTimes)
                 }
@@ -101,6 +107,7 @@ class TimesActivity : BaseActivity() {
     }
 
     //FIXME: Although this implementation works, we need to get rid of the recyclerViewItem once we go beyond
+    //FIXME may need a LocalDateTime
     //the time... unless that is already dealt with?
     private fun setupScheduledTask(stopTimes: List<Time>){
         scheduledTask = executor?.scheduleWithFixedDelay({
@@ -110,7 +117,8 @@ class TimesActivity : BaseActivity() {
         }, 0, 20, TimeUnit.SECONDS)
 
     }
-    
+
+    //FIXME may need a fucking localdatetime instead of a localtime
     private suspend fun displayRecyclerView(stopTimes: List<Time>){
         withContext(Dispatchers.Main) {
             //If stopTimes.isEmpty, say that it is empty

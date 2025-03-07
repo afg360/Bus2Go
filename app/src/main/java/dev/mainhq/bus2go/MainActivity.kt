@@ -13,7 +13,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.navigation.NavigationBarView
-import dev.mainhq.bus2go.fragments.alarms.AlarmReceiver
+//import dev.mainhq.bus2go.fragments.alarms.AlarmReceiver
 import dev.mainhq.bus2go.fragments.ComingSoon
 import dev.mainhq.bus2go.fragments.Home
 import dev.mainhq.bus2go.viewmodels.AlarmCreationViewModel
@@ -47,8 +47,8 @@ class MainActivity : BaseActivity() {
             finish()
             startActivity(intent)
         }
-        else
-            setupActivity()
+        setupActivity()
+
         /*
         //TODO check if need to start configuration activity here
         lifecycleScope.launch(Dispatchers.IO) {
@@ -119,6 +119,7 @@ class MainActivity : BaseActivity() {
         })
     }
 
+    /*
     fun setAlarm(context: Context, calendar: Calendar) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(context, AlarmReceiver::class.java)
@@ -136,6 +137,8 @@ class MainActivity : BaseActivity() {
         // Cancel the alarm
         alarmManager.cancel(pendingIntent)
     }
+
+     */
 
     /** To check if first time opening the app, check for the existence of the PreferenceManager field
      * 	If false/doesn't exist, then first time.

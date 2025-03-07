@@ -30,6 +30,7 @@ import dev.mainhq.bus2go.utils.BusExtrasInfo
 import dev.mainhq.bus2go.utils.TransitAgency
 import dev.mainhq.bus2go.utils.Time
 import java.lang.ref.WeakReference
+import java.time.LocalTime
 
 class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, recyclerView: WeakReference<RecyclerView>)
     : RecyclerView.Adapter<FavouritesListElemsAdapter.ViewHolder>(){
@@ -51,14 +52,15 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val info = list[position]
 
-        holder.arrivalTimeTextView.text = info.arrivalTime.toString()
+        holder.arrivalTimeTextView.text = info.arrivalTime?.getTimeString()
         if (info.arrivalTime == null){
             holder.timeRemainingTextView.text =
-                holder.itemView.context.getString(R.string.none_for_the_rest_of_the_today)
+                holder.itemView.context.getString(R.string.none_for_the_rest_of_the_day)
         }
         else{
             holder.timeRemainingTextView.text = getTimeRemaining(info.arrivalTime)
-            if (info.arrivalTime.timeRemaining()?.compareTo(Time(0,3,59)) == -1)
+            //if (info.arrivalTime.timeRemaining()?.compareTo(Time(0,3,59)) == -1)
+            if (info.arrivalTime < Time(LocalTime.of(0, 3, 59)))
                 holder.timeRemainingTextView.setTextColor(holder.itemView.resources.getColor(R.color.red, null))
             else {
                 holder.timeRemainingTextView.setTextColor(MaterialColors.getColor(holder.itemView, android.R.attr.editTextColor))
@@ -95,7 +97,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
                 holder.routeLongNameTextView.visibility = GONE
                 holder.itemView.tag = info.transitData
                 holder.directionTextView.text = "To ${info.transitData.lastStop}"
-                holder.tripHeadsignTextView.text = info.transitData.routeId.toString()
+                holder.tripHeadsignTextView.text = info.transitData.routeId
                 holder.tripHeadsignTextView.setTextColor(
                     holder.itemView.resources
                         .getColor(R.color.basic_blue, null)
@@ -151,8 +153,11 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
             }
         }
 
-        /** This onClick either serves to check the remaining times_activity.xml if not in selection mode, or to select/unselect an item of the
-         *  recycler view if in selection mode (see onLongClick for more detail on the selection mode) */
+        /**
+         * This onClick either serves to get to the Times activity if not in selection mode, or to
+         * select/unselect an item of the recycler view if in selection mode (see onLongClick for
+         * more detail on the selection mode)
+         **/
         holder.itemView.setOnClickListener {
             //FIXME could remove nullability by setting holder.itemview.tag = "unselected"...
             val parent = WeakReference((recyclerView.parent.parent.parent.parent.parent.parent as ViewGroup))
@@ -172,9 +177,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
                         }
                     }
                 }
-                else{
-                    startTimes(holder, it, info)
-                }
+                else startTimes(holder, it, info)
             }
 
             parent.get()!!.findViewById<MaterialTextView>(R.id.selectedNumsOfFavourites)
@@ -236,18 +239,31 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
     fun updateTime(viewGroup : ViewGroup, favouritesBusInfo: FavouriteTransitInfo){
         val container = viewGroup[0] as ViewGroup
         favouritesBusInfo.arrivalTime?.also {
+            ((container[1] as ViewGroup)[2] as MaterialTextView).text = getTimeRemaining(favouritesBusInfo.arrivalTime)
+            ((container[1] as ViewGroup)[3] as MaterialTextView).text = favouritesBusInfo.arrivalTime.getTimeString()
+
+            //set the color to red if the time remaining is less than 3min 59sec (warning)
+            if (favouritesBusInfo.arrivalTime < Time(LocalTime.of(0, 3, 59))) ((container[1] as ViewGroup)[2] as MaterialTextView)
+                .setTextColor(viewGroup.resources.getColor(R.color.red, null))
+            else ((container[1] as ViewGroup)[3] as MaterialTextView).setTextColor(MaterialColors.getColor(viewGroup, android.R.attr.editTextColor))
+        }
+        /*
+        favouritesBusInfo.arrivalTime?.also {
             ((container[1] as ViewGroup)[2] as MaterialTextView).text = getTimeRemaining(it)
-            ((container[1] as ViewGroup)[3] as MaterialTextView).text = favouritesBusInfo.arrivalTime.toString()
+            ((container[1] as ViewGroup)[3] as MaterialTextView).text = favouritesBusInfo.arrivalTime.getTimeString()
             if (it.timeRemaining()?.compareTo(Time(0,3,59)) == -1) ((container[1] as ViewGroup)[2] as MaterialTextView)
                 .setTextColor(viewGroup.resources.getColor(R.color.red, null))
             else ((container[1] as ViewGroup)[3] as MaterialTextView).setTextColor(MaterialColors.getColor(viewGroup, android.R.attr.editTextColor))
         }
+         */
     }
 
-    private fun getTimeRemaining(arrivalTime: Time): String {
-        val remainingTime = arrivalTime.timeRemaining() ?: Time(0, 0, 0) //todo replace that for better handling
-        return if (remainingTime.hour > 0) "In ${remainingTime.hour} h, ${remainingTime.min} min"
-                else "In ${remainingTime.min} min"
+    private fun getTimeRemaining(arrivalTime: Time?): String {
+        if (arrivalTime == null) return "Wtf"
+        val remainingTime = arrivalTime.timeRemaining()
+        return if (remainingTime != null && remainingTime.hour > 0) "In ${remainingTime.hour} h, ${remainingTime.minute} min"
+                else if (remainingTime != null) "In ${remainingTime.minute} min"
+            else "Bus has passed??"
     }
 
     /** This function is used to deselect a container
@@ -261,16 +277,22 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
         }
     }
 
-    fun select(/** Outer view group layout, containing the linear layout (at the moment) for the other components */
-               viewGroup : ViewGroup){
+    /**
+     * @param viewGroup Outer view group layout, containing the linear layout (at the moment) for
+     * the other components.
+     **/
+    fun select(viewGroup : ViewGroup){
         if (!((viewGroup[0] as ViewGroup)[0] as MaterialCheckBox).isChecked){
             ((viewGroup[0] as ViewGroup)[0] as MaterialCheckBox).isChecked = true
             numSelected++
         }
     }
 
-    fun isSelected(/** Outer view group layout, containing the linear layout (at the moment) for the other components */
-               viewGroup : ViewGroup) : Boolean{
+    /**
+     * @param viewGroup Outer view group layout, containing the linear layout (at the moment) for
+     * the other components.
+     **/
+    fun isSelected(viewGroup : ViewGroup) : Boolean{
         return ((viewGroup[0] as ViewGroup)[0] as MaterialCheckBox).isChecked
     }
 
@@ -281,18 +303,22 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
         when (info.agency) {
             TransitAgency.EXO_TRAIN -> {
                 info.transitData as TrainData
-                intent.putExtra(BusExtrasInfo.DIRECTION_ID.name, info.transitData.directionId)
+                //2 below are for DB queries
                 intent.putExtra(BusExtrasInfo.ROUTE_ID.name, info.transitData.routeId)
+                intent.putExtra(BusExtrasInfo.DIRECTION_ID.name, info.transitData.directionId)
+                //for final destination display
+                intent.putExtra(BusExtrasInfo.DIRECTION.name, info.transitData.direction)
+                intent.putExtra(BusExtrasInfo.TRAIN_NUM.name, info.transitData.trainNum)
             }
             TransitAgency.STM -> {
                 info.transitData as StmBusData
                 intent.putExtra(BusExtrasInfo.ROUTE_ID.name, info.transitData.routeId)
                 intent.putExtra(BusExtrasInfo.DIRECTION.name, info.transitData.direction)
-
             }
             TransitAgency.EXO_OTHER -> {
                 info.transitData as ExoBusData
-                intent.putExtra(BusExtrasInfo.ROUTE_ID.name, info.transitData.direction)
+                intent.putExtra(BusExtrasInfo.ROUTE_ID.name, info.transitData.routeId)
+                //intent.putExtra(BusExtrasInfo.DIRECTION.name, info.transitData.direction)
                 intent.putExtra(BusExtrasInfo.HEADSIGN.name, info.transitData.headsign)
             }
         }
@@ -332,9 +358,10 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
     }
 }
 
-/** Set the margins for the left margin for the left most items
+/**
+ * Set the margins for the left margin for the left most items
  *  and the right margin for the right most items inside the recycler view
- */
+ **/
 fun setMargins(constraintLayout : ConstraintLayout, left : Int, right : Int){
     for (i in 0..< constraintLayout.size){
         val materialTextView = constraintLayout[i] as MaterialTextView

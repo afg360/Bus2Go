@@ -37,6 +37,8 @@ import java.io.IOException
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.net.URLEncoder.encode
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.util.concurrent.TimeUnit
 
 //TODO cache or save the data somewhere in case used and disconnected
@@ -195,10 +197,11 @@ class RealTimeViewModel(application : Application) : AndroidViewModel(applicatio
                          *      "arrival_time: list[str]
                          * }
                          */
-                        return (Json.decodeFromString( JsonObject.serializer(),
+                        return (Json.decodeFromString(JsonObject.serializer(),
                                 response.body() )["arrival_time"] as JsonArray?)
                                 ?.filter{it.toString() != ""}
-                                ?.map{ Time.TimeBuilder.fromUnix(it.toString().toLong()) }
+                                //?.map{ Time.TimeBuilder.fromUnix(it.toString().toLong()) }
+                                ?.map{ Time.fromUnix(it.toString().toLong()) }
                                 ?: listOf()
                     }
                     

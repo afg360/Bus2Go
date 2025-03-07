@@ -12,12 +12,16 @@ import dev.mainhq.bus2go.R
 import android.icu.util.Calendar
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.utils.Time
+import java.time.Duration
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.Period
 
 //TODO
 //could add view/ontouchlistener to handle touch holding, etc.
 //may need to use a recycler view, but implement a base adapter instead...?
 class TimeListElemsAdapter(private val timeData: List<Time>,
-    private val fromAlarmCreation : Boolean)
+                           private val fromAlarmCreation : Boolean)
     : RecyclerView.Adapter<TimeListElemsAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -26,18 +30,19 @@ class TimeListElemsAdapter(private val timeData: List<Time>,
         )
     }
 
-    //todo for now ignore harcoded text warnings
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val time : Time = timeData[position]
-        holder.timeTextView.text = time.toString()
-        //todo refresh every 5-10 secs
-        //todo perhaps do that where the recycler is made directly instead
+        val time = timeData[position]
+        holder.timeTextView.text = time.getTimeString()
         if (position == 0 && !fromAlarmCreation){
-            val curTime = Time(Calendar.getInstance())
+            //TODO may need to use a LocalDateTime here...
+            val curTime = Time(LocalDateTime.now())
+            //Duration.between =! arg1 - arg2, == arg2 - arg1
             val remainingTime = time - curTime
+            //val remainingTime = time.minusHours(curTime.hour).minusMinutes(curTime.minute).minusSeconds(curTime.second)
+            //if (remainingTime != null) {
             if (remainingTime != null) {
                 if (remainingTime.hour == 0) holder.timeLeftTextView.text =
-                    holder.itemView.context.getString(R.string.in_min, remainingTime.min.toString())
+                    holder.itemView.context.getString(R.string.in_min, remainingTime.minute.toString())
                 else holder.timeLeftTextView.text = holder.itemView.context.getString(R.string.in_more_than_an_hour)//todo
             }
             else{

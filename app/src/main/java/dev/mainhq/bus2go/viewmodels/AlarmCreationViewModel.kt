@@ -46,11 +46,11 @@ class AlarmCreationViewModel(private val application : Application) : AndroidVie
     }
 
     fun updateDays(daysOn: Map<Char, Boolean>){
-        _chosenDays.value = daysOn //TODO TO PARSE THE STRING/LIST
+        //_chosenDays.value = daysOn //TODO TO PARSE THE STRING/LIST
     }
 
     fun updateBeforeTime(time : Time){
-        _beforeTime.value = time.toSerializableTime()
+        //_beforeTime.value = time.toSerializableTime()
     }
 
     fun updateLiveActivatedState(id : Int, state : Boolean){
@@ -58,6 +58,7 @@ class AlarmCreationViewModel(private val application : Application) : AndroidVie
         viewModelScope.launch {
             application.alarmDataStore.updateData {alarmsData ->
                 alarmsData.copy(list = alarmsData.list.mutate {list ->
+                    /*
                     list[id - 1] = Alarm(
                         list[id - 1].id,
                         list[id - 1].title,
@@ -66,6 +67,7 @@ class AlarmCreationViewModel(private val application : Application) : AndroidVie
                         list[id - 1].ringDays,
                         state,
                     )
+                     */
                 })
             }
         }
@@ -75,6 +77,7 @@ class AlarmCreationViewModel(private val application : Application) : AndroidVie
         viewModelScope.launch {
             application.alarmDataStore.updateData {alarmsData ->
                 alarmsData.copy(list = alarmsData.list.mutate {
+                    /*
                     it.add(Alarm(
                         //FIXME THIS PART WILL FAIL UNIQUENESS WHEN DELETING AND CREATING NEW ALARMS (and keeping older ones)
                         id = application.alarmDataStore.data.first().list.size + 1,
@@ -84,6 +87,7 @@ class AlarmCreationViewModel(private val application : Application) : AndroidVie
                         chosenDays.value!!,
                         isOn.value!!
                     ))
+                    */
                 })
             }
         }
@@ -95,6 +99,7 @@ class AlarmCreationViewModel(private val application : Application) : AndroidVie
         viewModelScope.launch {
             application.alarmDataStore.updateData {alarmsData ->
                 alarmsData.copy(list = alarmsData.list.mutate {
+                    /*
                     it.add(Alarm(
                         id = application.alarmDataStore.data.first().list.size + 1,
                         title = "Hello World",
@@ -103,6 +108,7 @@ class AlarmCreationViewModel(private val application : Application) : AndroidVie
                         chosenDays.value!!,
                         isOn.value!!
                     ))
+                    */
                 })
             }
             block()
@@ -117,6 +123,7 @@ class AlarmCreationViewModel(private val application : Application) : AndroidVie
                 alarmsData.copy(list = alarmsData.list.mutate {
                     //FIXME need a better way to refer to the correct alarm
                     it.removeAt(id - 1)
+                    /*
                     it.add(Alarm(
                         id = id,
                         title = "Hello World",
@@ -125,6 +132,7 @@ class AlarmCreationViewModel(private val application : Application) : AndroidVie
                         chosenDays.value!!,
                         isOn.value!!
                     ))
+                     */
                 })
             }
         }

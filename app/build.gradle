@@ -30,7 +30,7 @@ android {
 
     defaultConfig {
         applicationId "dev.mainhq.bus2go"
-        minSdk 25
+        minSdk 26
         targetSdk 34
         versionCode 4
         versionName "v1.2.1-alpha"

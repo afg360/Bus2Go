@@ -18,7 +18,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.viewmodels.ConfigurationStateViewModel
 import dev.mainhq.bus2go.workers.DatabaseDownloadManagerWorker
-import dev.mainhq.bus2go.workers.DatabaseInstallManagerWorker
 
 class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
 

@@ -43,7 +43,7 @@ class AlarmCreationChooseBusDialog() : DialogFragment(R.layout.fragment_create_a
 
         override fun writeToParcel(dest: Parcel, flags: Int) {
             dest.writeParcelable(busInfo, Parcelable.PARCELABLE_WRITE_RETURN_VALUE)
-            dest.writeParcelable(time, Parcelable.PARCELABLE_WRITE_RETURN_VALUE)
+            //dest.writeParcelable(time, Parcelable.PARCELABLE_WRITE_RETURN_VALUE)
         }
 
         companion object CREATOR : Parcelable.Creator<AlarmBusInfo> {

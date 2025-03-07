@@ -39,6 +39,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import java.io.File
 
 
+/** Manages new updates download and installation */
 class UpdateManagerWorker(context: Context, workerParams: WorkerParameters) : CoroutineWorker(context, workerParams ) {
 
 	companion object {
@@ -74,10 +75,8 @@ class UpdateManagerWorker(context: Context, workerParams: WorkerParameters) : Co
 
 				val channelId = "Updates"
 				val notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-					val channel = NotificationChannel(channelId, "Software Updates", NotificationManager.IMPORTANCE_DEFAULT)
-					notificationManager.createNotificationChannel(channel)
-				}
+				val channel = NotificationChannel(channelId, "Software Updates", NotificationManager.IMPORTANCE_DEFAULT)
+				notificationManager.createNotificationChannel(channel)
 
 				if (localVersionName < tagVersion){
 					Log.d("UPDATES", "Seems that you need to update!")

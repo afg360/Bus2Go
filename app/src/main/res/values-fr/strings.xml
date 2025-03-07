@@ -38,9 +38,10 @@
     <string name="from_to">De %1$s à %2$s</string>
     <string name="in_min">Dans %1$s min</string>
     <string name="in_more_than_an_hour"><![CDATA[Dans >> 1h]]></string>
-    <string name="none_for_the_rest_of_the_today">Aucun pour le restant de la journée</string>
+    <string name="none_for_the_rest_of_the_day">Aucun pour le restant de la journée</string>
     <string name="train_to">Train #%1$s, vers %2$s</string>
     <string name="add_a_new_server">Ajouter un nouveau serveur</string>
+    <string name="train_direction">Vers %1$s</string>
     <string name="welcome">Bienvenue!</string>
     <string name="config_continue">Continue</string>
 </resources>

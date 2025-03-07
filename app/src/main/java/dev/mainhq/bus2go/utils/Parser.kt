@@ -1,20 +1,7 @@
 package dev.mainhq.bus2go.utils
 
 import android.icu.util.Calendar
-import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import androidx.room.Room
-import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.adapters.BusListElemsAdapter
-import dev.mainhq.bus2go.database.stm_data.AppDatabaseSTM
-import dev.mainhq.bus2go.database.exo_data.AppDatabaseExo
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.withContext
+import java.time.LocalDateTime
 import java.util.Locale
 
 //right now only for the main activities
@@ -39,6 +26,9 @@ fun toParsable(txt: String): String {
     return str
 }
 
+
+@Deprecated("Use a LocalDateTime instead of a Calendar object",
+    replaceWith = ReplaceWith("getDayString(calendar : LocalDateTime) : String"))
 fun getDayString(calendar : Calendar) : String{
     return when (calendar.get(Calendar.DAY_OF_WEEK)) {
         Calendar.SUNDAY -> "d"

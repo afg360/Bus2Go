@@ -2,67 +2,92 @@ package dev.mainhq.bus2go
 
 import dev.mainhq.bus2go.utils.Time
 import junit.framework.TestCase.assertEquals
-import junit.framework.TestCase.assertTrue
 import org.junit.Test
+import java.time.LocalDateTime
+import java.time.LocalDate
+import java.time.LocalTime
 
 class TimeClassTest {
+
     @Test
-    fun testInit(){
-        val time = Time(0,0,0)
-        assertEquals("00:00:00", time.toString())
-    }
-    @Test
-    fun testInit2(){
-        val time = Time(0, 6, 13)
-        assertEquals("00:06:13", time.toString())
-    }
-    @Test
-    fun testSub1(){
-        val time1 = Time(5,2,1)
-        val time2 = Time(2,1,0)
-        assertEquals(Time(3,1,1), time1 - time2)
-    }
-    @Test
-    fun testSub2(){
-        val time1 = Time(5,2,1)
-        val time2 = Time(2,3,0)
-        assertEquals(Time(2,59,1), time1 - time2)
-    }
-    @Test
-    fun testSub3(){
-        val time1 = Time(3,2,1)
-        val time2 = Time(2,3,23)
-        assertEquals(Time(0,58,38), time1 - time2)
-    }
-    @Test
-    fun testSubErr(){
-        val time1 = Time(3,2,1)
-        val time2 = Time(5,3,23)
-        assertTrue(time2 - time1 != null)
+    fun testSubNoSecs() {
+        val prev = Time(LocalDateTime.of(2025, 3, 5, 2, 25, 0))
+        val new = Time(LocalDateTime.of(2025, 3, 5, 4, 0, 0))
+        //we expect the duration to be of 01:35:00
+        assertEquals(LocalTime.parse("01:35"), new - prev)
     }
 
     @Test
-    fun testCompare1(){
-        assertTrue(Time(0,3,59).compareTo(Time(0,4,0)) == -1)
-    }
-    @Test
-    fun testCompare2(){
-        assertTrue(Time(3,3,59).compareTo(Time(3,4,0)) == -1)
-    }
-    @Test
-    fun testCompare3(){
-        assertTrue(Time(0,3,59).compareTo(Time(0,3,0)) == 1)
+    fun testSubSecs() {
+        val prev = Time(LocalDateTime.of(2025, 3, 5, 2, 25, 23))
+        val new = Time(LocalDateTime.of(2025, 3, 5, 4, 0, 0))
+        //we expect the duration to be of 01:35:00
+        assertEquals(LocalTime.parse("01:34:37"), new - prev)
     }
 
     @Test
-    fun testFromString(){
-        val time1 = Time(23, 37, 26)
-        assertTrue(Time.TimeBuilder.fromString("23:37:26").compareTo(time1)  == 0)
+    fun testInitLate() {
+        val time = Time.fromString("26:21:23")
+        assertEquals(
+            Time(LocalDate.now().plusDays(1), LocalTime.of(2, 21, 23)).toString(),
+            time.toString()
+        )
     }
 
     @Test
-    fun testUnixTime(){
-        println(Time.TimeBuilder.fromUnix(1718768246))
-        assertTrue(Time.TimeBuilder.fromUnix(1718768246).compareTo(Time.TimeBuilder.fromString("23:37:26")) == 0)
+    fun testInitLateAndSub1() {
+        val time1 = Time.fromString("25:21:23")
+        val time2 = Time.fromString("26:21:23")
+        assertEquals(LocalTime.of(1, 0, 0), time2 - time1)
+    }
+
+    @Test
+    fun testInitLateAndSub2() {
+        val time1 = Time.fromString("26:21:23")
+        val time2 = Time.fromString("21:23:21")
+        assertEquals(LocalTime.of(4, 58, 2), time1 - time2)
+    }
+
+    @Test
+    fun testInitLateAndSubExpectNull() {
+        val time1 = Time.fromString("26:21:23")
+        val time2 = Time.fromString("21:23:21")
+        assertEquals(null, time2 - time1)
+    }
+
+    @Test
+    fun testInitUnix() {
+        val unix = Time.fromUnix(1741231534)
+        assertEquals(Time(LocalDateTime.of(2025, 3, 5, 22, 25, 34)), unix)
+    }
+
+    @Test
+    fun testDayString() {
+        val times = mutableListOf<Time>()
+        val daysOfWeek = listOf("d", "m", "t", "w", "y", "f", "s")
+        //from march 2 to 8 2025, we go from Sunday to Saturday (passing by Mon
+        for (i in 2..8) {
+            times.add(Time(LocalDate.of(2025, 3, i), LocalTime.now()))
+        }
+        times.zip(daysOfWeek) { time, str ->
+            assertEquals(time.getDayString(), str)
+        }
+    }
+
+    @Test
+    fun testTimeString() {
+        val time = Time(LocalTime.of(2, 32, 12))
+        assertEquals("02:32:12", time.getTimeString())
+
+        val timeNow = Time.now()
+        println(timeNow.getTimeString())
+        //we want to not consider microsecs, format is HH:MM:SS (length == 8)
+        assert(timeNow.getTimeString().length == 8)
+    }
+
+    @Test
+    fun testTodayString() {
+        val time = Time(LocalDate.of(2025, 3, 6), LocalTime.now())
+        assertEquals("20250306", time.getTodayString())
     }
 }

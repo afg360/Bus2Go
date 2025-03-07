@@ -6,7 +6,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import dev.mainhq.bus2go.adapters.StopListElemsAdapter
+import dev.mainhq.bus2go.adapters.StopListElemsAdapterExoOther
+import dev.mainhq.bus2go.adapters.StopListElemsAdapterExoTrain
+import dev.mainhq.bus2go.adapters.StopListElemsAdapterStm
 import dev.mainhq.bus2go.utils.BusExtrasInfo
 import dev.mainhq.bus2go.utils.TransitAgency
 import dev.mainhq.bus2go.viewmodels.FavouritesViewModel
@@ -14,7 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.lang.IllegalStateException
+import kotlin.IllegalStateException
 
 //todo
 //instead of doing a huge query on getting the time, we could first retrieve
@@ -22,8 +24,6 @@ import java.lang.IllegalStateException
 //and once the user clicks, either new activity OR new fragment? -> in the latter case need to implement onback
 //todo add possibility of searching amongst all the stops
 class ChooseStop() : BaseActivity() {
-
-    private var routeName : String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,17 +43,10 @@ class ChooseStop() : BaseActivity() {
             val recyclerView: RecyclerView = findViewById(R.id.stop_recycle_view)
             val layoutManager = LinearLayoutManager(applicationContext)
 
-            //nullable values
-            val directionId = intent.extras?.getInt(BusExtrasInfo.DIRECTION_ID.name)
-            val trainNum = intent.extras?.getInt(BusExtrasInfo.TRAIN_NUM.name)
-            val lastStop = intent.getStringExtra(BusExtrasInfo.LAST_STOP.name)
-            val headsign = intent.getStringExtra(BusExtrasInfo.HEADSIGN.name)
-
             //non-nullable values
             val routeId = intent.getStringExtra(BusExtrasInfo.ROUTE_ID.name)!!
             val direction = intent.getStringExtra(BusExtrasInfo.DIRECTION.name)!!
             if (agency == TransitAgency.EXO_TRAIN || agency == TransitAgency.EXO_OTHER){
-                routeName = intent.getStringExtra(BusExtrasInfo.ROUTE_NAME.name) ?: throw IllegalStateException("Forgot to give a route name to a train!")
             }
             else if (agency == TransitAgency.STM && routeId.toInt() == -1)
                     throw IllegalStateException("Forgot to give a route id to an stm bus!")
@@ -64,8 +57,32 @@ class ChooseStop() : BaseActivity() {
                 val favourites = favouritesViewModel.stmBusInfo.value + favouritesViewModel.exoBusInfo.value +
                         favouritesViewModel.exoTrainInfo.value
                 withContext(Dispatchers.Main){
-                    recyclerView.adapter = StopListElemsAdapter(stopNames, favourites, headsign, routeId,
-                        trainNum, routeName, directionId, direction, lastStop, agency, favouritesViewModel)
+                     when(agency){
+                        TransitAgency.STM -> {
+                            val directionId = intent.getIntExtra(BusExtrasInfo.DIRECTION_ID.name, -1)
+                            if (directionId < 0) throw IllegalStateException("Forgot to give a direction Id to an Stm bus")
+                            val lastStop = intent.getStringExtra(BusExtrasInfo.LAST_STOP.name) ?: throw IllegalStateException("Forgot to give a last stop to an Stm bus")
+                            recyclerView.adapter = StopListElemsAdapterStm(stopNames, favourites,
+                                favouritesViewModel, routeId, directionId, direction, lastStop)
+                        }
+
+                        TransitAgency.EXO_TRAIN -> {
+                            val trainNum = intent.getIntExtra(BusExtrasInfo.TRAIN_NUM.name, -1)
+                            if (trainNum < 0) throw IllegalStateException("No train num has been given to a train stop")
+                            val directionId = intent.getIntExtra(BusExtrasInfo.DIRECTION_ID.name, -1)
+                            if (directionId < 0) throw IllegalStateException("Forgot to give a direction Id to a train stop")
+                            val routeName = intent.getStringExtra(BusExtrasInfo.ROUTE_NAME.name) ?: throw IllegalStateException("Forgot to give a route name to a train!")
+                            recyclerView.adapter = StopListElemsAdapterExoTrain(stopNames, favourites,
+                                favouritesViewModel, routeId, routeName, directionId, direction, trainNum)
+                        }
+
+                        TransitAgency.EXO_OTHER -> {
+                            val headsign = intent.getStringExtra(BusExtrasInfo.HEADSIGN.name) ?: throw IllegalStateException("Forgot to give a headsign to an exo bus stop")
+                            val routeName = intent.getStringExtra(BusExtrasInfo.ROUTE_NAME.name) ?: throw IllegalStateException("Forgot to give a route name to an exo bus!")
+                            recyclerView.adapter = StopListElemsAdapterExoOther( stopNames, favourites,
+                                favouritesViewModel, routeId, routeName, direction, headsign)
+                        }
+                    }
                     layoutManager.orientation = LinearLayoutManager.VERTICAL
                     recyclerView.layoutManager = layoutManager
                 }
