@@ -15,6 +15,7 @@ import androidx.work.workDataOf
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import dev.mainhq.bus2go.AppThemeState
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.viewmodels.ConfigurationStateViewModel
 import dev.mainhq.bus2go.workers.DatabaseDownloadManagerWorker
@@ -64,6 +65,7 @@ class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
 							//	.build())
 							.enqueue()
 						dialogInterface.dismiss()
+						AppThemeState.turnOffDbUpdateChecking()
 					}
 					.setNegativeButton("Cancel"){ dialogInterface, _ -> /*close the dialog*/ dialogInterface.dismiss() }
 					.show()

@@ -2,10 +2,10 @@ package dev.mainhq.bus2go.database.stm_data.dao
 
 import androidx.room.Dao
 import androidx.room.Query
-import dev.mainhq.bus2go.database.stm_data.entities.Calendar
+import java.time.LocalDate
 
 @Dao
 interface CalendarDAO {
-    @Query("SELECT * FROM Calendar;")
-    suspend fun getAllCalendarInfo() : List<Calendar>
+    @Query("SELECT MAX(end_date) FROM Calendar")
+    suspend fun getMaxEndDate() : LocalDate?
 }

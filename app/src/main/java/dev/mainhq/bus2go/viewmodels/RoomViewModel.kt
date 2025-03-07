@@ -17,6 +17,9 @@ import dev.mainhq.bus2go.utils.FuzzyQuery
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
+import java.lang.Long.min
+import java.time.Duration
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -157,6 +160,18 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
         val job1 = coroutineScope.async { exoDataBase.stopTimesDao().getTrainStopNames("trains-$routeId", 0) }
         val job2 = coroutineScope.async { exoDataBase.stopTimesDao().getTrainStopNames("trains-$routeId", 1) }
         return Pair(job1, job2)
+    }
+
+    /**
+     * @return The closest date before one of the databases gets out of date
+     **/
+    suspend fun getMinDateForUpdate(): LocalDate? {
+        val exo = exoDataBase.calendarDao().getMaxEndDate() ?: return null
+        val stm = stmDatabase.calendarDao().getMaxEndDate() ?: return null
+        val curDate = Time.now()
+        val duration1 = Time(exo).minusDays(curDate) ?: return null
+        val duration2 = Time(stm).minusDays(curDate) ?: return null
+        return if (duration1 < duration2) exo else stm
     }
 
     suspend fun queryStmRoutes(query: FuzzyQuery) : List<BusRouteInfo> {

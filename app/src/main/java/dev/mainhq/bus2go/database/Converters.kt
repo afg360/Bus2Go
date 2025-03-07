@@ -28,6 +28,14 @@ class Converters {
     }
 
     @TypeConverter
+    /**
+     * Only used for CalendarDAOs
+     **/
+    fun toLocalDate(str: String?): LocalDate?{
+        return str?.let{ LocalDate.parse(it, DateTimeFormatter.BASIC_ISO_DATE)}
+    }
+
+    @TypeConverter
     fun userQuerySearch(query : FuzzyQuery) : String {
         return query.toString()
     }

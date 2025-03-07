@@ -6,6 +6,18 @@ import kotlin.properties.Delegates
 /** Singleton used to control the global theme of the application */
 object AppThemeState {
 
+    //FIXME if the app is not destroyed for a while but person set up the thing for a while, might
+    //not work as expected...
+    private var _displayIsDbUpdatedDialog: Boolean = true
+
+    /**
+     * Caches whether or not need to update local databases to avoid constantly looking up file.
+     * Always initialised at launch at true
+     **/
+    val displayIsDbUpdatedDialog: Boolean get() = _displayIsDbUpdatedDialog
+
+    fun turnOffDbUpdateChecking(){ _displayIsDbUpdatedDialog = false }
+
     private var prevVal by Delegates.notNull<Boolean>()
 
     /** Basic init function to be called when setting up a theme

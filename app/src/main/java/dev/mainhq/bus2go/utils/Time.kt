@@ -2,6 +2,7 @@ package dev.mainhq.bus2go.utils
 
 import android.os.Parcel
 import android.os.Parcelable
+import net.bytebuddy.asm.Advice.Local
 import java.time.DayOfWeek
 import java.time.Duration
 import java.time.LocalDate
@@ -9,6 +10,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
+import kotlin.math.min
 
 /** Allows to do operations more easily on time based formats */
 class Time(localDateTime: LocalDateTime) : Parcelable {
@@ -16,23 +18,22 @@ class Time(localDateTime: LocalDateTime) : Parcelable {
     private val localTime = localDateTime.toLocalTime()
     private val localDate = localDateTime.toLocalDate()
 
-    constructor(parcel: Parcel) : this(
-        LocalDateTime.of(
-            LocalDate.of(
-                parcel.readInt(),
-                parcel.readInt(),
-                parcel.readInt()
-            ),
-            LocalTime.of(
-                parcel.readInt(),
-                parcel.readInt(),
-                parcel.readInt()
-            )
-        )
-    )
 
     constructor(localDate: LocalDate, localTime: LocalTime) : this(
         LocalDateTime.of(localDate, localTime)
+    )
+
+    constructor(parcel: Parcel) : this(
+        LocalDate.of(
+            parcel.readInt(),
+            parcel.readInt(),
+            parcel.readInt()
+        ),
+        LocalTime.of(
+            parcel.readInt(),
+            parcel.readInt(),
+            parcel.readInt()
+        )
     )
 
     /**
@@ -40,6 +41,14 @@ class Time(localDateTime: LocalDateTime) : Parcelable {
      **/
     constructor(localTime: LocalTime) : this(
         LocalDateTime.of(LocalDate.now(), localTime)
+    )
+
+    constructor(localDate: LocalDate) : this(
+        LocalDateTime.of(localDate, LocalTime.now())
+    )
+
+    constructor(years: Int, months: Int, days: Int, hours: Int, mins: Int, secs: Int): this(
+        LocalDateTime.of(years, months, days, hours, mins, secs)
     )
 
     /**
@@ -55,8 +64,28 @@ class Time(localDateTime: LocalDateTime) : Parcelable {
         val secs = duration.seconds - mins * 60
         val hours = mins / 60
         mins -= 60 * hours
-        return if (duration.isNegative) null
-               else LocalTime.of(hours.toInt(), mins.toInt(), secs.toInt())
+        return LocalTime.of(hours.toInt(), mins.toInt(), secs.toInt())
+    }
+
+    fun minusDays(time: Time): Day? {
+        if (this < time) return null
+        val duration = Duration.between(LocalDateTime.of(time.localDate, time.localTime), LocalDateTime.of(this.localDate, this.localTime))
+        //duration.seconds === all the time (hours + minutes) in seconds
+        var mins = duration.seconds / 60
+        val secs = duration.seconds - mins * 60
+        var hours = mins / 60
+        mins -= 60 * hours
+        var days = hours / 24
+        hours -= 24 * days
+        return Day(LocalTime.of(hours.toInt(), mins.toInt(), secs.toInt()), days)
+    }
+
+    data class Day (val time: LocalTime, val days: Long){
+        operator fun compareTo(other: Day): Int{
+            val diff = this.days - other.days
+            if (diff != 0L) return (this.days - diff).toInt()
+            else return this.time.compareTo(other.time)
+        }
     }
 
     fun timeRemaining() : LocalTime? {
@@ -183,6 +212,10 @@ class Time(localDateTime: LocalDateTime) : Parcelable {
         fun fromUnix(unixTime : Long) : Time{
             //get Canada timeZone which is UTC - 5
             return Time(LocalDateTime.ofEpochSecond(unixTime, 0, ZoneOffset.ofHours(-5)))
+        }
+
+        fun toLocalDateString(localDate: LocalDate): String{
+            return localDate.format(DateTimeFormatter.BASIC_ISO_DATE)
         }
     }
 }
