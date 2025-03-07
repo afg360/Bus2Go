@@ -172,9 +172,13 @@ class MainActivity : BaseActivity() {
                             "update them so that you can enjoy accurate schedules."
                 )
                 .setPositiveButton("Update now") { dialogInterface, _ ->
-                    //TODO setup download jobs and shit
+                    //TODO setup download jobs and shit, no server prepared yet so display a coming soon for now
+                    MaterialAlertDialogBuilder(this@MainActivity)
+                        .setTitle("Coming Soon")
+                        .setMessage("Unfortunately, we are not hosting the dbs at the moment. Please update" +
+                                "the app when an update will be available")
                     dialogInterface.dismiss()
-                    deferred.complete(null)
+                    deferred.complete(30)
                 }
                 .setNeutralButton("Remind me later") { dialogInterface, _ ->
                     //TODO save the value in the application_state file (create a new dialog for choosing time before a reminder)

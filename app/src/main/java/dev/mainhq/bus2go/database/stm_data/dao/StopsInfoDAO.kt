@@ -10,12 +10,7 @@ import dev.mainhq.bus2go.utils.Time
  **/
 interface StopsInfoDAO {
 
-    //FIXME instead of simply creating empty LocalTime, we can create LocalDateTime using the Calendar associated with it
-
-    //query arrival time blabla
-    //in the calendar inner query, get the service_id, days and the start/end_date
-    //return those shit if it respects the query
-    //in the returning thing, if the today < end_date, inside converter use LocalDate.now()
+    //TODO add a query for old data
 
     @Query("SELECT DISTINCT stop_name FROM StopsInfo " +
             "WHERE trip_headsign = (:headsign) " +
@@ -32,6 +27,20 @@ interface StopsInfoDAO {
             "AND trip_headsign LIKE (:headsign) || '%' " +
             "ORDER BY arrival_time")
     suspend fun getStopTimes(stopName : String, day : String, curTime : String, /** i.e. DIRECTION string */ headsign: String, routeId: Int, curDate: String) : List<Time>
+
+    /*
+    //TODO use this query
+    @Query("SELECT DISTINCT arrival_time FROM StopsInfo JOIN " +
+            "(SELECT service_id, days FROM Calendar " +
+            "WHERE Calendar.end_date = (SELECT MAX(end_date) FROM Calendar) " +
+            ") AS Calendar " +
+            "ON StopsInfo.service_id = Calendar.service_id " +
+            "WHERE stop_name = (:stopName) AND days LIKE '%' || (:day) || '%' " +
+            "AND arrival_time >= (:curTime) AND route_id = (:routeId) " +
+            "AND trip_headsign LIKE (:headsign) || '%' " +
+            "ORDER BY arrival_time")
+    suspend fun getOldTimes(stopName: String, day: String, curTime: String, headsign: String, routeId: String): List<Time>
+     */
 
     /** Used for creating new alarm */
     @Query("SELECT DISTINCT arrival_time FROM StopsInfo JOIN " +

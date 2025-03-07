@@ -8,7 +8,7 @@ import dev.mainhq.bus2go.utils.Time
 //FIXME doing today queries instead of calendar seem to disrupt everything...
 interface StopTimesDAO {
 
-    //TODO TAKE INTO CONSIDERATION DATES WHEN CHECKING WHICH STOPS ARE AVAILABLE
+    //TODO Add query for old data
 
     @Query("SELECT DISTINCT stop_name FROM StopTimes " +
             "JOIN Stops on Stops.stop_id = StopTimes.stop_id " +
@@ -36,6 +36,22 @@ interface StopTimesDAO {
             "ORDER BY arrival_time")
     //perhaps also use the agency as a search argument
     suspend fun getStopTimes(stopName : String, day : String, curTime : String, headsign: String, curDate: String) : List<Time>
+
+    /*
+    //TODO To use
+    @Query("SELECT DISTINCT arrival_time FROM StopTimes " +
+            "JOIN Stops ON StopTimes.stop_id = Stops.stop_id " +
+            "JOIN Trips ON StopTimes.trip_id = Trips.trip_id " +
+            "JOIN " +
+            "(SELECT service_id, days FROM Calendar " +
+            "WHERE Calendar.end_date = (SELECT MAX(end_date) FROM Calendar)" +
+            ") AS Calendar " +
+            "ON Calendar.service_id = Trips.service_id " +
+            "WHERE stop_name = (:stopName) AND days LIKE '%' || (:day) || '%' " +
+            "AND arrival_time >= (:curTime) AND trip_headsign = (:headsign) " +
+            "ORDER BY arrival_time")
+    suspend fun getOldStopTimes(stopName : String, day : String, curTime : String, headsign: String) : List<Time>
+    */
 
     @Query("SELECT MIN(arrival_time) AS arrival_time FROM " +
                 "(SELECT arrival_time FROM StopTimes " +
