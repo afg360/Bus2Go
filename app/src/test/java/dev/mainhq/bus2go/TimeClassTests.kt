@@ -7,7 +7,7 @@ import java.time.LocalDateTime
 import java.time.LocalDate
 import java.time.LocalTime
 
-class TimeClassTest {
+class TimeClassTests {
 
     @Test
     fun testSubNoSecs() {

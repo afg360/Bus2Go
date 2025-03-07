@@ -176,7 +176,8 @@ class MainActivity : BaseActivity() {
                     MaterialAlertDialogBuilder(this@MainActivity)
                         .setTitle("Coming Soon")
                         .setMessage("Unfortunately, we are not hosting the dbs at the moment. Please update" +
-                                "the app when an update will be available")
+                                "the app when an update will be available.")
+                        .show()
                     dialogInterface.dismiss()
                     deferred.complete(30)
                 }

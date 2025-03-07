@@ -10,7 +10,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class NetworkClientTest {
+/** Tests for RealTime data integration */
+class RealTimeDataTests {
 
     private val context = InstrumentationRegistry.getInstrumentation().targetContext
     private lateinit var data : ByteArray

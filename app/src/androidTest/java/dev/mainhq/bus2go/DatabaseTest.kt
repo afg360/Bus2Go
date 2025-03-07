@@ -62,7 +62,7 @@ class DatabaseTest {
         val calendarDatesDao = db.calendarDatesDao()
         println(calendarDatesDao.getAllCalendarDates())
         println(routesDao.getBusDir())
-        println(db.calendarDao().getAllCalendarInfo())
+        //println(db.calendarDao().getAllCalendarInfo())
     }
 
     @Test

@@ -119,8 +119,12 @@ dependencies {
     //WorkManager
     def work_version = "2.9.1"
     implementation "androidx.work:work-runtime-ktx:$work_version"
+    testImplementation "androidx.work:work-testing:$work_version"
+    androidTestImplementation "androidx.work:work-testing:$work_version"
     
-
+    //runtimeOnly 'io.mockk:mockk-android:1.13.17'
+    
+    
     def data_store_version = "1.1.1"
     //DataStore
     implementation "androidx.datastore:datastore-preferences:$data_store_version"
@@ -153,7 +157,12 @@ dependencies {
     // Ktor HTTP client dependencies
     implementation "io.ktor:ktor-client-okhttp:$ktor_version"
     implementation "io.ktor:ktor-client-cio:$ktor_version"
-
+    
+    def mockWebServer_version = "1.2.1"
+    testImplementation "com.squareup.okhttp:mockwebserver:$mockWebServer_version"
+    androidTestImplementation "com.squareup.okhttp:mockwebserver:$mockWebServer_version"
+    
+    
     //Protobuf
     def protobuf_version = "4.27.1"
     implementation "com.google.protobuf:protobuf-javalite:$protobuf_version"

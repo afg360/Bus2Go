@@ -6,7 +6,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
@@ -40,7 +39,9 @@ import java.io.File
 
 
 /** Manages new updates download and installation */
-class UpdateManagerWorker(context: Context, workerParams: WorkerParameters) : CoroutineWorker(context, workerParams ) {
+class UpdateManagerWorker(context: Context, workerParams: WorkerParameters,
+						  /*private val notificationManager: NotificationManager */ //FIXME For testing purposes
+	) : CoroutineWorker(context, workerParams ) {
 
 	companion object {
 		const val TAG = "CHECK-FOR-UPDATES"
@@ -76,7 +77,7 @@ class UpdateManagerWorker(context: Context, workerParams: WorkerParameters) : Co
 				val channelId = "Updates"
 				val notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 				val channel = NotificationChannel(channelId, "Software Updates", NotificationManager.IMPORTANCE_DEFAULT)
-				notificationManager.createNotificationChannel(channel)
+				//notificationManager.createNotificationChannel(channel)
 
 				if (localVersionName < tagVersion){
 					Log.d("UPDATES", "Seems that you need to update!")
@@ -91,8 +92,8 @@ class UpdateManagerWorker(context: Context, workerParams: WorkerParameters) : Co
 						//perhaps no need to map, since latest would be the first element?
 						.map { it as JsonObject }
 						.find{ it["content_type"]?.jsonPrimitive?.content == "application/vnd.android.package-archive"
-								&& it["name"]?.jsonPrimitive?.content?.contains(appRegexName) == true
-						}?.get("url") ?: throw IllegalStateException("Expected a non null value for the github download link")
+								&& it["name"]?.jsonPrimitive?.content?.contains(appRegexName) == true }
+						?.get("url") ?: throw IllegalStateException("Expected a non null value for the github download link")
 
 					if (isAutoUpdate){
 						//before dowloading, check if a correct apk already exists, and jump to installation
