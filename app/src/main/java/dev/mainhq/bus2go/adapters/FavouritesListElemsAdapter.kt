@@ -58,13 +58,13 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
                 holder.itemView.context.getString(R.string.none_for_the_rest_of_the_day)
         }
         else{
-            holder.timeRemainingTextView.text = getTimeRemaining(info.arrivalTime)
+            val timeRemaining = info.arrivalTime.timeRemaining()
+            holder.timeRemainingTextView.text = getTimeRemaining(timeRemaining)
             //if (info.arrivalTime.timeRemaining()?.compareTo(Time(0,3,59)) == -1)
-            if (info.arrivalTime < Time(LocalTime.of(0, 3, 59)))
+            if (timeRemaining == null || timeRemaining < LocalTime.of(0, 4, 0))
                 holder.timeRemainingTextView.setTextColor(holder.itemView.resources.getColor(R.color.red, null))
-            else {
+            else
                 holder.timeRemainingTextView.setTextColor(MaterialColors.getColor(holder.itemView, android.R.attr.editTextColor))
-            }
         }
 
         when(info.agency) {
@@ -239,11 +239,12 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
     fun updateTime(viewGroup : ViewGroup, favouritesBusInfo: FavouriteTransitInfo){
         val container = viewGroup[0] as ViewGroup
         favouritesBusInfo.arrivalTime?.also {
-            ((container[1] as ViewGroup)[2] as MaterialTextView).text = getTimeRemaining(favouritesBusInfo.arrivalTime)
+            val diff= favouritesBusInfo.arrivalTime.timeRemaining()
+
+            ((container[1] as ViewGroup)[2] as MaterialTextView).text = getTimeRemaining(diff)
             ((container[1] as ViewGroup)[3] as MaterialTextView).text = favouritesBusInfo.arrivalTime.getTimeString()
 
             //set the color to red if the time remaining is less than 3min 59sec (warning)
-            val diff= favouritesBusInfo.arrivalTime.timeRemaining()
             if (diff == null || diff < LocalTime.of(0, 4, 0))
                     ((container[1] as ViewGroup)[2] as MaterialTextView)
                         .setTextColor(viewGroup.resources.getColor(R.color.red, null))
@@ -261,9 +262,9 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
          */
     }
 
-    private fun getTimeRemaining(arrivalTime: Time?): String {
-        if (arrivalTime == null) return "Wtf"
-        val remainingTime = arrivalTime.timeRemaining()
+    private fun getTimeRemaining(remainingTime: LocalTime?): String {
+        //if (arrivalTime == null) return "Wtf"
+        //val remainingTime = arrivalTime.timeRemaining()
         return if (remainingTime != null && remainingTime.hour > 0) "In ${remainingTime.hour} h, ${remainingTime.minute} min"
                 else if (remainingTime != null) "In ${remainingTime.minute} min"
             else "Bus has passed??"
