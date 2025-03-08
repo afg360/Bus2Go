@@ -243,9 +243,12 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
             ((container[1] as ViewGroup)[3] as MaterialTextView).text = favouritesBusInfo.arrivalTime.getTimeString()
 
             //set the color to red if the time remaining is less than 3min 59sec (warning)
-            if (favouritesBusInfo.arrivalTime < Time(LocalTime.of(0, 3, 59))) ((container[1] as ViewGroup)[2] as MaterialTextView)
-                .setTextColor(viewGroup.resources.getColor(R.color.red, null))
-            else ((container[1] as ViewGroup)[3] as MaterialTextView).setTextColor(MaterialColors.getColor(viewGroup, android.R.attr.editTextColor))
+            val diff= favouritesBusInfo.arrivalTime.timeRemaining()
+            if (diff == null || diff < LocalTime.of(0, 4, 0))
+                    ((container[1] as ViewGroup)[2] as MaterialTextView)
+                        .setTextColor(viewGroup.resources.getColor(R.color.red, null))
+            else ((container[1] as ViewGroup)[2] as MaterialTextView)
+                    .setTextColor(MaterialColors.getColor(viewGroup, android.R.attr.editTextColor))
         }
         /*
         favouritesBusInfo.arrivalTime?.also {
