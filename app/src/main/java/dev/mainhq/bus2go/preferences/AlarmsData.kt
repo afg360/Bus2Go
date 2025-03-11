@@ -1,6 +1,7 @@
 package dev.mainhq.bus2go.preferences
 
 import androidx.datastore.core.Serializer
+import dev.mainhq.bus2go.data.data_source.local.preference.deprecated.ExoBusData
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList

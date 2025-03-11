@@ -6,10 +6,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.room.Room
 import dev.mainhq.bus2go.adapters.BusListElemsAdapter
-import dev.mainhq.bus2go.database.exo_data.AppDatabaseExo
-import dev.mainhq.bus2go.database.stm_data.AppDatabaseSTM
 import dev.mainhq.bus2go.utils.FuzzyQuery
 import dev.mainhq.bus2go.utils.TransitAgency
 import dev.mainhq.bus2go.utils.TransitInfo

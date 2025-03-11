@@ -27,14 +27,12 @@ import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.preferences.ExoBusData
+import dev.mainhq.bus2go.data.data_source.local.preference.deprecated.ExoBusData
 import dev.mainhq.bus2go.utils.Time
 import dev.mainhq.bus2go.adapters.FavouritesListElemsAdapter
 import dev.mainhq.bus2go.adapters.setMargins
-import dev.mainhq.bus2go.preferences.StmBusData
-import dev.mainhq.bus2go.preferences.TrainData
-import dev.mainhq.bus2go.preferences.TransitData
-import dev.mainhq.bus2go.utils.TransitAgency
+import dev.mainhq.bus2go.data.data_source.local.preference.deprecated.StmBusData
+import dev.mainhq.bus2go.data.data_source.local.preference.deprecated.ExoTrainData
 import dev.mainhq.bus2go.viewmodels.FavouritesViewModel
 import dev.mainhq.bus2go.viewmodels.RealTimeViewModel
 import dev.mainhq.bus2go.viewmodels.RoomViewModel
@@ -383,10 +381,8 @@ class Favourites() : Fragment(R.layout.fragment_favourites) {
         return when (view.tag) {
             is ExoBusData -> view.tag as ExoBusData
             is StmBusData -> view.tag as StmBusData
-            is TrainData -> view.tag as TrainData
+            is ExoTrainData -> view.tag as ExoTrainData
             else -> throw IllegalStateException("The item view tag has not been initialised!!!")
         }
     }
 }
-
-data class FavouriteTransitInfo(val transitData: TransitData, val arrivalTime : Time?, val agency : TransitAgency)

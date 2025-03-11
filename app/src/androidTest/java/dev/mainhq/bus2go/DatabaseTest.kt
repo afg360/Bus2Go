@@ -7,9 +7,9 @@ import androidx.datastore.core.IOException
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import dev.mainhq.bus2go.database.stm_data.AppDatabaseSTM
-import dev.mainhq.bus2go.database.stm_data.dao.RoutesDAO
-import dev.mainhq.bus2go.database.stm_data.dao.TripsDAO
+import dev.mainhq.bus2go.data.data_source.local.exo.AppDatabaseSTM
+import dev.mainhq.bus2go.data.data_source.local.stm.dao.RoutesDAO
+import dev.mainhq.bus2go.data.data_source.local.stm.dao.TripsDAO
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before

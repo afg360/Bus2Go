@@ -9,7 +9,7 @@ import com.google.android.material.radiobutton.MaterialRadioButton
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.fragments.alarms.AlarmCreationDialogBottomNavBar
-import dev.mainhq.bus2go.preferences.ExoBusData
+import dev.mainhq.bus2go.data.data_source.local.preference.deprecated.ExoBusData
 
 //FIXME may need to get rid of these references
 class AlarmDialogListElemsAdapter(private val list : List<ExoBusData>, private val recyclerView: RecyclerView,

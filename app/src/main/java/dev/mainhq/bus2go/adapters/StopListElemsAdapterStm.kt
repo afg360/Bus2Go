@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.TimesActivity
-import dev.mainhq.bus2go.preferences.StmBusData
+import dev.mainhq.bus2go.data.data_source.local.preference.deprecated.StmBusData
 import dev.mainhq.bus2go.preferences.TransitData
 import dev.mainhq.bus2go.utils.BusExtrasInfo
 import dev.mainhq.bus2go.utils.TransitAgency

@@ -23,12 +23,11 @@ import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.TimesActivity
 import dev.mainhq.bus2go.fragments.FavouriteTransitInfo
 import dev.mainhq.bus2go.fragments.Home
-import dev.mainhq.bus2go.preferences.ExoBusData
-import dev.mainhq.bus2go.preferences.StmBusData
-import dev.mainhq.bus2go.preferences.TrainData
+import dev.mainhq.bus2go.data.data_source.local.preference.deprecated.ExoBusData
+import dev.mainhq.bus2go.data.data_source.local.preference.deprecated.StmBusData
+import dev.mainhq.bus2go.data.data_source.local.preference.deprecated.ExoTrainData
 import dev.mainhq.bus2go.utils.BusExtrasInfo
 import dev.mainhq.bus2go.utils.TransitAgency
-import dev.mainhq.bus2go.utils.Time
 import java.lang.ref.WeakReference
 import java.time.LocalTime
 
@@ -69,7 +68,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
 
         when(info.agency) {
             TransitAgency.EXO_TRAIN -> {
-                info.transitData as TrainData
+                info.transitData as ExoTrainData
                 holder.routeLongNameTextView.text = "" //clear it out even if gone
                 holder.routeLongNameTextView.visibility = GONE
                 holder.directionTextView.text = holder.itemView.context
@@ -306,7 +305,7 @@ class FavouritesListElemsAdapter(private val list : List<FavouriteTransitInfo>, 
         intent.putExtra(BusExtrasInfo.AGENCY.name, info.agency)
         when (info.agency) {
             TransitAgency.EXO_TRAIN -> {
-                info.transitData as TrainData
+                info.transitData as ExoTrainData
                 //2 below are for DB queries
                 intent.putExtra(BusExtrasInfo.ROUTE_ID.name, info.transitData.routeId)
                 intent.putExtra(BusExtrasInfo.DIRECTION_ID.name, info.transitData.directionId)

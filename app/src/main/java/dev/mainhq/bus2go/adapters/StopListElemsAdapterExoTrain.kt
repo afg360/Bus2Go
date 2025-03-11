@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.TimesActivity
-import dev.mainhq.bus2go.preferences.TrainData
+import dev.mainhq.bus2go.data.data_source.local.preference.deprecated.ExoTrainData
 import dev.mainhq.bus2go.preferences.TransitData
 import dev.mainhq.bus2go.utils.BusExtrasInfo
 import dev.mainhq.bus2go.utils.TransitAgency
@@ -30,7 +30,7 @@ class StopListElemsAdapterExoTrain(stopNames: List<String>, favourites: List<Tra
 		val stopName = stopNames[position]
 		holder.stopNameTextView.text = stopName
 
-		val trainData = TrainData(stopName, routeId, trainNum, routeName, directionId, direction)
+		val trainData = ExoTrainData(stopName, routeId, trainNum, routeName, directionId, direction)
 		holder.stopNameTextView.setTextColor(holder.itemView.resources.getColor(R.color.orange, null))
 		if (favourites.contains(trainData)) {
 			holder.favouriteSelectedView.tag = "on"

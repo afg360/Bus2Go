@@ -41,11 +41,3 @@ fun getDayString(calendar : Calendar) : String{
         else -> throw IllegalStateException("Cannot have a non day of the week!")
     }
 }
-
-
-data class TransitInfo(val routeId : String, val routeName : String, val trainNum : Int?, val transitAgency: TransitAgency)
-
-enum class TransitAgency : java.io.Serializable{
-    STM, EXO_TRAIN, EXO_OTHER
-}
-

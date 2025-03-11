@@ -2,14 +2,11 @@ package dev.mainhq.bus2go.viewmodels
 
 import android.app.Application
 import android.util.Log
-import android.view.View
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.preference.PreferenceManager
-import dev.mainhq.bus2go.preferences.ExoBusData
-import dev.mainhq.bus2go.preferences.StmBusData
-import dev.mainhq.bus2go.preferences.TrainData
+import dev.mainhq.bus2go.data.data_source.local.preference.deprecated.StmBusData
 import dev.mainhq.bus2go.utils.Time
 import dev.mainhq.bus2go.utils.TransitAgency
 import io.ktor.client.HttpClient
@@ -29,16 +26,12 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement
 import okhttp3.OkHttpClient
 import java.io.IOException
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.net.URLEncoder.encode
-import java.time.LocalDateTime
-import java.time.ZoneOffset
 import java.util.concurrent.TimeUnit
 
 //TODO cache or save the data somewhere in case used and disconnected

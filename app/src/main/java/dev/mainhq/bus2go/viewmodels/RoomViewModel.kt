@@ -3,25 +3,20 @@ package dev.mainhq.bus2go.viewmodels
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.room.Room
-import dev.mainhq.bus2go.database.exo_data.AppDatabaseExo
-import dev.mainhq.bus2go.database.stm_data.AppDatabaseSTM
-import dev.mainhq.bus2go.fragments.FavouriteTransitInfo
-import dev.mainhq.bus2go.preferences.ExoBusData
-import dev.mainhq.bus2go.utils.TransitAgency
+import dev.mainhq.bus2go.data.data_source.local.database.exo.AppDatabaseExo
+import dev.mainhq.bus2go.data.data_source.local.database.stm.AppDatabaseSTM
+import dev.mainhq.bus2go.domain.entity.FavouriteTransitInfo
+import dev.mainhq.bus2go.data.data_source.local.preference.deprecated.ExoBusData
+import dev.mainhq.bus2go.domain.entity.TransitAgency
 import dev.mainhq.bus2go.utils.Time
-import dev.mainhq.bus2go.database.stm_data.dao.BusRouteInfo
-import dev.mainhq.bus2go.preferences.StmBusData
-import dev.mainhq.bus2go.preferences.TrainData
+import dev.mainhq.bus2go.data.data_source.local.preference.deprecated.StmBusData
+import dev.mainhq.bus2go.data.data_source.local.preference.deprecated.ExoTrainData
 import dev.mainhq.bus2go.preferences.TransitData
 import dev.mainhq.bus2go.utils.FuzzyQuery
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
-import java.lang.Long.min
-import java.time.Duration
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 class RoomViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -54,7 +49,7 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
                 return times
             }
             TransitAgency.EXO_TRAIN -> {
-                list as List<TrainData>
+                list as List<ExoTrainData>
                 val stopsTimesDAO = exoDataBase.stopTimesDao()
                 list.forEach {trainInfo ->
                     stopsTimesDAO.getFavouriteTrainStopTime("trains-${trainInfo.routeId}", trainInfo.stopName, trainInfo.directionId, time.getTimeString(), time.getDayString(), time.getTodayString())
@@ -85,7 +80,7 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
             }
             TransitAgency.EXO_TRAIN -> {
                 val stopsTimesDAO = exoDataBase.stopTimesDao()
-                val trainInfo = transitData as TrainData
+                val trainInfo = transitData as ExoTrainData
                 FavouriteTransitInfo(transitData,
                     stopsTimesDAO.getFavouriteTrainStopTime("trains-${trainInfo.routeId}",
                         trainInfo.stopName, trainInfo.directionId, time.getTimeString(), time.getDayString(), time.getTodayString()), agency)

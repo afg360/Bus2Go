@@ -21,7 +21,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.TimesActivity
-import dev.mainhq.bus2go.preferences.ExoBusData
+import dev.mainhq.bus2go.data.data_source.local.preference.deprecated.ExoBusData
 import dev.mainhq.bus2go.utils.BusExtrasInfo
 import dev.mainhq.bus2go.utils.Time
 import dev.mainhq.bus2go.viewmodels.FavouritesViewModel
