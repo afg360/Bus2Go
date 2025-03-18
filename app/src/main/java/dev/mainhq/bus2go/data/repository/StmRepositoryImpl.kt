@@ -44,7 +44,7 @@ class StmRepositoryImpl(
 		curDate: String ) = stopsInfoDAO.getStopTimes(stopName, day, headsign, routeId, curDate)
 
 	override suspend fun getOldTimes(stopName: String, day: String, curTime: String, headsign: String,
-		routeId: String ) = stopsInfoDAO.getOldTimes(stopName, day, curTime, headsign, routeId)
+		routeId: String) = stopsInfoDAO.getOldTimes(stopName, day, curTime, headsign, routeId)
 
 	override suspend fun getFavouriteStopTime(list: List<StmBusData>,
 											  stopName: String, day: String, time: String,

@@ -10,11 +10,13 @@ import java.io.File
 
 /** The datastore of favourites refers to favourites defined in the preferences file, at dev.mainhq.schedules.preferences,
  *  NOT THE Favourites.kt FRAGMENT */
+@Deprecated("Version 1 of favourites, some data structure changed.")
 val Context.favouritesDataStoreOld by dataStore(
 	fileName = "favourites.json",
 	serializer = SettingsSerializerOld,
 )
 
+@Deprecated("Version 2 of favourites, migrated to a version that doesn't mix STM and Exo data.")
 val Context.favouritesDataStore by dataStore(
 	fileName = "favourites_1.json",
 	serializer = SettingsSerializer,
@@ -52,23 +54,3 @@ val Context.favouritesDataStore by dataStore(
 	)
 	}
 )
-
-suspend fun migrateFavouritesData(application: Application, updateData: List<Pair<String, String>>){
-	//FIXME DO IT ONLY WHEN NEEDED
-	application.favouritesDataStore.updateData { favouritesData ->
-		favouritesData.copy(
-			//recreate the list by initialising the data
-			listExo = favouritesData.listExo.zip(updateData){ favourite, updatedData ->
-				ExoBusData(favourite.stopName, updatedData.first, favourite.direction, updatedData.second, favourite.headsign)
-			}.toPersistentList()
-		)
-	}
-}
-
-suspend fun doesNeedMigration(application: Application): Boolean {
-	if (application.favouritesDataStore.data.first().listExo.isNotEmpty()){
-		return application.favouritesDataStore.data.first().listExo.any { it.routeId == "" }
-	}
-	return false
-}
-

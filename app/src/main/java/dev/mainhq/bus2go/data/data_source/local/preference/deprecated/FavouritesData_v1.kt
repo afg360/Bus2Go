@@ -3,7 +3,7 @@ package dev.mainhq.bus2go.data.data_source.local.preference.deprecated
 import android.os.Parcel
 import android.os.Parcelable
 import androidx.datastore.core.Serializer
-import dev.mainhq.bus2go.domain.entity.TransitData
+import dev.mainhq.bus2go.data.data_source.local.preference.TransitDataDto
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
@@ -41,7 +41,7 @@ data class FavouritesDataOld(
 	replaceWith = ReplaceWith("FavouritesData.kt #ExoBusData")
 )
 data class ExoBusDataOld(override val stopName : String,/** aka tripheadSign */ override val routeId : String, override val direction: String)
-	: TransitData() {
+	: TransitDataDto() {
 	constructor(parcel: Parcel) : this(
 		parcel.readString()!!,
 		parcel.readString()!!,

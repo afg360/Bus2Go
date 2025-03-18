@@ -3,7 +3,7 @@ package dev.mainhq.bus2go.data.data_source.local.preference.deprecated
 import android.os.Parcel
 import android.os.Parcelable
 import androidx.datastore.core.Serializer
-import dev.mainhq.bus2go.domain.entity.TransitData
+import dev.mainhq.bus2go.data.data_source.local.preference.TransitDataDto
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
@@ -39,7 +39,7 @@ data class FavouritesData(
 @Serializable
 data class ExoTrainData(override val stopName : String, override val routeId : String, val trainNum : Int, val routeName : String,
                         val directionId: Int, override val direction : String)
-    : TransitData() {
+    : TransitDataDto() {
     constructor(parcel: Parcel) : this(
         parcel.readString()!!,
         parcel.readString()!!,
@@ -95,7 +95,7 @@ class PersistentTrainInfoListSerializer(private val serializer: KSerializer<ExoT
 @Serializable
 data class StmBusData(override val stopName: String,/** aka busNum */override val routeId : String,
                       val directionId: Int, override val direction : String, val lastStop : String)
-    : TransitData() {
+    : TransitDataDto() {
     constructor(parcel: Parcel) : this(
         parcel.readString()!!,
         parcel.readString()!!,
@@ -150,7 +150,7 @@ class PersistentStmBusInfoListSerializer(private val serializer: KSerializer<Stm
 @Serializable
 data class ExoBusData(override val stopName : String, override val routeId : String,
                       override val direction: String, val routeLongName: String, val headsign: String)
-    : Parcelable, TransitData() {
+    : Parcelable, TransitDataDto() {
     constructor(parcel: Parcel) : this(
         parcel.readString()!!,
         parcel.readString()!!,

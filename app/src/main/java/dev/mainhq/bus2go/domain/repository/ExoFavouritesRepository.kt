@@ -1,17 +1,17 @@
 package dev.mainhq.bus2go.domain.repository
 
-import dev.mainhq.bus2go.data.data_source.local.preference.deprecated.ExoBusData
-import dev.mainhq.bus2go.data.data_source.local.preference.deprecated.ExoTrainData
+import dev.mainhq.bus2go.domain.entity.exo.ExoFavouriteBusItem
+import dev.mainhq.bus2go.domain.entity.exo.ExoFavouriteTrainItem
 
 interface ExoFavouritesRepository {
 
-	fun getExoBusFavourites(): List<ExoBusData>
-	fun getExoTrainFavourites(): List<ExoTrainData>
+	suspend fun getExoBusFavourites(): List<ExoFavouriteBusItem>
+	suspend fun getExoTrainFavourites(): List<ExoFavouriteTrainItem>
 
-	fun removeExoBusFavourite(data : ExoBusData)
-	fun removeExoTrainFavourite(data : ExoTrainData)
+	suspend fun removeExoBusFavourite(data : ExoFavouriteBusItem)
+	suspend fun removeExoTrainFavourite(data : ExoFavouriteTrainItem)
 
-	fun addExoBusFavourite(data : ExoBusData)
-	fun addExoTrainFavourite(data : ExoTrainData)
+	suspend fun addExoBusFavourite(data : ExoFavouriteBusItem)
+	suspend fun addExoTrainFavourite(data : ExoFavouriteTrainItem)
 
 }

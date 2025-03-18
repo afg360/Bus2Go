@@ -13,22 +13,23 @@ import java.io.OutputStream
 
 //TODO eventually encrypt all the data to make it safe from other apps in case unwanted access happens
 @Serializable
-data class ExoFavouritesData(
+data class ExoFavouritesDataDto(
+	val version: Int,
 	@Serializable(with = PersistentExoBusInfoListSerializer::class)
-	val listExo : PersistentList<ExoFavouriteBusItem> = persistentListOf(),
+	val listExo : PersistentList<ExoFavouriteBusItemDto> = persistentListOf(),
 	@Serializable(with = PersistentTrainInfoListSerializer::class)
-	val listExoTrain : PersistentList<ExoFavouriteTrainItem> = persistentListOf()
+	val listExoTrain : PersistentList<ExoFavouriteTrainItemDto> = persistentListOf()
 )
 
-object ExoFavouritesDataSerializer : Serializer<ExoFavouritesData> {
-	override val defaultValue: ExoFavouritesData
-		get() = ExoFavouritesData()
+object ExoFavouritesDataSerializer : Serializer<ExoFavouritesDataDto> {
+	override val defaultValue: ExoFavouritesDataDto
+		get() = ExoFavouritesDataDto(1)
 
-	override suspend fun readFrom(input: InputStream): ExoFavouritesData {
+	override suspend fun readFrom(input: InputStream): ExoFavouritesDataDto {
 		return try{
 			/** First try to read the input stream as an old data. if it fails, retry. if that fails,
 			 *  then use the default data */
-			Json.decodeFromString(ExoFavouritesData.serializer(), input.readBytes().decodeToString())
+			Json.decodeFromString(ExoFavouritesDataDto.serializer(), input.readBytes().decodeToString())
 		}
 		catch (e : Exception){
 			e.printStackTrace()
@@ -36,10 +37,10 @@ object ExoFavouritesDataSerializer : Serializer<ExoFavouritesData> {
 		}
 	}
 
-	override suspend fun writeTo(t: ExoFavouritesData, output: OutputStream) {
+	override suspend fun writeTo(t: ExoFavouritesDataDto, output: OutputStream) {
 		withContext(Dispatchers.IO) {
 			output.write(
-				Json.encodeToString(ExoFavouritesData.serializer(), t).encodeToByteArray()
+				Json.encodeToString(ExoFavouritesDataDto.serializer(), t).encodeToByteArray()
 			)
 		}
 	}

@@ -1,8 +1,9 @@
-package dev.mainhq.bus2go.data.data_source.local.preference.exo.entity
+package dev.mainhq.bus2go.domain.entity.exo
 
 import android.os.Parcel
 import android.os.Parcelable
-import dev.mainhq.bus2go.domain.entity.TransitData
+import dev.mainhq.bus2go.data.data_source.local.preference.TransitDataDto
+import dev.mainhq.bus2go.domain.entity.FavouriteTransitData
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -14,61 +15,61 @@ import kotlinx.serialization.descriptors.serialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
-@Serializable
-data class ExoFavouriteBusItem(
-	override val stopName : String,
+data class ExoFavouriteTrainItem(
 	override val routeId : String,
-	override val direction: String,
-	val routeLongName: String,
-	val headsign: String
-) : Parcelable, TransitData() {
+	override val stopName : String,
+	override val direction : String,
+	val trainNum : Int,
+	val routeName : String,
+	val directionId: Int
+) : FavouriteTransitData() {
+
 	constructor(parcel: Parcel) : this(
 		parcel.readString()!!,
 		parcel.readString()!!,
 		parcel.readString()!!,
+		parcel.readInt(),
 		parcel.readString()!!,
-		parcel.readString()!!
+		parcel.readInt()
 	)
 
-	override fun describeContents(): Int {
-		return 0
-	}
 
 	override fun writeToParcel(dest: Parcel, flags: Int) {
-		dest.writeString(stopName)
 		dest.writeString(routeId)
+		dest.writeString(stopName)
 		dest.writeString(direction)
-		dest.writeString(routeLongName)
-		dest.writeString(headsign)
+		dest.writeInt(trainNum)
+		dest.writeString(routeName)
+		dest.writeInt(directionId)
 	}
 
-	companion object CREATOR : Parcelable.Creator<ExoFavouriteBusItem> {
-		override fun createFromParcel(parcel: Parcel): ExoFavouriteBusItem {
-			return ExoFavouriteBusItem(parcel)
+	companion object CREATOR : Parcelable.Creator<ExoFavouriteTrainItem> {
+		override fun createFromParcel(parcel: Parcel): ExoFavouriteTrainItem {
+			return ExoFavouriteTrainItem(parcel)
 		}
 
-		override fun newArray(size: Int): Array<ExoFavouriteBusItem?> {
+		override fun newArray(size: Int): Array<ExoFavouriteTrainItem?> {
 			return arrayOfNulls(size)
 		}
 	}
 }
 
-class PersistentExoBusInfoListSerializer(private val serializer: KSerializer<ExoFavouriteBusItem>) :
-	KSerializer<PersistentList<ExoFavouriteBusItem>> {
+class PersistentTrainInfoListSerializer(private val serializer: KSerializer<ExoFavouriteTrainItem>) :
+	KSerializer<PersistentList<ExoFavouriteTrainItem>> {
 
 	private class PersistentListDescriptor :
-		SerialDescriptor by serialDescriptor<List<ExoFavouriteBusItem>>() {
+		SerialDescriptor by serialDescriptor<List<ExoFavouriteTrainItem>>() {
 		@ExperimentalSerializationApi
 		override val serialName: String = "kotlinx.serialization.immutable.persistentList"
 	}
 
 	override val descriptor: SerialDescriptor = PersistentListDescriptor()
 
-	override fun serialize(encoder: Encoder, value: PersistentList<ExoFavouriteBusItem>) {
+	override fun serialize(encoder: Encoder, value: PersistentList<ExoFavouriteTrainItem>) {
 		return ListSerializer(serializer).serialize(encoder, value)
 	}
 
-	override fun deserialize(decoder: Decoder): PersistentList<ExoFavouriteBusItem> {
+	override fun deserialize(decoder: Decoder): PersistentList<ExoFavouriteTrainItem> {
 		return ListSerializer(serializer).deserialize(decoder).toPersistentList()
 	}
 }

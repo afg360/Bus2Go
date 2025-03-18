@@ -1,12 +1,12 @@
 package dev.mainhq.bus2go.domain.repository
 
-import dev.mainhq.bus2go.data.data_source.local.preference.deprecated.StmBusData
+import dev.mainhq.bus2go.domain.entity.stm.StmFavouriteBusItem
 
 interface StmFavouritesRepository {
 
-	fun getStmBusFavourites(): List<StmBusData>
+	suspend fun getStmBusFavourites(): List<StmFavouriteBusItem>
 
-	fun removeStmBusFavourite(data : StmBusData)
+	suspend fun removeStmBusFavourite(data : StmFavouriteBusItem)
 
-	fun addStmBusFavourite(data : StmBusData)
+	suspend fun addStmBusFavourite(data : StmFavouriteBusItem)
 }
