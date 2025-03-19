@@ -93,6 +93,7 @@ class PersistentTrainInfoListSerializer(private val serializer: KSerializer<ExoT
 }
 
 @Serializable
+@Deprecated("Deprecated since V3", replaceWith = ReplaceWith("StmFavouriteBusItemDto"))
 data class StmBusData(override val stopName: String,/** aka busNum */override val routeId : String,
                       val directionId: Int, override val direction : String, val lastStop : String)
     : TransitDataDto() {

@@ -59,6 +59,7 @@ interface StopsInfoDAO {
             "ON StopsInfo.service_id = Calendar.service_id " +
             "WHERE stop_name = (:stopName) AND days LIKE '%' || (:day) || '%' " +
             "AND arrival_time >= (:time) AND route_id = (:routeId) " +
-            "AND trip_headsign = (:headsign)")
-    suspend fun getFavouriteStopTime(stopName : String, day : String, time : String, headsign: String, routeId: Int, curDate: String) : Time?
+            "AND trip_headsign = (:direction)")
+    /** @param direction aka headsign **/
+    suspend fun getFavouriteStopTime(stopName : String, day : String, time : String, direction: String, routeId: Int, curDate: String) : Time?
 }

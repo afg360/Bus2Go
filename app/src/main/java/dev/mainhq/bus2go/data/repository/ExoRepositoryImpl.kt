@@ -4,8 +4,13 @@ import dev.mainhq.bus2go.data.data_source.local.database.exo.dao.CalendarDAO
 import dev.mainhq.bus2go.data.data_source.local.database.exo.dao.RoutesDAO
 import dev.mainhq.bus2go.data.data_source.local.database.exo.dao.StopTimesDAO
 import dev.mainhq.bus2go.data.data_source.local.database.exo.dao.TripsDAO
+import dev.mainhq.bus2go.domain.entity.FavouriteTransitData
+import dev.mainhq.bus2go.domain.entity.FavouriteTransitDataWithTime
+import dev.mainhq.bus2go.domain.entity.exo.ExoFavouriteBusItem
+import dev.mainhq.bus2go.domain.entity.exo.ExoFavouriteTrainItem
 import dev.mainhq.bus2go.domain.repository.ExoRepository
 import dev.mainhq.bus2go.utils.FuzzyQuery
+import dev.mainhq.bus2go.utils.Time
 
 class ExoRepositoryImpl(
 	private val calendarDAO: CalendarDAO,
@@ -18,27 +23,58 @@ class ExoRepositoryImpl(
 	override suspend fun getBusDir(routeId: String) = routesDAO.getBusDir(routeId)
 	override suspend fun getBusRouteInfo(routeId: FuzzyQuery) = routesDAO.getBusRouteInfo(routeId)
 
-	override suspend fun getStopNames(headsign: String) = stopTimesDAO.getStopNames(headsign)
+	override suspend fun getStopNames(direction: String) = stopTimesDAO.getStopNames(direction)
 	override suspend fun getTrainStopNames(routeId: String, directionId: Int) = stopTimesDAO.getTrainStopNames(routeId, directionId)
-	override suspend fun getStopTimes(stopName: String, day: String, curTime: String, headsign: String,
-		curDate: String) = stopTimesDAO.getStopTimes(stopName, day, curTime, headsign, curDate)
-
-	override suspend fun getOldStopTimes(stopName: String, day: String, curTime: String,
-		 headsign: String) = stopTimesDAO.getOldStopTimes(stopName, day, curTime, headsign)
-
-	override suspend fun getFavouriteBusStopTime(stopName: String, day: String, curTime: String,
-		headsign: String, curDate: String) = stopTimesDAO.getFavouriteBusStopTime(
-			stopName, day, curTime, headsign, curDate
+	override suspend fun getStopTimes(exoTransitData: FavouriteTransitData, curTime: Time) =
+		stopTimesDAO.getStopTimes(
+			exoTransitData.stopName,
+			curTime.getDayString(),
+			curTime.getTimeString(),
+			exoTransitData.direction,
+			curTime.getTodayString()
 		)
 
-	override suspend fun getTrainStopTimes(routeId: String, stopName: String, directionId: Int,
-		time: String, day: String, curDate: String ) = stopTimesDAO.getTrainStopTimes(
-			routeId, stopName, directionId, time, day, curDate
+	override suspend fun getOldStopTimes(exoTransitData: FavouriteTransitData, curTime: Time) =
+		stopTimesDAO.getOldStopTimes(
+			exoTransitData.stopName,
+			curTime.getDayString(),
+			curTime.getTimeString(),
+			exoTransitData.direction
 		)
 
-	override suspend fun getFavouriteTrainStopTime(routeId: String, stopName: String,
-		directionId: Int, time: String, day: String, curDate: String) =
-		stopTimesDAO.getFavouriteTrainStopTime(routeId, stopName, directionId, time, day, curDate)
+	override suspend fun getFavouriteBusStopTime(exoFavouriteBusItem: ExoFavouriteBusItem, curTime: Time) =
+		FavouriteTransitDataWithTime(
+			exoFavouriteBusItem,
+			stopTimesDAO.getFavouriteBusStopTime(
+				exoFavouriteBusItem.stopName,
+				curTime.getDayString(),
+				curTime.getTimeString(),
+				exoFavouriteBusItem.headsign,
+				curTime.getDayString()
+			)
+		)
+
+	override suspend fun getTrainStopTimes(exoTrainItem: ExoFavouriteTrainItem, curTime: Time) =
+		stopTimesDAO.getTrainStopTimes(
+			exoTrainItem.routeId,
+			exoTrainItem.stopName,
+			exoTrainItem.directionId,
+			curTime.getTimeString(),
+			curTime.getDayString(),
+			curTime.getTodayString()
+		)
+
+	override suspend fun getFavouriteTrainStopTime(exoFavouriteTrainItem: ExoFavouriteTrainItem, curTime: Time) =
+		FavouriteTransitDataWithTime(
+			exoFavouriteTrainItem,
+			stopTimesDAO.getFavouriteTrainStopTime(exoFavouriteTrainItem.routeId,
+				exoFavouriteTrainItem.stopName,
+				exoFavouriteTrainItem.directionId,
+				curTime.getTimeString(),
+				curTime.getDayString(),
+				curTime.getTodayString()
+			)
+		)
 
 	override suspend fun getTripHeadsigns(routeId: String) = tripsDAO.getTripHeadsigns(routeId)
 

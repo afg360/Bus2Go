@@ -2,7 +2,6 @@ package dev.mainhq.bus2go.utils
 
 import android.os.Parcel
 import android.os.Parcelable
-import net.bytebuddy.asm.Advice.Local
 import java.time.DayOfWeek
 import java.time.Duration
 import java.time.LocalDate
@@ -10,7 +9,6 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
-import kotlin.math.min
 
 /** Allows to do operations more easily on time based formats */
 class Time(localDateTime: LocalDateTime) : Parcelable {
@@ -98,9 +96,9 @@ class Time(localDateTime: LocalDateTime) : Parcelable {
     }
 
     /**
-     * Get a string representing the hour, minute and secs
-     * @return Format: HH:MM:SS (DateTimeFormatter.ISO_TIME)
-     * */
+     * Get a string representing the hour, minute and secs.
+     * @return Format: HH:MM:SS ([DateTimeFormatter.ISO_TIME])
+     **/
     fun getTimeString(): String{
         //ignore nanosecs
         return this.localTime.format(DateTimeFormatter.ISO_TIME).split(".")[0]
@@ -108,7 +106,7 @@ class Time(localDateTime: LocalDateTime) : Parcelable {
 
     /**
      * Get a string representing the year, month and day.
-     * @return Format: YYYYMMDD
+     * @return Format: YYYYMMDD ([DateTimeFormatter.BASIC_ISO_DATE])
      **/
     fun getTodayString(): String {
         return this.localDate.format(DateTimeFormatter.BASIC_ISO_DATE)

@@ -54,23 +54,3 @@ data class StmFavouriteBusItem(
 	}
 }
 
-class PersistentStmBusInfoListSerializer(private val serializer: KSerializer<StmFavouriteBusItem>) :
-	KSerializer<PersistentList<StmFavouriteBusItem>> {
-
-	private class PersistentListDescriptor :
-		SerialDescriptor by serialDescriptor<List<StmFavouriteBusItem>>() {
-		@ExperimentalSerializationApi
-		override val serialName: String = "kotlinx.serialization.immutable.persistentList"
-	}
-
-	override val descriptor: SerialDescriptor = PersistentListDescriptor()
-
-	override fun serialize(encoder: Encoder, value: PersistentList<StmFavouriteBusItem>) {
-		return ListSerializer(serializer).serialize(encoder, value)
-	}
-
-	override fun deserialize(decoder: Decoder): PersistentList<StmFavouriteBusItem> {
-		return ListSerializer(serializer).deserialize(decoder).toPersistentList()
-	}
-}
-

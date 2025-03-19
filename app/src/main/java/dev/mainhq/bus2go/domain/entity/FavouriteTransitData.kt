@@ -9,7 +9,6 @@ abstract class FavouriteTransitData: Parcelable {
 	abstract val direction : String
 
 
-
 	override fun describeContents(): Int {
 		return 0
 	}
