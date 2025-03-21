@@ -1,9 +1,8 @@
 package dev.mainhq.bus2go.domain.repository
 
-import dev.mainhq.bus2go.domain.entity.BusRouteInfo
+import dev.mainhq.bus2go.domain.entity.RouteInfo
 import dev.mainhq.bus2go.domain.entity.stm.CalendarDates
 import dev.mainhq.bus2go.domain.entity.stm.DirectionInfo
-import dev.mainhq.bus2go.data.data_source.local.preference.stm.entity.StmFavouriteBusItemDto
 import dev.mainhq.bus2go.domain.entity.FavouriteTransitData
 import dev.mainhq.bus2go.domain.entity.FavouriteTransitDataWithTime
 import dev.mainhq.bus2go.domain.entity.stm.StmFavouriteBusItem
@@ -22,11 +21,11 @@ interface StmRepository {
 	suspend fun getAllCalendarDates(): List<CalendarDates>
 
 	suspend fun getBusDir() : List<String>;
-	suspend fun getBusRouteInfo(routeId : FuzzyQuery) : List<BusRouteInfo>
+	suspend fun getBusRouteInfo(routeId : FuzzyQuery) : List<RouteInfo>
 
 	suspend fun getStopName(stopId : Int) : String
 
-	suspend fun getStopNames(headsign : String, routeId : String) : List<String>
+	suspend fun getStopNames(headsigns: Pair<String, String>, routeId : String) : Pair<List<String>, List<String>>
 
 	suspend fun getOldTimes(stmTransitData: FavouriteTransitData, curTime: Time): List<Time>
 	suspend fun getStopTimes(stmTransitData: FavouriteTransitData, curTime: Time) : List<Time>

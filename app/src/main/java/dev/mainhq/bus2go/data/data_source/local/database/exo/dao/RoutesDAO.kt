@@ -2,7 +2,7 @@ package dev.mainhq.bus2go.data.data_source.local.database.exo.dao;
 
 import androidx.room.Dao;
 import androidx.room.Query;
-import dev.mainhq.bus2go.domain.entity.BusRouteInfo
+import dev.mainhq.bus2go.data.data_source.local.database.RouteInfoDto
 import dev.mainhq.bus2go.utils.FuzzyQuery
 
 @Dao
@@ -20,7 +20,7 @@ interface RoutesDAO {
     @Query("SELECT route_id AS routeId,route_long_name AS routeName FROM Routes " +
             "WHERE route_id LIKE '%' || (:routeId) || '%' " +
             "OR route_long_name LIKE '%' || (:routeId) || '%' ;")
-    suspend fun getBusRouteInfo(routeId : FuzzyQuery) : List<BusRouteInfo>
+    suspend fun getRouteInfo(routeId : FuzzyQuery) : List<RouteInfoDto>
 
     @Query("SELECT route_id as routeId FROM Routes " +
             "WHERE route_id LIKE 'trains-' || (:routeId);")

@@ -1,6 +1,6 @@
 package dev.mainhq.bus2go.domain.repository
 
-import dev.mainhq.bus2go.domain.entity.stm.StmFavouriteBusItem
+import dev.mainhq.bus2go.domain.entity.StmFavouriteBusItem
 
 interface StmFavouritesRepository {
 

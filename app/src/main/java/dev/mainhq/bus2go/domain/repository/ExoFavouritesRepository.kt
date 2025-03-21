@@ -1,7 +1,7 @@
 package dev.mainhq.bus2go.domain.repository
 
-import dev.mainhq.bus2go.domain.entity.exo.ExoFavouriteBusItem
-import dev.mainhq.bus2go.domain.entity.exo.ExoFavouriteTrainItem
+import dev.mainhq.bus2go.domain.entity.ExoFavouriteBusItem
+import dev.mainhq.bus2go.domain.entity.ExoFavouriteTrainItem
 
 interface ExoFavouritesRepository {
 

@@ -2,14 +2,38 @@ package dev.mainhq.bus2go.domain.entity
 
 import android.os.Parcelable
 
-/** Entity to deal to interface with data coming from dataStore */
-abstract class FavouriteTransitData: Parcelable {
+/** Entity to interface with data coming from dataStore */
+sealed class FavouriteTransitData {
 	abstract val routeId : String
 	abstract val stopName : String
 	abstract val direction : String
-
-
-	override fun describeContents(): Int {
-		return 0
-	}
 }
+
+/**
+ * @param routeId aka busNum.
+ **/
+data class StmFavouriteBusItem(
+	override val routeId : String,
+	override val stopName: String,
+	override val direction : String,
+	val directionId: Int,
+	val lastStop : String
+) : FavouriteTransitData()
+
+
+data class ExoFavouriteBusItem(
+	override val routeId : String,
+	override val stopName : String,
+	override val direction: String,
+	val routeLongName: String,
+	val headsign: String
+) : FavouriteTransitData()
+
+data class ExoFavouriteTrainItem(
+	override val routeId : String,
+	override val stopName : String,
+	override val direction : String,
+	val trainNum : Int,
+	val routeName : String,
+	val directionId: Int
+) : FavouriteTransitData()

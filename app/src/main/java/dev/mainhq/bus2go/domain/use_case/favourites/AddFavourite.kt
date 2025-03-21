@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go.domain.use_case
+package dev.mainhq.bus2go.domain.use_case.favourites
 
 import dev.mainhq.bus2go.domain.entity.FavouriteTransitData
 import dev.mainhq.bus2go.domain.entity.exo.ExoFavouriteBusItem

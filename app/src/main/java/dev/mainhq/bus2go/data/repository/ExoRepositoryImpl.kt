@@ -1,16 +1,20 @@
 package dev.mainhq.bus2go.data.repository
 
+import dev.mainhq.bus2go.data.data_source.local.database.DbMapper
 import dev.mainhq.bus2go.data.data_source.local.database.exo.dao.CalendarDAO
 import dev.mainhq.bus2go.data.data_source.local.database.exo.dao.RoutesDAO
 import dev.mainhq.bus2go.data.data_source.local.database.exo.dao.StopTimesDAO
 import dev.mainhq.bus2go.data.data_source.local.database.exo.dao.TripsDAO
 import dev.mainhq.bus2go.domain.entity.FavouriteTransitData
 import dev.mainhq.bus2go.domain.entity.FavouriteTransitDataWithTime
+import dev.mainhq.bus2go.domain.entity.RouteInfo
 import dev.mainhq.bus2go.domain.entity.exo.ExoFavouriteBusItem
 import dev.mainhq.bus2go.domain.entity.exo.ExoFavouriteTrainItem
 import dev.mainhq.bus2go.domain.repository.ExoRepository
 import dev.mainhq.bus2go.utils.FuzzyQuery
 import dev.mainhq.bus2go.utils.Time
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 
 class ExoRepositoryImpl(
 	private val calendarDAO: CalendarDAO,
@@ -21,10 +25,27 @@ class ExoRepositoryImpl(
 	override suspend fun getMaxEndDate() = calendarDAO.getMaxEndDate()
 
 	override suspend fun getBusDir(routeId: String) = routesDAO.getBusDir(routeId)
-	override suspend fun getBusRouteInfo(routeId: FuzzyQuery) = routesDAO.getBusRouteInfo(routeId)
+	override suspend fun getRouteInfo(routeId: FuzzyQuery): List<RouteInfo> {
+		return routesDAO.getRouteInfo(routeId).toMutableList().map {
+			DbMapper.mapFromExoDbRouteInfoDtoToRouteInfo(it)
+		}.toList()
+	}
 
-	override suspend fun getStopNames(direction: String) = stopTimesDAO.getStopNames(direction)
-	override suspend fun getTrainStopNames(routeId: String, directionId: Int) = stopTimesDAO.getTrainStopNames(routeId, directionId)
+	override suspend fun getStopNames(directions: Pair<String, String>): Pair<List<String>, List<String>> {
+		return coroutineScope {
+			val job1 = async { stopTimesDAO.getStopNames(directions.first) }
+			val job2 = async { stopTimesDAO.getStopNames(directions.second) }
+			Pair(job1.await(), job2.await())
+		}
+	}
+	override suspend fun getTrainStopNames(routeId: String): Pair<List<String>, List<String>>{
+		return coroutineScope {
+			val job1 = async { stopTimesDAO.getTrainStopNames("trains-$routeId", 0) }
+			val job2 = async { stopTimesDAO.getTrainStopNames("trains-$routeId", 1) }
+			Pair(job1.await(), job2.await())
+		}
+	}
+
 	override suspend fun getStopTimes(exoTransitData: FavouriteTransitData, curTime: Time) =
 		stopTimesDAO.getStopTimes(
 			exoTransitData.stopName,

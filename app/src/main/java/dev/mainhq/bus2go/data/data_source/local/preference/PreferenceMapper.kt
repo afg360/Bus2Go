@@ -9,7 +9,7 @@ import dev.mainhq.bus2go.domain.entity.exo.ExoFavouriteBusItem
 import dev.mainhq.bus2go.domain.entity.exo.ExoFavouriteTrainItem
 import dev.mainhq.bus2go.domain.entity.stm.StmFavouriteBusItem
 
-object Mapper {
+object PreferenceMapper {
 
 	fun mapStmBusToDto(stmBus: StmFavouriteBusItem): StmFavouriteBusItemDto {
 		return StmFavouriteBusItemDto(

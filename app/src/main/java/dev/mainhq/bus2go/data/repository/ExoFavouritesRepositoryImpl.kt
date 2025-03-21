@@ -1,7 +1,7 @@
 package dev.mainhq.bus2go.data.repository
 
 import androidx.datastore.core.DataStore
-import dev.mainhq.bus2go.data.data_source.local.preference.Mapper
+import dev.mainhq.bus2go.data.data_source.local.preference.PreferenceMapper
 import dev.mainhq.bus2go.data.data_source.local.preference.exo.entity.ExoFavouritesDataDto
 import dev.mainhq.bus2go.domain.entity.exo.ExoFavouriteBusItem
 import dev.mainhq.bus2go.domain.entity.exo.ExoFavouriteTrainItem
@@ -11,18 +11,18 @@ import kotlinx.coroutines.flow.first
 
 class ExoFavouritesRepositoryImpl(private val exoFavouritesDataStore: DataStore<ExoFavouritesDataDto>): ExoFavouritesRepository {
 	override suspend fun getExoBusFavourites(): List<ExoFavouriteBusItem> {
-		return Mapper.mapExoBus(exoFavouritesDataStore.data.first())
+		return PreferenceMapper.mapExoBus(exoFavouritesDataStore.data.first())
 	}
 
 	override suspend fun getExoTrainFavourites(): List<ExoFavouriteTrainItem> {
-		return Mapper.mapExoTrain(exoFavouritesDataStore.data.first())
+		return PreferenceMapper.mapExoTrain(exoFavouritesDataStore.data.first())
 	}
 
 	override suspend fun removeExoBusFavourite(data: ExoFavouriteBusItem) {
 		exoFavouritesDataStore.updateData {favourites ->
 			favourites.copy(listExo = favourites.listExo.mutate {
 				//maybe add a tripid or some identifier so that it is a unique thing deleted
-				it.remove(Mapper.mapExoBusToDto(data))
+				it.remove(PreferenceMapper.mapExoBusToDto(data))
 			})
 		}
 	}
@@ -31,7 +31,7 @@ class ExoFavouritesRepositoryImpl(private val exoFavouritesDataStore: DataStore<
 		exoFavouritesDataStore.updateData {favourites ->
 			favourites.copy(listExoTrain = favourites.listExoTrain.mutate {
 				//maybe add a tripid or some identifier so that it is a unique thing deleted
-				it.remove(Mapper.mapExoTrainToDto(data))
+				it.remove(PreferenceMapper.mapExoTrainToDto(data))
 			})
 		}
 	}
@@ -39,7 +39,7 @@ class ExoFavouritesRepositoryImpl(private val exoFavouritesDataStore: DataStore<
 	override suspend fun addExoBusFavourite(data: ExoFavouriteBusItem) {
 		exoFavouritesDataStore.updateData { favourites ->
 			favourites.copy(listExo = favourites.listExo.mutate {
-				it.add(Mapper.mapExoBusToDto(data))
+				it.add(PreferenceMapper.mapExoBusToDto(data))
 			})
 		}
 	}
@@ -47,7 +47,7 @@ class ExoFavouritesRepositoryImpl(private val exoFavouritesDataStore: DataStore<
 	override suspend fun addExoTrainFavourite(data: ExoFavouriteTrainItem) {
 		exoFavouritesDataStore.updateData { favourites ->
 			favourites.copy(listExoTrain = favourites.listExoTrain.mutate {
-				it.add(Mapper.mapExoTrainToDto(data))
+				it.add(PreferenceMapper.mapExoTrainToDto(data))
 			})
 		}
 	}

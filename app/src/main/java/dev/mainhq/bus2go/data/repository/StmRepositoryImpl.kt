@@ -1,20 +1,23 @@
 package dev.mainhq.bus2go.data.repository
 
+import dev.mainhq.bus2go.data.data_source.local.database.DbMapper
 import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.CalendarDAO
 import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.CalendarDatesDAO
 import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.RoutesDAO
 import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.StopsDAO
 import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.StopsInfoDAO
 import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.TripsDAO
-import dev.mainhq.bus2go.data.data_source.local.preference.Mapper
+import dev.mainhq.bus2go.data.data_source.local.preference.PreferenceMapper
 import dev.mainhq.bus2go.domain.entity.stm.CalendarDates
 import dev.mainhq.bus2go.domain.repository.StmRepository
-import dev.mainhq.bus2go.data.data_source.local.preference.stm.entity.StmFavouriteBusItemDto
 import dev.mainhq.bus2go.domain.entity.FavouriteTransitData
 import dev.mainhq.bus2go.domain.entity.FavouriteTransitDataWithTime
-import dev.mainhq.bus2go.domain.entity.stm.StmFavouriteBusItem
+import dev.mainhq.bus2go.domain.entity.RouteInfo
+import dev.mainhq.bus2go.domain.entity.StmFavouriteBusItem
 import dev.mainhq.bus2go.utils.FuzzyQuery
 import dev.mainhq.bus2go.utils.Time
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 
 class StmRepositoryImpl(
 	private val calendarDAO: CalendarDAO,
@@ -32,11 +35,21 @@ class StmRepositoryImpl(
 	}
 
 	override suspend fun getBusDir() = routesDAO.getBusDir()
-	override suspend fun getBusRouteInfo(routeId: FuzzyQuery) = routesDAO.getBusRouteInfo(routeId)
+	override suspend fun getBusRouteInfo(routeId: FuzzyQuery): List<RouteInfo> {
+		return routesDAO.getBusRouteInfo(routeId).toMutableList().map {
+			DbMapper.mapFromStmDbRouteInfoDtoToRouteInfo(it)
+		}.toList()
+	}
 
 	override suspend fun getStopName(stopId: Int) = stopsDAO.getStopName(stopId)
 
-	override suspend fun getStopNames(headsign: String, routeId: String) = stopsInfoDAO.getStopNames(headsign, routeId)
+	override suspend fun getStopNames(headsigns: Pair<String, String>, routeId: String): Pair<List<String>, List<String>> {
+		return coroutineScope {
+			val job1 = async{ stopsInfoDAO.getStopNames(headsigns.first, routeId) }
+			val job2 = async{ stopsInfoDAO.getStopNames(headsigns.second, routeId) }
+			Pair(job1.await(), job2.await())
+		}
+	}
 
 	override suspend fun getStopTimes(stmTransitData: FavouriteTransitData, curTime: Time) =
 		stopsInfoDAO.getStopTimes(
@@ -61,9 +74,11 @@ class StmRepositoryImpl(
 			stmTransitData.routeId
 		)
 
-	override suspend fun getFavouriteStopTime(stmFavouriteBusItem: StmFavouriteBusItem,
-											  curTime: Time): FavouriteTransitDataWithTime {
-		val stmFavouriteBusItemDto = Mapper.mapStmBusToDto(stmFavouriteBusItem)
+	override suspend fun getFavouriteStopTime(
+		stmFavouriteBusItem: StmFavouriteBusItem,
+		curTime: Time
+	): FavouriteTransitDataWithTime {
+		val stmFavouriteBusItemDto = PreferenceMapper.mapStmBusToDto(stmFavouriteBusItem)
 		stopsInfoDAO.getFavouriteStopTime(
 			stmFavouriteBusItemDto.stopName,
 			curTime.getDayString(),
