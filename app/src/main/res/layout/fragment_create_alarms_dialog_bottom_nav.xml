@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".fragments.alarms.AlarmCreationDialogBottomNavBar"
+    tools:context=".presentation.ui.fragments.alarms.AlarmCreationDialogBottomNavBar"
     >
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"

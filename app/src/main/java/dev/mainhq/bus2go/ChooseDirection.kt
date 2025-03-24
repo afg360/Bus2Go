@@ -9,7 +9,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.data.data_source.stm.DirectionInfo
 import dev.mainhq.bus2go.utils.TransitAgency
-import dev.mainhq.bus2go.viewmodels.RoomViewModel
+import dev.mainhq.bus2go.presentation.viewmodels.RoomViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

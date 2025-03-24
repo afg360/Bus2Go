@@ -32,7 +32,7 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths" />
         </provider>
-        <receiver android:name=".fragments.alarms.AlarmReceiver" />
+        <receiver android:name=".presentation.ui.fragments.alarms.AlarmReceiver" />
         <activity
             android:name=".ConfigActivity"
             android:exported="false"/>

@@ -2,7 +2,7 @@ package dev.mainhq.bus2go
 
 import android.os.Bundle
 import com.google.android.material.appbar.MaterialToolbar
-import dev.mainhq.bus2go.fragments.preferences.SettingsPreferences
+import dev.mainhq.bus2go.presentation.ui.fragments.preferences.SettingsPreferences
 
 class SettingsActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

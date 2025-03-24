@@ -6,12 +6,12 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import dev.mainhq.bus2go.adapters.StopListElemsAdapterExoOther
-import dev.mainhq.bus2go.adapters.StopListElemsAdapterExoTrain
-import dev.mainhq.bus2go.adapters.StopListElemsAdapterStm
+import dev.mainhq.bus2go.presentation.ui.adapters.StopListElemsAdapterExoOther
+import dev.mainhq.bus2go.presentation.ui.adapters.StopListElemsAdapterExoTrain
+import dev.mainhq.bus2go.presentation.ui.adapters.StopListElemsAdapterStm
 import dev.mainhq.bus2go.utils.BusExtrasInfo
 import dev.mainhq.bus2go.utils.TransitAgency
-import dev.mainhq.bus2go.viewmodels.FavouritesViewModel
+import dev.mainhq.bus2go.presentation.viewmodels.FavouritesViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch

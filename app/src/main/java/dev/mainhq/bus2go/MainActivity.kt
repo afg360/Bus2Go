@@ -11,17 +11,23 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.navigation.NavigationBarView
 //import dev.mainhq.bus2go.fragments.alarms.AlarmReceiver
-import dev.mainhq.bus2go.fragments.ComingSoon
-import dev.mainhq.bus2go.fragments.Home
+import dev.mainhq.bus2go.presentation.ui.fragments.ComingSoon
+import dev.mainhq.bus2go.presentation.ui.fragments.Home
+import dev.mainhq.bus2go.presentation.ui.fragments.Map
+import dev.mainhq.bus2go.presentation.ui.fragments.alarms.Alarms
 import dev.mainhq.bus2go.utils.Time
-import dev.mainhq.bus2go.viewmodels.AlarmCreationViewModel
-import dev.mainhq.bus2go.viewmodels.RoomViewModel
+import dev.mainhq.bus2go.presentation.viewmodels.AlarmCreationViewModel
+import dev.mainhq.bus2go.presentation.viewmodels.MainActivityViewModel
+import dev.mainhq.bus2go.presentation.viewmodels.RoomViewModel
+import dev.mainhq.bus2go.utils.ActivityType
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -37,14 +43,11 @@ import java.time.format.DateTimeFormatter
 //to show to user storing favourites of "deprecated buses" that it has changed
 //to another bus (e.g. 435 -> 465)
 
-val Context.applicationStateDataStore: DataStore<Preferences> by preferencesDataStore(
-    name = "application_state"
-)
-
 class MainActivity : BaseActivity() {
 
-    private lateinit var activityType : ActivityType
-    private val roomViewModel: RoomViewModel by viewModels()
+    private val mainActivityViewModel: MainActivityViewModel by viewModels()
+    //private val roomViewModel: RoomViewModel by viewModels()
+
 
 	override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,40 +75,46 @@ class MainActivity : BaseActivity() {
     private fun setupActivity(){
         setContentView(R.layout.main_activity)
 
-        activityType = ActivityType.HOME
-        val home = Home()
-        supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer, home).commit()
+        lifecycleScope.launch {
+            //sets essentially an "observer" that notifies the ui when the state changes
+            repeatOnLifecycle(Lifecycle.State.STARTED){
+                mainActivityViewModel.activityType.collect{ activityType ->
+                    when(activityType){
+                        ActivityType.HOME -> {
+                            supportFragmentManager.beginTransaction()
+                                .replace(R.id.mainFragmentContainer, Home())
+                                .commit()
+                        }
+                        ActivityType.MAP -> {
+                            supportFragmentManager.beginTransaction()
+                                .replace(R.id.mainFragmentContainer, Map())
+                                .commit()
+                        }
+                        ActivityType.ALARMS -> {
+                            supportFragmentManager.beginTransaction()
+                                .replace(R.id.mainFragmentContainer, Alarms())
+                                .commit()
+                        }
+                    }
+                }
+            }
+        }
 
         val alarmViewModel = ViewModelProvider(this)[AlarmCreationViewModel::class.java]
-        val bottomNav = findViewById<NavigationBarView>(R.id.bottomNavBarView)
-        bottomNav.setOnItemSelectedListener {
+
+        findViewById<NavigationBarView>(R.id.bottomNavBarView).setOnItemSelectedListener {
+            //we change the state. Since the ui has an "observer", changes ui accordingly
             when(it.itemId) {
                 R.id.homeScreenButton -> {
-                    // Respond to navigation item 1 click
-                    if (activityType != ActivityType.HOME) {
-                        supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer,
-                            Home()).commit()
-                        activityType = ActivityType.HOME
-                    }
+                    mainActivityViewModel.setActivityType(ActivityType.HOME)
                     true
                 }
                 R.id.mapButton -> {
-                    // Respond to navigation item 2 click
-                    if (activityType != ActivityType.MAP) {
-                        //supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer, Map()).commit()
-                        supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer, ComingSoon()).commit()
-                        activityType = ActivityType.MAP
-                    }
+                    mainActivityViewModel.setActivityType(ActivityType.MAP)
                     true
                 }
                 R.id.alarmsButton -> {
-                    // Respond to navigation item 2 click
-                    if (activityType != ActivityType.ALARMS) {
-                        //supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer,
-                        //    Alarms(alarmViewModel, favouritesViewModel)).commit()
-                        supportFragmentManager.beginTransaction().replace(R.id.mainFragmentContainer, ComingSoon()).commit()
-                        activityType = ActivityType.ALARMS
-                    }
+                    mainActivityViewModel.setActivityType(ActivityType.ALARMS)
                     true
                 }
                 else -> false
@@ -122,6 +131,7 @@ class MainActivity : BaseActivity() {
         })
     }
 
+    //TODO add some classes in data/domain layer handling this
     private suspend fun checkAndUpdateDatabases(){
         val databaseStateKey = stringPreferencesKey("databases_state")
         if (!applicationStateDataStore.data.first().contains(databaseStateKey)){
@@ -256,8 +266,5 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    private enum class ActivityType{
-        HOME, MAP, ALARMS
-    }
 }
 

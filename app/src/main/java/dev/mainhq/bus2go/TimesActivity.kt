@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import dev.mainhq.bus2go.adapters.TimeListElemsAdapter
+import dev.mainhq.bus2go.presentation.ui.adapters.TimeListElemsAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -15,7 +15,7 @@ import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.utils.BusExtrasInfo
 import dev.mainhq.bus2go.utils.Time
 import dev.mainhq.bus2go.utils.TransitAgency
-import dev.mainhq.bus2go.viewmodels.RoomViewModel
+import dev.mainhq.bus2go.presentation.viewmodels.RoomViewModel
 import kotlinx.coroutines.Job
 import java.time.LocalDateTime
 import java.time.LocalTime

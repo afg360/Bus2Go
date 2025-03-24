@@ -4,7 +4,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.transit.realtime.GtfsRealtime.FeedEntity
 import dev.mainhq.bus2go.data.data_source.local.preference.deprecated.StmBusData
-import dev.mainhq.bus2go.viewmodels.RealTimeViewModel
+import dev.mainhq.bus2go.presentation.viewmodels.RealTimeViewModel
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.runner.RunWith

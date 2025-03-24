@@ -5,8 +5,8 @@ import android.os.Bundle;
 import androidx.activity.viewModels
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
-import dev.mainhq.bus2go.fragments.config.ConfigWelcomeFragment
-import dev.mainhq.bus2go.viewmodels.ConfigurationStateViewModel
+import dev.mainhq.bus2go.presentation.ui.fragments.config.ConfigWelcomeFragment
+import dev.mainhq.bus2go.presentation.viewmodels.ConfigurationStateViewModel
 
 //todo set lang
 //todo set color theme and or icon
