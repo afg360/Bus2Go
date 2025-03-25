@@ -1,0 +1,133 @@
+package dev.mainhq.bus2go.presentation.main.home
+
+import android.content.Intent
+import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.widget.TextView
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.view.children
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.search.SearchBar
+import com.google.android.material.search.SearchView
+import com.google.android.material.search.SearchView.TransitionState
+import dev.mainhq.bus2go.R
+import dev.mainhq.bus2go.SearchBus
+import dev.mainhq.bus2go.SettingsActivity
+import dev.mainhq.bus2go.presentation.main.home.favourites.FavouritesFragment
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+
+//We must have an empty constructor and instead pass elements inside the bundle??
+class HomeFragment: Fragment(R.layout.fragment_home) {
+
+    private val homeFragmentViewModel: HomeFragmentViewModel by viewModels()
+    private val homeFragmentSharedViewModel: HomeFragmentSharedViewModel by activityViewModels()
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        //TODO check wtf this code does again... the refreshing seems to get fucked when the bus just passed (which is why it shows 0min even for the new bus)
+        lifecycle.addObserver(object : DefaultLifecycleObserver {
+            override fun onResume(owner: LifecycleOwner) {
+                super.onResume(owner)
+                if (owner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED) && isAdded) {
+                    childFragmentManager.beginTransaction()
+                        .replace(
+                            R.id.favouritesFragmentContainer,
+                            FavouritesFragment()
+                        ).commit()
+                }
+            }
+        })
+
+        val recyclerView = view.findViewById<RecyclerView>(R.id.search_recycle_view)
+        val layoutManager = LinearLayoutManager(this@HomeFragment.context)
+        val busListAdapter = BusListElemsAdapter(ArrayList())
+        recyclerView.adapter = busListAdapter
+        recyclerView.layoutManager = layoutManager
+
+        val searchView = view.findViewById<SearchView>(R.id.main_search_view)
+        searchView.editText.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(query: Editable?) {
+                homeFragmentViewModel.onSearchQueryChange(query?.toString() ?: "")
+            }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            }
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            }
+        })
+
+        //use this instead of directly collecting to prevent collection when in background
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                homeFragmentViewModel.searchQuery.collect { results ->
+                    busListAdapter.updateData(results)
+                }
+            }
+        }
+
+        //TODO refactor this using a sharedViewModel
+        searchView.editText.setOnEditorActionListener { textView : TextView, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                val submittedText = textView.text.toString()
+                val intent = Intent(this.context, SearchBus::class.java)
+                intent.putExtra("query", submittedText)
+                startActivity(intent)
+                true
+            }
+            else {
+                false
+            }
+        }
+
+        /** This part hides the bottom navigation bar when expanding the search bar to the search view */
+        searchView.addTransitionListener { _, previousState, newState ->
+            if (previousState == TransitionState.HIDDEN && newState == TransitionState.SHOWING){
+                //can add an animation
+                activity?.findViewById<CoordinatorLayout>(R.id.bottomNavCoordLayout)?.visibility = View.INVISIBLE
+            }
+            else if (previousState == TransitionState.SHOWN && newState == TransitionState.HIDING){
+                activity?.findViewById<CoordinatorLayout>(R.id.bottomNavCoordLayout)?.visibility = View.VISIBLE
+            }
+        }
+
+        view.findViewById<SearchBar>(R.id.mainSearchBar).setOnMenuItemClickListener { menuItem ->
+            val itemID = menuItem.itemId
+            if (itemID == R.id.settingsIcon) {
+                val intent = Intent(this.context, SettingsActivity::class.java)
+                startActivity(intent)
+                true
+            }
+            else super.onOptionsItemSelected(menuItem)
+        }
+
+        lifecycleScope.launch(Dispatchers.Main) {
+            homeFragmentSharedViewModel.isBackPressed.collect {
+                if (searchView.currentTransitionState == TransitionState.SHOWN) {
+                    searchView.hide()
+                }
+            }
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        view?.findViewById<AppBarLayout>(R.id.mainAppBar)?.apply {
+            children.elementAt(0).visibility = View.VISIBLE
+            children.elementAt(1).visibility = View.GONE
+        }
+    }
+}

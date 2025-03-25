@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go.presentation.ui.adapters
+package dev.mainhq.bus2go.presentation.main.alarms.adapters
 
 import android.view.LayoutInflater
 import android.view.View
@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.radiobutton.MaterialRadioButton
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.presentation.ui.fragments.alarms.AlarmCreationDialogBottomNavBar
+import dev.mainhq.bus2go.presentation.main.alarms.AlarmCreationDialogBottomNavBar
 import dev.mainhq.bus2go.data.data_source.local.preference.deprecated.ExoBusData
 
 //FIXME may need to get rid of these references

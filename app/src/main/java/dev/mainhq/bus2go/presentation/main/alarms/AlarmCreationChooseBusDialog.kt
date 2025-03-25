@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go.presentation.ui.fragments.alarms
+package dev.mainhq.bus2go.presentation.main.alarms
 
 import android.app.Activity
 import android.content.Intent
@@ -24,7 +24,7 @@ import dev.mainhq.bus2go.TimesActivity
 import dev.mainhq.bus2go.data.data_source.local.preference.deprecated.ExoBusData
 import dev.mainhq.bus2go.utils.BusExtrasInfo
 import dev.mainhq.bus2go.utils.Time
-import dev.mainhq.bus2go.presentation.viewmodels.FavouritesViewModel
+import dev.mainhq.bus2go.presentation.main.home.favourites.FavouritesViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -100,7 +100,7 @@ class AlarmCreationChooseBusDialog() : DialogFragment(R.layout.fragment_create_a
                 val bottomNavBar = AlarmCreationDialogBottomNavBar()
                 withContext(Dispatchers.Main) {
                     bottomNavBar.setBottomNavBarListener(object :
-                        AlarmCreationDialogBottomNavBar.BottomNavBarListener {
+						AlarmCreationDialogBottomNavBar.BottomNavBarListener {
                         override fun onCancel() {
                             dismiss()
                         }

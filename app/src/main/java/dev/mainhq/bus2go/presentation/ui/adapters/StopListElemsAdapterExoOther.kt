@@ -11,7 +11,7 @@ import dev.mainhq.bus2go.data.data_source.local.preference.deprecated.ExoBusData
 import dev.mainhq.bus2go.preferences.TransitData
 import dev.mainhq.bus2go.utils.BusExtrasInfo
 import dev.mainhq.bus2go.utils.TransitAgency
-import dev.mainhq.bus2go.presentation.viewmodels.FavouritesViewModel
+import dev.mainhq.bus2go.presentation.main.home.favourites.FavouritesViewModel
 
 class StopListElemsAdapterExoOther(stopNames: List<String>, favourites: List<TransitData>,
 								   favouritesViewModel: FavouritesViewModel,

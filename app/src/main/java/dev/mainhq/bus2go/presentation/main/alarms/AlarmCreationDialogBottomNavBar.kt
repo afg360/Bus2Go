@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go.presentation.ui.fragments.alarms
+package dev.mainhq.bus2go.presentation.main.alarms
 
 import android.os.Bundle
 import android.view.View

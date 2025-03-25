@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go.presentation.ui.fragments.alarms
+package dev.mainhq.bus2go.presentation.main.alarms
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -20,10 +20,9 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.SettingsActivity
-import dev.mainhq.bus2go.presentation.ui.adapters.AlarmsListElemAdapter
+import dev.mainhq.bus2go.presentation.main.alarms.adapters.AlarmsListElemAdapter
 import dev.mainhq.bus2go.data.data_source.local.preference.alarms.Alarm
-import dev.mainhq.bus2go.presentation.viewmodels.AlarmCreationViewModel
-import dev.mainhq.bus2go.presentation.viewmodels.FavouritesViewModel
+import dev.mainhq.bus2go.presentation.main.home.favourites.FavouritesViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

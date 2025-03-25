@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go.presentation.ui.fragments
+package dev.mainhq.bus2go.presentation.main.map
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment

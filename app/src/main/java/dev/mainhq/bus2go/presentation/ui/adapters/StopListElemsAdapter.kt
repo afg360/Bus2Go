@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.preferences.TransitData
-import dev.mainhq.bus2go.presentation.viewmodels.FavouritesViewModel
+import dev.mainhq.bus2go.presentation.main.home.favourites.FavouritesViewModel
 
 
 abstract class StopListElemsAdapter (protected val stopNames: List<String>,

@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go.presentation.viewmodels
+package dev.mainhq.bus2go.presentation.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

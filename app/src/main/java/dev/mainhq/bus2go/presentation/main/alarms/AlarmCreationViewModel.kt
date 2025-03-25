@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go.presentation.viewmodels
+package dev.mainhq.bus2go.presentation.main.alarms
 
 import android.app.Application
 import android.content.Context
@@ -8,11 +8,11 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import dev.mainhq.bus2go.presentation.ui.fragments.alarms.AlarmCreationChooseBusDialog.AlarmBusInfo
 import dev.mainhq.bus2go.data.data_source.local.preference.alarms.Alarm
 import dev.mainhq.bus2go.data.data_source.local.preference.alarms.AlarmsData
 import dev.mainhq.bus2go.data.data_source.local.preference.alarms.AlarmsSerializer
 import dev.mainhq.bus2go.data.data_source.local.preference.alarms.SerializableTime
+import dev.mainhq.bus2go.presentation.viewmodels.alarmDataStore
 import dev.mainhq.bus2go.utils.Time
 import kotlinx.collections.immutable.mutate
 import kotlinx.coroutines.flow.first
@@ -23,25 +23,33 @@ private val Context.alarmDataStore : DataStore<AlarmsData> by dataStore(
     serializer = AlarmsSerializer
 )
 
-//FIXME UPDATE THIS VIEW MODEL TO STORE BETTER ORGANISED DATA
 /** Used to save the state when creating a new alarm. */
 class AlarmCreationViewModel(private val application : Application) : AndroidViewModel(application) {
 
-    private val _alarmBusInfo : MutableLiveData<AlarmBusInfo> = MutableLiveData()
-        val alarmBusInfo : LiveData<AlarmBusInfo> get() = _alarmBusInfo
+    private val _alarmBusInfo : MutableLiveData<AlarmCreationChooseBusDialog.AlarmBusInfo> =
+		MutableLiveData()
+        val alarmBusInfo : LiveData<AlarmCreationChooseBusDialog.AlarmBusInfo> get() = _alarmBusInfo
 
     private val _isOn : MutableLiveData<Boolean> = MutableLiveData(true)
         val isOn : LiveData<Boolean> get() = _isOn
 
-    private val _chosenDays : MutableLiveData<Map<Char, Boolean>> = MutableLiveData(mapOf(
-        Pair('d', false), Pair('m', false), Pair('t', false), Pair('w', false), Pair('y', false), Pair('f', false), Pair('s', false)
-    ))
+    private val _chosenDays : MutableLiveData<Map<Char, Boolean>> = MutableLiveData(
+		mapOf(
+			Pair('d', false),
+			Pair('m', false),
+			Pair('t', false),
+			Pair('w', false),
+			Pair('y', false),
+			Pair('f', false),
+			Pair('s', false)
+		)
+	)
         val chosenDays: LiveData<Map<Char, Boolean>> get() = _chosenDays
 
     private val _beforeTime : MutableLiveData<SerializableTime> = MutableLiveData()
     val beforeTime : LiveData<SerializableTime> get() = _beforeTime
 
-    fun updateAlarmBusInfo(alarmBusInfo: AlarmBusInfo){
+    fun updateAlarmBusInfo(alarmBusInfo: AlarmCreationChooseBusDialog.AlarmBusInfo){
         _alarmBusInfo.value = alarmBusInfo
     }
 

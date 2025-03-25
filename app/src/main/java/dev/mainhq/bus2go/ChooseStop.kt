@@ -11,7 +11,7 @@ import dev.mainhq.bus2go.presentation.ui.adapters.StopListElemsAdapterExoTrain
 import dev.mainhq.bus2go.presentation.ui.adapters.StopListElemsAdapterStm
 import dev.mainhq.bus2go.utils.BusExtrasInfo
 import dev.mainhq.bus2go.utils.TransitAgency
-import dev.mainhq.bus2go.presentation.viewmodels.FavouritesViewModel
+import dev.mainhq.bus2go.presentation.main.home.favourites.FavouritesViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch

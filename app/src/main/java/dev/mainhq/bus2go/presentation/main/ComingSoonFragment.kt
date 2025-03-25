@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go.presentation.ui.fragments
+package dev.mainhq.bus2go.presentation.main
 
 import androidx.fragment.app.Fragment
 import dev.mainhq.bus2go.R

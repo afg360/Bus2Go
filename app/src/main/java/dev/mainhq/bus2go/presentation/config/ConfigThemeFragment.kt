@@ -1,15 +1,12 @@
-package dev.mainhq.bus2go.presentation.ui.fragments.config
+package dev.mainhq.bus2go.presentation.config
 
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.materialswitch.MaterialSwitch
-import dev.mainhq.bus2go.AppThemeState
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.presentation.viewmodels.ConfigurationStateViewModel
 
 class ConfigThemeFragment: Fragment(R.layout.fragment_config_theme) {
 

@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go
+package dev.mainhq.bus2go.presentation.main
 
 import android.content.Intent
 import android.os.Bundle
@@ -10,12 +10,16 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.navigation.NavigationBarView
+import dev.mainhq.bus2go.AppThemeState
+import dev.mainhq.bus2go.BaseActivity
+import dev.mainhq.bus2go.presentation.config.ConfigActivity
+import dev.mainhq.bus2go.R
 //import dev.mainhq.bus2go.fragments.alarms.AlarmReceiver
-import dev.mainhq.bus2go.presentation.ui.fragments.HomeFragment
-import dev.mainhq.bus2go.presentation.ui.fragments.MapFragment
-import dev.mainhq.bus2go.presentation.ui.fragments.alarms.AlarmsFragment
-import dev.mainhq.bus2go.presentation.viewmodels.AlarmCreationViewModel
-import dev.mainhq.bus2go.presentation.viewmodels.MainActivityViewModel
+import dev.mainhq.bus2go.presentation.main.home.HomeFragment
+import dev.mainhq.bus2go.presentation.main.map.MapFragment
+import dev.mainhq.bus2go.presentation.main.alarms.AlarmsFragment
+import dev.mainhq.bus2go.presentation.main.alarms.AlarmCreationViewModel
+import dev.mainhq.bus2go.presentation.main.home.HomeFragmentSharedViewModel
 import dev.mainhq.bus2go.utils.ActivityType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filterNotNull
@@ -32,6 +36,7 @@ import kotlinx.coroutines.withContext
 class MainActivity : BaseActivity() {
 
     private val mainActivityViewModel: MainActivityViewModel by viewModels()
+    private val homeFragmentSharedViewModel: HomeFragmentSharedViewModel by viewModels()
     private val alarmViewModel: AlarmCreationViewModel by viewModels()
     //private val roomViewModel: RoomViewModel by viewModels()
 
@@ -100,7 +105,9 @@ class MainActivity : BaseActivity() {
                     //Toast.makeText(this@MainActivity, "First back", Toast.LENGTH_SHORT).show()
                     if (mainActivityViewModel.activityType.value == ActivityType.HOME) {
                         //use a shared viewModel instead
-                        home.onBackPressed()
+                        lifecycleScope.launch(Dispatchers.Main) {
+                            homeFragmentSharedViewModel.triggerBackPressed()
+                        }
                     }
                 }
             })

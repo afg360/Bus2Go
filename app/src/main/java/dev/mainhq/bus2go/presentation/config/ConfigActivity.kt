@@ -1,12 +1,11 @@
-package dev.mainhq.bus2go;
+package dev.mainhq.bus2go.presentation.config;
 
-import android.content.Intent
 import android.os.Bundle;
 import androidx.activity.viewModels
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
-import dev.mainhq.bus2go.presentation.ui.fragments.config.ConfigWelcomeFragment
-import dev.mainhq.bus2go.presentation.viewmodels.ConfigurationStateViewModel
+import dev.mainhq.bus2go.BaseActivity
+import dev.mainhq.bus2go.R
 
 //todo set lang
 //todo set color theme and or icon
@@ -22,7 +21,8 @@ class ConfigActivity : BaseActivity() {
         setContentView(R.layout.config_activity)
 
         supportFragmentManager.beginTransaction()
-                .replace(R.id.configActivityFragmentContainer,
+                .replace(
+                    R.id.configActivityFragmentContainer,
                     supportFragmentManager.findFragmentByTag(viewModel.currentFragmentTag.value)
                         ?: ConfigWelcomeFragment()
                 )

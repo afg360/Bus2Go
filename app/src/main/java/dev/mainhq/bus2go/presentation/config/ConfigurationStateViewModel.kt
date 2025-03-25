@@ -1,12 +1,9 @@
-package dev.mainhq.bus2go.presentation.viewmodels
+package dev.mainhq.bus2go.presentation.config
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.presentation.ui.fragments.config.ConfigWelcomeFragment
-import kotlin.reflect.KClass
 
 /** ViewModel that saves the state of the last fragment attached to the configurationActivity, and notifies
  * 	the activity when configuration is done */

@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go.presentation.ui.adapters
+package dev.mainhq.bus2go.presentation.main.alarms.adapters
 
 import android.view.LayoutInflater
 import android.view.View

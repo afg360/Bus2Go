@@ -18,7 +18,7 @@ object DbMapper {
 				tmp[1],
 				/** Parsed train name */
 				values[1],
-				/** Train number (WHICH IS != TO THE ROUTE_ID */
+				/** Train number (WHICH IS != TO THE ROUTE_ID) */
 				values[0].toInt()
 			)
 		}

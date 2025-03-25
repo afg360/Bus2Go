@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go.presentation.viewmodels
+package dev.mainhq.bus2go.presentation.main.home.favourites
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,7 +7,6 @@ import dev.mainhq.bus2go.domain.use_case.FavouritesUseCases
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 

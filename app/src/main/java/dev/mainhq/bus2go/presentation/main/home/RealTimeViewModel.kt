@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go.presentation.viewmodels
+package dev.mainhq.bus2go.presentation.main.home
 
 import android.app.Application
 import android.util.Log
@@ -241,9 +241,9 @@ data class Response(val response: List<JsonTransitTime>)
 
 @Serializable
 data class JsonTransitTime(
-	@SerialName("transit_info")
+    @SerialName("transit_info")
     val transitInfo: TransitInfo,
-	@SerialName("arrival_time")
+    @SerialName("arrival_time")
     //val arrivalTime: List<String>
     //tmp make it ints instead
     val arrivalTime: List<Int>

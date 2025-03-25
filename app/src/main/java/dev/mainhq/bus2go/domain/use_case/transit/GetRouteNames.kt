@@ -5,7 +5,9 @@ import dev.mainhq.bus2go.domain.repository.ExoRepository
 import dev.mainhq.bus2go.domain.repository.StmRepository
 import dev.mainhq.bus2go.utils.FuzzyQuery
 
-/** Class for querying transit data. */
+/**
+ * Class for querying transit data. Performs a search using FuzzyQuery.
+ **/
 class GetRouteNames (
 	private val exoRepository: ExoRepository,
 	private val stmRepository: StmRepository,

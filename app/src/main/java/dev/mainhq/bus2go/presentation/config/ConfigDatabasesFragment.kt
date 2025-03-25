@@ -1,14 +1,10 @@
-package dev.mainhq.bus2go.presentation.ui.fragments.config
+package dev.mainhq.bus2go.presentation.config
 
-import android.content.DialogInterface
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.view.View.OnClickListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.work.Data
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager
 import androidx.work.workDataOf
@@ -17,7 +13,6 @@ import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dev.mainhq.bus2go.AppThemeState
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.presentation.viewmodels.ConfigurationStateViewModel
 import dev.mainhq.bus2go.workers.DatabaseDownloadManagerWorker
 
 class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {

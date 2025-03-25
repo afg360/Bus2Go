@@ -32,9 +32,9 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths" />
         </provider>
-        <receiver android:name=".presentation.ui.fragments.alarms.AlarmReceiver" />
+        <receiver android:name=".presentation.main.alarms.AlarmReceiver" />
         <activity
-            android:name=".ConfigActivity"
+            android:name=".presentation.config.ConfigActivity"
             android:exported="false"/>
         <activity
             android:name=".ChooseStop"
@@ -48,7 +48,7 @@
         </activity>
         <!-- Need to change the android:theme attr -->
         <activity
-            android:name=".MainActivity"
+            android:name=".presentation.main.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

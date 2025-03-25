@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go.presentation.ui.fragments.config
+package dev.mainhq.bus2go.presentation.config
 
 import android.os.Bundle
 import android.view.View
@@ -7,7 +7,6 @@ import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.activityViewModels
 import com.google.android.material.button.MaterialButton
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.presentation.viewmodels.ConfigurationStateViewModel
 
 class ConfigWelcomeFragment: Fragment(R.layout.fragment_config_welcome) {
 

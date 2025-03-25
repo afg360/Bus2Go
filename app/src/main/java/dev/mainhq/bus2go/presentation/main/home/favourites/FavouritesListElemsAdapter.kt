@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go.presentation.ui.adapters
+package dev.mainhq.bus2go.presentation.main.home.favourites
 
 import android.content.Intent
 import android.view.LayoutInflater
@@ -18,7 +18,7 @@ import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.textview.MaterialTextView
-import dev.mainhq.bus2go.MainActivity
+import dev.mainhq.bus2go.presentation.main.MainActivity
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.TimesActivity
 import dev.mainhq.bus2go.fragments.FavouriteTransitInfo

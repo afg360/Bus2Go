@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go.presentation.ui.fragments
+package dev.mainhq.bus2go.presentation.main.home.favourites
 
 import android.content.Context
 import android.net.ConnectivityManager
@@ -29,12 +29,9 @@ import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.data.data_source.local.preference.deprecated.ExoBusData
 import dev.mainhq.bus2go.utils.Time
-import dev.mainhq.bus2go.presentation.ui.adapters.FavouritesListElemsAdapter
-import dev.mainhq.bus2go.presentation.ui.adapters.setMargins
 import dev.mainhq.bus2go.data.data_source.local.preference.deprecated.StmBusData
 import dev.mainhq.bus2go.data.data_source.local.preference.deprecated.ExoTrainData
-import dev.mainhq.bus2go.presentation.viewmodels.FavouritesViewModel
-import dev.mainhq.bus2go.presentation.viewmodels.RealTimeViewModel
+import dev.mainhq.bus2go.presentation.main.home.RealTimeViewModel
 import dev.mainhq.bus2go.presentation.viewmodels.RoomViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
