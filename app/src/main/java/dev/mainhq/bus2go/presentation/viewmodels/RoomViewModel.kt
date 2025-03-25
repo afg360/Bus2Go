@@ -83,17 +83,6 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
         return Pair(job1, job2)
     }
 
-    /**
-     * @return The closest date before one of the databases gets out of date
-     **/
-    suspend fun getMinDateForUpdate(): LocalDate? {
-        val exo = exoDataBase.calendarDao().getMaxEndDate() ?: return null
-        val stm = stmDatabase.calendarDao().getMaxEndDate() ?: return null
-        val curDate = Time.now()
-        val duration1 = Time(exo).minusDays(curDate) ?: return null
-        val duration2 = Time(stm).minusDays(curDate) ?: return null
-        return if (duration1 < duration2) exo else stm
-    }
 
     /** For STM testing only for now */
     suspend fun getNames(stopId : Int) : String{

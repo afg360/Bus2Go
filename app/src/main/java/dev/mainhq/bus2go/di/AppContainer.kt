@@ -4,8 +4,10 @@ import android.content.Context
 import androidx.room.Room
 import dev.mainhq.bus2go.data.data_source.local.database.exo.AppDatabaseExo
 import dev.mainhq.bus2go.data.data_source.local.database.stm.AppDatabaseSTM
+import dev.mainhq.bus2go.data.data_source.local.preference.app_state.appStateDataStore
 import dev.mainhq.bus2go.data.data_source.local.preference.exo.exoFavouritesDataStore
 import dev.mainhq.bus2go.data.data_source.local.preference.stm.stmFavouritesDataStore
+import dev.mainhq.bus2go.data.repository.AppStateRepositoryImpl
 import dev.mainhq.bus2go.data.repository.ExoFavouritesRepositoryImpl
 import dev.mainhq.bus2go.data.repository.ExoRepositoryImpl
 import dev.mainhq.bus2go.data.repository.StmFavouritesRepositoryImpl
@@ -32,6 +34,11 @@ class AppContainer(applicationContext: Context) {
 		stmDatabase.stopDao(),
 		stmDatabase.stopsInfoDao(),
 		stmDatabase.tripsDao()
+	)
+
+	private val appStateRepository = AppStateRepositoryImpl(
+		applicationContext.appStateDataStore,
+		applicationContext.dataDir
 	)
 
 	private val stmFavouritesRepository = StmFavouritesRepositoryImpl(

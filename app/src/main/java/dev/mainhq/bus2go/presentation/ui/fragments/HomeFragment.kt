@@ -35,7 +35,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 //We must have an empty constructor and instead pass elements inside the bundle??
-class Home() : Fragment(R.layout.fragment_home) {
+class HomeFragment: Fragment(R.layout.fragment_home) {
     //todo could use a favourites list here to use in other methods
     private lateinit var searchView : SearchView
 

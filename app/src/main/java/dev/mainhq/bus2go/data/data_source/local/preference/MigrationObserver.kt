@@ -10,7 +10,7 @@ import kotlinx.coroutines.sync.withLock
 import java.io.File
 
 /**
- * An observer that makes sure that both dataStores are initialised and have migrated before
+ * An observer that makes sure that Stm and Exo dataStores are initialised and have migrated before
  * deleting old files.
  **/
 object MigrationObserver {

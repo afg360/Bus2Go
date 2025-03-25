@@ -6,7 +6,7 @@ import android.view.View
 import dev.mainhq.bus2go.R
 
 
-class Map : Fragment(R.layout.fragment_map) {
+class MapFragment: Fragment(R.layout.fragment_map) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

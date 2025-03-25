@@ -49,7 +49,7 @@ import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
 
 
-class Favourites() : Fragment(R.layout.fragment_favourites) {
+class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
 
     private lateinit var onBackPressedCallback: OnBackPressedCallback
     private lateinit var realTimeViewModel: RealTimeViewModel

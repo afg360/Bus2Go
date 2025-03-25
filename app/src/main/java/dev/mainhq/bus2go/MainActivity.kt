@@ -1,41 +1,27 @@
 package dev.mainhq.bus2go
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.navigation.NavigationBarView
 //import dev.mainhq.bus2go.fragments.alarms.AlarmReceiver
-import dev.mainhq.bus2go.presentation.ui.fragments.ComingSoon
-import dev.mainhq.bus2go.presentation.ui.fragments.Home
-import dev.mainhq.bus2go.presentation.ui.fragments.Map
-import dev.mainhq.bus2go.presentation.ui.fragments.alarms.Alarms
-import dev.mainhq.bus2go.utils.Time
+import dev.mainhq.bus2go.presentation.ui.fragments.HomeFragment
+import dev.mainhq.bus2go.presentation.ui.fragments.MapFragment
+import dev.mainhq.bus2go.presentation.ui.fragments.alarms.AlarmsFragment
 import dev.mainhq.bus2go.presentation.viewmodels.AlarmCreationViewModel
 import dev.mainhq.bus2go.presentation.viewmodels.MainActivityViewModel
-import dev.mainhq.bus2go.presentation.viewmodels.RoomViewModel
 import dev.mainhq.bus2go.utils.ActivityType
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 
 //TODO
@@ -46,6 +32,7 @@ import java.time.format.DateTimeFormatter
 class MainActivity : BaseActivity() {
 
     private val mainActivityViewModel: MainActivityViewModel by viewModels()
+    private val alarmViewModel: AlarmCreationViewModel by viewModels()
     //private val roomViewModel: RoomViewModel by viewModels()
 
 
@@ -53,176 +40,125 @@ class MainActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
 
         //TODO check if need to start configuration activity here
-        lifecycleScope.launch(Dispatchers.IO) {
-            if (isFirstTime()){
-                withContext(Dispatchers.Main){
-                    val intent = Intent(applicationContext, ConfigActivity::class.java)
-                    /** Once the configuration is done, we will automatically start the MainActivity */
-                    startActivity(intent)
-                    //AppThemeState.turnOffDbUpdateChecking()
-                }
+        lifecycleScope.launch(Dispatchers.Main) {
+            val isFirstTime = mainActivityViewModel.isFirstTime.filterNotNull().first()
+            if (isFirstTime){
+                val intent = Intent(applicationContext, ConfigActivity::class.java)
+                /** Once the configuration is done, we will automatically start the MainActivity */
+                startActivity(intent)
+                //AppThemeState.turnOffDbUpdateChecking()
             }
-
             if (AppThemeState.displayIsDbUpdatedDialog)
                 checkAndUpdateDatabases()
 
-            withContext(Dispatchers.Main){
-                setupActivity()
-            }
-        }
-    }
+            setContentView(R.layout.main_activity)
 
-    private fun setupActivity(){
-        setContentView(R.layout.main_activity)
-
-        lifecycleScope.launch {
             //sets essentially an "observer" that notifies the ui when the state changes
             repeatOnLifecycle(Lifecycle.State.STARTED){
                 mainActivityViewModel.activityType.collect{ activityType ->
                     when(activityType){
                         ActivityType.HOME -> {
                             supportFragmentManager.beginTransaction()
-                                .replace(R.id.mainFragmentContainer, Home())
+                                .replace(R.id.mainFragmentContainer, HomeFragment())
                                 .commit()
                         }
                         ActivityType.MAP -> {
                             supportFragmentManager.beginTransaction()
-                                .replace(R.id.mainFragmentContainer, Map())
+                                .replace(R.id.mainFragmentContainer, MapFragment())
                                 .commit()
                         }
                         ActivityType.ALARMS -> {
                             supportFragmentManager.beginTransaction()
-                                .replace(R.id.mainFragmentContainer, Alarms())
+                                .replace(R.id.mainFragmentContainer, AlarmsFragment())
                                 .commit()
                         }
                     }
                 }
             }
-        }
 
-        val alarmViewModel = ViewModelProvider(this)[AlarmCreationViewModel::class.java]
-
-        findViewById<NavigationBarView>(R.id.bottomNavBarView).setOnItemSelectedListener {
-            //we change the state. Since the ui has an "observer", changes ui accordingly
-            when(it.itemId) {
-                R.id.homeScreenButton -> {
-                    mainActivityViewModel.setActivityType(ActivityType.HOME)
-                    true
-                }
-                R.id.mapButton -> {
-                    mainActivityViewModel.setActivityType(ActivityType.MAP)
-                    true
-                }
-                R.id.alarmsButton -> {
-                    mainActivityViewModel.setActivityType(ActivityType.ALARMS)
-                    true
-                }
-                else -> false
-            }
-        }
-
-        onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true){
-            override fun handleOnBackPressed() {
-                //Toast.makeText(this@MainActivity, "First back", Toast.LENGTH_SHORT).show()
-                if (activityType == ActivityType.HOME) {
-                    home.onBackPressed()
+            findViewById<NavigationBarView>(R.id.bottomNavBarView).setOnItemSelectedListener {
+                //we change the state. Since the ui has an "observer", changes ui accordingly
+                when(it.itemId) {
+                    R.id.homeScreenButton -> {
+                        mainActivityViewModel.setActivityType(ActivityType.HOME)
+                        true
+                    }
+                    R.id.mapButton -> {
+                        mainActivityViewModel.setActivityType(ActivityType.MAP)
+                        true
+                    }
+                    R.id.alarmsButton -> {
+                        mainActivityViewModel.setActivityType(ActivityType.ALARMS)
+                        true
+                    }
+                    else -> false
                 }
             }
-        })
+
+            onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true){
+                override fun handleOnBackPressed() {
+                    //Toast.makeText(this@MainActivity, "First back", Toast.LENGTH_SHORT).show()
+                    if (mainActivityViewModel.activityType.value == ActivityType.HOME) {
+                        //use a shared viewModel instead
+                        home.onBackPressed()
+                    }
+                }
+            })
+        }
     }
 
     //TODO add some classes in data/domain layer handling this
     private suspend fun checkAndUpdateDatabases(){
-        val databaseStateKey = stringPreferencesKey("databases_state")
-        if (!applicationStateDataStore.data.first().contains(databaseStateKey)){
-            //FIXME instead of checking both dbs at the same time, check each individually to only download
-            //the required ones
-            val timeForUpdate = roomViewModel.getMinDateForUpdate()
-            if  (timeForUpdate == null){
-                displayUpdateDatabasesDialog()?.also{ time ->
-                    applicationStateDataStore.edit { mutablePreferences ->
-                        mutablePreferences[databaseStateKey] = Time.toLocalDateString(LocalDate.now().plusDays(time))
+        repeatOnLifecycle(Lifecycle.State.CREATED){
+            mainActivityViewModel.showAlert.collect{ showAlert ->
+                if (showAlert){
+                    // Displays a dialog for the user to choose to update now or to get reminded later.
+                    withContext(Dispatchers.Main) {
+                        val dialog = MaterialAlertDialogBuilder(this@MainActivity)
+                            .setTitle("Update your databases")
+                            .setMessage(
+                                "It seems like your local databases are out of date. It is recommended that you " +
+                                        "update them so that you can enjoy accurate schedules."
+                            )
+                            .setPositiveButton("Update now") { dialogInterface, _ ->
+                                //TODO setup download jobs and shit, no server prepared yet so display a coming soon for now
+                                MaterialAlertDialogBuilder(this@MainActivity)
+                                    .setTitle("Coming Soon")
+                                    .setMessage("Unfortunately, we are not hosting the dbs at the moment. Please update" +
+                                            "the app when an update will be available.")
+                                    .show()
+                                dialogInterface.dismiss()
+                                mainActivityViewModel.setUpdateDbState(30)
+                            }
+                            .setNeutralButton("Remind me later") { dialogInterface, _ ->
+                                //TODO save the value in the application_state file (create a new dialog for choosing time before a reminder)
+                                val datePicker = MaterialDatePicker.Builder.datePicker()
+                                    .setTitleText("Remind me in...")
+                                    .setPositiveButtonText("Confirm")
+                                    .setNegativeButtonText("Cancel")
+                                    .build()
+                                datePicker.addOnPositiveButtonClickListener {
+                                    mainActivityViewModel.setUpdateDbState(it)
+                                    dialogInterface.dismiss()
+                                }
+                                datePicker.addOnNegativeButtonClickListener {
+                                    dialogInterface.dismiss()
+                                }
+                                datePicker.show(this@MainActivity.supportFragmentManager, null)
+                            }
+                            .setNegativeButton("Don't remind me") { dialogInterface, _ ->
+                                mainActivityViewModel.setUpdateDbState(30)
+                                dialogInterface.cancel()
+                            }
+                            .create()
+
+                        dialog.show()
                     }
                 }
-                AppThemeState.turnOffDbUpdateChecking()
             }
-            else{
-                applicationStateDataStore.edit { mutablePreferences ->
-                    mutablePreferences[databaseStateKey] = Time.toLocalDateString(timeForUpdate)
-                }
-                AppThemeState.turnOffDbUpdateChecking()
-            }
-        }
-        else {
-            val savedDate = LocalDate.parse(applicationStateDataStore.data.first()[databaseStateKey], DateTimeFormatter.BASIC_ISO_DATE)
-            if (savedDate < LocalDate.now()){
-                displayUpdateDatabasesDialog()?.also{ time ->
-                    applicationStateDataStore.edit { mutablePreferences ->
-                        mutablePreferences[databaseStateKey] = Time.toLocalDateString(LocalDate.now().plusDays(time))
-                    }
-                }
-                AppThemeState.turnOffDbUpdateChecking()
-            }
-        }
-    }
-
-    /**
-     * Displays a dialog for the user to choose to update now or to get reminded later.
-     * @return The number of days before displaying a new notification and dialog. Null if update
-     * occurs.
-     **/
-    private suspend fun displayUpdateDatabasesDialog(): Long? {
-        //TODO Add notification to task bar
-        return withContext(Dispatchers.Main) {
-            val deferred = CompletableDeferred<Long?>()
-            val dialog = MaterialAlertDialogBuilder(this@MainActivity)
-                .setTitle("Update your databases")
-                .setMessage(
-                    "It seems like your local databases are out of date. It is recommended that you " +
-                            "update them so that you can enjoy accurate schedules."
-                )
-                .setPositiveButton("Update now") { dialogInterface, _ ->
-                    //TODO setup download jobs and shit, no server prepared yet so display a coming soon for now
-                    MaterialAlertDialogBuilder(this@MainActivity)
-                        .setTitle("Coming Soon")
-                        .setMessage("Unfortunately, we are not hosting the dbs at the moment. Please update" +
-                                "the app when an update will be available.")
-                        .show()
-                    dialogInterface.dismiss()
-                    deferred.complete(30)
-                }
-                .setNeutralButton("Remind me later") { dialogInterface, _ ->
-                    //TODO save the value in the application_state file (create a new dialog for choosing time before a reminder)
-                    val datePicker = MaterialDatePicker.Builder.datePicker()
-                        .setTitleText("Remind me in...")
-                        .setPositiveButtonText("Confirm")
-                        .setNegativeButtonText("Cancel")
-                        .build()
-                    datePicker.addOnPositiveButtonClickListener {
-                        deferred.complete(it)
-                        dialogInterface.dismiss()
-                    }
-                    datePicker.addOnNegativeButtonClickListener {
-                        deferred.complete(null)
-                        dialogInterface.dismiss()
-                    }
-                    datePicker.show(this@MainActivity.supportFragmentManager, null)
-                }
-                .setNegativeButton("Don't remind me") { dialogInterface, _ ->
-                    deferred.complete(30)
-                    dialogInterface.cancel()
-                }
-                .create()
-
-            dialog.show()
-
-            deferred.invokeOnCompletion {
-                if (deferred.isCancelled) dialog.dismiss()
-            }
-
-            deferred.await()
         }
     }
+
 
     /*
     fun setAlarm(context: Context, calendar: Calendar) {
@@ -244,27 +180,5 @@ class MainActivity : BaseActivity() {
     }
 
      */
-
-    /**
-     * To check if first time opening the app, check for the existence of the PreferenceManager field
-     * If false/doesn't exist, then first time.
-     * However, for long time users, check if the databases exist. If they don't, then we are sure
-     * it is their first time
-     **/
-    private suspend fun isFirstTime(): Boolean{
-        val keyName = booleanPreferencesKey("isFirstTime")
-        if  (applicationStateDataStore.data.first().contains(keyName)){
-            return applicationStateDataStore.data.first()[keyName] ?: true
-        }
-        else{
-            //TODO check for the existence of a bus2go database folder/files
-            val directory = File(dataDir, "databases")
-            if (directory.exists() && directory.isDirectory){
-                return directory.list()?.isEmpty() ?: true
-            }
-            return true
-        }
-    }
-
 }
 

@@ -65,6 +65,7 @@ class Time(localDateTime: LocalDateTime) : Parcelable {
         return LocalTime.of(hours.toInt(), mins.toInt(), secs.toInt())
     }
 
+    /** @return null if this < time. */
     fun minusDays(time: Time): Day? {
         if (this < time) return null
         val duration = Duration.between(LocalDateTime.of(time.localDate, time.localTime), LocalDateTime.of(this.localDate, this.localTime))
@@ -212,6 +213,9 @@ class Time(localDateTime: LocalDateTime) : Parcelable {
             return Time(LocalDateTime.ofEpochSecond(unixTime, 0, ZoneOffset.ofHours(-5)))
         }
 
+        /**
+         * Formats correctly a localDate to a string.
+         **/
         fun toLocalDateString(localDate: LocalDate): String{
             return localDate.format(DateTimeFormatter.BASIC_ISO_DATE)
         }

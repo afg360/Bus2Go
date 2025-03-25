@@ -30,8 +30,7 @@ import kotlinx.coroutines.withContext
 
 
 /* For the moment, the user can only add an alarm to a favourite bus */
-class Alarms()
-    : Fragment(R.layout.fragment_alarms)  {
+class AlarmsFragment : Fragment(R.layout.fragment_alarms)  {
 
     private lateinit var list : List<Alarm>
     private lateinit var recyclerView: RecyclerView
