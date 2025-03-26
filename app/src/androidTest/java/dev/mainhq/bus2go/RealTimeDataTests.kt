@@ -3,8 +3,8 @@ package dev.mainhq.bus2go
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.transit.realtime.GtfsRealtime.FeedEntity
-import dev.mainhq.bus2go.data.data_source.local.preference.deprecated.StmBusData
-import dev.mainhq.bus2go.presentation.main.home.RealTimeViewModel
+import dev.mainhq.bus2go.data.data_source.local.datastore.deprecated.StmBusData
+import dev.mainhq.bus2go.presentation.main.home.favourites.RealTimeViewModel
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.runner.RunWith

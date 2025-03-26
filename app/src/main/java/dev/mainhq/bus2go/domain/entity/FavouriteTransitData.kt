@@ -1,9 +1,11 @@
 package dev.mainhq.bus2go.domain.entity
 
 import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 /** Entity to interface with data coming from dataStore */
-sealed class FavouriteTransitData {
+sealed class FavouriteTransitData: Parcelable {
 	abstract val routeId : String
 	abstract val stopName : String
 	abstract val direction : String

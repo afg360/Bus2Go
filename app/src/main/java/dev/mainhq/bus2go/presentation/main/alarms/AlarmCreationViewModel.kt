@@ -8,11 +8,10 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import dev.mainhq.bus2go.data.data_source.local.preference.alarms.Alarm
-import dev.mainhq.bus2go.data.data_source.local.preference.alarms.AlarmsData
-import dev.mainhq.bus2go.data.data_source.local.preference.alarms.AlarmsSerializer
-import dev.mainhq.bus2go.data.data_source.local.preference.alarms.SerializableTime
-import dev.mainhq.bus2go.presentation.viewmodels.alarmDataStore
+import dev.mainhq.bus2go.data.data_source.local.datastore.alarms.Alarm
+import dev.mainhq.bus2go.data.data_source.local.datastore.alarms.AlarmsData
+import dev.mainhq.bus2go.data.data_source.local.datastore.alarms.AlarmsSerializer
+import dev.mainhq.bus2go.data.data_source.local.datastore.alarms.SerializableTime
 import dev.mainhq.bus2go.utils.Time
 import kotlinx.collections.immutable.mutate
 import kotlinx.coroutines.flow.first

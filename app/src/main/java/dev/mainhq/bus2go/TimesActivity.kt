@@ -12,13 +12,12 @@ import android.os.Build
 import android.view.View
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.textview.MaterialTextView
+import dev.mainhq.bus2go.domain.entity.FavouriteTransitData
+import dev.mainhq.bus2go.domain.entity.TransitAgency
 import dev.mainhq.bus2go.utils.BusExtrasInfo
 import dev.mainhq.bus2go.utils.Time
-import dev.mainhq.bus2go.utils.TransitAgency
 import dev.mainhq.bus2go.presentation.viewmodels.RoomViewModel
 import kotlinx.coroutines.Job
-import java.time.LocalDateTime
-import java.time.LocalTime
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledFuture
@@ -40,13 +39,12 @@ class TimesActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.times_activity)
-        val stopName = intent.getStringExtra("stopName")!!
-        assert (stopName.isNotEmpty())
-        val agency = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getSerializableExtra (BusExtrasInfo.AGENCY.name, TransitAgency::class.java) ?: throw AssertionError("AGENCY is Null")
-        } else {
-            intent.getSerializableExtra (BusExtrasInfo.AGENCY.name) as TransitAgency? ?: throw AssertionError("AGENCY is Null")
-        }
+
+        //TODO parcelised data
+        val data = if (Build.VERSION.SDK_INT >= 33)
+            intent.getParcelableExtra("foo", FavouriteTransitData::class.java)
+        else  intent.getParcelableExtra("foo")
+
         fromAlarmCreation = intent.getBooleanExtra("ALARMS", false)
 
         executor = Executors.newSingleThreadScheduledExecutor()

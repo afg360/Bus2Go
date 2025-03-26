@@ -4,12 +4,13 @@ import android.content.Context
 import androidx.room.Room
 import dev.mainhq.bus2go.data.data_source.local.database.exo.AppDatabaseExo
 import dev.mainhq.bus2go.data.data_source.local.database.stm.AppDatabaseSTM
-import dev.mainhq.bus2go.data.data_source.local.preference.app_state.appStateDataStore
-import dev.mainhq.bus2go.data.data_source.local.preference.exo.exoFavouritesDataStore
-import dev.mainhq.bus2go.data.data_source.local.preference.stm.stmFavouritesDataStore
+import dev.mainhq.bus2go.data.data_source.local.datastore.app_state.appStateDataStore
+import dev.mainhq.bus2go.data.data_source.local.datastore.exo.exoFavouritesDataStore
+import dev.mainhq.bus2go.data.data_source.local.datastore.stm.stmFavouritesDataStore
 import dev.mainhq.bus2go.data.repository.AppStateRepositoryImpl
 import dev.mainhq.bus2go.data.repository.ExoFavouritesRepositoryImpl
 import dev.mainhq.bus2go.data.repository.ExoRepositoryImpl
+import dev.mainhq.bus2go.data.repository.SettingsRepositoryImpl
 import dev.mainhq.bus2go.data.repository.StmFavouritesRepositoryImpl
 import dev.mainhq.bus2go.data.repository.StmRepositoryImpl
 import dev.mainhq.bus2go.domain.use_case.FavouritesUseCases
@@ -17,6 +18,7 @@ import dev.mainhq.bus2go.domain.use_case.TransitInfoUseCases
 import dev.mainhq.bus2go.domain.use_case.favourites.AddFavourite
 import dev.mainhq.bus2go.domain.use_case.favourites.GetFavouritesWithTimeData
 import dev.mainhq.bus2go.domain.use_case.favourites.RemoveFavourite
+import dev.mainhq.bus2go.domain.use_case.settings.IsRealTimeEnabled
 import dev.mainhq.bus2go.domain.use_case.transit.GetRouteNames
 import dev.mainhq.bus2go.domain.use_case.transit.GetStopNames
 import dev.mainhq.bus2go.domain.use_case.transit.GetTransitTime
@@ -61,6 +63,10 @@ class AppContainer(applicationContext: Context) {
 		applicationContext.exoFavouritesDataStore
 	)
 
+	private val settingsRepository = SettingsRepositoryImpl(
+		applicationContext
+	)
+
 	val favouritesUseCases = FavouritesUseCases(
 		GetFavouritesWithTimeData(
 			exoFavouritesRepository,
@@ -75,6 +81,9 @@ class AppContainer(applicationContext: Context) {
 		RemoveFavourite(
 			exoFavouritesRepository,
 			stmFavouritesRepository
+		),
+		IsRealTimeEnabled(
+			settingsRepository
 		)
 	)
 

@@ -19,9 +19,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.SettingsActivity
+import dev.mainhq.bus2go.presentation.settings.SettingsActivity
 import dev.mainhq.bus2go.presentation.main.alarms.adapters.AlarmsListElemAdapter
-import dev.mainhq.bus2go.data.data_source.local.preference.alarms.Alarm
+import dev.mainhq.bus2go.data.data_source.local.datastore.alarms.Alarm
 import dev.mainhq.bus2go.presentation.main.home.favourites.FavouritesViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

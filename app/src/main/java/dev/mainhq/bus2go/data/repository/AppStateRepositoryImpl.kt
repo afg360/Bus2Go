@@ -3,7 +3,7 @@ package dev.mainhq.bus2go.data.repository
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
-import dev.mainhq.bus2go.data.data_source.local.preference.app_state.AppStateDataStoreKeys
+import dev.mainhq.bus2go.data.data_source.local.datastore.app_state.AppStateDataStoreKeys
 import dev.mainhq.bus2go.domain.repository.AppStateRepository
 import dev.mainhq.bus2go.utils.Time
 import kotlinx.coroutines.Dispatchers

@@ -60,7 +60,7 @@
             android:exported="false">
         </activity>
         <activity
-            android:name=".SettingsActivity"
+            android:name=".presentation.settings.SettingsActivity"
             android:exported="false">
         </activity>
         <activity

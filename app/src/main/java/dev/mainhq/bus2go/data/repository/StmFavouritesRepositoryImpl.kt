@@ -1,9 +1,9 @@
 package dev.mainhq.bus2go.data.repository
 
 import androidx.datastore.core.DataStore
-import dev.mainhq.bus2go.data.data_source.local.preference.PreferenceMapper
+import dev.mainhq.bus2go.data.data_source.local.datastore.PreferenceMapper
 import dev.mainhq.bus2go.domain.repository.StmFavouritesRepository
-import dev.mainhq.bus2go.data.data_source.local.preference.stm.entity.StmFavouritesDataDto
+import dev.mainhq.bus2go.data.data_source.local.datastore.stm.entity.StmFavouritesDataDto
 import dev.mainhq.bus2go.domain.entity.StmFavouriteBusItem
 import kotlinx.collections.immutable.mutate
 import kotlinx.coroutines.Dispatchers

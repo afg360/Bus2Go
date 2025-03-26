@@ -2,21 +2,11 @@ package dev.mainhq.bus2go.presentation.viewmodels
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import androidx.room.Room
-import dev.mainhq.bus2go.data.data_source.local.database.exo.AppDatabaseExo
-import dev.mainhq.bus2go.data.data_source.local.database.stm.AppDatabaseSTM
-import dev.mainhq.bus2go.domain.entity.FavouriteTransitInfo
-import dev.mainhq.bus2go.data.data_source.local.preference.deprecated.ExoBusData
 import dev.mainhq.bus2go.domain.entity.TransitAgency
 import dev.mainhq.bus2go.utils.Time
-import dev.mainhq.bus2go.data.data_source.local.preference.deprecated.StmBusData
-import dev.mainhq.bus2go.data.data_source.local.preference.deprecated.ExoTrainData
-import dev.mainhq.bus2go.preferences.TransitData
-import dev.mainhq.bus2go.utils.FuzzyQuery
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
-import java.time.LocalDate
 
 class RoomViewModel(application: Application) : AndroidViewModel(application) {
 

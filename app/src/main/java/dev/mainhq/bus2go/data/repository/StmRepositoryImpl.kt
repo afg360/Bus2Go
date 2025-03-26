@@ -7,7 +7,7 @@ import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.RoutesDAO
 import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.StopsDAO
 import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.StopsInfoDAO
 import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.TripsDAO
-import dev.mainhq.bus2go.data.data_source.local.preference.PreferenceMapper
+import dev.mainhq.bus2go.data.data_source.local.datastore.PreferenceMapper
 import dev.mainhq.bus2go.domain.entity.stm.CalendarDates
 import dev.mainhq.bus2go.domain.repository.StmRepository
 import dev.mainhq.bus2go.domain.entity.FavouriteTransitData

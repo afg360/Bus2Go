@@ -9,7 +9,7 @@ import com.google.android.material.materialswitch.MaterialSwitch
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.presentation.ui.fragments.alarms.Alarms
-import dev.mainhq.bus2go.data.data_source.local.preference.alarms.Alarm
+import dev.mainhq.bus2go.data.data_source.local.datastore.alarms.Alarm
 
 class AlarmsListElemAdapter(private val list : List<Alarm>)
     : RecyclerView.Adapter<AlarmsListElemAdapter.ViewHolder>() {

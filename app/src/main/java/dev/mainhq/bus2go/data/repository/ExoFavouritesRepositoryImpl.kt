@@ -1,8 +1,8 @@
 package dev.mainhq.bus2go.data.repository
 
 import androidx.datastore.core.DataStore
-import dev.mainhq.bus2go.data.data_source.local.preference.PreferenceMapper
-import dev.mainhq.bus2go.data.data_source.local.preference.exo.entity.ExoFavouritesDataDto
+import dev.mainhq.bus2go.data.data_source.local.datastore.PreferenceMapper
+import dev.mainhq.bus2go.data.data_source.local.datastore.exo.entity.ExoFavouritesDataDto
 import dev.mainhq.bus2go.domain.entity.ExoFavouriteBusItem
 import dev.mainhq.bus2go.domain.entity.ExoFavouriteTrainItem
 import dev.mainhq.bus2go.domain.repository.ExoFavouritesRepository

@@ -5,7 +5,10 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.inputmethod.EditorInfo
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.children
@@ -20,13 +23,16 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.search.SearchBar
 import com.google.android.material.search.SearchView
 import com.google.android.material.search.SearchView.TransitionState
+import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.SearchBus
-import dev.mainhq.bus2go.SettingsActivity
+import dev.mainhq.bus2go.presentation.settings.SettingsActivity
 import dev.mainhq.bus2go.presentation.main.home.favourites.FavouritesFragment
+import dev.mainhq.bus2go.presentation.main.home.favourites.FavouritesFragmentSharedViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -35,9 +41,14 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
 
     private val homeFragmentViewModel: HomeFragmentViewModel by viewModels()
     private val homeFragmentSharedViewModel: HomeFragmentSharedViewModel by activityViewModels()
+    private val favouritesSharedViewModel: FavouritesFragmentSharedViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        view.findViewById<MaterialCheckBox>(R.id.selectAllCheckbox).setOnClickListener{
+            favouritesSharedViewModel.toggleSelectAllFavourites()
+        }
 
         //TODO check wtf this code does again... the refreshing seems to get fucked when the bus just passed (which is why it shows 0min even for the new bus)
         lifecycle.addObserver(object : DefaultLifecycleObserver {
@@ -53,6 +64,7 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
             }
         })
 
+        //recyclerView for when searching
         val recyclerView = view.findViewById<RecyclerView>(R.id.search_recycle_view)
         val layoutManager = LinearLayoutManager(this@HomeFragment.context)
         val busListAdapter = BusListElemsAdapter(ArrayList())
@@ -72,9 +84,45 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
 
         //use this instead of directly collecting to prevent collection when in background
         viewLifecycleOwner.lifecycleScope.launch {
+            //FIXME use viewLifecycleOwner.repeatOnLifecycle instead?
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 homeFragmentViewModel.searchQuery.collect { results ->
                     busListAdapter.updateData(results)
+                }
+            }
+
+            //change the appBar number displayed
+            repeatOnLifecycle(Lifecycle.State.STARTED){
+                favouritesSharedViewModel.numberFavouritesSelected.collect { numSelected ->
+                    val deleteItemsWidget = view.findViewById<LinearLayout>(R.id.removeItemsWidget)
+                    view.findViewById<MaterialTextView>(R.id.selectedNumsOfFavourites)
+                        .text = if (numSelected > 0) {
+                        if (deleteItemsWidget?.visibility == GONE) deleteItemsWidget.visibility = VISIBLE
+                        numSelected.toString()
+                    }
+                    else {
+                        deleteItemsWidget?.visibility = GONE
+                        recyclerView.context.getString(R.string.select_favourites_to_remove)
+                    }
+                }
+            }
+
+            //handling remove selection mode, coming from favourites fragment
+            repeatOnLifecycle(Lifecycle.State.STARTED){
+                favouritesSharedViewModel.selectionMode.collect{ removeFavouritesMode ->
+                    view.findViewById<AppBarLayout>(R.id.mainAppBar)?.also { appBarLayout ->
+                        if (removeFavouritesMode){
+                            /** This is the search bar that will disappear in the appBar*/
+                            appBarLayout.children.elementAt(0).visibility = GONE
+                            /** This is the constraint layout having the selection mode */
+                            appBarLayout.children.elementAt(1).visibility = VISIBLE
+                        }
+                        else {
+                            appBarLayout.children.elementAt(0).visibility = VISIBLE
+                            appBarLayout.children.elementAt(1).visibility = GONE
+                            appBarLayout.findViewById<MaterialCheckBox>(R.id.selectAllCheckbox).isChecked = false
+                        }
+                    }
                 }
             }
         }

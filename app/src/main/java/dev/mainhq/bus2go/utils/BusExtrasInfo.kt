@@ -2,9 +2,12 @@ package dev.mainhq.bus2go.utils
 
 /** Enum class listing multiple strings used inside bundles between activities */
 enum class BusExtrasInfo {
+                         //new shit
+    ROUTE_INFO, //used in MainActivity
+    TRANSIT_DATA, //used inside Times activity
 
     ROUTE_NAME, // = "BUS_NAME"
-    ROUTE_INFO,
+
     BUS_NUM,
     AGENCY,
     DIRECTION,
