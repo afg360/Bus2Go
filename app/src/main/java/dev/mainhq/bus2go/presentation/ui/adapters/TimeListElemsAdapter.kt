@@ -20,9 +20,10 @@ import java.time.Period
 //TODO
 //could add view/ontouchlistener to handle touch holding, etc.
 //may need to use a recycler view, but implement a base adapter instead...?
-class TimeListElemsAdapter(private val timeData: List<Time>,
-                           private val fromAlarmCreation : Boolean)
-    : RecyclerView.Adapter<TimeListElemsAdapter.ViewHolder>() {
+class TimeListElemsAdapter(
+    private var timeData: List<Time>,
+    private val fromAlarmCreation : Boolean
+) : RecyclerView.Adapter<TimeListElemsAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(LayoutInflater.from(parent.context)
@@ -64,16 +65,17 @@ class TimeListElemsAdapter(private val timeData: List<Time>,
         }
     }
 
+    fun update(timeData: List<Time>){
+        this.timeData = timeData
+        notifyItemRangeChanged(0, itemCount)
+    }
+
     override fun getItemCount(): Int {
         return timeData.size
     }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view){
-        val timeTextView: MaterialTextView
-        var timeLeftTextView: MaterialTextView
-        init {
-            timeTextView = view.findViewById(R.id.time)
-            timeLeftTextView = view.findViewById(R.id.time_left)
-        }
+        val timeTextView: MaterialTextView = view.findViewById(R.id.time)
+        var timeLeftTextView: MaterialTextView = view.findViewById(R.id.time_left)
     }
 }

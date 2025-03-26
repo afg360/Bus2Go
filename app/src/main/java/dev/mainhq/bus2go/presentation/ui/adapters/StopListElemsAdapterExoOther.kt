@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.TimesActivity
+import dev.mainhq.bus2go.presentation.stopTimes.StopTimesActivity
 import dev.mainhq.bus2go.data.data_source.local.datastore.deprecated.ExoBusData
 import dev.mainhq.bus2go.preferences.TransitData
 import dev.mainhq.bus2go.utils.BusExtrasInfo
@@ -56,7 +56,7 @@ class StopListElemsAdapterExoOther(stopNames: List<String>, favourites: List<Tra
 		init {
 			stopNameTextView.setOnClickListener {
 				val stopName = (it as MaterialTextView).text as String
-				val intent = Intent(view.context, TimesActivity::class.java)
+				val intent = Intent(view.context, StopTimesActivity::class.java)
 				intent.putExtra("stopName", stopName)
 				intent.putExtra(BusExtrasInfo.AGENCY.name, TransitAgency.EXO_OTHER)
 				//intent.putExtra("TRANSIT_DATA", TrainData(stopName, "", 0, "", "", ""))

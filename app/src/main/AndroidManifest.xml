@@ -42,7 +42,7 @@
             >
 
         </activity>
-        <activity android:name=".TimesActivity"
+        <activity android:name=".presentation.stopTimes.StopTimesActivity"
             android:exported="false">
 
         </activity>

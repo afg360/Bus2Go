@@ -10,7 +10,9 @@ class FavouritesFragmentSharedViewModel: ViewModel() {
 	private val _selectionMode: MutableStateFlow<Boolean> = MutableStateFlow(false)
 	val selectionMode = _selectionMode.asStateFlow()
 
-	private val _selectAllFavourites: MutableStateFlow<Boolean> = MutableStateFlow(false)
+	//null if not clicked, false if unclicked, true if clicked. null happens if we selected all
+	//but then deselected one or more manually
+	private val _selectAllFavourites: MutableStateFlow<Boolean?> = MutableStateFlow(false)
 	val selectAllFavourites = _selectAllFavourites.asStateFlow()
 
 	//TODO need to share how many to remove and change the garbage button or not
@@ -27,7 +29,11 @@ class FavouritesFragmentSharedViewModel: ViewModel() {
 	}
 
 	fun toggleSelectAllFavourites(){
-		_selectAllFavourites.value = !_selectAllFavourites.value
+		_selectAllFavourites.value = !_selectAllFavourites.value!!
+	}
+
+	fun setSelectionMode(selectedMode: Boolean){
+		_selectionMode.value = selectedMode
 	}
 
 	/** Should only be called by FavouritesFragment */

@@ -101,4 +101,9 @@ class AppContainer(applicationContext: Context) {
 			stmRepository
 		)
 	)
+
+	val getTransitTime = GetTransitTime(
+		exoRepository,
+		stmRepository
+	)
 }

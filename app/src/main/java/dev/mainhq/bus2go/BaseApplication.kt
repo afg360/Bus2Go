@@ -14,7 +14,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 
 class BaseApplication : Application() {
-	private lateinit var appContainer: AppContainer
+	lateinit var appContainer: AppContainer
 
 	override fun onCreate() {
 		super.onCreate()

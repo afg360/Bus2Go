@@ -81,18 +81,27 @@ class FavouritesViewModel(
         }
     }
 
-    fun deSelectFavouriteForRemoval(index: Int){
+    fun deselectFavouriteForRemoval(index: Int){
         _favouriteTransitData.update { curList ->
             curList[index].isSelected = false
             curList
         }
     }
 
-    fun toggleAllForRemoval(){
+    fun selectAllForRemoval(){
         _favouriteTransitData.update { list ->
             list.map { FavouriteTransitDataWithTimeAndSelection(
                 it.favouriteTransitDataWithTime,
                 true
+            )}
+        }
+    }
+
+    fun deselectAllForRemoval(){
+        _favouriteTransitData.update { list ->
+            list.map { FavouriteTransitDataWithTimeAndSelection(
+                it.favouriteTransitDataWithTime,
+                false
             )}
         }
     }

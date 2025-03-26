@@ -20,7 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.TimesActivity
+import dev.mainhq.bus2go.presentation.stopTimes.StopTimesActivity
 import dev.mainhq.bus2go.data.data_source.local.datastore.deprecated.ExoBusData
 import dev.mainhq.bus2go.utils.BusExtrasInfo
 import dev.mainhq.bus2go.utils.Time
@@ -108,7 +108,7 @@ class AlarmCreationChooseBusDialog() : DialogFragment(R.layout.fragment_create_a
                             if (view.findViewById<MaterialTextView>(R.id.acceptAlarmCreation).tag == AVAILABLE) {
                                 view.findViewById<RecyclerView>(R.id.alarmDialogRecyclerView).forEach {
                                     if (it.findViewById<RadioButton>(R.id.addAlarmBusChoiceRadioButton).isChecked) {
-                                        val intent = Intent(context, TimesActivity::class.java)
+                                        val intent = Intent(context, StopTimesActivity::class.java)
                                         alarmDialogBusStop = it.findViewById<MaterialTextView>(R.id.alarmDialogBusStop).text.toString()
                                         alarmDialogBusNum = it.findViewById<MaterialTextView>(R.id.alarmDialogBusNum).text.toString()
                                         intent.putExtra("stopName", alarmDialogBusStop)

@@ -19,8 +19,7 @@ import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.TimesActivity
-import dev.mainhq.bus2go.presentation.main.home.HomeFragment
+import dev.mainhq.bus2go.presentation.stopTimes.StopTimesActivity
 import dev.mainhq.bus2go.utils.BusExtrasInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -59,7 +58,7 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
                     checkBoxView.isChecked = !checkBoxView.isChecked
                 }
                 else {
-                    val intent = Intent(view.context, TimesActivity::class.java)
+                    val intent = Intent(view.context, StopTimesActivity::class.java)
                     intent.putExtra(BusExtrasInfo.TRANSIT_DATA.name, favouriteTransitData)
 
                     itemView.context.startActivity(intent)
@@ -75,15 +74,21 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
         recyclerView.adapter = adapter
 
         lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){
+                favouritesSharedViewModel.selectAllFavourites.collect { isAllSelected ->
+                    if (isAllSelected == true){
+                        favouritesViewModel.selectAllForRemoval()
+                    }
+                    else if (isAllSelected == false) {
+                        favouritesViewModel.deselectAllForRemoval()
+                    }
+                }
+            }
+
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 favouritesViewModel.selectionMode.collect { selectedMode ->
-                    if (selectedMode) {
-                        //FIXMe instead use a shared viewModel between the 2 fragments
-
-                        this@FavouritesFragment.parentFragment as HomeFragment
-                    } else {
-
-                    }
+                    favouritesSharedViewModel.setSelectionMode(selectedMode)
+                    //TODO more shit
                 }
             }
 

@@ -14,7 +14,6 @@ import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.TimesActivity
 import dev.mainhq.bus2go.domain.entity.ExoFavouriteBusItem
 import dev.mainhq.bus2go.domain.entity.ExoFavouriteTrainItem
 import dev.mainhq.bus2go.domain.entity.FavouriteTransitData
@@ -133,14 +132,11 @@ class FavouritesListElemsAdapter(
             holder.checkBoxView.isChecked = !holder.checkBoxView.isChecked
         }
 
-        /**
-         * This onClick either
-         **/
         holder.itemView.setOnClickListener {
             onClickListener(it, info.favouriteTransitData)
         }
 
-        holder.itemView.setOnLongClickListener(onLongClickListener)
+        //holder.itemView.setOnLongClickListener(onLongClickListener)
         holder.itemView.setOnLongClickListener {
             val tmpRecyclerView = it.parent as RecyclerView
             /** if recycler has never been long clicked/has been backed, check if the view is not selected and select it */
@@ -158,6 +154,7 @@ class FavouritesListElemsAdapter(
                     holder.checkBoxView.isChecked = true
                 }
             }
+            onLongClickListener
             true
         }
     }
