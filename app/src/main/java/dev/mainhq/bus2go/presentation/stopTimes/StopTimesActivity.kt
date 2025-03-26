@@ -16,14 +16,14 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.google.android.material.textview.MaterialTextView
-import dev.mainhq.bus2go.BaseActivity
-import dev.mainhq.bus2go.BaseApplication
+import dev.mainhq.bus2go.presentation.base.BaseActivity
+import dev.mainhq.bus2go.presentation.Bus2GoApplication
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.domain.entity.ExoFavouriteBusItem
 import dev.mainhq.bus2go.domain.entity.ExoFavouriteTrainItem
 import dev.mainhq.bus2go.domain.entity.FavouriteTransitData
 import dev.mainhq.bus2go.domain.entity.StmFavouriteBusItem
-import dev.mainhq.bus2go.utils.BusExtrasInfo
+import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
 import dev.mainhq.bus2go.utils.Time
 
 
@@ -39,15 +39,15 @@ class StopTimesActivity : BaseActivity() {
         //TODO parcelised data
         @Suppress("DEPRECATION")
         val transitData = (if (Build.VERSION.SDK_INT >= 33)
-            intent.getParcelableExtra(BusExtrasInfo.TRANSIT_DATA.name, FavouriteTransitData::class.java)
-            else  intent.getParcelableExtra(BusExtrasInfo.TRANSIT_DATA.name)) ?: throw IllegalStateException("You forgot to give a TransitData")
+            intent.getParcelableExtra(ExtrasTagNames.TRANSIT_DATA, FavouriteTransitData::class.java)
+            else  intent.getParcelableExtra(ExtrasTagNames.TRANSIT_DATA)) ?: throw IllegalStateException("You forgot to give a TransitData")
 
         val stopTimesViewModel: StopTimesViewModel by viewModels{
             object : ViewModelProvider.Factory {
                 override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
                     if (modelClass.isAssignableFrom(StopTimesViewModel::class.java)){
                         return StopTimesViewModel(
-                            (this@StopTimesActivity.application as BaseApplication).appContainer.getTransitTime,
+                            (this@StopTimesActivity.application as Bus2GoApplication).appContainer.getTransitTime,
                             transitData
                         ) as T
                     }

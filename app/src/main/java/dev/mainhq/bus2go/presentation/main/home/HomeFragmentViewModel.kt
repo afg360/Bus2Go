@@ -21,7 +21,7 @@ class HomeFragmentViewModel(
 		}
 		else{
 			viewModelScope.launch {
-				_searchQuery.value = transitInfoUseCases.getRouteNames(query)
+				_searchQuery.value = transitInfoUseCases.getRouteInfo(query)
 			}
 		}
 	}

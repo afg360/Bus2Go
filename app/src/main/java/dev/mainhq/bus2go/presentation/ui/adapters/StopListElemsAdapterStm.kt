@@ -8,9 +8,7 @@ import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.presentation.stopTimes.StopTimesActivity
 import dev.mainhq.bus2go.data.data_source.local.datastore.deprecated.StmBusData
-import dev.mainhq.bus2go.preferences.TransitData
-import dev.mainhq.bus2go.utils.BusExtrasInfo
-import dev.mainhq.bus2go.utils.TransitAgency
+import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
 import dev.mainhq.bus2go.presentation.main.home.favourites.FavouritesViewModel
 
 class StopListElemsAdapterStm(stopNames: List<String>, favourites: List<TransitData>,
@@ -59,9 +57,9 @@ class StopListElemsAdapterStm(stopNames: List<String>, favourites: List<TransitD
 				val stopName = (it as MaterialTextView).text as String
 				val intent = Intent(view.context, StopTimesActivity::class.java)
 				intent.putExtra("stopName", stopName)
-				intent.putExtra(BusExtrasInfo.AGENCY.name, TransitAgency.STM)
-				intent.putExtra(BusExtrasInfo.ROUTE_ID.name, routeId)
-				intent.putExtra(BusExtrasInfo.DIRECTION.name, direction)
+				intent.putExtra(ExtrasTagNames.AGENCY, TransitAgency.STM)
+				intent.putExtra(ExtrasTagNames.ROUTE_ID, routeId)
+				intent.putExtra(ExtrasTagNames.DIRECTION, direction)
 				it.context.startActivity(intent)
 				it.clearFocus()
 			}

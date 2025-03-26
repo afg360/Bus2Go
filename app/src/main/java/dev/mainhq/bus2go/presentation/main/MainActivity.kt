@@ -10,8 +10,8 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.navigation.NavigationBarView
-import dev.mainhq.bus2go.AppThemeState
-import dev.mainhq.bus2go.BaseActivity
+import dev.mainhq.bus2go.presentation.core.state.AppThemeState
+import dev.mainhq.bus2go.presentation.base.BaseActivity
 import dev.mainhq.bus2go.presentation.config.ConfigActivity
 import dev.mainhq.bus2go.R
 //import dev.mainhq.bus2go.fragments.alarms.AlarmReceiver

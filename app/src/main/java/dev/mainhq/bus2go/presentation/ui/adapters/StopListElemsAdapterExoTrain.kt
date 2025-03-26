@@ -9,7 +9,7 @@ import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.presentation.stopTimes.StopTimesActivity
 import dev.mainhq.bus2go.data.data_source.local.datastore.deprecated.ExoTrainData
 import dev.mainhq.bus2go.preferences.TransitData
-import dev.mainhq.bus2go.utils.BusExtrasInfo
+import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
 import dev.mainhq.bus2go.utils.TransitAgency
 import dev.mainhq.bus2go.presentation.main.home.favourites.FavouritesViewModel
 
@@ -61,11 +61,11 @@ class StopListElemsAdapterExoTrain(stopNames: List<String>, favourites: List<Tra
 				val stopName = (it as MaterialTextView).text as String
 				val intent = Intent(view.context, StopTimesActivity::class.java)
 				intent.putExtra("stopName", stopName)
-				intent.putExtra(BusExtrasInfo.AGENCY.name, TransitAgency.EXO_TRAIN)
-				intent.putExtra(BusExtrasInfo.ROUTE_ID.name, routeId)
-				intent.putExtra(BusExtrasInfo.DIRECTION_ID.name, directionId)
-				intent.putExtra(BusExtrasInfo.DIRECTION.name, direction)
-				intent.putExtra(BusExtrasInfo.TRAIN_NUM.name, trainNum)
+				intent.putExtra(ExtrasTagNames.AGENCY.name, TransitAgency.EXO_TRAIN)
+				intent.putExtra(ExtrasTagNames.ROUTE_ID.name, routeId)
+				intent.putExtra(ExtrasTagNames.DIRECTION_ID.name, directionId)
+				intent.putExtra(ExtrasTagNames.DIRECTION.name, direction)
+				intent.putExtra(ExtrasTagNames.TRAIN_NUM.name, trainNum)
 				it.context.startActivity(intent)
 				it.clearFocus()
 			}

@@ -22,7 +22,7 @@ import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.presentation.stopTimes.StopTimesActivity
 import dev.mainhq.bus2go.data.data_source.local.datastore.deprecated.ExoBusData
-import dev.mainhq.bus2go.utils.BusExtrasInfo
+import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
 import dev.mainhq.bus2go.utils.Time
 import dev.mainhq.bus2go.presentation.main.home.favourites.FavouritesViewModel
 import kotlinx.coroutines.Dispatchers
@@ -112,9 +112,9 @@ class AlarmCreationChooseBusDialog() : DialogFragment(R.layout.fragment_create_a
                                         alarmDialogBusStop = it.findViewById<MaterialTextView>(R.id.alarmDialogBusStop).text.toString()
                                         alarmDialogBusNum = it.findViewById<MaterialTextView>(R.id.alarmDialogBusNum).text.toString()
                                         intent.putExtra("stopName", alarmDialogBusStop)
-                                        intent.putExtra(BusExtrasInfo.ROUTE_ID.name, alarmDialogBusNum)
+                                        intent.putExtra(ExtrasTagNames.ROUTE_ID.name, alarmDialogBusNum)
                                         intent.putExtra("ALARMS", true)
-                                        intent.putExtra(BusExtrasInfo.HEADSIGN.name, alarmDialogBusNum)
+                                        intent.putExtra(ExtrasTagNames.HEADSIGN.name, alarmDialogBusNum)
                                         activityResultLauncher.launch(intent)
 
                                         //val resultIntent = Intent()

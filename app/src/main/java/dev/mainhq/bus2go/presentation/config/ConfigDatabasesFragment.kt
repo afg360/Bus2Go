@@ -11,7 +11,7 @@ import androidx.work.workDataOf
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import dev.mainhq.bus2go.AppThemeState
+import dev.mainhq.bus2go.presentation.core.state.AppThemeState
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.workers.DatabaseDownloadManagerWorker
 

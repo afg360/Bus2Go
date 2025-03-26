@@ -8,7 +8,7 @@ import dev.mainhq.bus2go.utils.FuzzyQuery
 /**
  * Class for querying transit data. Performs a search using FuzzyQuery.
  **/
-class GetRouteNames (
+class GetRouteInfo (
 	private val exoRepository: ExoRepository,
 	private val stmRepository: StmRepository,
 ){

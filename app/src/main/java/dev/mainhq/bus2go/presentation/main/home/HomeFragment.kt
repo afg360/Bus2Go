@@ -29,10 +29,11 @@ import com.google.android.material.search.SearchView
 import com.google.android.material.search.SearchView.TransitionState
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.SearchBus
+import dev.mainhq.bus2go.presentation.search_transit.SearchTransit
 import dev.mainhq.bus2go.presentation.settings.SettingsActivity
 import dev.mainhq.bus2go.presentation.main.home.favourites.FavouritesFragment
 import dev.mainhq.bus2go.presentation.main.home.favourites.FavouritesFragmentSharedViewModel
+import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -127,12 +128,11 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
             }
         }
 
-        //TODO refactor this using a sharedViewModel
         searchView.editText.setOnEditorActionListener { textView : TextView, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 val submittedText = textView.text.toString()
-                val intent = Intent(this.context, SearchBus::class.java)
-                intent.putExtra("query", submittedText)
+                val intent = Intent(this.context, SearchTransit::class.java)
+                intent.putExtra(ExtrasTagNames.QUERY, submittedText)
                 startActivity(intent)
                 true
             }

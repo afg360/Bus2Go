@@ -9,7 +9,7 @@
 
     <!--FOR TESTING ONLY ENABLE HTTP CONNECTIONS -->
     <application
-        android:name=".BaseApplication"
+        android:name=".presentation.Bus2GoApplication"
         android:usesCleartextTraffic="true"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -37,7 +37,7 @@
             android:name=".presentation.config.ConfigActivity"
             android:exported="false"/>
         <activity
-            android:name=".ChooseStop"
+            android:name=".presentation.choose_stop.ChooseStop"
             android:exported="false"
             >
 
@@ -56,7 +56,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".SearchBus"
+            android:name=".presentation.search_transit.SearchTransit"
             android:exported="false">
         </activity>
         <activity
@@ -64,7 +64,7 @@
             android:exported="false">
         </activity>
         <activity
-            android:name=".ChooseDirection"
+            android:name=".presentation.choose_direction.ChooseDirection"
             android:exported="false">
         </activity>
     </application>

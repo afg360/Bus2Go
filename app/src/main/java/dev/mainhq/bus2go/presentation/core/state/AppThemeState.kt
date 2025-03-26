@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go
+package dev.mainhq.bus2go.presentation.core.state
 
 import androidx.appcompat.app.AppCompatDelegate
 import kotlin.properties.Delegates

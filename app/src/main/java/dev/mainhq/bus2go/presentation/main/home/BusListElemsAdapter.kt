@@ -7,13 +7,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textview.MaterialTextView
-import dev.mainhq.bus2go.ChooseDirection
+import dev.mainhq.bus2go.presentation.choose_direction.ChooseDirection
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.domain.entity.ExoBusRouteInfo
 import dev.mainhq.bus2go.domain.entity.ExoTrainRouteInfo
 import dev.mainhq.bus2go.domain.entity.RouteInfo
 import dev.mainhq.bus2go.domain.entity.StmBusRouteInfo
-import dev.mainhq.bus2go.utils.BusExtrasInfo
+import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
 
 class BusListElemsAdapter(private var busData: List<RouteInfo>) :
     RecyclerView.Adapter<BusListElemsAdapter.ViewHolder>() {
@@ -35,14 +35,7 @@ class BusListElemsAdapter(private var busData: List<RouteInfo>) :
         holder.busDirView.text = data.routeName
         holder.itemView.setOnClickListener {
             val intent = Intent(it.context, ChooseDirection::class.java)
-            intent.putExtra(BusExtrasInfo.ROUTE_INFO.name, data)
-            //intent.putExtra(BusExtrasInfo.ROUTE_NAME.name, data.routeName)
-            //intent.putExtra(BusExtrasInfo.ROUTE_ID.name, holder.busNumView.text.toString())
-            //if (data::class.java == ExoTrainRouteInfo::class.java){
-            //    val train = data as ExoTrainRouteInfo
-            //    intent.putExtra(BusExtrasInfo.TRAIN_NUM.name, train.trainNum)
-            //}
-            //intent.putExtra(BusExtrasInfo.AGENCY.name, data.transitAgency)
+            intent.putExtra(ExtrasTagNames.ROUTE_INFO, data)
             it.context.startActivity(intent)
             it.clearFocus()
         }

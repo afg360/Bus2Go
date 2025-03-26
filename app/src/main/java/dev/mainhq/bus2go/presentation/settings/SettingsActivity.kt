@@ -2,7 +2,7 @@ package dev.mainhq.bus2go.presentation.settings
 
 import android.os.Bundle
 import com.google.android.material.appbar.MaterialToolbar
-import dev.mainhq.bus2go.BaseActivity
+import dev.mainhq.bus2go.presentation.base.BaseActivity
 import dev.mainhq.bus2go.R
 
 class SettingsActivity : BaseActivity() {

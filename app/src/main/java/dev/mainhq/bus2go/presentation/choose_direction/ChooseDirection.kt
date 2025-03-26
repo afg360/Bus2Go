@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go;
+package dev.mainhq.bus2go.presentation.choose_direction;
 
 import android.content.Intent
 import android.os.Build
@@ -7,7 +7,10 @@ import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textview.MaterialTextView
+import dev.mainhq.bus2go.presentation.base.BaseActivity
+import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.data.data_source.stm.DirectionInfo
+import dev.mainhq.bus2go.presentation.choose_stop.ChooseStop
 import dev.mainhq.bus2go.utils.TransitAgency
 import dev.mainhq.bus2go.presentation.viewmodels.RoomViewModel
 import kotlinx.coroutines.Dispatchers
@@ -15,7 +18,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.IllegalStateException
 import kotlin.collections.ArrayList
-import dev.mainhq.bus2go.utils.BusExtrasInfo
+import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
 
 
 //todo
@@ -29,12 +32,12 @@ class ChooseDirection : BaseActivity() {
     override fun onCreate(savedInstanceState : Bundle?) {
         super.onCreate(savedInstanceState)
         roomViewModel = RoomViewModel(application)
-        val routeName = intent.getStringExtra(BusExtrasInfo.ROUTE_NAME.name)!!
-        val busNum = intent.getStringExtra(BusExtrasInfo.ROUTE_ID.name)!!
+        val routeName = intent.getStringExtra(ExtrasTagNames.ROUTE_NAME.name)!!
+        val busNum = intent.getStringExtra(ExtrasTagNames.ROUTE_ID.name)!!
         agency = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getSerializableExtra(BusExtrasInfo.AGENCY.name, TransitAgency::class.java)!!
+            intent.getSerializableExtra(ExtrasTagNames.AGENCY.name, TransitAgency::class.java)!!
         } else {
-            intent.getSerializableExtra(BusExtrasInfo.AGENCY.name) as TransitAgency
+            intent.getSerializableExtra(ExtrasTagNames.AGENCY.name) as TransitAgency
         }
         //set a loading screen first before displaying the correct buttons
         setContentView(R.layout.choose_direction)
@@ -43,7 +46,7 @@ class ChooseDirection : BaseActivity() {
 
         //todo need to ignore bus num for trains (use agency with route to check)
         if (agency == TransitAgency.EXO_TRAIN){
-            val trainNum = intent.extras!!.getInt(BusExtrasInfo.TRAIN_NUM.name)
+            val trainNum = intent.extras!!.getInt(ExtrasTagNames.TRAIN_NUM.name)
             busNumView.text = trainNum.toString()
             busNameView.text = routeName
             lifecycleScope.launch{
@@ -59,12 +62,12 @@ class ChooseDirection : BaseActivity() {
                         getString(R.string.train_direction, headsign0)
                     findViewById<MaterialButton>(R.id.route_0).setOnClickListener {
                         intent.putStringArrayListExtra("stops", dir0 as ArrayList<String>)
-                        intent.putExtra(BusExtrasInfo.DIRECTION_ID.name, 0)
-                        intent.putExtra(BusExtrasInfo.DIRECTION.name, headsign0)
-                        intent.putExtra(BusExtrasInfo.ROUTE_ID.name, busNum)
-                        intent.putExtra(BusExtrasInfo.TRAIN_NUM.name, trainNum)
-                        intent.putExtra(BusExtrasInfo.ROUTE_NAME.name, routeName)
-                        intent.putExtra(BusExtrasInfo.AGENCY.name, agency)
+                        intent.putExtra(ExtrasTagNames.DIRECTION_ID.name, 0)
+                        intent.putExtra(ExtrasTagNames.DIRECTION.name, headsign0)
+                        intent.putExtra(ExtrasTagNames.ROUTE_ID.name, busNum)
+                        intent.putExtra(ExtrasTagNames.TRAIN_NUM.name, trainNum)
+                        intent.putExtra(ExtrasTagNames.ROUTE_NAME.name, routeName)
+                        intent.putExtra(ExtrasTagNames.AGENCY.name, agency)
                         startActivity(intent)
                     }
 
@@ -72,12 +75,12 @@ class ChooseDirection : BaseActivity() {
                         getString(R.string.train_direction, headsign1)
                     findViewById<MaterialButton>(R.id.route_1).setOnClickListener {
                         intent.putStringArrayListExtra("stops", dir1 as ArrayList<String>)
-                        intent.putExtra(BusExtrasInfo.DIRECTION_ID.name, 1)
-                        intent.putExtra(BusExtrasInfo.DIRECTION.name, headsign1)
-                        intent.putExtra(BusExtrasInfo.ROUTE_ID.name, busNum)
-                        intent.putExtra(BusExtrasInfo.TRAIN_NUM.name, trainNum)
-                        intent.putExtra(BusExtrasInfo.ROUTE_NAME.name, routeName)
-                        intent.putExtra(BusExtrasInfo.AGENCY.name, agency)
+                        intent.putExtra(ExtrasTagNames.DIRECTION_ID.name, 1)
+                        intent.putExtra(ExtrasTagNames.DIRECTION.name, headsign1)
+                        intent.putExtra(ExtrasTagNames.ROUTE_ID.name, busNum)
+                        intent.putExtra(ExtrasTagNames.TRAIN_NUM.name, trainNum)
+                        intent.putExtra(ExtrasTagNames.ROUTE_NAME.name, routeName)
+                        intent.putExtra(ExtrasTagNames.AGENCY.name, agency)
                         startActivity(intent)
                     }
                 }
@@ -128,20 +131,20 @@ class ChooseDirection : BaseActivity() {
                                 //FIXME CHANGE BusExtrasInfo.DIRECTION.name TERMINOLOGY TO BE MORE CONSISTENT
                                 leftButton.setOnClickListener {
                                     intent.putStringArrayListExtra("stops", stops1 as ArrayList<String>)
-                                    intent.putExtra(BusExtrasInfo.ROUTE_ID.name, bus)//.toInt())
-                                    intent.putExtra(BusExtrasInfo.LAST_STOP.name, stops1.last())
-                                    intent.putExtra(BusExtrasInfo.DIRECTION.name, dirs.last().tripHeadSign)
-                                    intent.putExtra(BusExtrasInfo.DIRECTION_ID.name, dirs.last().directionId)
-                                    intent.putExtra(BusExtrasInfo.AGENCY.name, agency)
+                                    intent.putExtra(ExtrasTagNames.ROUTE_ID.name, bus)//.toInt())
+                                    intent.putExtra(ExtrasTagNames.LAST_STOP.name, stops1.last())
+                                    intent.putExtra(ExtrasTagNames.DIRECTION.name, dirs.last().tripHeadSign)
+                                    intent.putExtra(ExtrasTagNames.DIRECTION_ID.name, dirs.last().directionId)
+                                    intent.putExtra(ExtrasTagNames.AGENCY.name, agency)
                                     startActivity(intent)
                                 }
                                 rightButton.setOnClickListener {
                                     intent.putStringArrayListExtra("stops", stops0 as ArrayList<String>)
-                                    intent.putExtra(BusExtrasInfo.ROUTE_ID.name, bus)//.toInt())
-                                    intent.putExtra(BusExtrasInfo.LAST_STOP.name, stops0.last())
-                                    intent.putExtra(BusExtrasInfo.DIRECTION.name, dirs.first().tripHeadSign)
-                                    intent.putExtra(BusExtrasInfo.DIRECTION_ID.name, dirs.first().directionId)
-                                    intent.putExtra(BusExtrasInfo.AGENCY.name, agency)
+                                    intent.putExtra(ExtrasTagNames.ROUTE_ID.name, bus)//.toInt())
+                                    intent.putExtra(ExtrasTagNames.LAST_STOP.name, stops0.last())
+                                    intent.putExtra(ExtrasTagNames.DIRECTION.name, dirs.first().tripHeadSign)
+                                    intent.putExtra(ExtrasTagNames.DIRECTION_ID.name, dirs.first().directionId)
+                                    intent.putExtra(ExtrasTagNames.AGENCY.name, agency)
                                     startActivity(intent)
                                 }
                             }
@@ -153,20 +156,20 @@ class ChooseDirection : BaseActivity() {
                                 rightDescr.text = getString(R.string.from_to, stops1.first(), stops1.last())
                                 leftButton.setOnClickListener {
                                     intent.putStringArrayListExtra("stops", stops0 as ArrayList<String>)
-                                    intent.putExtra(BusExtrasInfo.ROUTE_ID.name, bus)//.toInt())
-                                    intent.putExtra(BusExtrasInfo.LAST_STOP.name, stops0.last())
-                                    intent.putExtra(BusExtrasInfo.DIRECTION.name, dirs.first().tripHeadSign)
-                                    intent.putExtra(BusExtrasInfo.DIRECTION_ID.name, dirs.first().directionId)
-                                    intent.putExtra(BusExtrasInfo.AGENCY.name, agency)
+                                    intent.putExtra(ExtrasTagNames.ROUTE_ID.name, bus)//.toInt())
+                                    intent.putExtra(ExtrasTagNames.LAST_STOP.name, stops0.last())
+                                    intent.putExtra(ExtrasTagNames.DIRECTION.name, dirs.first().tripHeadSign)
+                                    intent.putExtra(ExtrasTagNames.DIRECTION_ID.name, dirs.first().directionId)
+                                    intent.putExtra(ExtrasTagNames.AGENCY.name, agency)
                                     startActivity(intent)
                                 }
                                 rightButton.setOnClickListener {
                                     intent.putStringArrayListExtra("stops", stops1 as ArrayList<String>)
-                                    intent.putExtra(BusExtrasInfo.ROUTE_ID.name, bus)//.toInt())
-                                    intent.putExtra(BusExtrasInfo.LAST_STOP.name, stops1.last())
-                                    intent.putExtra(BusExtrasInfo.DIRECTION.name, dirs.last().tripHeadSign)
-                                    intent.putExtra(BusExtrasInfo.DIRECTION_ID.name, dirs.last().directionId)
-                                    intent.putExtra(BusExtrasInfo.AGENCY.name, agency)
+                                    intent.putExtra(ExtrasTagNames.ROUTE_ID.name, bus)//.toInt())
+                                    intent.putExtra(ExtrasTagNames.LAST_STOP.name, stops1.last())
+                                    intent.putExtra(ExtrasTagNames.DIRECTION.name, dirs.last().tripHeadSign)
+                                    intent.putExtra(ExtrasTagNames.DIRECTION_ID.name, dirs.last().directionId)
+                                    intent.putExtra(ExtrasTagNames.AGENCY.name, agency)
                                     startActivity(intent)
                                 }
                             }
@@ -177,8 +180,8 @@ class ChooseDirection : BaseActivity() {
                     val headsigns = dirs as List<String>
                     //some buses/transit only have 1 direction, so check before assigning
                     val intent = Intent(applicationContext, ChooseStop::class.java)
-                    intent.putExtra(BusExtrasInfo.ROUTE_ID.name, bus)
-                    intent.putExtra(BusExtrasInfo.ROUTE_NAME.name, routeName)
+                    intent.putExtra(ExtrasTagNames.ROUTE_ID.name, bus)
+                    intent.putExtra(ExtrasTagNames.ROUTE_NAME.name, routeName)
 
                     //Not a bug, if only 1 dir, then simply opens the activity...
                     if (headsigns.size == 1){
@@ -220,9 +223,9 @@ class ChooseDirection : BaseActivity() {
 
     private fun setIntent(intent : Intent, dir : ArrayList<String>, headsign: String, direction : String, agency: TransitAgency){
         intent.putStringArrayListExtra("stops", dir)
-        intent.putExtra(BusExtrasInfo.HEADSIGN.name, headsign)
-        intent.putExtra(BusExtrasInfo.DIRECTION.name, direction)
-        intent.putExtra(BusExtrasInfo.AGENCY.name, agency)
+        intent.putExtra(ExtrasTagNames.HEADSIGN.name, headsign)
+        intent.putExtra(ExtrasTagNames.DIRECTION.name, direction)
+        intent.putExtra(ExtrasTagNames.AGENCY.name, agency)
         startActivity(intent)
     }
 

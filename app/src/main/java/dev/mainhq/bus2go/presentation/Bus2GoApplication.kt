@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go
+package dev.mainhq.bus2go.presentation
 
 import android.app.Application
 import android.content.pm.PackageInfo
@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 
-class BaseApplication : Application() {
+class Bus2GoApplication : Application() {
 	lateinit var appContainer: AppContainer
 
 	override fun onCreate() {

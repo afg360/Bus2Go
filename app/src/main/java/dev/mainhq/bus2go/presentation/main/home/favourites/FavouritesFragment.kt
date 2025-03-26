@@ -20,7 +20,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.presentation.stopTimes.StopTimesActivity
-import dev.mainhq.bus2go.utils.BusExtrasInfo
+import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -59,7 +59,7 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
                 }
                 else {
                     val intent = Intent(view.context, StopTimesActivity::class.java)
-                    intent.putExtra(BusExtrasInfo.TRANSIT_DATA.name, favouriteTransitData)
+                    intent.putExtra(ExtrasTagNames.TRANSIT_DATA.name, favouriteTransitData)
 
                     itemView.context.startActivity(intent)
                     view.clearFocus()

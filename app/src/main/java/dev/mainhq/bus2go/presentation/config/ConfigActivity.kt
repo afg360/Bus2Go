@@ -4,7 +4,7 @@ import android.os.Bundle;
 import androidx.activity.viewModels
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
-import dev.mainhq.bus2go.BaseActivity
+import dev.mainhq.bus2go.presentation.base.BaseActivity
 import dev.mainhq.bus2go.R
 
 //todo set lang

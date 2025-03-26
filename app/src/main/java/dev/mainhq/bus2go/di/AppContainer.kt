@@ -19,7 +19,7 @@ import dev.mainhq.bus2go.domain.use_case.favourites.AddFavourite
 import dev.mainhq.bus2go.domain.use_case.favourites.GetFavouritesWithTimeData
 import dev.mainhq.bus2go.domain.use_case.favourites.RemoveFavourite
 import dev.mainhq.bus2go.domain.use_case.settings.IsRealTimeEnabled
-import dev.mainhq.bus2go.domain.use_case.transit.GetRouteNames
+import dev.mainhq.bus2go.domain.use_case.transit.GetRouteInfo
 import dev.mainhq.bus2go.domain.use_case.transit.GetStopNames
 import dev.mainhq.bus2go.domain.use_case.transit.GetTransitTime
 
@@ -88,7 +88,7 @@ class AppContainer(applicationContext: Context) {
 	)
 
 	val transitInfoUseCases = TransitInfoUseCases(
-		GetRouteNames(
+		GetRouteInfo(
 			exoRepository,
 			stmRepository,
 		),
