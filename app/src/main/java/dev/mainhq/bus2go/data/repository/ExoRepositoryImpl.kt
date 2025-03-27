@@ -5,17 +5,16 @@ import dev.mainhq.bus2go.data.data_source.local.database.exo.dao.CalendarDAO
 import dev.mainhq.bus2go.data.data_source.local.database.exo.dao.RoutesDAO
 import dev.mainhq.bus2go.data.data_source.local.database.exo.dao.StopTimesDAO
 import dev.mainhq.bus2go.data.data_source.local.database.exo.dao.TripsDAO
-import dev.mainhq.bus2go.domain.entity.FavouriteTransitData
-import dev.mainhq.bus2go.domain.entity.FavouriteTransitDataWithTime
+import dev.mainhq.bus2go.domain.entity.TransitData
+import dev.mainhq.bus2go.domain.entity.TransitDataWithTime
 import dev.mainhq.bus2go.domain.entity.RouteInfo
-import dev.mainhq.bus2go.domain.entity.ExoFavouriteBusItem
-import dev.mainhq.bus2go.domain.entity.ExoFavouriteTrainItem
+import dev.mainhq.bus2go.domain.entity.ExoBusItem
+import dev.mainhq.bus2go.domain.entity.ExoTrainItem
 import dev.mainhq.bus2go.domain.repository.ExoRepository
 import dev.mainhq.bus2go.utils.FuzzyQuery
 import dev.mainhq.bus2go.utils.Time
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 
 class ExoRepositoryImpl(
@@ -27,6 +26,7 @@ class ExoRepositoryImpl(
 	override suspend fun getMaxEndDate() = calendarDAO.getMaxEndDate()
 
 	override suspend fun getBusDir(routeId: String) = routesDAO.getBusDir(routeId)
+
 	override suspend fun getRouteInfo(routeId: FuzzyQuery): List<RouteInfo> {
 		return routesDAO.getRouteInfo(routeId).toMutableList().map {
 			DbMapper.mapFromExoDbRouteInfoDtoToRouteInfo(it)
@@ -40,6 +40,7 @@ class ExoRepositoryImpl(
 			Pair(job1.await(), job2.await())
 		}
 	}
+
 	override suspend fun getTrainStopNames(routeId: String): Pair<List<String>, List<String>>{
 		return withContext(Dispatchers.IO) {
 			val job1 = async { stopTimesDAO.getTrainStopNames("trains-$routeId", 0) }
@@ -48,7 +49,7 @@ class ExoRepositoryImpl(
 		}
 	}
 
-	override suspend fun getStopTimes(exoTransitData: FavouriteTransitData, curTime: Time) =
+	override suspend fun getStopTimes(exoTransitData: TransitData, curTime: Time) =
 		withContext(Dispatchers.IO){
 			stopTimesDAO.getStopTimes(
 				exoTransitData.stopName,
@@ -59,7 +60,7 @@ class ExoRepositoryImpl(
 			)
 		}
 
-	override suspend fun getOldStopTimes(exoTransitData: FavouriteTransitData, curTime: Time) =
+	override suspend fun getOldStopTimes(exoTransitData: TransitData, curTime: Time) =
 		withContext(Dispatchers.IO){
 			stopTimesDAO.getOldStopTimes(
 				exoTransitData.stopName,
@@ -69,9 +70,9 @@ class ExoRepositoryImpl(
 			)
 		}
 
-	override suspend fun getFavouriteBusStopTime(exoFavouriteBusItem: ExoFavouriteBusItem, curTime: Time) =
+	override suspend fun getFavouriteBusStopTime(exoFavouriteBusItem: ExoBusItem, curTime: Time) =
 		withContext(Dispatchers.IO){
-			FavouriteTransitDataWithTime(
+			TransitDataWithTime(
 				exoFavouriteBusItem,
 				stopTimesDAO.getFavouriteBusStopTime(
 					exoFavouriteBusItem.stopName,
@@ -84,7 +85,7 @@ class ExoRepositoryImpl(
 		}
 
 
-	override suspend fun getTrainStopTimes(exoTrainItem: ExoFavouriteTrainItem, curTime: Time) =
+	override suspend fun getTrainStopTimes(exoTrainItem: ExoTrainItem, curTime: Time) =
 		withContext(Dispatchers.IO){
 			stopTimesDAO.getTrainStopTimes(
 				exoTrainItem.routeId,
@@ -97,9 +98,9 @@ class ExoRepositoryImpl(
 		}
 
 
-	override suspend fun getFavouriteTrainStopTime(exoFavouriteTrainItem: ExoFavouriteTrainItem, curTime: Time) =
+	override suspend fun getFavouriteTrainStopTime(exoFavouriteTrainItem: ExoTrainItem, curTime: Time) =
 		withContext(Dispatchers.IO){
-			FavouriteTransitDataWithTime(
+			TransitDataWithTime(
 				exoFavouriteTrainItem,
 				stopTimesDAO.getFavouriteTrainStopTime(exoFavouriteTrainItem.routeId,
 					exoFavouriteTrainItem.stopName,

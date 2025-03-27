@@ -1,14 +1,17 @@
 package dev.mainhq.bus2go.presentation.search_transit
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.presentation.base.BaseActivity
+import dev.mainhq.bus2go.presentation.choose_direction.ChooseDirection
 import dev.mainhq.bus2go.presentation.main.home.BusListElemsAdapter
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
 import dev.mainhq.bus2go.presentation.viewmodels.RoomViewModel
@@ -34,7 +37,11 @@ class SearchTransit : BaseActivity() {
 
         val recyclerView : RecyclerView = findViewById(R.id.search_recycle_view)
         val layoutManager = LinearLayoutManager(applicationContext)
-        val adapter = BusListElemsAdapter(listOf())
+        val adapter = BusListElemsAdapter(listOf()){ data ->
+            val intent = Intent(this, ChooseDirection::class.java)
+            intent.putExtra(ExtrasTagNames.ROUTE_INFO, data)
+            startActivity(intent)
+        }
         recyclerView.adapter = adapter
         layoutManager.orientation = LinearLayoutManager.VERTICAL
         recyclerView.layoutManager = layoutManager

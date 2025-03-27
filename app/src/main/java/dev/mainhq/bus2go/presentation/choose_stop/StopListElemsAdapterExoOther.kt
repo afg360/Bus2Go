@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go.presentation.ui.adapters
+package dev.mainhq.bus2go.presentation.choose_stop
 
 import android.content.Intent
 import android.view.LayoutInflater
@@ -7,22 +7,22 @@ import android.view.ViewGroup
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.presentation.stopTimes.StopTimesActivity
-import dev.mainhq.bus2go.data.data_source.local.datastore.deprecated.ExoTrainData
+import dev.mainhq.bus2go.data.data_source.local.datastore.deprecated.ExoBusData
 import dev.mainhq.bus2go.preferences.TransitData
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
 import dev.mainhq.bus2go.utils.TransitAgency
 import dev.mainhq.bus2go.presentation.main.home.favourites.FavouritesViewModel
 
-class StopListElemsAdapterExoTrain(stopNames: List<String>, favourites: List<TransitData>,
-								   favouritesViewModel: FavouritesViewModel, private val routeId: String,
-								   private val routeName: String, private val directionId: Int,
-								   private val direction: String, private val trainNum : Int)
-	: StopListElemsAdapter(stopNames, favourites, favouritesViewModel){
+class StopListElemsAdapterExoOther(stopNames: List<String>, favourites: List<TransitData>,
+								   favouritesViewModel: FavouritesViewModel,
+								   private val routeId: String, private val direction: String,
+								   private val routeName: String, private val headsign: String
+) : StopListElemsAdapter(stopNames, favourites, favouritesViewModel) {
 
 	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): InnerViewHolder {
 		return ViewHolder(
 			LayoutInflater.from(parent.context).inflate(R.layout.elem_stop_list, parent, false),
-			routeId, directionId, direction, trainNum
+			routeId, headsign
 		)
 	}
 
@@ -30,42 +30,39 @@ class StopListElemsAdapterExoTrain(stopNames: List<String>, favourites: List<Tra
 		val stopName = stopNames[position]
 		holder.stopNameTextView.text = stopName
 
-		val trainData = ExoTrainData(stopName, routeId, trainNum, routeName, directionId, direction)
-		holder.stopNameTextView.setTextColor(holder.itemView.resources.getColor(R.color.orange, null))
-		if (favourites.contains(trainData)) {
+		val exoBusData = ExoBusData(holder.stopNameTextView.text.toString(), routeId, direction,
+						routeName, headsign)
+		holder.stopNameTextView.setTextColor(holder.itemView.resources .getColor(R.color.basic_purple, null))
+		if (favourites.contains(exoBusData)){
 			holder.favouriteSelectedView.tag = "on"
 			holder.favouriteSelectedView.setBackgroundResource(R.drawable.favourite_drawable_on)
 		}
-
 		holder.favouriteSelectedView.setOnClickListener { view ->
 			if (view.tag.equals("off")) {
 				view.setBackgroundResource(R.drawable.favourite_drawable_on)
 				view.tag = "on"
-				favouritesViewModel.addFavourites(trainData)
+				favouritesViewModel.addFavourites(exoBusData)
 			}
 			else {
 				view.setBackgroundResource(R.drawable.favourite_drawable_off)
 				view.tag = "off"
 				//todo add to favourites
-				favouritesViewModel.removeFavourites(trainData)
+				favouritesViewModel.removeFavourites(exoBusData)
 			}
 		}
-
 	}
 
-	class ViewHolder(view: View, private val routeId: String,
-					 private val directionId: Int, private val direction: String,
-					 private val trainNum: Int) : InnerViewHolder(view){
+	class ViewHolder(view: View, private val routeId: String, private val headsign: String) : InnerViewHolder(view){
 		init {
 			stopNameTextView.setOnClickListener {
 				val stopName = (it as MaterialTextView).text as String
 				val intent = Intent(view.context, StopTimesActivity::class.java)
 				intent.putExtra("stopName", stopName)
-				intent.putExtra(ExtrasTagNames.AGENCY.name, TransitAgency.EXO_TRAIN)
+				intent.putExtra(ExtrasTagNames.AGENCY.name, TransitAgency.EXO_OTHER)
+				//intent.putExtra("TRANSIT_DATA", TrainData(stopName, "", 0, "", "", ""))
+				//routeId is used for being displayed
 				intent.putExtra(ExtrasTagNames.ROUTE_ID.name, routeId)
-				intent.putExtra(ExtrasTagNames.DIRECTION_ID.name, directionId)
-				intent.putExtra(ExtrasTagNames.DIRECTION.name, direction)
-				intent.putExtra(ExtrasTagNames.TRAIN_NUM.name, trainNum)
+				intent.putExtra(ExtrasTagNames.HEADSIGN.name, headsign)
 				it.context.startActivity(intent)
 				it.clearFocus()
 			}

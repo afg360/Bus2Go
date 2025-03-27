@@ -1,17 +1,17 @@
 package dev.mainhq.bus2go.domain.repository
 
-import dev.mainhq.bus2go.domain.entity.ExoFavouriteBusItem
-import dev.mainhq.bus2go.domain.entity.ExoFavouriteTrainItem
+import dev.mainhq.bus2go.domain.entity.ExoBusItem
+import dev.mainhq.bus2go.domain.entity.ExoTrainItem
 
 interface ExoFavouritesRepository {
 
-	suspend fun getExoBusFavourites(): List<ExoFavouriteBusItem>
-	suspend fun getExoTrainFavourites(): List<ExoFavouriteTrainItem>
+	suspend fun getExoBusFavourites(): List<ExoBusItem>
+	suspend fun getExoTrainFavourites(): List<ExoTrainItem>
 
-	suspend fun removeExoBusFavourite(data : ExoFavouriteBusItem)
-	suspend fun removeExoTrainFavourite(data : ExoFavouriteTrainItem)
+	suspend fun removeExoBusFavourite(data : ExoBusItem)
+	suspend fun removeExoTrainFavourite(data : ExoTrainItem)
 
-	suspend fun addExoBusFavourite(data : ExoFavouriteBusItem)
-	suspend fun addExoTrainFavourite(data : ExoFavouriteTrainItem)
+	suspend fun addExoBusFavourite(data : ExoBusItem)
+	suspend fun addExoTrainFavourite(data : ExoTrainItem)
 
 }

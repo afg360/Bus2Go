@@ -1,6 +1,6 @@
 package dev.mainhq.bus2go.domain.use_case.favourites
 
-import dev.mainhq.bus2go.domain.entity.FavouriteTransitDataWithTime
+import dev.mainhq.bus2go.domain.entity.TransitDataWithTime
 import dev.mainhq.bus2go.domain.repository.ExoFavouritesRepository
 import dev.mainhq.bus2go.domain.repository.ExoRepository
 import dev.mainhq.bus2go.domain.repository.StmFavouritesRepository
@@ -17,7 +17,7 @@ class GetFavouritesWithTimeData(
 ) {
 
 	//FIXME perhaps use a flow instead since we will be continusously updating the curTime
-	suspend operator fun invoke(): List<FavouriteTransitDataWithTime>{
+	suspend operator fun invoke(): List<TransitDataWithTime>{
 		val time = Time.now()
 		val stmBusFavourites = stmFavouritesRepository.getStmBusFavourites().map {
 			stmRepository.getFavouriteStopTime(it, time)

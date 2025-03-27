@@ -14,11 +14,11 @@ import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.domain.entity.ExoFavouriteBusItem
-import dev.mainhq.bus2go.domain.entity.ExoFavouriteTrainItem
-import dev.mainhq.bus2go.domain.entity.FavouriteTransitData
-import dev.mainhq.bus2go.domain.entity.FavouriteTransitDataWithTime
-import dev.mainhq.bus2go.domain.entity.StmFavouriteBusItem
+import dev.mainhq.bus2go.domain.entity.ExoBusItem
+import dev.mainhq.bus2go.domain.entity.ExoTrainItem
+import dev.mainhq.bus2go.domain.entity.TransitData
+import dev.mainhq.bus2go.domain.entity.TransitDataWithTime
+import dev.mainhq.bus2go.domain.entity.StmBusItem
 import java.time.LocalTime
 
 //FIXME could make the list thing a bit more efficient and simply change all the times instead
@@ -29,8 +29,8 @@ import java.time.LocalTime
  * @param onLongClickListener An onLongClickListener for each item in the adapter.
  **/
 class FavouritesListElemsAdapter(
-    private var list : List<FavouriteTransitDataWithTime>,
-    private val onClickListener: (View, FavouriteTransitData) -> Unit,
+    private var list : List<TransitDataWithTime>,
+    private val onClickListener: (View, TransitData) -> Unit,
     private val onLongClickListener: OnLongClickListener
 )
     : RecyclerView.Adapter<FavouritesListElemsAdapter.ViewHolder>(){
@@ -65,7 +65,7 @@ class FavouritesListElemsAdapter(
 
         when(info.favouriteTransitData) {
             //FIXME some margin issues with bus number and bus route long name
-            is ExoFavouriteBusItem -> {
+            is ExoBusItem -> {
                 holder.itemView.tag = info.favouriteTransitData
                 holder.routeLongNameTextView.text = "Bus: ${info.favouriteTransitData.routeLongName}"
                 holder.routeLongNameTextView.visibility = VISIBLE
@@ -86,7 +86,7 @@ class FavouritesListElemsAdapter(
                 )
             }
 
-            is ExoFavouriteTrainItem -> {
+            is ExoTrainItem -> {
                 holder.routeLongNameTextView.text = "" //clear it out even if gone
                 holder.routeLongNameTextView.visibility = GONE
                 holder.directionTextView.text = holder.itemView.context
@@ -108,7 +108,7 @@ class FavouritesListElemsAdapter(
                     .getColor(R.color.orange,null))
             }
 
-            is StmFavouriteBusItem -> {
+            is StmBusItem -> {
                 holder.routeLongNameTextView.text = "" //clear it out even if gone
                 holder.routeLongNameTextView.visibility = GONE
                 holder.itemView.tag = info.favouriteTransitData
@@ -159,7 +159,7 @@ class FavouritesListElemsAdapter(
         }
     }
 
-    fun updateTime(list: List<FavouriteTransitDataWithTime>){
+    fun updateTime(list: List<TransitDataWithTime>){
         this.list = list
         notifyItemRangeChanged(0, itemCount)
     }

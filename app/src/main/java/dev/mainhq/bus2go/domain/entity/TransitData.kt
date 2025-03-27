@@ -5,37 +5,40 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 /** Entity to interface with data coming from dataStore */
-sealed class FavouriteTransitData: Parcelable {
+sealed class TransitData: Parcelable {
 	abstract val routeId : String
 	abstract val stopName : String
 	abstract val direction : String
 }
 
+@Parcelize
 /**
  * @param routeId aka busNum.
  **/
-data class StmFavouriteBusItem(
+data class StmBusItem(
 	override val routeId : String,
 	override val stopName: String,
 	override val direction : String,
 	val directionId: Int,
 	val lastStop : String
-) : FavouriteTransitData()
+) : TransitData()
 
 
-data class ExoFavouriteBusItem(
+@Parcelize
+data class ExoBusItem(
 	override val routeId : String,
 	override val stopName : String,
 	override val direction: String,
 	val routeLongName: String,
 	val headsign: String
-) : FavouriteTransitData()
+) : TransitData()
 
-data class ExoFavouriteTrainItem(
+@Parcelize
+data class ExoTrainItem(
 	override val routeId : String,
 	override val stopName : String,
 	override val direction : String,
 	val trainNum : Int,
 	val routeName : String,
 	val directionId: Int
-) : FavouriteTransitData()
+) : TransitData()

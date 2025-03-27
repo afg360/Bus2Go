@@ -5,7 +5,6 @@ import android.os.Bundle
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import dev.mainhq.bus2go.presentation.ui.adapters.TimeListElemsAdapter
 import kotlinx.coroutines.launch
 import android.os.Build
 import android.view.View
@@ -19,10 +18,10 @@ import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.presentation.base.BaseActivity
 import dev.mainhq.bus2go.presentation.Bus2GoApplication
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.domain.entity.ExoFavouriteBusItem
-import dev.mainhq.bus2go.domain.entity.ExoFavouriteTrainItem
-import dev.mainhq.bus2go.domain.entity.FavouriteTransitData
-import dev.mainhq.bus2go.domain.entity.StmFavouriteBusItem
+import dev.mainhq.bus2go.domain.entity.ExoBusItem
+import dev.mainhq.bus2go.domain.entity.ExoTrainItem
+import dev.mainhq.bus2go.domain.entity.TransitData
+import dev.mainhq.bus2go.domain.entity.StmBusItem
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
 import dev.mainhq.bus2go.utils.Time
 
@@ -39,7 +38,7 @@ class StopTimesActivity : BaseActivity() {
         //TODO parcelised data
         @Suppress("DEPRECATION")
         val transitData = (if (Build.VERSION.SDK_INT >= 33)
-            intent.getParcelableExtra(ExtrasTagNames.TRANSIT_DATA, FavouriteTransitData::class.java)
+            intent.getParcelableExtra(ExtrasTagNames.TRANSIT_DATA, TransitData::class.java)
             else  intent.getParcelableExtra(ExtrasTagNames.TRANSIT_DATA)) ?: throw IllegalStateException("You forgot to give a TransitData")
 
         val stopTimesViewModel: StopTimesViewModel by viewModels{
@@ -63,13 +62,13 @@ class StopTimesActivity : BaseActivity() {
 
         @SuppressLint("SetTextI18n")
         when(transitData){
-            is ExoFavouriteBusItem -> {
+            is ExoBusItem -> {
                 textView.text = "${transitData.routeId} ${transitData.stopName} -> ${transitData.headsign}"
             }
-            is ExoFavouriteTrainItem -> {
+            is ExoTrainItem -> {
                 textView.text = "#${transitData.trainNum} ${transitData.stopName} -> ${transitData.direction}"
             }
-            is StmFavouriteBusItem -> {
+            is StmBusItem -> {
                 textView.text = "${transitData.routeId} ${transitData.stopName} -> ${transitData.direction}"
             }
         }
@@ -78,7 +77,7 @@ class StopTimesActivity : BaseActivity() {
         layoutManager.orientation = LinearLayoutManager.VERTICAL
         val recyclerView: RecyclerView = findViewById(R.id.time_recycle_view)
         recyclerView.layoutManager = layoutManager
-        val adapter = TimeListElemsAdapter(listOf(), fromAlarmCreation)
+        val adapter = StopTimeListElemsAdapter(listOf(), fromAlarmCreation)
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED){

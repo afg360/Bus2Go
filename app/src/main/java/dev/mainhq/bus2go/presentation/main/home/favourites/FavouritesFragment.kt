@@ -52,20 +52,20 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
         layoutManager.orientation = LinearLayoutManager.VERTICAL
         val adapter = FavouritesListElemsAdapter(
             listOf(),
-            { itemView, favouriteTransitData -> //we are using the itemView of the holder
+            onClickListener = { itemView, favouriteTransitData -> //we are using the itemView of the holder
                 if (favouritesViewModel.selectionMode.value){
                     val checkBoxView = itemView as MaterialCheckBox
                     checkBoxView.isChecked = !checkBoxView.isChecked
                 }
                 else {
                     val intent = Intent(view.context, StopTimesActivity::class.java)
-                    intent.putExtra(ExtrasTagNames.TRANSIT_DATA.name, favouriteTransitData)
+                    intent.putExtra(ExtrasTagNames.TRANSIT_DATA, favouriteTransitData)
 
                     itemView.context.startActivity(intent)
                     view.clearFocus()
                 }
             },
-            {
+            onLongClickListener = {
                 favouritesViewModel.activateSelectionMode()
                 favouritesSharedViewModel.activateSelectionMode()
                 true

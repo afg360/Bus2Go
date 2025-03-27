@@ -4,232 +4,172 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
+import androidx.activity.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.viewmodel.CreationExtras
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.presentation.base.BaseActivity
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.data.data_source.stm.DirectionInfo
+import dev.mainhq.bus2go.domain.entity.ExoBusRouteInfo
+import dev.mainhq.bus2go.domain.entity.ExoBusTransitDataWithStopNames
+import dev.mainhq.bus2go.domain.entity.ExoTrainItem
+import dev.mainhq.bus2go.domain.entity.ExoTrainRouteInfo
+import dev.mainhq.bus2go.domain.entity.ExoTrainTransitDataWithStopNames
+import dev.mainhq.bus2go.domain.entity.RouteInfo
+import dev.mainhq.bus2go.domain.entity.StmBusRouteInfo
+import dev.mainhq.bus2go.domain.entity.StmBusTransitDataWithStopNames
+import dev.mainhq.bus2go.presentation.Bus2GoApplication
 import dev.mainhq.bus2go.presentation.choose_stop.ChooseStop
-import dev.mainhq.bus2go.utils.TransitAgency
-import dev.mainhq.bus2go.presentation.viewmodels.RoomViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.IllegalStateException
 import kotlin.collections.ArrayList
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 
 
 //todo
 //change appbar to be only a back button
-//todo may make it a swapable ui instead of choosing button0 or 1
+//todo may make it a swappable ui instead of choosing button0 or 1
 class ChooseDirection : BaseActivity() {
 
-    private lateinit var agency : TransitAgency
-    private lateinit var roomViewModel: RoomViewModel
 
     override fun onCreate(savedInstanceState : Bundle?) {
         super.onCreate(savedInstanceState)
-        roomViewModel = RoomViewModel(application)
-        val routeName = intent.getStringExtra(ExtrasTagNames.ROUTE_NAME.name)!!
-        val busNum = intent.getStringExtra(ExtrasTagNames.ROUTE_ID.name)!!
-        agency = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getSerializableExtra(ExtrasTagNames.AGENCY.name, TransitAgency::class.java)!!
-        } else {
-            intent.getSerializableExtra(ExtrasTagNames.AGENCY.name) as TransitAgency
-        }
-        //set a loading screen first before displaying the correct buttons
         setContentView(R.layout.choose_direction)
+
+        val routeInfo = (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+			intent.extras?.getParcelable(ExtrasTagNames.ROUTE_INFO, RouteInfo::class.java)
+		} else {
+            @Suppress("DEPRECATION")
+            intent.extras?.getParcelable(ExtrasTagNames.ROUTE_INFO)
+        }) ?: throw IllegalStateException("Expected a non null RouteInfo passed")
+
+        val chooseDirectionViewModel: ChooseDirectionViewModel by viewModels{
+            object : ViewModelProvider.Factory {
+                override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+                    if (modelClass.isAssignableFrom(ChooseDirectionViewModel::class.java)){
+                        return ChooseDirectionViewModel(
+                            routeInfo = routeInfo,
+                            getDirections = (this@ChooseDirection.application as Bus2GoApplication).appContainer.getDirections,
+                            getStopNames = (this@ChooseDirection.application as Bus2GoApplication).appContainer.getStopNames,
+                        ) as T
+                    }
+                    throw IllegalArgumentException("Gave wrong ViewModel class")
+                }
+            }
+        }
+
+		//set a loading screen first before displaying the correct buttons
         val busNumView: MaterialTextView = findViewById(R.id.chooseBusNum)
         val busNameView: MaterialTextView = findViewById(R.id.chooseBusDir)
 
-        //todo need to ignore bus num for trains (use agency with route to check)
-        if (agency == TransitAgency.EXO_TRAIN){
-            val trainNum = intent.extras!!.getInt(ExtrasTagNames.TRAIN_NUM.name)
-            busNumView.text = trainNum.toString()
-            busNameView.text = routeName
-            lifecycleScope.launch{
-                val stopNames = roomViewModel.getTrainStopNames(this, busNum.toInt())
-                val dir0 = stopNames.first.await()
-                val dir1 = stopNames.second.await()
-                //means to what station it is heading, NOT ACCURATE FOR THE MOMENT
-                val headsign0 = dir0.last()
-                val headsign1 = dir1.last()
-                withContext(Dispatchers.Main){
-                    val intent = Intent(applicationContext, ChooseStop::class.java)
-                    findViewById<MaterialTextView>(R.id.description_route_0).text =
-                        getString(R.string.train_direction, headsign0)
-                    findViewById<MaterialButton>(R.id.route_0).setOnClickListener {
-                        intent.putStringArrayListExtra("stops", dir0 as ArrayList<String>)
-                        intent.putExtra(ExtrasTagNames.DIRECTION_ID.name, 0)
-                        intent.putExtra(ExtrasTagNames.DIRECTION.name, headsign0)
-                        intent.putExtra(ExtrasTagNames.ROUTE_ID.name, busNum)
-                        intent.putExtra(ExtrasTagNames.TRAIN_NUM.name, trainNum)
-                        intent.putExtra(ExtrasTagNames.ROUTE_NAME.name, routeName)
-                        intent.putExtra(ExtrasTagNames.AGENCY.name, agency)
-                        startActivity(intent)
-                    }
-
-                    findViewById<MaterialTextView>(R.id.description_route_1).text =
-                        getString(R.string.train_direction, headsign1)
-                    findViewById<MaterialButton>(R.id.route_1).setOnClickListener {
-                        intent.putStringArrayListExtra("stops", dir1 as ArrayList<String>)
-                        intent.putExtra(ExtrasTagNames.DIRECTION_ID.name, 1)
-                        intent.putExtra(ExtrasTagNames.DIRECTION.name, headsign1)
-                        intent.putExtra(ExtrasTagNames.ROUTE_ID.name, busNum)
-                        intent.putExtra(ExtrasTagNames.TRAIN_NUM.name, trainNum)
-                        intent.putExtra(ExtrasTagNames.ROUTE_NAME.name, routeName)
-                        intent.putExtra(ExtrasTagNames.AGENCY.name, agency)
-                        startActivity(intent)
-                    }
-                }
-            }
-        }
-        else {
-            busNumView.text = busNum
-            busNameView.text = routeName
-            setButtons(busNum, routeName)
-        }
-    }
-
-    private fun setButtons(bus : String, routeName: String) {
-        //if agency == EXO_Train, getTrips will actually give the "stops"
-        //^need to check how to get the directions properly for trains...
         lifecycleScope.launch {
-            val dirs = roomViewModel.getDirections(agency, bus)
-            if (dirs.isEmpty()){
-                Toast.makeText(this@ChooseDirection, "Metro not implemented yet...", Toast.LENGTH_SHORT).show()
-                return@launch
-            }
-            //FIXME TRIPS_HEADSIGN HAS CHANGED FOR STM, ONLY SHOWS BusExtrasInfo.DIRECTION.name
-
-            when (agency) {
-                TransitAgency.STM -> {
-                    dirs as List<DirectionInfo>
-                    val jobs = roomViewModel.getStopNames(this, agency, dirs.map { it.tripHeadSign }, bus)
-                    val orientation =
-                        //already in alphabetical order
-                        if (dirs.first().tripHeadSign == "Est" || dirs.first().tripHeadSign == "Ouest") Orientation.HORIZONTAL
-                        else Orientation.VERTICAL
-                    withContext(Dispatchers.Main){
-                        val leftButton : MaterialButton = findViewById(R.id.route_0)
-                        val leftDescr : MaterialTextView = findViewById(R.id.description_route_0)
-                        val rightButton : MaterialButton = findViewById(R.id.route_1)
-                        val rightDescr : MaterialTextView = findViewById(R.id.description_route_1)
-                        val intent = Intent(applicationContext, ChooseStop::class.java)
-                        //east or north
-                        val stops0 = jobs.first.await()
-                        //west or south
-                        val stops1 = jobs.second.await()
-                        when (orientation){
-                            Orientation.HORIZONTAL -> {
-                                leftButton.text = getString(R.string.west)
-                                rightButton.text = getString(R.string.east)
-                                leftDescr.text = getString(R.string.from_to, stops1.first(), stops1.last())
-                                rightDescr.text = getString(R.string.from_to, stops0.first(), stops0.last())
-                                //FIXME CHANGE BusExtrasInfo.DIRECTION.name TERMINOLOGY TO BE MORE CONSISTENT
-                                leftButton.setOnClickListener {
-                                    intent.putStringArrayListExtra("stops", stops1 as ArrayList<String>)
-                                    intent.putExtra(ExtrasTagNames.ROUTE_ID.name, bus)//.toInt())
-                                    intent.putExtra(ExtrasTagNames.LAST_STOP.name, stops1.last())
-                                    intent.putExtra(ExtrasTagNames.DIRECTION.name, dirs.last().tripHeadSign)
-                                    intent.putExtra(ExtrasTagNames.DIRECTION_ID.name, dirs.last().directionId)
-                                    intent.putExtra(ExtrasTagNames.AGENCY.name, agency)
-                                    startActivity(intent)
-                                }
-                                rightButton.setOnClickListener {
-                                    intent.putStringArrayListExtra("stops", stops0 as ArrayList<String>)
-                                    intent.putExtra(ExtrasTagNames.ROUTE_ID.name, bus)//.toInt())
-                                    intent.putExtra(ExtrasTagNames.LAST_STOP.name, stops0.last())
-                                    intent.putExtra(ExtrasTagNames.DIRECTION.name, dirs.first().tripHeadSign)
-                                    intent.putExtra(ExtrasTagNames.DIRECTION_ID.name, dirs.first().directionId)
-                                    intent.putExtra(ExtrasTagNames.AGENCY.name, agency)
-                                    startActivity(intent)
-                                }
-                            }
-                            Orientation.VERTICAL -> {
-                                leftButton.text = getString(R.string.north)
-                                rightButton.text = getString(R.string.south)
-
-                                leftDescr.text = getString(R.string.from_to, stops0.first(), stops0.last())
-                                rightDescr.text = getString(R.string.from_to, stops1.first(), stops1.last())
-                                leftButton.setOnClickListener {
-                                    intent.putStringArrayListExtra("stops", stops0 as ArrayList<String>)
-                                    intent.putExtra(ExtrasTagNames.ROUTE_ID.name, bus)//.toInt())
-                                    intent.putExtra(ExtrasTagNames.LAST_STOP.name, stops0.last())
-                                    intent.putExtra(ExtrasTagNames.DIRECTION.name, dirs.first().tripHeadSign)
-                                    intent.putExtra(ExtrasTagNames.DIRECTION_ID.name, dirs.first().directionId)
-                                    intent.putExtra(ExtrasTagNames.AGENCY.name, agency)
-                                    startActivity(intent)
-                                }
-                                rightButton.setOnClickListener {
-                                    intent.putStringArrayListExtra("stops", stops1 as ArrayList<String>)
-                                    intent.putExtra(ExtrasTagNames.ROUTE_ID.name, bus)//.toInt())
-                                    intent.putExtra(ExtrasTagNames.LAST_STOP.name, stops1.last())
-                                    intent.putExtra(ExtrasTagNames.DIRECTION.name, dirs.last().tripHeadSign)
-                                    intent.putExtra(ExtrasTagNames.DIRECTION_ID.name, dirs.last().directionId)
-                                    intent.putExtra(ExtrasTagNames.AGENCY.name, agency)
-                                    startActivity(intent)
-                                }
-                            }
-                        }
-                    }
-                }
-                TransitAgency.EXO_OTHER -> {
-                    val headsigns = dirs as List<String>
-                    //some buses/transit only have 1 direction, so check before assigning
+            repeatOnLifecycle(Lifecycle.State.STARTED){
+                chooseDirectionViewModel.isUnidirectional.collect{ isUnidirectional ->
                     val intent = Intent(applicationContext, ChooseStop::class.java)
-                    intent.putExtra(ExtrasTagNames.ROUTE_ID.name, bus)
-                    intent.putExtra(ExtrasTagNames.ROUTE_NAME.name, routeName)
+                    val leftDescr = findViewById<MaterialTextView>(R.id.description_route_0)
+                    val rightDescr = findViewById<MaterialTextView>(R.id.description_route_1)
 
-                    //Not a bug, if only 1 dir, then simply opens the activity...
-                    if (headsigns.size == 1){
-                        val dir = roomViewModel.getStopNames(this, headsigns[0], bus).await()
-                        withContext(Dispatchers.Main) {
-                            //no need for a button in this case
-                            finish()
-                            setIntent(intent, dir as ArrayList<String>, headsigns[0], dir.last(), agency)
-                            Toast.makeText(this@ChooseDirection, "This bus line only contains 1 direction", Toast.LENGTH_SHORT).show()
+                    withContext(Dispatchers.Main) {
+                        when(routeInfo){
+                            is ExoBusRouteInfo -> {
+                                val leftDir = chooseDirectionViewModel.leftDirection.filterNotNull().first() as ExoBusTransitDataWithStopNames
+                                busNumView.text = routeInfo.routeId
+                                busNameView.text = routeInfo.routeName
+
+                                if (isUnidirectional == true) {
+                                    intent.putExtra(ExtrasTagNames.ROUTE_INFO_WITH_STOP_NAMES, leftDir)
+                                    Toast.makeText(this@ChooseDirection,"This bus line only contains 1 direction",Toast.LENGTH_SHORT).show()
+                                    finish()
+                                    startActivity(intent)
+                                }
+                                else if (isUnidirectional == false) {
+                                    val rightDir = chooseDirectionViewModel.rightDirection.filterNotNull().first() as ExoBusTransitDataWithStopNames
+
+                                    findViewById<MaterialTextView>(R.id.description_route_0).text = leftDir.exoBusItem.headsign
+                                    findViewById<MaterialButton>(R.id.route_0).setOnClickListener {
+                                        intent.putExtra(ExtrasTagNames.ROUTE_INFO_WITH_STOP_NAMES, leftDir)
+                                        startActivity(intent)
+                                    }
+                                    findViewById<MaterialTextView>(R.id.description_route_1).text = rightDir.exoBusItem.headsign
+                                    findViewById<MaterialButton>(R.id.route_1).setOnClickListener {
+                                        intent.putExtra(ExtrasTagNames.ROUTE_INFO_WITH_STOP_NAMES, rightDir)
+                                        startActivity(intent)
+                                    }
+                                    leftDescr.text = getString(R.string.from_to, leftDir.stopNames.first(), leftDir.stopNames.last())
+                                    rightDescr.text = getString(R.string.from_to, rightDir.stopNames.first(), rightDir.stopNames.last())
+                                }
+                            }
+                            is ExoTrainRouteInfo -> {
+                                val leftDir = chooseDirectionViewModel.leftDirection.filterNotNull().first() as ExoTrainTransitDataWithStopNames
+                                if (isUnidirectional == false){
+                                    val rightDir = chooseDirectionViewModel.rightDirection.filterNotNull().first() as ExoTrainTransitDataWithStopNames
+
+                                    findViewById<MaterialTextView>(R.id.description_route_0).text =
+                                        getString(R.string.train_direction, leftDir.exoTrainItem.direction)
+                                    findViewById<MaterialButton>(R.id.route_0).setOnClickListener {
+                                        intent.putExtra(ExtrasTagNames.ROUTE_INFO_WITH_STOP_NAMES, leftDir)
+                                        startActivity(intent)
+                                    }
+
+                                    findViewById<MaterialTextView>(R.id.description_route_1).text =
+                                        getString(R.string.train_direction, rightDir.exoTrainItem.direction)
+                                    findViewById<MaterialButton>(R.id.route_1).setOnClickListener {
+                                        intent.putExtra(ExtrasTagNames.ROUTE_INFO_WITH_STOP_NAMES, rightDir)
+                                        startActivity(intent)
+                                    }
+                                    leftDescr.text = getString(R.string.from_to, leftDir.stopNames.first(), leftDir.stopNames.last())
+                                    rightDescr.text = getString(R.string.from_to, rightDir.stopNames.first(), rightDir.stopNames.last())
+                                }
+                                else if (isUnidirectional == true)
+                                    throw IllegalStateException("Unexpected data: ExoTrain being unidirectional...")
+                            }
+                            is StmBusRouteInfo -> {
+                                val leftDir = chooseDirectionViewModel.leftDirection.filterNotNull().first() as StmBusTransitDataWithStopNames
+                                if (isUnidirectional == false) {
+                                    busNumView.text = routeInfo.routeId
+                                    busNameView.text = routeInfo.routeName
+
+                                    val rightDir = chooseDirectionViewModel.rightDirection.filterNotNull().first() as StmBusTransitDataWithStopNames
+
+                                    val leftButton = findViewById<MaterialButton>(R.id.route_0)
+                                    val rightButton = findViewById<MaterialButton>(R.id.route_1)
+                                    leftButton.setOnClickListener {
+                                        intent.putExtra(ExtrasTagNames.ROUTE_INFO_WITH_STOP_NAMES, leftDir)
+                                        startActivity(intent)
+                                    }
+                                    rightButton.setOnClickListener {
+                                        intent.putExtra(ExtrasTagNames.ROUTE_INFO_WITH_STOP_NAMES, rightDir)
+                                        startActivity(intent)
+                                    }
+                                    leftDescr.text = getString(R.string.from_to, leftDir.stopNames.first(), leftDir.stopNames.last())
+                                    rightDescr.text = getString(R.string.from_to, rightDir.stopNames.first(), rightDir.stopNames.last())
+
+                                    if (leftDir.stmBusItem.direction == "est" || leftDir.stmBusItem.direction == "ouest") {
+                                        leftButton.text = getString(R.string.west)
+                                        rightButton.text = getString(R.string.east)
+                                    }
+                                    else {
+                                        leftButton.text = getString(R.string.north)
+                                        rightButton.text = getString(R.string.south)
+                                    }
+                                }
+                                else if (isUnidirectional == true)
+                                    throw IllegalStateException("Unexpected data: StmBus being unidirectional...")
+                            }
                         }
                     }
-                    else if (dirs.size > 1){
-                        val jobs = roomViewModel.getStopNames(this, agency, dirs, bus)
-                        val headsign0 = headsigns[0]
-                        val headsign1 = headsigns[1]
-                        val dir0 = jobs.first.await()
-                        val dir1 = jobs.second.await()
-                        withContext(Dispatchers.Main) {
-                            findViewById<MaterialTextView>(R.id.description_route_0).text = headsign0
-                            findViewById<MaterialButton>(R.id.route_0).setOnClickListener {
-                                setIntent(intent, dir0 as ArrayList<String>, headsign0, dir0.last(), agency)
-                            }
-                            findViewById<MaterialTextView>(R.id.description_route_1).text = headsign1
-                            findViewById<MaterialButton>(R.id.route_1).setOnClickListener {
-                                setIntent(intent, dir1 as ArrayList<String>, headsign1, dir1.last(), agency)
-                            }
-                        }
-                    }
-                    else {
-                        throw IllegalStateException("Cannot have no directions for a transit")
-                    }
-                }
-                else -> {
-                    throw IllegalStateException("Wrong agency given for getting directions!")
                 }
             }
         }
-    }
-
-    private fun setIntent(intent : Intent, dir : ArrayList<String>, headsign: String, direction : String, agency: TransitAgency){
-        intent.putStringArrayListExtra("stops", dir)
-        intent.putExtra(ExtrasTagNames.HEADSIGN.name, headsign)
-        intent.putExtra(ExtrasTagNames.DIRECTION.name, direction)
-        intent.putExtra(ExtrasTagNames.AGENCY.name, agency)
-        startActivity(intent)
-    }
-
-    private enum class Orientation{
-        HORIZONTAL,VERTICAL
     }
 }

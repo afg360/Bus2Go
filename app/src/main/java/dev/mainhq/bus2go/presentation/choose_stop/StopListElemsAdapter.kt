@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go.presentation.ui.adapters
+package dev.mainhq.bus2go.presentation.choose_stop
 
 import android.view.View
 import android.widget.ImageView

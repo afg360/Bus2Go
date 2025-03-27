@@ -1,9 +1,9 @@
 package dev.mainhq.bus2go.domain.use_case.transit
 
-import dev.mainhq.bus2go.domain.entity.ExoFavouriteBusItem
-import dev.mainhq.bus2go.domain.entity.ExoFavouriteTrainItem
-import dev.mainhq.bus2go.domain.entity.FavouriteTransitData
-import dev.mainhq.bus2go.domain.entity.StmFavouriteBusItem
+import dev.mainhq.bus2go.domain.entity.ExoBusItem
+import dev.mainhq.bus2go.domain.entity.ExoTrainItem
+import dev.mainhq.bus2go.domain.entity.TransitData
+import dev.mainhq.bus2go.domain.entity.StmBusItem
 import dev.mainhq.bus2go.domain.repository.ExoRepository
 import dev.mainhq.bus2go.domain.repository.StmRepository
 import dev.mainhq.bus2go.utils.Time
@@ -17,19 +17,19 @@ class GetTransitTime(
 	private val stmRepository: StmRepository,
 ) {
 
-	suspend operator fun invoke(transitData: FavouriteTransitData): List<Time>{
+	suspend operator fun invoke(transitData: TransitData): List<Time>{
 		val curTime = Time.now()
 		when(transitData){
-			is ExoFavouriteBusItem -> return exoRepository.getStopTimes(
+			is ExoBusItem -> return exoRepository.getStopTimes(
 				transitData,
 				curTime
 			)
-			is ExoFavouriteTrainItem -> return exoRepository.getStopTimes(
+			is ExoTrainItem -> return exoRepository.getStopTimes(
 				transitData,
 				curTime
 			)
 
-			is StmFavouriteBusItem -> return stmRepository.getStopTimes(
+			is StmBusItem -> return stmRepository.getStopTimes(
 				transitData,
 				curTime
 			)

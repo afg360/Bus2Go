@@ -10,10 +10,10 @@ import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.TripsDAO
 import dev.mainhq.bus2go.data.data_source.local.datastore.PreferenceMapper
 import dev.mainhq.bus2go.domain.entity.stm.CalendarDates
 import dev.mainhq.bus2go.domain.repository.StmRepository
-import dev.mainhq.bus2go.domain.entity.FavouriteTransitData
-import dev.mainhq.bus2go.domain.entity.FavouriteTransitDataWithTime
+import dev.mainhq.bus2go.domain.entity.TransitData
+import dev.mainhq.bus2go.domain.entity.TransitDataWithTime
 import dev.mainhq.bus2go.domain.entity.RouteInfo
-import dev.mainhq.bus2go.domain.entity.StmFavouriteBusItem
+import dev.mainhq.bus2go.domain.entity.StmBusItem
 import dev.mainhq.bus2go.utils.FuzzyQuery
 import dev.mainhq.bus2go.utils.Time
 import kotlinx.coroutines.Dispatchers
@@ -64,7 +64,7 @@ class StmRepositoryImpl(
 		}
 	}
 
-	override suspend fun getStopTimes(stmTransitData: FavouriteTransitData, curTime: Time) =
+	override suspend fun getStopTimes(stmTransitData: TransitData, curTime: Time) =
 		withContext(Dispatchers.IO) {
 			stopsInfoDAO.getStopTimes(
 				stmTransitData.stopName,
@@ -82,7 +82,7 @@ class StmRepositoryImpl(
 			stopsInfoDAO.getStopTimes(stopName, curTime.getDayString(), headsign, routeId, curTime.getDayString())
 		}
 
-	override suspend fun getOldTimes(stmTransitData: FavouriteTransitData, curTime: Time) =
+	override suspend fun getOldTimes(stmTransitData: TransitData, curTime: Time) =
 		withContext(Dispatchers.IO) {
 			stopsInfoDAO.getOldTimes(
 				stmTransitData.stopName,
@@ -95,9 +95,9 @@ class StmRepositoryImpl(
 
 	//TODO move to FavouritesImpl?
 	override suspend fun getFavouriteStopTime(
-		stmFavouriteBusItem: StmFavouriteBusItem,
+		stmFavouriteBusItem: StmBusItem,
 		curTime: Time
-	): FavouriteTransitDataWithTime {
+	): TransitDataWithTime {
 		return withContext(Dispatchers.IO){
 			val stmFavouriteBusItemDto = PreferenceMapper.mapStmBusToDto(stmFavouriteBusItem)
 			stopsInfoDAO.getFavouriteStopTime(
@@ -107,7 +107,7 @@ class StmRepositoryImpl(
 				stmFavouriteBusItemDto.direction,
 				stmFavouriteBusItemDto.routeId.toInt(),
 				curTime.getTodayString()
-			).let { FavouriteTransitDataWithTime(stmFavouriteBusItem, it) }
+			).let { TransitDataWithTime(stmFavouriteBusItem, it) }
 
 		}
 	}

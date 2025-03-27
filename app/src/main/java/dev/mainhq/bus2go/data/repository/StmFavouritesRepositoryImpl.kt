@@ -4,7 +4,7 @@ import androidx.datastore.core.DataStore
 import dev.mainhq.bus2go.data.data_source.local.datastore.PreferenceMapper
 import dev.mainhq.bus2go.domain.repository.StmFavouritesRepository
 import dev.mainhq.bus2go.data.data_source.local.datastore.stm.entity.StmFavouritesDataDto
-import dev.mainhq.bus2go.domain.entity.StmFavouriteBusItem
+import dev.mainhq.bus2go.domain.entity.StmBusItem
 import kotlinx.collections.immutable.mutate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -15,13 +15,13 @@ class StmFavouritesRepositoryImpl(private val stmFavouritesDataStore: DataStore<
 
 		//TODO withContext(Dispatchers.IO) forall suspend fxn doing heavy computation
 
-	override suspend fun getStmBusFavourites(): List<StmFavouriteBusItem> {
+	override suspend fun getStmBusFavourites(): List<StmBusItem> {
 		return withContext(Dispatchers.IO) {
 			PreferenceMapper.mapStmBus(stmFavouritesDataStore.data.first())
 		}
 	}
 
-	override suspend fun removeStmBusFavourite(data: StmFavouriteBusItem) {
+	override suspend fun removeStmBusFavourite(data: StmBusItem) {
 		withContext(Dispatchers.IO){
 			stmFavouritesDataStore.updateData { stmFavouritesData ->
 				stmFavouritesData.copy(listSTM = stmFavouritesData.listSTM.mutate {
@@ -31,7 +31,7 @@ class StmFavouritesRepositoryImpl(private val stmFavouritesDataStore: DataStore<
 		}
 	}
 
-	override suspend fun addStmBusFavourite(data: StmFavouriteBusItem) {
+	override suspend fun addStmBusFavourite(data: StmBusItem) {
 		withContext(Dispatchers.IO){
 			stmFavouritesDataStore.updateData { stmFavouritesData ->
 				stmFavouritesData.copy(listSTM = stmFavouritesData.listSTM.mutate {

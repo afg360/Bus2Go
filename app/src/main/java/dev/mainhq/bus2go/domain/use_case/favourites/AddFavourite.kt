@@ -1,9 +1,9 @@
 package dev.mainhq.bus2go.domain.use_case.favourites
 
-import dev.mainhq.bus2go.domain.entity.FavouriteTransitData
-import dev.mainhq.bus2go.domain.entity.ExoFavouriteBusItem
-import dev.mainhq.bus2go.domain.entity.ExoFavouriteTrainItem
-import dev.mainhq.bus2go.domain.entity.StmFavouriteBusItem
+import dev.mainhq.bus2go.domain.entity.TransitData
+import dev.mainhq.bus2go.domain.entity.ExoBusItem
+import dev.mainhq.bus2go.domain.entity.ExoTrainItem
+import dev.mainhq.bus2go.domain.entity.StmBusItem
 import dev.mainhq.bus2go.domain.repository.ExoFavouritesRepository
 import dev.mainhq.bus2go.domain.repository.StmFavouritesRepository
 
@@ -12,11 +12,11 @@ class AddFavourite(
 	private val stmFavouritesRepository: StmFavouritesRepository
 ) {
 
-	suspend operator fun invoke(favourite: FavouriteTransitData){
+	suspend operator fun invoke(favourite: TransitData){
 		when(favourite){
-			is StmFavouriteBusItem -> stmFavouritesRepository.addStmBusFavourite(favourite)
-			is ExoFavouriteTrainItem -> exoFavouritesRepo.addExoTrainFavourite(favourite)
-			is ExoFavouriteBusItem -> exoFavouritesRepo.addExoBusFavourite(favourite)
+			is StmBusItem -> stmFavouritesRepository.addStmBusFavourite(favourite)
+			is ExoTrainItem -> exoFavouritesRepo.addExoTrainFavourite(favourite)
+			is ExoBusItem -> exoFavouritesRepo.addExoBusFavourite(favourite)
 		}
 	}
 }

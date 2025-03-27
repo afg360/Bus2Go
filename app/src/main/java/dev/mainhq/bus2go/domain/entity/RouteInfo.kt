@@ -15,11 +15,14 @@ sealed class RouteInfo : Parcelable {
 	abstract val routeName : String
 }
 
+@Parcelize
 data class StmBusRouteInfo(override val routeId: String, override val routeName: String)
 	: RouteInfo()
 
+@Parcelize
 data class ExoBusRouteInfo(override val routeId: String, override val routeName: String)
 	: RouteInfo()
 
+@Parcelize
 data class ExoTrainRouteInfo(override val routeId: String, override val routeName: String, val trainNum: Int)
 	: RouteInfo()

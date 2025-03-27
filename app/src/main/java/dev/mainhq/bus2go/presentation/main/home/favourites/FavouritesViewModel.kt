@@ -2,17 +2,13 @@ package dev.mainhq.bus2go.presentation.main.home.favourites
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dev.mainhq.bus2go.domain.entity.FavouriteTransitData
-import dev.mainhq.bus2go.domain.entity.FavouriteTransitDataWithTime
+import dev.mainhq.bus2go.domain.entity.TransitDataWithTime
 import dev.mainhq.bus2go.domain.use_case.FavouritesUseCases
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -32,13 +28,13 @@ class FavouritesViewModel(
      * A helper class that let's us know if a favouriteTransitDataWithTime is selected
      **/
     private data class FavouriteTransitDataWithTimeAndSelection(
-        val favouriteTransitDataWithTime: FavouriteTransitDataWithTime,
+        val transitDataWithTime: TransitDataWithTime,
         var isSelected: Boolean
     )
 
     private val _favouriteTransitData: MutableStateFlow<List<FavouriteTransitDataWithTimeAndSelection>> = MutableStateFlow(listOf())
     val favouriteTransitData get() = _favouriteTransitData
-        .map { list -> list.map { it.favouriteTransitDataWithTime } }
+        .map { list -> list.map { it.transitDataWithTime } }
         .stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000),
@@ -91,7 +87,7 @@ class FavouritesViewModel(
     fun selectAllForRemoval(){
         _favouriteTransitData.update { list ->
             list.map { FavouriteTransitDataWithTimeAndSelection(
-                it.favouriteTransitDataWithTime,
+                it.transitDataWithTime,
                 true
             )}
         }
@@ -100,7 +96,7 @@ class FavouritesViewModel(
     fun deselectAllForRemoval(){
         _favouriteTransitData.update { list ->
             list.map { FavouriteTransitDataWithTimeAndSelection(
-                it.favouriteTransitDataWithTime,
+                it.transitDataWithTime,
                 false
             )}
         }
@@ -110,7 +106,7 @@ class FavouritesViewModel(
         //FIXME isnt even necessary to call this?
         _favouriteTransitData.update { list ->
             list.map { FavouriteTransitDataWithTimeAndSelection(
-                it.favouriteTransitDataWithTime,
+                it.transitDataWithTime,
                 false
             )}
         }
@@ -122,12 +118,12 @@ class FavouritesViewModel(
                 .filter { it.isSelected }
                 .map { favouriteTransitData ->
                     async {
-                        favouritesUseCases.removeFavourite(favouriteTransitData.favouriteTransitDataWithTime.favouriteTransitData)
+                        favouritesUseCases.removeFavourite(favouriteTransitData.transitDataWithTime.favouriteTransitData)
                         _favouriteTransitData.update {
                             val list = it.toMutableList()
                             list.removeIf { data ->
-                                data.favouriteTransitDataWithTime.favouriteTransitData ==
-                                        favouriteTransitData.favouriteTransitDataWithTime
+                                data.transitDataWithTime.favouriteTransitData ==
+                                        favouriteTransitData.transitDataWithTime
                                             .favouriteTransitData
                             }
                             return@update list

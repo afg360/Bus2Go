@@ -29,6 +29,7 @@ import com.google.android.material.search.SearchView
 import com.google.android.material.search.SearchView.TransitionState
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
+import dev.mainhq.bus2go.presentation.choose_direction.ChooseDirection
 import dev.mainhq.bus2go.presentation.search_transit.SearchTransit
 import dev.mainhq.bus2go.presentation.settings.SettingsActivity
 import dev.mainhq.bus2go.presentation.main.home.favourites.FavouritesFragment
@@ -68,7 +69,11 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
         //recyclerView for when searching
         val recyclerView = view.findViewById<RecyclerView>(R.id.search_recycle_view)
         val layoutManager = LinearLayoutManager(this@HomeFragment.context)
-        val busListAdapter = BusListElemsAdapter(ArrayList())
+        val busListAdapter = BusListElemsAdapter(ArrayList()){ data ->
+            val intent = Intent(requireContext(), ChooseDirection::class.java)
+            intent.putExtra(ExtrasTagNames.ROUTE_INFO, data)
+            requireContext().startActivity(intent)
+        }
         recyclerView.adapter = busListAdapter
         recyclerView.layoutManager = layoutManager
 
@@ -174,8 +179,8 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
     override fun onPause() {
         super.onPause()
         view?.findViewById<AppBarLayout>(R.id.mainAppBar)?.apply {
-            children.elementAt(0).visibility = View.VISIBLE
-            children.elementAt(1).visibility = View.GONE
+            children.elementAt(0).visibility = VISIBLE
+            children.elementAt(1).visibility = GONE
         }
     }
 }

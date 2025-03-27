@@ -3,8 +3,8 @@ package dev.mainhq.bus2go.domain.repository
 import dev.mainhq.bus2go.domain.entity.RouteInfo
 import dev.mainhq.bus2go.domain.entity.stm.CalendarDates
 import dev.mainhq.bus2go.domain.entity.stm.DirectionInfo
-import dev.mainhq.bus2go.domain.entity.FavouriteTransitData
-import dev.mainhq.bus2go.domain.entity.FavouriteTransitDataWithTime
+import dev.mainhq.bus2go.domain.entity.TransitData
+import dev.mainhq.bus2go.domain.entity.TransitDataWithTime
 import dev.mainhq.bus2go.domain.entity.stm.StmFavouriteBusItem
 import dev.mainhq.bus2go.utils.FuzzyQuery
 import dev.mainhq.bus2go.utils.Time
@@ -27,15 +27,15 @@ interface StmRepository {
 
 	suspend fun getStopNames(headsigns: Pair<String, String>, routeId : String) : Pair<List<String>, List<String>>
 
-	suspend fun getOldTimes(stmTransitData: FavouriteTransitData, curTime: Time): List<Time>
-	suspend fun getStopTimes(stmTransitData: FavouriteTransitData, curTime: Time) : List<Time>
+	suspend fun getOldTimes(stmTransitData: TransitData, curTime: Time): List<Time>
+	suspend fun getStopTimes(stmTransitData: TransitData, curTime: Time) : List<Time>
 	/**
 	 * Used for creating new alarm
 	 **/
 	suspend fun getStopTimes(stopName : String, headsign: String, routeId: Int, curTime: Time) : List<Time>
 	/** @param curTime The current time. The stop time retrieved will correspond to the one nearest to now */
 	//FIXME instead of querying once the favourite thing, query all the stop times and cache them somewhere
-	suspend fun getFavouriteStopTime(stmFavouriteBusItem: StmFavouriteBusItem, curTime: Time) : FavouriteTransitDataWithTime
+	suspend fun getFavouriteStopTime(stmFavouriteBusItem: StmFavouriteBusItem, curTime: Time) : TransitDataWithTime
 
 	suspend fun getDirectionInfo(routeId : Int) : List<DirectionInfo>
 }

@@ -14,11 +14,12 @@ import dev.mainhq.bus2go.data.repository.SettingsRepositoryImpl
 import dev.mainhq.bus2go.data.repository.StmFavouritesRepositoryImpl
 import dev.mainhq.bus2go.data.repository.StmRepositoryImpl
 import dev.mainhq.bus2go.domain.use_case.FavouritesUseCases
-import dev.mainhq.bus2go.domain.use_case.TransitInfoUseCases
+import dev.mainhq.bus2go.domain.use_case.TransitTimeInfoUseCases
 import dev.mainhq.bus2go.domain.use_case.favourites.AddFavourite
 import dev.mainhq.bus2go.domain.use_case.favourites.GetFavouritesWithTimeData
 import dev.mainhq.bus2go.domain.use_case.favourites.RemoveFavourite
 import dev.mainhq.bus2go.domain.use_case.settings.IsRealTimeEnabled
+import dev.mainhq.bus2go.domain.use_case.transit.GetDirections
 import dev.mainhq.bus2go.domain.use_case.transit.GetRouteInfo
 import dev.mainhq.bus2go.domain.use_case.transit.GetStopNames
 import dev.mainhq.bus2go.domain.use_case.transit.GetTransitTime
@@ -87,7 +88,7 @@ class AppContainer(applicationContext: Context) {
 		)
 	)
 
-	val transitInfoUseCases = TransitInfoUseCases(
+	val transitTimeInfoUseCases = TransitTimeInfoUseCases(
 		GetRouteInfo(
 			exoRepository,
 			stmRepository,
@@ -102,7 +103,18 @@ class AppContainer(applicationContext: Context) {
 		)
 	)
 
+	//FIXME not ideal to make them like this...
 	val getTransitTime = GetTransitTime(
+		exoRepository,
+		stmRepository
+	)
+
+	val getDirections = GetDirections(
+		exoRepository,
+		stmRepository
+	)
+
+	val getStopNames = GetStopNames(
 		exoRepository,
 		stmRepository
 	)

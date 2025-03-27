@@ -1,10 +1,10 @@
 package dev.mainhq.bus2go.domain.repository
 
 import dev.mainhq.bus2go.domain.entity.RouteInfo
-import dev.mainhq.bus2go.domain.entity.FavouriteTransitData
-import dev.mainhq.bus2go.domain.entity.FavouriteTransitDataWithTime
-import dev.mainhq.bus2go.domain.entity.ExoFavouriteBusItem
-import dev.mainhq.bus2go.domain.entity.ExoFavouriteTrainItem
+import dev.mainhq.bus2go.domain.entity.TransitData
+import dev.mainhq.bus2go.domain.entity.TransitDataWithTime
+import dev.mainhq.bus2go.domain.entity.ExoBusItem
+import dev.mainhq.bus2go.domain.entity.ExoTrainItem
 import dev.mainhq.bus2go.utils.FuzzyQuery
 import dev.mainhq.bus2go.utils.Time
 import java.time.LocalDate
@@ -20,11 +20,11 @@ interface ExoRepository {
 	/** @param direction AKA headsign */
 	suspend fun getStopNames(directions : Pair<String, String>) : Pair<List<String>, List<String>>
 	suspend fun getTrainStopNames(routeId : String) : Pair<List<String>, List<String>>
-	suspend fun getStopTimes(exoTransitData: FavouriteTransitData, curTime: Time) : List<Time>
-	suspend fun getOldStopTimes(exoTransitData: FavouriteTransitData, curTime: Time) : List<Time>
-	suspend fun getFavouriteBusStopTime(exoFavouriteBusItem: ExoFavouriteBusItem, curTime: Time) : FavouriteTransitDataWithTime
-	suspend fun getTrainStopTimes(exoTrainItem: ExoFavouriteTrainItem, curTime: Time) : List<Time>
-	suspend fun getFavouriteTrainStopTime(exoFavouriteTrainItem: ExoFavouriteTrainItem, curTime: Time) : FavouriteTransitDataWithTime
+	suspend fun getStopTimes(exoTransitData: TransitData, curTime: Time) : List<Time>
+	suspend fun getOldStopTimes(exoTransitData: TransitData, curTime: Time) : List<Time>
+	suspend fun getFavouriteBusStopTime(exoFavouriteBusItem: ExoBusItem, curTime: Time) : TransitDataWithTime
+	suspend fun getTrainStopTimes(exoTrainItem: ExoTrainItem, curTime: Time) : List<Time>
+	suspend fun getFavouriteTrainStopTime(exoFavouriteTrainItem: ExoTrainItem, curTime: Time) : TransitDataWithTime
 
 	suspend fun getTripHeadsigns(routeId : String) : List<String>
 	suspend fun getRouteId() : List<String>

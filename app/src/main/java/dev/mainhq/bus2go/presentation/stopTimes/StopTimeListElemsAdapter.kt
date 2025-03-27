@@ -1,29 +1,24 @@
-package dev.mainhq.bus2go.presentation.ui.adapters
+package dev.mainhq.bus2go.presentation.stopTimes
 
 import android.app.Activity
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.OnClickListener
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import dev.mainhq.bus2go.R
-import android.icu.util.Calendar
 import com.google.android.material.textview.MaterialTextView
+import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
 import dev.mainhq.bus2go.utils.Time
-import java.time.Duration
 import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.Period
 
 //TODO
 //could add view/ontouchlistener to handle touch holding, etc.
 //may need to use a recycler view, but implement a base adapter instead...?
-class TimeListElemsAdapter(
+class StopTimeListElemsAdapter(
     private var timeData: List<Time>,
     private val fromAlarmCreation : Boolean
-) : RecyclerView.Adapter<TimeListElemsAdapter.ViewHolder>() {
+) : RecyclerView.Adapter<StopTimeListElemsAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(LayoutInflater.from(parent.context)
@@ -56,7 +51,7 @@ class TimeListElemsAdapter(
         holder.itemView.setOnClickListener {
             if (fromAlarmCreation) {
                 val resultIntent = Intent()
-                resultIntent.putExtra("TIME", time)
+                resultIntent.putExtra(ExtrasTagNames.TIME, time)
                 (it.context as Activity).apply {
                     setResult(Activity.RESULT_OK, resultIntent)
                     finish()

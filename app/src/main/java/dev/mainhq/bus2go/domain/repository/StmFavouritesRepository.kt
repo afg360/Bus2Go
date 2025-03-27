@@ -1,12 +1,12 @@
 package dev.mainhq.bus2go.domain.repository
 
-import dev.mainhq.bus2go.domain.entity.StmFavouriteBusItem
+import dev.mainhq.bus2go.domain.entity.StmBusItem
 
 interface StmFavouritesRepository {
 
-	suspend fun getStmBusFavourites(): List<StmFavouriteBusItem>
+	suspend fun getStmBusFavourites(): List<StmBusItem>
 
-	suspend fun removeStmBusFavourite(data : StmFavouriteBusItem)
+	suspend fun removeStmBusFavourite(data : StmBusItem)
 
-	suspend fun addStmBusFavourite(data : StmFavouriteBusItem)
+	suspend fun addStmBusFavourite(data : StmBusItem)
 }

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.OnClickListener
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textview.MaterialTextView
@@ -15,8 +16,10 @@ import dev.mainhq.bus2go.domain.entity.RouteInfo
 import dev.mainhq.bus2go.domain.entity.StmBusRouteInfo
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
 
-class BusListElemsAdapter(private var busData: List<RouteInfo>) :
-    RecyclerView.Adapter<BusListElemsAdapter.ViewHolder>() {
+class BusListElemsAdapter(
+    private var busData: List<RouteInfo>,
+    private val onClickListener: (RouteInfo) -> Unit
+) : RecyclerView.Adapter<BusListElemsAdapter.ViewHolder>() {
     //when doing bus num >= 400, then color = green
     // if  >= 300, then color = black
     // else blue
@@ -33,13 +36,8 @@ class BusListElemsAdapter(private var busData: List<RouteInfo>) :
         val data = busData[position]
         holder.busNumView.text = data.routeId
         holder.busDirView.text = data.routeName
-        holder.itemView.setOnClickListener {
-            val intent = Intent(it.context, ChooseDirection::class.java)
-            intent.putExtra(ExtrasTagNames.ROUTE_INFO, data)
-            it.context.startActivity(intent)
-            it.clearFocus()
-        }
-        
+        holder.itemView.setOnClickListener{ onClickListener(data) }
+
         when(data){
             is ExoBusRouteInfo -> {
                 holder.busNumView.setTextColor(holder.itemView.resources .getColor(R.color.basic_purple, null))

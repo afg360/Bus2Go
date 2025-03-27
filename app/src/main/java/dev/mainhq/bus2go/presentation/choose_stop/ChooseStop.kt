@@ -1,6 +1,5 @@
 package dev.mainhq.bus2go.presentation.choose_stop
 
-import android.os.Build
 import android.os.Bundle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -8,11 +7,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import dev.mainhq.bus2go.presentation.base.BaseActivity
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.presentation.ui.adapters.StopListElemsAdapterExoOther
-import dev.mainhq.bus2go.presentation.ui.adapters.StopListElemsAdapterExoTrain
-import dev.mainhq.bus2go.presentation.ui.adapters.StopListElemsAdapterStm
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
-import dev.mainhq.bus2go.utils.TransitAgency
 import dev.mainhq.bus2go.presentation.main.home.favourites.FavouritesViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -36,11 +31,6 @@ class ChooseStop() : BaseActivity() {
         //terminus (i.e. to destination) = data.last(), needed for exo because some of the headsigns are the same
         val stopNames : List<String> = intent.getStringArrayListExtra("stops") ?: listOf()
 
-        val agency = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getSerializableExtra (ExtrasTagNames.AGENCY.name, TransitAgency::class.java) ?: throw AssertionError("AGENCY is Null")
-        } else {
-            intent.getSerializableExtra (ExtrasTagNames.AGENCY.name) as TransitAgency? ?: throw AssertionError("AGENCY is Null")
-        }
         if (stopNames.isNotEmpty()) {
             val recyclerView: RecyclerView = findViewById(R.id.stop_recycle_view)
             val layoutManager = LinearLayoutManager(applicationContext)
