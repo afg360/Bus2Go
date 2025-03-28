@@ -106,6 +106,7 @@ class AlarmCreationChooseBusDialog() : DialogFragment(R.layout.fragment_create_a
                         }
                         override fun onAccept() {
                             if (view.findViewById<MaterialTextView>(R.id.acceptAlarmCreation).tag == AVAILABLE) {
+                                /*
                                 view.findViewById<RecyclerView>(R.id.alarmDialogRecyclerView).forEach {
                                     if (it.findViewById<RadioButton>(R.id.addAlarmBusChoiceRadioButton).isChecked) {
                                         val intent = Intent(context, StopTimesActivity::class.java)
@@ -126,6 +127,8 @@ class AlarmCreationChooseBusDialog() : DialogFragment(R.layout.fragment_create_a
                                         //dismiss()
                                     }
                                 }
+
+                                 */
                             }
                         }
 
@@ -133,7 +136,7 @@ class AlarmCreationChooseBusDialog() : DialogFragment(R.layout.fragment_create_a
                     childFragmentManager.beginTransaction()
                         .add(R.id.createAlarmsDialogChooseBusBottomNav, bottomNavBar)
                         .commit()
-                     val list = favouritesViewModel.getAllBusInfo()
+                     //val list = favouritesViewModel.getAllBusInfo()
                      recyclerView = view.findViewById(R.id.alarmDialogRecyclerView)
                      val layoutManager = LinearLayoutManager(it)
                      layoutManager.orientation = LinearLayoutManager.VERTICAL

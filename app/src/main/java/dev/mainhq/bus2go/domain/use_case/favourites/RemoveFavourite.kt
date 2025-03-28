@@ -1,9 +1,9 @@
 package dev.mainhq.bus2go.domain.use_case.favourites
 
+import dev.mainhq.bus2go.domain.entity.ExoBusItem
+import dev.mainhq.bus2go.domain.entity.ExoTrainItem
+import dev.mainhq.bus2go.domain.entity.StmBusItem
 import dev.mainhq.bus2go.domain.entity.TransitData
-import dev.mainhq.bus2go.domain.entity.exo.ExoFavouriteBusItem
-import dev.mainhq.bus2go.domain.entity.exo.ExoFavouriteTrainItem
-import dev.mainhq.bus2go.domain.entity.stm.StmFavouriteBusItem
 import dev.mainhq.bus2go.domain.repository.ExoFavouritesRepository
 import dev.mainhq.bus2go.domain.repository.StmFavouritesRepository
 
@@ -18,9 +18,9 @@ class RemoveFavourite(
 		//val exoBusFavourites = favourites.filterIsInstance<ExoFavouriteBusItem>()
 		//val exoTrainFavourites = favourites.filterIsInstance<ExoFavouriteTrainItem>()
 		when(favourite){
-			is StmFavouriteBusItem -> stmFavouritesRepository.removeStmBusFavourite(favourite)
-			is ExoFavouriteTrainItem -> exoFavouritesRepo.removeExoTrainFavourite(favourite)
-			is ExoFavouriteBusItem -> exoFavouritesRepo.removeExoBusFavourite(favourite)
+			is StmBusItem -> stmFavouritesRepository.removeStmBusFavourite(favourite)
+			is ExoTrainItem -> exoFavouritesRepo.removeExoTrainFavourite(favourite)
+			is ExoBusItem -> exoFavouritesRepo.removeExoBusFavourite(favourite)
 		}
 	}
 }

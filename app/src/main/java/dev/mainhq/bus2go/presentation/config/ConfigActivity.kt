@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import dev.mainhq.bus2go.presentation.base.BaseActivity
 import dev.mainhq.bus2go.R
+import dev.mainhq.bus2go.data.data_source.local.datastore.app_state.appStateDataStore
 
 //todo set lang
 //todo set color theme and or icon
@@ -40,7 +41,7 @@ class ConfigActivity : BaseActivity() {
 
 
     private suspend fun setApplicationState(){
-        applicationStateDataStore.edit { settings ->
+        appStateDataStore.edit { settings ->
             settings[booleanPreferencesKey("isFirstTime")] = false
         }
     }

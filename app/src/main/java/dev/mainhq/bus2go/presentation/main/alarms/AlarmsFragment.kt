@@ -69,7 +69,7 @@ class AlarmsFragment : Fragment(R.layout.fragment_alarms)  {
             //This recycler View is NOT in the xml. it is created for the dialog box specifically
             val recyclerView = RecyclerView(this)
             lifecycleScope.launch {
-                val list =  favouritesViewModel.getAllBusInfo()
+                //val list =  favouritesViewModel.getAllBusInfo()
                 withContext(Dispatchers.Main){
                     if (list.isNotEmpty()) {
                         val layoutManager = LinearLayoutManager(view.context)

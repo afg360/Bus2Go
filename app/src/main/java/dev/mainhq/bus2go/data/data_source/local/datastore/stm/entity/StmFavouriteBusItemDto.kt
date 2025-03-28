@@ -3,6 +3,7 @@ package dev.mainhq.bus2go.data.data_source.local.datastore.stm.entity
 import dev.mainhq.bus2go.data.data_source.local.datastore.TransitDataDto
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -12,6 +13,7 @@ import kotlinx.serialization.descriptors.serialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
+@Parcelize
 @Serializable
 /**
  * @param routeId aka busNum.

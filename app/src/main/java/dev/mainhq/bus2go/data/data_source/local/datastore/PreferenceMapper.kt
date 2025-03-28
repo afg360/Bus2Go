@@ -5,13 +5,13 @@ import dev.mainhq.bus2go.data.data_source.local.datastore.exo.entity.ExoFavourit
 import dev.mainhq.bus2go.data.data_source.local.datastore.exo.entity.ExoFavouritesDataDto
 import dev.mainhq.bus2go.data.data_source.local.datastore.stm.entity.StmFavouriteBusItemDto
 import dev.mainhq.bus2go.data.data_source.local.datastore.stm.entity.StmFavouritesDataDto
-import dev.mainhq.bus2go.domain.entity.exo.ExoFavouriteBusItem
-import dev.mainhq.bus2go.domain.entity.exo.ExoFavouriteTrainItem
-import dev.mainhq.bus2go.domain.entity.stm.StmFavouriteBusItem
+import dev.mainhq.bus2go.domain.entity.ExoBusItem
+import dev.mainhq.bus2go.domain.entity.ExoTrainItem
+import dev.mainhq.bus2go.domain.entity.StmBusItem
 
 object PreferenceMapper {
 
-	fun mapStmBusToDto(stmBus: StmFavouriteBusItem): StmFavouriteBusItemDto {
+	fun mapStmBusToDto(stmBus: StmBusItem): StmFavouriteBusItemDto {
 		return StmFavouriteBusItemDto(
 			stmBus.stopName,
 			stmBus.routeId,
@@ -21,9 +21,9 @@ object PreferenceMapper {
 		)
 	}
 
-	fun mapStmBus(stmDto: StmFavouritesDataDto): List<StmFavouriteBusItem>{
+	fun mapStmBus(stmDto: StmFavouritesDataDto): List<StmBusItem>{
 		return stmDto.listSTM.map {
-			StmFavouriteBusItem(
+			StmBusItem(
 				it.routeId,
 				it.stopName,
 				it.direction,
@@ -33,7 +33,7 @@ object PreferenceMapper {
 		}
 	}
 
-	fun mapExoBusToDto(exoBus: ExoFavouriteBusItem): ExoFavouriteBusItemDto {
+	fun mapExoBusToDto(exoBus: ExoBusItem): ExoFavouriteBusItemDto {
 		return ExoFavouriteBusItemDto(
 			exoBus.stopName,
 			exoBus.routeId,
@@ -43,9 +43,9 @@ object PreferenceMapper {
 		)
 	}
 
-	fun mapExoBus(exoDto: ExoFavouritesDataDto): List<ExoFavouriteBusItem>{
+	fun mapExoBus(exoDto: ExoFavouritesDataDto): List<ExoBusItem>{
 		return exoDto.listExo.map {
-			ExoFavouriteBusItem(
+			ExoBusItem(
 				it.routeId,
 				it.stopName,
 				it.direction,
@@ -55,7 +55,7 @@ object PreferenceMapper {
 		}
 	}
 
-	fun mapExoTrainToDto(exoTrain: ExoFavouriteTrainItem): ExoFavouriteTrainItemDto {
+	fun mapExoTrainToDto(exoTrain: ExoTrainItem): ExoFavouriteTrainItemDto {
 		return ExoFavouriteTrainItemDto(
 			exoTrain.stopName,
 			exoTrain.routeId,
@@ -66,9 +66,9 @@ object PreferenceMapper {
 		)
 	}
 
-	fun mapExoTrain(exoDto: ExoFavouritesDataDto): List<ExoFavouriteTrainItem>{
+	fun mapExoTrain(exoDto: ExoFavouritesDataDto): List<ExoTrainItem>{
 		return exoDto.listExoTrain.map {
-			ExoFavouriteTrainItem(
+			ExoTrainItem(
 				it.routeId,
 				it.stopName,
 				it.direction,

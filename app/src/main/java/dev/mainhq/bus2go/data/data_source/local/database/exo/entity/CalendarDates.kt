@@ -3,7 +3,6 @@ package dev.mainhq.bus2go.data.data_source.local.database.exo.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
-import dev.mainhq.bus2go.data.data_source.local.stm.entity.Calendar
 
 @Entity(primaryKeys = ["service_id", "date"],
 	foreignKeys = [

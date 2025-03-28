@@ -8,8 +8,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.materialswitch.MaterialSwitch
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.presentation.ui.fragments.alarms.Alarms
 import dev.mainhq.bus2go.data.data_source.local.datastore.alarms.Alarm
+import dev.mainhq.bus2go.presentation.main.alarms.AlarmsFragment
 
 class AlarmsListElemAdapter(private val list : List<Alarm>)
     : RecyclerView.Adapter<AlarmsListElemAdapter.ViewHolder>() {
@@ -45,7 +45,7 @@ class AlarmsListElemAdapter(private val list : List<Alarm>)
         holder.materialSwitch.text = list.toString()
         if (data.isOn) holder.materialSwitch.isChecked = true
         holder.materialSwitch.setOnClickListener {
-            holder.itemView.findFragment<Alarms>().alarmViewModel
+            holder.itemView.findFragment<AlarmsFragment>().alarmViewModel
                 .updateLiveActivatedState(data.id, holder.materialSwitch.isChecked)
         }
         //holder.itemView.setOnClickListener {

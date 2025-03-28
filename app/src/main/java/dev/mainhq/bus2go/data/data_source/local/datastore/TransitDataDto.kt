@@ -1,6 +1,7 @@
 package dev.mainhq.bus2go.data.data_source.local.datastore
 
 import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
 @Serializable

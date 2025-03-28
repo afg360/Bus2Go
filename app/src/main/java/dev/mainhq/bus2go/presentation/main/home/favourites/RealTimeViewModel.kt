@@ -8,7 +8,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.preference.PreferenceManager
 import dev.mainhq.bus2go.data.data_source.local.datastore.deprecated.StmBusData
 import dev.mainhq.bus2go.utils.Time
-import dev.mainhq.bus2go.utils.TransitAgency
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.okhttp.OkHttp
@@ -36,6 +35,7 @@ import java.util.concurrent.TimeUnit
 //TODO cache or save the data somewhere in case used and disconnected
 class RealTimeViewModel(application : Application) : AndroidViewModel(application) {
 
+    /*
     //perhaps store also the port number in the config/.env file
     //need to update this value when the user makes changes here
     private val _domainName : MutableLiveData<String> = MutableLiveData("0.0.0.0")
@@ -233,6 +233,7 @@ class RealTimeViewModel(application : Application) : AndroidViewModel(applicatio
             }
         }
     }
+     */
 }
 
 
