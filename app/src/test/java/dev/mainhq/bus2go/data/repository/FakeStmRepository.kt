@@ -15,66 +15,31 @@ import kotlin.random.Random
 
 class FakeStmRepository: StmRepository {
 
-	val stmRouteInfo =  listOf(
-		StmBusRouteInfo(
-			230.toString(),
-			"STM BUS 230"
-		),
-		StmBusRouteInfo(
-			1.toString(),
-			"Un metro STN... ligne 1"
-		),
-		//
-		StmBusRouteInfo(
-			"SomeText",
-			"STM error should happen"
-		)
+	private val stmRouteIds = listOf(
+		230.toString(),
+		1.toString(), //"metro"
+		"SomeText", //"wrong" shit
+		192.toString()
 	)
 
-	val stmTransitData = listOf(
-		StmBusItem(
-			"192",
-			"Some First stopName",
-			"Est",
-			0,
-			"LastStop written"
-		),
-		StmBusItem(
-			"192",
-			"Second stopName",
-			"Est",
-			0,
-			"LastStop written"
-		),
-		StmBusItem(
-			"192",
-			"Last stopName",
-			"Est",
-			0,
-			"LastStop written"
-		),
-		StmBusItem(
-			"192",
-			"Some First Other stopName",
-			"Ouest",
-			1,
-			"LastStop written"
-		),
-		StmBusItem(
-			"192",
-			"Second Other stopName",
-			"Ouest",
-			1,
-			"LastStop written"
-		),
-		StmBusItem(
-			"192",
-			"Last Other stopName",
-			"Ouest",
-			1,
-			"Last Other written"
-		)
-	)
+	val stmRouteInfo: List<StmBusRouteInfo> = stmRouteIds.map {
+		if (it.all { it.isDigit() }){
+			if (it.toInt() > 5) StmBusRouteInfo(it, "STM BUS $it")
+			else StmBusRouteInfo(it, "Un metro STM... ligne $it")
+		}
+		else StmBusRouteInfo(it, "STM error should happen")
+	}
+
+	val stmTransitData = stmRouteInfo.map {
+		val list = mutableListOf<StmBusItem>()
+		for (i in 1..5)
+			list.add(StmBusItem(it.routeId, "StopName $i", "Est", 0, "StopName 5"))
+
+		for (i in 5 downTo 1)
+			list.add(StmBusItem(it.routeId, "StopName $i", "Ouest", 1, "StopName 1"))
+		list
+	}.flatten()
+
 
 	val stopTimes = hashMapOf<StmBusItem, Time>()
 
@@ -89,7 +54,7 @@ class FakeStmRepository: StmRepository {
 	}
 
 	override suspend fun getAllCalendarDates(): List<CalendarDates> {
-		TODO("Not yet implemented")
+		throw IllegalStateException("Not implemented")
 	}
 
 
@@ -117,7 +82,7 @@ class FakeStmRepository: StmRepository {
 	}
 
 	override suspend fun getOldTimes(stmTransitData: TransitData, curTime: Time): List<Time> {
-		TODO("Not yet implemented")
+		throw IllegalStateException("Not implemented")
 	}
 
 	override suspend fun getStopTimes(stmTransitData: TransitData, curTime: Time): List<Time> {
@@ -145,6 +110,9 @@ class FakeStmRepository: StmRepository {
 			.first()
 	}
 
+	/**
+	 * @throws NumberFormatException If the stored routeId contains some wrongly formatted routeId
+	 **/
 	override suspend fun getDirectionInfo(routeId: Int): List<DirectionInfo> {
 		return stmTransitData.filter { it.routeId.toInt() == routeId }
 			.map { DirectionInfo(it.direction, it.directionId)

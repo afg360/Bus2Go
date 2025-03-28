@@ -2,6 +2,7 @@ package dev.mainhq.bus2go.di
 
 import android.content.Context
 import androidx.room.Room
+import dev.mainhq.bus2go.data.core.LoggerImpl
 import dev.mainhq.bus2go.data.data_source.local.database.exo.AppDatabaseExo
 import dev.mainhq.bus2go.data.data_source.local.database.stm.AppDatabaseSTM
 import dev.mainhq.bus2go.data.data_source.local.datastore.app_state.appStateDataStore
@@ -69,6 +70,8 @@ class AppContainer(applicationContext: Context) {
 		applicationContext
 	)
 
+	private val loggerImpl = LoggerImpl()
+
 	val favouritesUseCases = FavouritesUseCases(
 		GetFavouritesWithTimeData(
 			exoFavouritesRepository,
@@ -95,6 +98,7 @@ class AppContainer(applicationContext: Context) {
 			stmRepository,
 		),
 		GetStopNames(
+			loggerImpl,
 			exoRepository,
 			stmRepository
 		),
@@ -126,6 +130,7 @@ class AppContainer(applicationContext: Context) {
 	)
 
 	val getStopNames = GetStopNames(
+		loggerImpl,
 		exoRepository,
 		stmRepository
 	)

@@ -1,6 +1,6 @@
 package dev.mainhq.bus2go.domain.use_case.transit
 
-import android.util.Log
+import dev.mainhq.bus2go.domain.core.Logger
 import dev.mainhq.bus2go.domain.entity.ExoBusRouteInfo
 import dev.mainhq.bus2go.domain.entity.ExoTrainRouteInfo
 import dev.mainhq.bus2go.domain.entity.RouteInfo
@@ -13,6 +13,7 @@ import dev.mainhq.bus2go.domain.repository.StmRepository
  * Also used to get the directions.
  **/
 class GetStopNames(
+	private val logger: Logger,
 	private val exoRepository: ExoRepository,
 	private val stmRepository: StmRepository
 ) {
@@ -45,17 +46,17 @@ class GetStopNames(
 							),
 							routeInfo.routeId
 						)
-					} else {
-						//Log.w(
-						//	"STM_BUS_NUM",
-						//	"A metro bus num was given... not dealing with this shit for now..."
-						//)
-						//return Pair(listOf(), listOf())
-						return null
+					}
+					else {
+						logger.warn(
+							"STM_BUS_NUM",
+							"A metro bus num was given... not dealing with this shit for now..."
+						)
+						return Pair(listOf(), listOf())
 					}
 				}
 				catch (nfm: NumberFormatException){
-					//Log.e("STM_ROUTE_ID", "Expected an integer in the db but received a string")
+					logger.error("STM_ROUTE_ID", "Expected an integer in the db but received a string", null)
 					return null
 				}
 			}

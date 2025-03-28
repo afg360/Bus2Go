@@ -10,139 +10,44 @@ import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.domain.entity.TransitDataWithTime
 import dev.mainhq.bus2go.domain.repository.ExoRepository
 import dev.mainhq.bus2go.domain.entity.FuzzyQuery
+import dev.mainhq.bus2go.domain.entity.StmBusItem
 import java.time.LocalDate
 import kotlin.random.Random
 
 class FakeExoRepository: ExoRepository {
 
-	private val exoBusRouteInfo = listOf(
-		ExoBusRouteInfo(
-			230.toString(),
-			"EXO BUS 230"
-		),
-		ExoBusRouteInfo(
-			124.toString(),
-			"EXO BUS 124"
-		),
-		ExoBusRouteInfo(
-			"T140",
-			"EXO BUS T140"
-		)
+	private val exoBusRouteIds = listOf(
+		230.toString(),
+		1.toString(),
+		"T102",
+		192.toString()
 	)
 
-	val exoBusTransitData = listOf(
-		ExoBusItem(
-			"192",
-			"Some First stopName",
-			"Est",
-			"Long name 0",
-			"LastStop written"
-		),
-		ExoBusItem(
-			"192",
-			"Second stopName",
-			"Est",
-			"Long name 1",
-			"LastStop written"
-		),
-		ExoBusItem(
-			"192",
-			"Last stopName",
-			"Est",
-			"Long name 2",
-			"LastStop written"
-		),
-		ExoBusItem(
-			"192",
-			"Some First Other stopName",
-			"Ouest",
-			"Long name 3",
-			"LastStop written"
-		),
-		ExoBusItem(
-			"192",
-			"Second Other stopName",
-			"Ouest",
-			"Long name 3",
-			"LastStop written"
-		),
-		ExoBusItem(
-			"192",
-			"Last Other stopName",
-			"Ouest",
-			"Long name 4",
-			"Last Other written"
-		)
-	)
+	private val exoBusRouteInfo = exoBusRouteIds.map { ExoBusRouteInfo(it, "EXO BUS $it") }
 
-	private val exoTrainRouteInfo = listOf(
-		ExoTrainRouteInfo(
-			230.toString(),
-			"EXO TRAIN 230",
-			1
-		),
-		ExoTrainRouteInfo(
-			124.toString(),
-			"EXO TRAIN 124",
-			5
-		),
-		ExoTrainRouteInfo(
-			10.toString(),
-			"EXO TRAIN 10",
-			3
-		)
-	)
+	val exoBusTransitData = exoBusRouteInfo.map {
+		val list = mutableListOf<ExoBusItem>()
+		for (i in 1..5)
+			list.add(ExoBusItem(it.routeId, "StopName $i", "Est", "Route Long Name 1", "StopName 5"))
 
-	private val exoTrainTransitData = listOf(
-		ExoTrainItem(
-			"192",
-			"Some First stopName",
-			"Est",
-			1,
-			"LastStop written",
-			directionId = 0
-		),
-		ExoTrainItem(
-			"192",
-			"Second stopName",
-			"Est",
-			1,
-			"LastStop written",
-			directionId = 0
-		),
-		ExoTrainItem(
-			"192",
-			"Last stopName",
-			"Est",
-			1,
-			"LastStop written",
-			directionId = 0
-		),
-		ExoTrainItem(
-			"192",
-			"Some First Other stopName",
-			"Ouest",
-			1,
-			"LastStop written",
-			directionId = 1
-		),
-		ExoTrainItem(
-			"192",
-			"Second Other stopName",
-			"Ouest",
-			1,
-			"LastStop written",
-			directionId = 1
-		),
-		ExoTrainItem(
-			"192",
-			"Last Other stopName",
-			"Ouest",
-			1,
-			"Last Other written",
-			directionId = 1
-		)
-	)
+		for (i in 5 downTo 1)
+			list.add(ExoBusItem(it.routeId, "StopName $i", "Ouest", "Route Long Name 2 REVERSE", "StopName 1 (Last Other)"))
+		list
+	}.flatten()
+
+
+	private val exoTrainRouteInfo = (1..5).map { ExoTrainRouteInfo(it.toString(), "EXO TRAIN $it", it) }
+
+	private val exoTrainTransitData = exoTrainRouteInfo.map{
+		val list = mutableListOf<ExoTrainItem>()
+		for (i in 1..5)
+			list.add(ExoTrainItem(it.routeId, "StopName $i", "Est", it.trainNum, "Route Long Name 1", 0))
+
+		for (i in 5 downTo 1)
+			list.add(ExoTrainItem(it.routeId, "StopName $i", "Ouest", it.trainNum, "Route Long Name 2 REVERSE", 1))
+		list
+	}.flatten()
+
 
 	val stopTimesBus = hashMapOf<ExoBusItem, Time>()
 	val stopTimesTrain = hashMapOf<ExoTrainItem, Time>()
@@ -189,7 +94,7 @@ class FakeExoRepository: ExoRepository {
 	}
 
 	override suspend fun getOldStopTimes(exoTransitData: TransitData, curTime: Time): List<Time> {
-		TODO("Not yet implemented")
+		throw IllegalStateException("Not implemented")
 	}
 
 	override suspend fun getFavouriteBusStopTime(
