@@ -2,7 +2,7 @@ package dev.mainhq.bus2go.domain.use_case.transit
 
 import dev.mainhq.bus2go.domain.repository.ExoRepository
 import dev.mainhq.bus2go.domain.repository.StmRepository
-import dev.mainhq.bus2go.utils.Time
+import dev.mainhq.bus2go.domain.entity.Time
 import java.time.LocalDate
 
 class GetMinDateForUpdate(

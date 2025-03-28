@@ -5,7 +5,7 @@ import dev.mainhq.bus2go.domain.repository.ExoFavouritesRepository
 import dev.mainhq.bus2go.domain.repository.ExoRepository
 import dev.mainhq.bus2go.domain.repository.StmFavouritesRepository
 import dev.mainhq.bus2go.domain.repository.StmRepository
-import dev.mainhq.bus2go.utils.Time
+import dev.mainhq.bus2go.domain.entity.Time
 
 //should not only take favourites but also the time
 //(and since the time is periodically calculated, perhaps it should be sent as a flow instead?

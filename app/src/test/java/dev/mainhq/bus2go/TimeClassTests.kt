@@ -1,6 +1,6 @@
 package dev.mainhq.bus2go
 
-import dev.mainhq.bus2go.utils.Time
+import dev.mainhq.bus2go.domain.entity.Time
 import junit.framework.TestCase.assertEquals
 import org.junit.Test
 import java.time.LocalDateTime

@@ -2,7 +2,7 @@ package dev.mainhq.bus2go.data.data_source.local.database.exo.dao;
 
 import androidx.room.Dao;
 import androidx.room.Query;
-import dev.mainhq.bus2go.utils.Time
+import dev.mainhq.bus2go.domain.entity.Time
 
 @Dao
 //FIXME doing today queries instead of calendar seem to disrupt everything...

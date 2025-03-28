@@ -7,7 +7,7 @@ import dev.mainhq.bus2go.domain.entity.stm.DirectionInfo
 import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.domain.entity.TransitDataWithTime
 import dev.mainhq.bus2go.utils.FuzzyQuery
-import dev.mainhq.bus2go.utils.Time
+import dev.mainhq.bus2go.domain.entity.Time
 import java.time.LocalDate
 
 /* Create an interface making testing much easier, since we can mock data */
@@ -20,7 +20,7 @@ interface StmRepository {
 
 	suspend fun getAllCalendarDates(): List<CalendarDates>
 
-	suspend fun getBusDir() : List<String>;
+	//suspend fun getBusDir() : List<String>;
 	suspend fun getBusRouteInfo(routeId : FuzzyQuery) : List<RouteInfo>
 
 	suspend fun getStopName(stopId : Int) : String

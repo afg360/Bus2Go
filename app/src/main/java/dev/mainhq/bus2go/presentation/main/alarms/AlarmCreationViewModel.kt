@@ -12,7 +12,7 @@ import dev.mainhq.bus2go.data.data_source.local.datastore.alarms.Alarm
 import dev.mainhq.bus2go.data.data_source.local.datastore.alarms.AlarmsData
 import dev.mainhq.bus2go.data.data_source.local.datastore.alarms.AlarmsSerializer
 import dev.mainhq.bus2go.data.data_source.local.datastore.alarms.SerializableTime
-import dev.mainhq.bus2go.utils.Time
+import dev.mainhq.bus2go.domain.entity.Time
 import kotlinx.collections.immutable.mutate
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch

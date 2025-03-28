@@ -5,7 +5,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import dev.mainhq.bus2go.data.data_source.local.datastore.app_state.AppStateDataStoreKeys
 import dev.mainhq.bus2go.domain.repository.AppStateRepository
-import dev.mainhq.bus2go.utils.Time
+import dev.mainhq.bus2go.domain.entity.Time
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext

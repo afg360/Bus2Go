@@ -15,7 +15,7 @@ import dev.mainhq.bus2go.domain.entity.TransitDataWithTime
 import dev.mainhq.bus2go.domain.entity.RouteInfo
 import dev.mainhq.bus2go.domain.entity.StmBusItem
 import dev.mainhq.bus2go.utils.FuzzyQuery
-import dev.mainhq.bus2go.utils.Time
+import dev.mainhq.bus2go.domain.entity.Time
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
@@ -40,9 +40,6 @@ class StmRepositoryImpl(
 		}
 	}
 
-	override suspend fun getBusDir() = withContext(Dispatchers.IO) {
-		routesDAO.getBusDir()
-	}
 
 	override suspend fun getBusRouteInfo(routeId: FuzzyQuery): List<RouteInfo> {
 		return withContext(Dispatchers.IO) {

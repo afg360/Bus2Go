@@ -9,15 +9,15 @@ import androidx.recyclerview.widget.RecyclerView
 import dev.mainhq.bus2go.R
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
-import dev.mainhq.bus2go.utils.Time
+import dev.mainhq.bus2go.domain.entity.Time
 import java.time.LocalDateTime
 
 //TODO
 //could add view/ontouchlistener to handle touch holding, etc.
 //may need to use a recycler view, but implement a base adapter instead...?
 class StopTimeListElemsAdapter(
-    private var timeData: List<Time>,
-    private val fromAlarmCreation : Boolean
+	private var timeData: List<Time>,
+	private val fromAlarmCreation : Boolean
 ) : RecyclerView.Adapter<StopTimeListElemsAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

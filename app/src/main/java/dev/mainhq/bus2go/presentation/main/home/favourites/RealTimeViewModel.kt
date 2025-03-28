@@ -1,36 +1,7 @@
 package dev.mainhq.bus2go.presentation.main.home.favourites
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.preference.PreferenceManager
-import dev.mainhq.bus2go.data.data_source.local.datastore.deprecated.StmBusData
-import dev.mainhq.bus2go.utils.Time
-import io.ktor.client.HttpClient
-import io.ktor.client.call.body
-import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.network.sockets.ConnectTimeoutException
-import io.ktor.client.plugins.websocket.WebSockets
-import io.ktor.client.plugins.websocket.webSocket
-import io.ktor.client.request.get
-import io.ktor.websocket.Frame
-import io.ktor.websocket.readText
-import io.ktor.websocket.send
-import kotlinx.coroutines.delay
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.encodeToJsonElement
-import okhttp3.OkHttpClient
-import java.io.IOException
-import java.net.ConnectException
-import java.net.SocketTimeoutException
-import java.net.URLEncoder.encode
-import java.util.concurrent.TimeUnit
 
 //TODO cache or save the data somewhere in case used and disconnected
 class RealTimeViewModel(application : Application) : AndroidViewModel(application) {

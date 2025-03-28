@@ -12,7 +12,7 @@ import dev.mainhq.bus2go.domain.entity.ExoBusItem
 import dev.mainhq.bus2go.domain.entity.ExoTrainItem
 import dev.mainhq.bus2go.domain.repository.ExoRepository
 import dev.mainhq.bus2go.utils.FuzzyQuery
-import dev.mainhq.bus2go.utils.Time
+import dev.mainhq.bus2go.domain.entity.Time
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
@@ -24,8 +24,6 @@ class ExoRepositoryImpl(
 	private val tripsDAO: TripsDAO
 ): ExoRepository {
 	override suspend fun getMaxEndDate() = calendarDAO.getMaxEndDate()
-
-	override suspend fun getBusDir(routeId: String) = routesDAO.getBusDir(routeId)
 
 	override suspend fun getRouteInfo(routeId: FuzzyQuery): List<RouteInfo> {
 		return routesDAO.getRouteInfo(routeId).toMutableList().map {
@@ -49,13 +47,13 @@ class ExoRepositoryImpl(
 		}
 	}
 
-	override suspend fun getStopTimes(exoTransitData: TransitData, curTime: Time) =
+	override suspend fun getStopTimes(exoBusItem: ExoBusItem, curTime: Time) =
 		withContext(Dispatchers.IO){
 			stopTimesDAO.getStopTimes(
-				exoTransitData.stopName,
+				exoBusItem.stopName,
 				curTime.getDayString(),
 				curTime.getTimeString(),
-				exoTransitData.direction,
+				exoBusItem.direction,
 				curTime.getTodayString()
 			)
 		}
@@ -115,13 +113,5 @@ class ExoRepositoryImpl(
 
 	override suspend fun getTripHeadsigns(routeId: String) = withContext(Dispatchers.IO){
 		tripsDAO.getTripHeadsigns(routeId)
-	}
-
-	override suspend fun getRouteId() = withContext(Dispatchers.IO) {
-		tripsDAO.getRouteId()
-	}
-
-	override suspend fun getRouteId(headsign: String) = withContext(Dispatchers.IO) {
-		tripsDAO.getRouteId(headsign)
 	}
 }

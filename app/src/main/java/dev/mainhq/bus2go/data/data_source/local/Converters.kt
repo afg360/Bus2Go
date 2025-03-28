@@ -2,7 +2,7 @@ package dev.mainhq.bus2go.data.data_source.local
 
 import androidx.room.TypeConverter
 import dev.mainhq.bus2go.utils.FuzzyQuery
-import dev.mainhq.bus2go.utils.Time
+import dev.mainhq.bus2go.domain.entity.Time
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 

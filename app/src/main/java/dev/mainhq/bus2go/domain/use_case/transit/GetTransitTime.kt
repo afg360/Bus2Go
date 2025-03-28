@@ -6,7 +6,7 @@ import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.domain.entity.StmBusItem
 import dev.mainhq.bus2go.domain.repository.ExoRepository
 import dev.mainhq.bus2go.domain.repository.StmRepository
-import dev.mainhq.bus2go.utils.Time
+import dev.mainhq.bus2go.domain.entity.Time
 
 /**
  * Used inside the Times Activity to retrieve
@@ -24,7 +24,7 @@ class GetTransitTime(
 				transitData,
 				curTime
 			)
-			is ExoTrainItem -> return exoRepository.getStopTimes(
+			is ExoTrainItem -> return exoRepository.getTrainStopTimes(
 				transitData,
 				curTime
 			)

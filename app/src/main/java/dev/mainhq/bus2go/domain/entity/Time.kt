@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go.utils
+package dev.mainhq.bus2go.domain.entity
 
 import android.os.Parcel
 import android.os.Parcelable
@@ -11,10 +11,10 @@ import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
 /** Allows to do operations more easily on time based formats */
-class Time(localDateTime: LocalDateTime) : Parcelable {
+class Time(localDateTime: LocalDateTime) : Parcelable, Comparable<Time> {
 
     private val localTime = localDateTime.toLocalTime()
-    private val localDate = localDateTime.toLocalDate()
+    /*private*/ val localDate = localDateTime.toLocalDate()
 
 
     constructor(localDate: LocalDate, localTime: LocalTime) : this(
@@ -91,7 +91,7 @@ class Time(localDateTime: LocalDateTime) : Parcelable {
         return this - Time(LocalDateTime.now())
     }
 
-    operator fun compareTo(other : Time): Int {
+    override operator fun compareTo(other : Time): Int {
         return LocalDateTime.of(this.localDate, this.localTime)
             .compareTo(LocalDateTime.of(other.localDate, other.localTime))
     }
@@ -208,7 +208,7 @@ class Time(localDateTime: LocalDateTime) : Parcelable {
 
         fun now(): Time = Time(LocalDateTime.now())
 
-        fun fromUnix(unixTime : Long) : Time{
+        fun fromUnix(unixTime : Long) : Time {
             //get Canada timeZone which is UTC - 5
             return Time(LocalDateTime.ofEpochSecond(unixTime, 0, ZoneOffset.ofHours(-5)))
         }
