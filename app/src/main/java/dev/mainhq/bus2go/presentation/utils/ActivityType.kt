@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go.utils
+package dev.mainhq.bus2go.presentation.utils
 
 enum class ActivityType{
 	HOME, MAP, ALARMS

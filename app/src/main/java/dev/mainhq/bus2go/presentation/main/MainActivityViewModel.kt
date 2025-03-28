@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dev.mainhq.bus2go.domain.use_case.db_state.CheckDatabaseUpdateRequired
 import dev.mainhq.bus2go.domain.use_case.db_state.IsFirstTimeAppLaunched
 import dev.mainhq.bus2go.domain.use_case.db_state.SetDatabaseState
-import dev.mainhq.bus2go.utils.ActivityType
+import dev.mainhq.bus2go.presentation.utils.ActivityType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch

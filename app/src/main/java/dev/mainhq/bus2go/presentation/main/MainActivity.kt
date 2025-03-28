@@ -20,7 +20,7 @@ import dev.mainhq.bus2go.presentation.main.map.MapFragment
 import dev.mainhq.bus2go.presentation.main.alarms.AlarmsFragment
 import dev.mainhq.bus2go.presentation.main.alarms.AlarmCreationViewModel
 import dev.mainhq.bus2go.presentation.main.home.HomeFragmentSharedViewModel
-import dev.mainhq.bus2go.utils.ActivityType
+import dev.mainhq.bus2go.presentation.utils.ActivityType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first

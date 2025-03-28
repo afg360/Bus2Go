@@ -3,7 +3,7 @@ package dev.mainhq.bus2go.data.data_source.local.database.exo.dao;
 import androidx.room.Dao;
 import androidx.room.Query;
 import dev.mainhq.bus2go.data.data_source.local.database.RouteInfoDto
-import dev.mainhq.bus2go.utils.FuzzyQuery
+import dev.mainhq.bus2go.domain.entity.FuzzyQuery
 
 @Dao
 interface RoutesDAO {

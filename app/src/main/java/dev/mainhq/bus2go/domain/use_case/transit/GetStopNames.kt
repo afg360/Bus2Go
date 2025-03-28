@@ -35,19 +35,27 @@ class GetStopNames(
 			is ExoTrainRouteInfo -> return exoRepository.getTrainStopNames(routeInfo.routeId)
 			is StmBusRouteInfo -> {
 				//busNum <= 5 are skipped, bcz these are metros
-				if (routeInfo.routeId.toInt() > 5) {
-					val directions = stmRepository.getDirectionInfo(routeInfo.routeId.toInt())
-					return stmRepository.getStopNames(
-						Pair(
-							directions.first().tripHeadSign,
-							directions.last().tripHeadSign
-						),
-						routeInfo.routeId
-					)
+				try {
+					if (routeInfo.routeId.toInt() > 5) {
+						val directions = stmRepository.getDirectionInfo(routeInfo.routeId.toInt())
+						return stmRepository.getStopNames(
+							Pair(
+								directions.first().tripHeadSign,
+								directions.last().tripHeadSign
+							),
+							routeInfo.routeId
+						)
+					} else {
+						//Log.w(
+						//	"STM_BUS_NUM",
+						//	"A metro bus num was given... not dealing with this shit for now..."
+						//)
+						//return Pair(listOf(), listOf())
+						return null
+					}
 				}
-				else {
-					Log.w("STM_BUS_NUM", "A metro bus num was given... not dealing with this shit for now...")
-					//return Pair(listOf(), listOf())
+				catch (nfm: NumberFormatException){
+					//Log.e("STM_ROUTE_ID", "Expected an integer in the db but received a string")
 					return null
 				}
 			}

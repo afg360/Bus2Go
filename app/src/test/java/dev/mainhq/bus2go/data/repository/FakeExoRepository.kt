@@ -9,7 +9,7 @@ import dev.mainhq.bus2go.domain.entity.Time
 import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.domain.entity.TransitDataWithTime
 import dev.mainhq.bus2go.domain.repository.ExoRepository
-import dev.mainhq.bus2go.utils.FuzzyQuery
+import dev.mainhq.bus2go.domain.entity.FuzzyQuery
 import java.time.LocalDate
 import kotlin.random.Random
 
@@ -149,10 +149,10 @@ class FakeExoRepository: ExoRepository {
 
 	init {
 		exoBusTransitData.forEach {
-			stopTimesBus[it] = Time.fromUnix(Random.nextLong(0, Long.MAX_VALUE))
+			stopTimesBus[it] = Time.fromUnix(Random.nextLong(0, Int.MAX_VALUE.toLong()))
 		}
 		exoTrainTransitData.forEach {
-			stopTimesTrain[it] = Time.fromUnix(Random.nextLong(0, Long.MAX_VALUE))
+			stopTimesTrain[it] = Time.fromUnix(Random.nextLong(0, Int.MAX_VALUE.toLong()))
 		}
 	}
 
@@ -221,6 +221,5 @@ class FakeExoRepository: ExoRepository {
 					.map { it.headsign } +
 				exoTrainTransitData.filter { it.routeId == routeId }
 					.map { it.direction }
-
 	}
 }

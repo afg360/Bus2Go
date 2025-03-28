@@ -9,7 +9,7 @@ import dev.mainhq.bus2go.domain.entity.TransitDataWithTime
 import dev.mainhq.bus2go.domain.entity.stm.CalendarDates
 import dev.mainhq.bus2go.domain.entity.stm.DirectionInfo
 import dev.mainhq.bus2go.domain.repository.StmRepository
-import dev.mainhq.bus2go.utils.FuzzyQuery
+import dev.mainhq.bus2go.domain.entity.FuzzyQuery
 import java.time.LocalDate
 import kotlin.random.Random
 
@@ -24,7 +24,7 @@ class FakeStmRepository: StmRepository {
 			1.toString(),
 			"Un metro STN... ligne 1"
 		),
-		//this shouldnt be allowed
+		//
 		StmBusRouteInfo(
 			"SomeText",
 			"STM error should happen"
@@ -80,7 +80,7 @@ class FakeStmRepository: StmRepository {
 
 	init {
 		stmTransitData.forEach {
-			stopTimes[it] = Time.fromUnix(Random.nextLong(0, Long.MAX_VALUE))
+			stopTimes[it] = Time.fromUnix(Random.nextLong(0, Int.MAX_VALUE.toLong()))
 		}
 	}
 

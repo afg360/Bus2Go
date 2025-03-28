@@ -1,6 +1,4 @@
-package dev.mainhq.bus2go.utils;
-
-import android.util.Log
+package dev.mainhq.bus2go.domain.entity;
 
 //todo this class is intended to do fuzzy searching. for now very simple
 class FuzzyQuery(query : String, exo: Boolean = false) {

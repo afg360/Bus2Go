@@ -104,14 +104,13 @@ dependencies {
     //noinspection GradleDependency
     implementation "androidx.fragment:fragment-ktx:$fragment_version"
     implementation "androidx.core:core-ktx:1.13.1"
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
+    
+    def kotlin_coroutines_version = "1.7.3"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlin_coroutines_version"
 
     implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'com.google.android.material:material:1.12.0'
     implementation "androidx.core:core-splashscreen:1.0.1"
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
 
     //Preference manager
     implementation "androidx.preference:preference-ktx:1.2.1"
@@ -119,11 +118,8 @@ dependencies {
     //WorkManager
     def work_version = "2.9.1"
     implementation "androidx.work:work-runtime-ktx:$work_version"
-    testImplementation "androidx.work:work-testing:$work_version"
-    androidTestImplementation "androidx.work:work-testing:$work_version"
     
     //runtimeOnly 'io.mockk:mockk-android:1.13.17'
-    
     
     def data_store_version = "1.1.1"
     //DataStore
@@ -144,8 +140,6 @@ dependencies {
     // To use Kotlin annotation processing tool (kapt)
     kapt "androidx.room:room-compiler:$room_version"
     implementation "androidx.room:room-ktx:$room_version"
-    // optional - Test helpers
-    testImplementation "androidx.room:room-testing:$room_version"
 
     /* WebRequest apis */
     // Ktor Core
@@ -158,15 +152,24 @@ dependencies {
     implementation "io.ktor:ktor-client-okhttp:$ktor_version"
     implementation "io.ktor:ktor-client-cio:$ktor_version"
     
-    def mockWebServer_version = "1.2.1"
-    testImplementation "com.squareup.okhttp:mockwebserver:$mockWebServer_version"
-    androidTestImplementation "com.squareup.okhttp:mockwebserver:$mockWebServer_version"
-    
-    
     //Protobuf
     def protobuf_version = "4.27.1"
     implementation "com.google.protobuf:protobuf-javalite:$protobuf_version"
-
-    //LeakCanary
-    //debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.13'
+    
+    def mockWebServer_version = "1.2.1"
+    //Unit Testing
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlin_coroutines_version"
+    testImplementation "org.assertj:assertj-core:3.24.2"
+    testImplementation "androidx.test:core:1.6.1"
+    testImplementation "androidx.arch.core:core-testing:2.2.0"
+    testImplementation "androidx.room:room-testing:$room_version"
+    testImplementation "androidx.work:work-testing:$work_version"
+    testImplementation "com.squareup.okhttp:mockwebserver:$mockWebServer_version"
+    
+    //Instrumentation Testing
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
+    androidTestImplementation "androidx.work:work-testing:$work_version"
+    androidTestImplementation "com.squareup.okhttp:mockwebserver:$mockWebServer_version"
 }
