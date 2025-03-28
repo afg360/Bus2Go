@@ -18,8 +18,7 @@ data class JsonTransitTime(
 )
 
 @Serializable
-data class TransitInfo(val agency: TransitAgency,
-					   @SerialName("route_id")
+data class TransitInfo(@SerialName("route_id")
 					   val routeId: String,
 					   @SerialName("trip_headsign")
 					   val tripHeadsign: String,

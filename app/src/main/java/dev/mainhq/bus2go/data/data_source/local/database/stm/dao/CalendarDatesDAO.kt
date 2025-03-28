@@ -2,7 +2,7 @@ package dev.mainhq.bus2go.data.data_source.local.database.stm.dao
 
 import androidx.room.Dao
 import androidx.room.Query
-import dev.mainhq.bus2go.data.data_source.local.stm.entity.CalendarDates
+import dev.mainhq.bus2go.data.data_source.local.database.stm.entity.CalendarDates
 
 @Dao
 /** For testing purposes */

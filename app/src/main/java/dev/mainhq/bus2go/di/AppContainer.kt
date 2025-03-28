@@ -16,6 +16,7 @@ import dev.mainhq.bus2go.data.repository.StmRepositoryImpl
 import dev.mainhq.bus2go.domain.use_case.FavouritesUseCases
 import dev.mainhq.bus2go.domain.use_case.TransitTimeInfoUseCases
 import dev.mainhq.bus2go.domain.use_case.favourites.AddFavourite
+import dev.mainhq.bus2go.domain.use_case.favourites.GetFavourites
 import dev.mainhq.bus2go.domain.use_case.favourites.GetFavouritesWithTimeData
 import dev.mainhq.bus2go.domain.use_case.favourites.RemoveFavourite
 import dev.mainhq.bus2go.domain.use_case.settings.IsRealTimeEnabled
@@ -104,6 +105,16 @@ class AppContainer(applicationContext: Context) {
 	)
 
 	//FIXME not ideal to make them like this...
+	val addFavourite = AddFavourite(
+		exoFavouritesRepository,
+		stmFavouritesRepository
+	)
+
+	val getFavourites = GetFavourites(
+		exoFavouritesRepository,
+		stmFavouritesRepository
+	)
+
 	val getTransitTime = GetTransitTime(
 		exoRepository,
 		stmRepository

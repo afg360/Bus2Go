@@ -15,25 +15,22 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.presentation.base.BaseActivity
 import dev.mainhq.bus2go.R
+import dev.mainhq.bus2go.domain.entity.ExoBusItem
 import dev.mainhq.bus2go.domain.entity.ExoBusRouteInfo
-import dev.mainhq.bus2go.domain.entity.ExoBusTransitDataWithStopNames
 import dev.mainhq.bus2go.domain.entity.ExoTrainItem
 import dev.mainhq.bus2go.domain.entity.ExoTrainRouteInfo
-import dev.mainhq.bus2go.domain.entity.ExoTrainTransitDataWithStopNames
 import dev.mainhq.bus2go.domain.entity.RouteInfo
+import dev.mainhq.bus2go.domain.entity.StmBusItem
 import dev.mainhq.bus2go.domain.entity.StmBusRouteInfo
-import dev.mainhq.bus2go.domain.entity.StmBusTransitDataWithStopNames
 import dev.mainhq.bus2go.presentation.Bus2GoApplication
 import dev.mainhq.bus2go.presentation.choose_stop.ChooseStop
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.IllegalStateException
-import kotlin.collections.ArrayList
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 
 
 //todo
@@ -82,79 +79,81 @@ class ChooseDirection : BaseActivity() {
                     withContext(Dispatchers.Main) {
                         when(routeInfo){
                             is ExoBusRouteInfo -> {
-                                val leftDir = chooseDirectionViewModel.leftDirection.filterNotNull().first() as ExoBusTransitDataWithStopNames
+                                val leftDir = chooseDirectionViewModel.leftDirection.filterNotNull().first() as List<ExoBusItem>
+                                assert(leftDir.isNotEmpty())
                                 busNumView.text = routeInfo.routeId
                                 busNameView.text = routeInfo.routeName
 
                                 if (isUnidirectional == true) {
-                                    intent.putExtra(ExtrasTagNames.ROUTE_INFO_WITH_STOP_NAMES, leftDir)
+                                    intent.putExtra(ExtrasTagNames.TRANSIT_DATA, leftDir.toTypedArray())
                                     Toast.makeText(this@ChooseDirection,"This bus line only contains 1 direction",Toast.LENGTH_SHORT).show()
                                     finish()
                                     startActivity(intent)
                                 }
                                 else if (isUnidirectional == false) {
-                                    val rightDir = chooseDirectionViewModel.rightDirection.filterNotNull().first() as ExoBusTransitDataWithStopNames
+                                    val rightDir = chooseDirectionViewModel.rightDirection.filterNotNull().first() as List<ExoBusItem>
+                                    assert(rightDir.isNotEmpty())
 
-                                    findViewById<MaterialTextView>(R.id.description_route_0).text = leftDir.exoBusItem.headsign
+                                    findViewById<MaterialTextView>(R.id.description_route_0).text = leftDir.first().headsign
                                     findViewById<MaterialButton>(R.id.route_0).setOnClickListener {
-                                        intent.putExtra(ExtrasTagNames.ROUTE_INFO_WITH_STOP_NAMES, leftDir)
+                                        intent.putExtra(ExtrasTagNames.TRANSIT_DATA, leftDir.toTypedArray())
                                         startActivity(intent)
                                     }
-                                    findViewById<MaterialTextView>(R.id.description_route_1).text = rightDir.exoBusItem.headsign
+                                    findViewById<MaterialTextView>(R.id.description_route_1).text = rightDir.first().headsign
                                     findViewById<MaterialButton>(R.id.route_1).setOnClickListener {
-                                        intent.putExtra(ExtrasTagNames.ROUTE_INFO_WITH_STOP_NAMES, rightDir)
+                                        intent.putExtra(ExtrasTagNames.TRANSIT_DATA, rightDir.toTypedArray())
                                         startActivity(intent)
                                     }
-                                    leftDescr.text = getString(R.string.from_to, leftDir.stopNames.first(), leftDir.stopNames.last())
-                                    rightDescr.text = getString(R.string.from_to, rightDir.stopNames.first(), rightDir.stopNames.last())
+                                    leftDescr.text = getString(R.string.from_to, leftDir.first().stopName, leftDir.last().stopName)
+                                    rightDescr.text = getString(R.string.from_to, rightDir.first().stopName, rightDir.last().stopName)
                                 }
                             }
                             is ExoTrainRouteInfo -> {
-                                val leftDir = chooseDirectionViewModel.leftDirection.filterNotNull().first() as ExoTrainTransitDataWithStopNames
+                                val leftDir = chooseDirectionViewModel.leftDirection.filterNotNull().first() as List<ExoTrainItem>
                                 if (isUnidirectional == false){
-                                    val rightDir = chooseDirectionViewModel.rightDirection.filterNotNull().first() as ExoTrainTransitDataWithStopNames
+                                    val rightDir = chooseDirectionViewModel.rightDirection.filterNotNull().first() as List<ExoTrainItem>
 
                                     findViewById<MaterialTextView>(R.id.description_route_0).text =
-                                        getString(R.string.train_direction, leftDir.exoTrainItem.direction)
+                                        getString(R.string.train_direction, leftDir.first().direction)
                                     findViewById<MaterialButton>(R.id.route_0).setOnClickListener {
-                                        intent.putExtra(ExtrasTagNames.ROUTE_INFO_WITH_STOP_NAMES, leftDir)
+                                        intent.putExtra(ExtrasTagNames.TRANSIT_DATA, leftDir.toTypedArray())
                                         startActivity(intent)
                                     }
 
                                     findViewById<MaterialTextView>(R.id.description_route_1).text =
-                                        getString(R.string.train_direction, rightDir.exoTrainItem.direction)
+                                        getString(R.string.train_direction, rightDir.first().direction)
                                     findViewById<MaterialButton>(R.id.route_1).setOnClickListener {
-                                        intent.putExtra(ExtrasTagNames.ROUTE_INFO_WITH_STOP_NAMES, rightDir)
+                                        intent.putExtra(ExtrasTagNames.TRANSIT_DATA, rightDir.toTypedArray())
                                         startActivity(intent)
                                     }
-                                    leftDescr.text = getString(R.string.from_to, leftDir.stopNames.first(), leftDir.stopNames.last())
-                                    rightDescr.text = getString(R.string.from_to, rightDir.stopNames.first(), rightDir.stopNames.last())
+                                    leftDescr.text = getString(R.string.from_to, leftDir.first().stopName, leftDir.last().stopName)
+                                    rightDescr.text = getString(R.string.from_to, rightDir.first().stopName, rightDir.last().stopName)
                                 }
                                 else if (isUnidirectional == true)
                                     throw IllegalStateException("Unexpected data: ExoTrain being unidirectional...")
                             }
                             is StmBusRouteInfo -> {
-                                val leftDir = chooseDirectionViewModel.leftDirection.filterNotNull().first() as StmBusTransitDataWithStopNames
+                                val leftDir = chooseDirectionViewModel.leftDirection.filterNotNull().first() as List<StmBusItem>
                                 if (isUnidirectional == false) {
                                     busNumView.text = routeInfo.routeId
                                     busNameView.text = routeInfo.routeName
 
-                                    val rightDir = chooseDirectionViewModel.rightDirection.filterNotNull().first() as StmBusTransitDataWithStopNames
+                                    val rightDir = chooseDirectionViewModel.rightDirection.filterNotNull().first() as List<StmBusItem>
 
                                     val leftButton = findViewById<MaterialButton>(R.id.route_0)
                                     val rightButton = findViewById<MaterialButton>(R.id.route_1)
                                     leftButton.setOnClickListener {
-                                        intent.putExtra(ExtrasTagNames.ROUTE_INFO_WITH_STOP_NAMES, leftDir)
+                                        intent.putExtra(ExtrasTagNames.TRANSIT_DATA, leftDir.toTypedArray())
                                         startActivity(intent)
                                     }
                                     rightButton.setOnClickListener {
-                                        intent.putExtra(ExtrasTagNames.ROUTE_INFO_WITH_STOP_NAMES, rightDir)
+                                        intent.putExtra(ExtrasTagNames.TRANSIT_DATA, rightDir.toTypedArray())
                                         startActivity(intent)
                                     }
-                                    leftDescr.text = getString(R.string.from_to, leftDir.stopNames.first(), leftDir.stopNames.last())
-                                    rightDescr.text = getString(R.string.from_to, rightDir.stopNames.first(), rightDir.stopNames.last())
+                                    leftDescr.text = getString(R.string.from_to, leftDir.first().stopName, leftDir.last().stopName)
+                                    rightDescr.text = getString(R.string.from_to, rightDir.first().stopName, rightDir.last().stopName)
 
-                                    if (leftDir.stmBusItem.direction == "est" || leftDir.stmBusItem.direction == "ouest") {
+                                    if (leftDir.first().direction == "est" || leftDir.first().direction == "ouest") {
                                         leftButton.text = getString(R.string.west)
                                         rightButton.text = getString(R.string.east)
                                     }

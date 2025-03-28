@@ -1,16 +1,27 @@
 package dev.mainhq.bus2go.presentation.choose_stop
 
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import androidx.activity.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import dev.mainhq.bus2go.presentation.base.BaseActivity
 import dev.mainhq.bus2go.R
+import dev.mainhq.bus2go.data.data_source.local.database.exo.entity.StopTimes
+import dev.mainhq.bus2go.domain.entity.TransitData
+import dev.mainhq.bus2go.presentation.Bus2GoApplication
+import dev.mainhq.bus2go.presentation.stopTimes.StopTimesActivity
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
-import dev.mainhq.bus2go.presentation.main.home.favourites.FavouritesViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.IllegalStateException
@@ -22,63 +33,58 @@ import kotlin.IllegalStateException
 //todo add possibility of searching amongst all the stops
 class ChooseStop() : BaseActivity() {
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.choose_stop)
-        val favouritesViewModel = ViewModelProvider(this)[FavouritesViewModel::class.java]
-        val loadingJob = lifecycleScope.async { favouritesViewModel.loadData() }
 
         //terminus (i.e. to destination) = data.last(), needed for exo because some of the headsigns are the same
-        val stopNames : List<String> = intent.getStringArrayListExtra("stops") ?: listOf()
+        val transitData = (if (Build.VERSION.SDK_INT >= 33) {
+            intent.extras?.getParcelableArray(ExtrasTagNames.TRANSIT_DATA, TransitData::class.java)
+        }
+        else {
+            @Suppress("DEPRECATION")
+            intent.extras?.getParcelableArray(ExtrasTagNames.TRANSIT_DATA)
+        })?.map { it as TransitData } ?: throw IllegalStateException("Expected to give a " + ExtrasTagNames.TRANSIT_DATA)
 
-        if (stopNames.isNotEmpty()) {
-            val recyclerView: RecyclerView = findViewById(R.id.stop_recycle_view)
-            val layoutManager = LinearLayoutManager(applicationContext)
-
-            //non-nullable values
-            val routeId = intent.getStringExtra(ExtrasTagNames.ROUTE_ID.name)!!
-            val direction = intent.getStringExtra(ExtrasTagNames.DIRECTION.name)!!
-            if (agency == TransitAgency.EXO_TRAIN || agency == TransitAgency.EXO_OTHER){
-            }
-            else if (agency == TransitAgency.STM && routeId.toInt() == -1)
-                    throw IllegalStateException("Forgot to give a route id to an stm bus!")
-
-            lifecycleScope.launch {
-                //the datastore may be closed!
-                loadingJob.await()
-                val favourites = favouritesViewModel.stmBusInfo.value + favouritesViewModel.exoBusInfo.value +
-                        favouritesViewModel.exoTrainInfo.value
-                withContext(Dispatchers.Main){
-                     when(agency){
-                        TransitAgency.STM -> {
-                            val directionId = intent.getIntExtra(ExtrasTagNames.DIRECTION_ID.name, -1)
-                            if (directionId < 0) throw IllegalStateException("Forgot to give a direction Id to an Stm bus")
-                            val lastStop = intent.getStringExtra(ExtrasTagNames.LAST_STOP.name) ?: throw IllegalStateException("Forgot to give a last stop to an Stm bus")
-                            recyclerView.adapter = StopListElemsAdapterStm(stopNames, favourites,
-                                favouritesViewModel, routeId, directionId, direction, lastStop)
-                        }
-
-                        TransitAgency.EXO_TRAIN -> {
-                            val trainNum = intent.getIntExtra(ExtrasTagNames.TRAIN_NUM.name, -1)
-                            if (trainNum < 0) throw IllegalStateException("No train num has been given to a train stop")
-                            val directionId = intent.getIntExtra(ExtrasTagNames.DIRECTION_ID.name, -1)
-                            if (directionId < 0) throw IllegalStateException("Forgot to give a direction Id to a train stop")
-                            val routeName = intent.getStringExtra(ExtrasTagNames.ROUTE_NAME.name) ?: throw IllegalStateException("Forgot to give a route name to a train!")
-                            recyclerView.adapter = StopListElemsAdapterExoTrain(stopNames, favourites,
-                                favouritesViewModel, routeId, routeName, directionId, direction, trainNum)
-                        }
-
-                        TransitAgency.EXO_OTHER -> {
-                            val headsign = intent.getStringExtra(ExtrasTagNames.HEADSIGN.name) ?: throw IllegalStateException("Forgot to give a headsign to an exo bus stop")
-                            val routeName = intent.getStringExtra(ExtrasTagNames.ROUTE_NAME.name) ?: throw IllegalStateException("Forgot to give a route name to an exo bus!")
-                            recyclerView.adapter = StopListElemsAdapterExoOther( stopNames, favourites,
-                                favouritesViewModel, routeId, routeName, direction, headsign)
-                        }
+        val chooseStopViewModel: ChooseStopViewModel by viewModels {
+            object : ViewModelProvider.Factory {
+                override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+                    if (modelClass.isAssignableFrom(ChooseStopViewModel::class.java)){
+                        return ChooseStopViewModel(
+                            transitData.toList(),
+                            addFavourite = (application as Bus2GoApplication).appContainer.favouritesUseCases.addFavourite,
+                            removeFavourite = (application as Bus2GoApplication).appContainer.favouritesUseCases.removeFavourite,
+                            getFavourites = (application as Bus2GoApplication).appContainer.getFavourites,
+                        ) as T
                     }
-                    layoutManager.orientation = LinearLayoutManager.VERTICAL
-                    recyclerView.layoutManager = layoutManager
+                    throw IllegalArgumentException("Gave wrong ViewModel class")
                 }
             }
+        }
+
+
+        if (transitData.isNotEmpty()) {
+            val recyclerView = findViewById<RecyclerView>(R.id.stop_recycle_view)
+            recyclerView.layoutManager = LinearLayoutManager(applicationContext)
+            recyclerView.adapter = StopListElemsAdapter(transitData,
+                addToFavouritesClickListener = {
+                    if (chooseStopViewModel.favourites.value?.contains(it) == true){
+                        chooseStopViewModel.removeFavourite(it)
+                    }
+                    else if (chooseStopViewModel.favourites.value?.contains(it) == false){
+                        chooseStopViewModel.addFavourite(it)
+                    }
+                    else {
+                        throw IllegalStateException("Clicking when favourites in the view model havent been init...")
+                    }
+                },
+                onClickListener = {
+                    val intent = Intent(this, StopTimesActivity::class.java)
+                    intent.putExtra(ExtrasTagNames.TRANSIT_DATA, it)
+                    startActivity(intent)
+                }
+            )
         }
         else{
             TODO("Display message saying no stops found")

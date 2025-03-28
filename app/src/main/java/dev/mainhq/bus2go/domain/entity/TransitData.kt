@@ -3,7 +3,6 @@ package dev.mainhq.bus2go.domain.entity
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
-@Parcelize
 /** Entity to interface with data coming from dataStore */
 sealed class TransitData: Parcelable {
 	abstract val routeId : String

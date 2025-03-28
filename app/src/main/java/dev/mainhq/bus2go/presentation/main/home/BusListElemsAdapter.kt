@@ -40,16 +40,16 @@ class BusListElemsAdapter(
 
         when(data){
             is ExoBusRouteInfo -> {
-                holder.busNumView.setTextColor(holder.itemView.resources .getColor(R.color.basic_purple, null))
-                holder.busDirView.setTextColor(holder.itemView.resources .getColor(R.color.basic_purple, null))
+                holder.busNumView.setTextColor(holder.itemView.resources.getColor(R.color.basic_purple, null))
+                holder.busDirView.setTextColor(holder.itemView.resources.getColor(R.color.basic_purple, null))
             }
             is ExoTrainRouteInfo -> {
-                holder.busNumView.setTextColor(holder.itemView.resources .getColor(R.color.orange, null))
-                holder.busDirView.setTextColor(holder.itemView.resources .getColor(R.color.orange, null))
+                holder.busNumView.setTextColor(holder.itemView.resources.getColor(R.color.orange, null))
+                holder.busDirView.setTextColor(holder.itemView.resources.getColor(R.color.orange, null))
             }
             is StmBusRouteInfo -> {
-                holder.busNumView.setTextColor(holder.itemView.resources .getColor(R.color.basic_blue, null))
-                holder.busDirView.setTextColor(holder.itemView.resources .getColor(R.color.basic_blue, null))
+                holder.busNumView.setTextColor(holder.itemView.resources.getColor(R.color.basic_blue, null))
+                holder.busDirView.setTextColor(holder.itemView.resources.getColor(R.color.basic_blue, null))
             }
         }
     }
@@ -57,7 +57,7 @@ class BusListElemsAdapter(
     @SuppressLint("NotifyDataSetChanged")
 	fun updateData(busData: List<RouteInfo>){
         this.busData = busData
-        notifyDataSetChanged() //TODO could compare the list itself, or apparently use DiffUtil
+        notifyItemRangeChanged(0, itemCount) //TODO could compare the list itself, or apparently use DiffUtil
     }
 
     override fun getItemCount(): Int {

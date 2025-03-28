@@ -8,7 +8,6 @@ object ExtrasTagNames {
 
 
     const val TRANSIT_DATA = "TRANSIT_DATA" //used inside Times activity
-    const val ROUTE_INFO_WITH_STOP_NAMES = "ROUTE_INFO_WITH_STOP_NAMES"
 
     const val TIME = "TIME" //apparently used in StopTimes adapter
 }
