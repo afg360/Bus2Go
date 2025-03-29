@@ -53,10 +53,10 @@ class StmRepositoryImpl(
 		stopsDAO.getStopName(stopId)
 	}
 
-	override suspend fun getStopNames(headsigns: Pair<String, String>, routeId: String): Pair<List<String>, List<String>> {
+	override suspend fun getStopNames(headsign1: String, headsign2: String, routeId: String): Pair<List<String>, List<String>> {
 		return withContext(Dispatchers.IO) {
-			val job1 = async{ stopsInfoDAO.getStopNames(headsigns.first, routeId) }
-			val job2 = async{ stopsInfoDAO.getStopNames(headsigns.second, routeId) }
+			val job1 = async{ stopsInfoDAO.getStopNames(headsign1, routeId) }
+			val job2 = async{ stopsInfoDAO.getStopNames(headsign2, routeId) }
 			Pair(job1.await(), job2.await())
 		}
 	}

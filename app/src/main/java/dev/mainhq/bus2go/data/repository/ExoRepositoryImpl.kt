@@ -31,11 +31,12 @@ class ExoRepositoryImpl(
 		}.toList()
 	}
 
-	override suspend fun getStopNames(directions: Pair<String, String>): Pair<List<String>, List<String>> {
+	override suspend fun getStopNames(direction1: String, direction2: String?): Pair<List<String>, List<String>> {
 		return withContext(Dispatchers.IO) {
-			val job1 = async { stopTimesDAO.getStopNames(directions.first) }
-			val job2 = async { stopTimesDAO.getStopNames(directions.second) }
-			Pair(job1.await(), job2.await())
+			val job1 = async { stopTimesDAO.getStopNames(direction1) }
+			return@withContext direction2?.let {
+				Pair(job1.await(), async { stopTimesDAO.getStopNames(it) }.await())
+			} ?: Pair(job1.await(), listOf())
 		}
 	}
 
@@ -110,8 +111,16 @@ class ExoRepositoryImpl(
 			)
 		}
 
-
-	override suspend fun getTripHeadsigns(routeId: String) = withContext(Dispatchers.IO){
-		tripsDAO.getTripHeadsigns(routeId)
+	override suspend fun getBusTripHeadsigns(routeId: String): List<String> {
+		return withContext(Dispatchers.IO){
+			tripsDAO.getBusTripHeadsigns(routeId)
+		}
 	}
+
+	override suspend fun getTrainTripHeadsigns(routeId: Int, directionId: Int): List<String> {
+		return withContext(Dispatchers.IO){
+			tripsDAO.getTrainTripHeadsigns(routeId, directionId)
+		}
+	}
+
 }

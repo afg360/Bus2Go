@@ -5,8 +5,9 @@ import androidx.room.Query;
 
 @Dao
 interface TripsDAO {
-    @Query("SELECT DISTINCT trip_headsign FROM Trips WHERE route_id LIKE '%' || (:routeId);")
-    suspend fun getTripHeadsigns(routeId : String) : List<String>
+    @Query("SELECT DISTINCT trip_headsign FROM Trips " +
+            "WHERE route_id LIKE '%' || (:routeId);")
+    suspend fun getBusTripHeadsigns(routeId : String) : List<String>
 
     @Query("SELECT DISTINCT trip_headsign FROM Trips WHERE route_id = (:routeId) " +
             "AND direction_id = (:directionId);")

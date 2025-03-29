@@ -10,7 +10,6 @@ import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.domain.entity.TransitDataWithTime
 import dev.mainhq.bus2go.domain.repository.ExoRepository
 import dev.mainhq.bus2go.domain.entity.FuzzyQuery
-import dev.mainhq.bus2go.domain.entity.StmBusItem
 import java.time.LocalDate
 import kotlin.random.Random
 
@@ -23,22 +22,22 @@ class FakeExoRepository: ExoRepository {
 		192.toString()
 	)
 
-	private val exoBusRouteInfo = exoBusRouteIds.map { ExoBusRouteInfo(it, "EXO BUS $it") }
+	val exoBusRouteInfo = exoBusRouteIds.map { ExoBusRouteInfo(it, "EXO BUS $it") }
 
 	val exoBusTransitData = exoBusRouteInfo.map {
 		val list = mutableListOf<ExoBusItem>()
 		for (i in 1..5)
-			list.add(ExoBusItem(it.routeId, "StopName $i", "Est", "Route Long Name 1", "StopName 5"))
+			list.add(ExoBusItem(it.routeId, "StopName $i", "StopName 5@${it.routeId}", "Route Long Name 1", "StopName 5@${it.routeId}"))
 
 		for (i in 5 downTo 1)
-			list.add(ExoBusItem(it.routeId, "StopName $i", "Ouest", "Route Long Name 2 REVERSE", "StopName 1 (Last Other)"))
+			list.add(ExoBusItem(it.routeId, "StopName $i", "StopName 1 (Last Other)@${it.routeId}", "Route Long Name 2 REVERSE", "StopName 1 (Last Other)@${it.routeId}"))
 		list
 	}.flatten()
 
 
-	private val exoTrainRouteInfo = (1..5).map { ExoTrainRouteInfo(it.toString(), "EXO TRAIN $it", it) }
+	val exoTrainRouteInfo = (1..5).map { ExoTrainRouteInfo(it.toString(), "EXO TRAIN $it", it) }
 
-	private val exoTrainTransitData = exoTrainRouteInfo.map{
+	val exoTrainTransitData = exoTrainRouteInfo.map{
 		val list = mutableListOf<ExoTrainItem>()
 		for (i in 1..5)
 			list.add(ExoTrainItem(it.routeId, "StopName $i", "Est", it.trainNum, "Route Long Name 1", 0))
@@ -74,10 +73,10 @@ class FakeExoRepository: ExoRepository {
 		}
 	}
 
-	override suspend fun getStopNames(directions: Pair<String, String>): Pair<List<String>, List<String>> {
+	override suspend fun getStopNames(direction1: String, direction2: String?): Pair<List<String>, List<String>> {
 		return Pair(
-			exoBusTransitData.filter { it.direction == directions.first }.map { it.stopName },
-			exoBusTransitData.filter { it.direction == directions.second }.map { it.stopName }
+			exoBusTransitData.filter { it.direction == direction1 }.map { it.stopName },
+			exoBusTransitData.filter { it.direction == direction2 }.map { it.stopName }
 		)
 	}
 
@@ -121,10 +120,14 @@ class FakeExoRepository: ExoRepository {
 			.first()
 	}
 
-	override suspend fun getTripHeadsigns(routeId: String): List<String> {
-		return exoBusTransitData.filter { it.routeId == routeId }
-					.map { it.headsign } +
-				exoTrainTransitData.filter { it.routeId == routeId }
-					.map { it.direction }
+	override suspend fun getBusTripHeadsigns(routeId: String): List<String> {
+		return exoBusTransitData.filter { it.routeId == routeId }.map { it.headsign }
+			.toSet().toList()
+	}
+
+	override suspend fun getTrainTripHeadsigns(routeId: Int, directionId: Int): List<String> {
+		return exoTrainTransitData
+			.filter { it.routeId.toInt() == routeId &&  it.directionId == directionId }
+			.map { it.direction }.toSet().toList()
 	}
 }

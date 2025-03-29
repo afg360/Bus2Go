@@ -20,12 +20,11 @@ interface StmRepository {
 
 	suspend fun getAllCalendarDates(): List<CalendarDates>
 
-	//suspend fun getBusDir() : List<String>;
 	suspend fun getBusRouteInfo(routeId : FuzzyQuery) : List<RouteInfo>
 
 	suspend fun getStopName(stopId : Int) : String
 
-	suspend fun getStopNames(headsigns: Pair<String, String>, routeId : String) : Pair<List<String>, List<String>>
+	suspend fun getStopNames(headsign1: String, headsign2: String, routeId : String) : Pair<List<String>, List<String>>
 
 	suspend fun getOldTimes(stmTransitData: TransitData, curTime: Time): List<Time>
 	suspend fun getStopTimes(stmTransitData: TransitData, curTime: Time) : List<Time>

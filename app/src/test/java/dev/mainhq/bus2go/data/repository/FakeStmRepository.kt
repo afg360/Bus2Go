@@ -70,13 +70,14 @@ class FakeStmRepository: StmRepository {
 	}
 
 	override suspend fun getStopNames(
-		headsigns: Pair<String, String>,
+		headsign1: String,
+		headsign2: String,
 		routeId: String,
 	): Pair<List<String>, List<String>> {
 		return Pair(
-			stmTransitData.filter { it.routeId == routeId && it.direction == headsigns.first }
+			stmTransitData.filter { it.routeId == routeId && it.direction == headsign1 }
 				.map { it.stopName },
-			stmTransitData.filter { it.routeId == routeId && it.direction == headsigns.second }
+			stmTransitData.filter { it.routeId == routeId && it.direction == headsign2 }
 				.map { it.stopName }
 		)
 	}
@@ -114,7 +115,9 @@ class FakeStmRepository: StmRepository {
 	 * @throws NumberFormatException If the stored routeId contains some wrongly formatted routeId
 	 **/
 	override suspend fun getDirectionInfo(routeId: Int): List<DirectionInfo> {
-		return stmTransitData.filter { it.routeId.toInt() == routeId }
+		return stmTransitData
+			.filter { it.routeId.all { it.isDigit() } }
+			.filter { it.routeId.toInt() == routeId }
 			.map { DirectionInfo(it.direction, it.directionId)
 		}
 	}
