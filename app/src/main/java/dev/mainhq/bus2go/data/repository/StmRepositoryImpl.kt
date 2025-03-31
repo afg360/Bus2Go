@@ -74,10 +74,12 @@ class StmRepositoryImpl(
 		}
 
 	/** Used for alarms... */
+	/*
 	override suspend fun getStopTimes(stopName: String, headsign: String, routeId: Int, curTime: Time) =
 		withContext(Dispatchers.IO) {
 			stopsInfoDAO.getStopTimes(stopName, curTime.getDayString(), headsign, routeId, curTime.getDayString())
 		}
+	 */
 
 	override suspend fun getOldTimes(stmTransitData: TransitData, curTime: Time) =
 		withContext(Dispatchers.IO) {

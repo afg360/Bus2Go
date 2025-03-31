@@ -31,7 +31,7 @@ interface StmRepository {
 	/**
 	 * Used for creating new alarm
 	 **/
-	suspend fun getStopTimes(stopName : String, headsign: String, routeId: Int, curTime: Time) : List<Time>
+	//suspend fun getStopTimes(stopName : String, headsign: String, routeId: Int, curTime: Time) : List<Time>
 	/** @param curTime The current time. The stop time retrieved will correspond to the one nearest to now */
 	//FIXME instead of querying once the favourite thing, query all the stop times and cache them somewhere
 	suspend fun getFavouriteStopTime(stmFavouriteBusItem: StmBusItem, curTime: Time) : TransitDataWithTime

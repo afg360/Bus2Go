@@ -17,10 +17,9 @@ class GetTransitTime(
 	private val stmRepository: StmRepository,
 ) {
 
-	suspend operator fun invoke(transitData: TransitData): List<Time>{
-		val curTime = Time.now()
+	suspend operator fun invoke(curTime: Time, transitData: TransitData): List<Time>{
 		when(transitData){
-			is ExoBusItem -> return exoRepository.getStopTimes(
+			is ExoBusItem -> return exoRepository.getBusStopTimes(
 				transitData,
 				curTime
 			)

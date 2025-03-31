@@ -31,8 +31,8 @@ class GetStopNames(
 			is ExoBusRouteInfo -> {
 				val directions = exoRepository.getBusTripHeadsigns(routeInfo.routeId)
 				return if (directions.isEmpty()) throw DirectionsMissingException("The route $routeInfo doesn't have any directions to it...")
-				else if (directions.size == 1) exoRepository.getStopNames(directions.first(), null)
-				else exoRepository.getStopNames(
+				else if (directions.size == 1) exoRepository.getBusStopNames(directions.first(), null)
+				else exoRepository.getBusStopNames(
 					directions.first(),
 					directions.last()
 				)

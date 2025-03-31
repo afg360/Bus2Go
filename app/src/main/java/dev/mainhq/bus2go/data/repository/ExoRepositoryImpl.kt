@@ -31,7 +31,7 @@ class ExoRepositoryImpl(
 		}.toList()
 	}
 
-	override suspend fun getStopNames(direction1: String, direction2: String?): Pair<List<String>, List<String>> {
+	override suspend fun getBusStopNames(direction1: String, direction2: String?): Pair<List<String>, List<String>> {
 		return withContext(Dispatchers.IO) {
 			val job1 = async { stopTimesDAO.getStopNames(direction1) }
 			return@withContext direction2?.let {
@@ -48,7 +48,7 @@ class ExoRepositoryImpl(
 		}
 	}
 
-	override suspend fun getStopTimes(exoBusItem: ExoBusItem, curTime: Time) =
+	override suspend fun getBusStopTimes(exoBusItem: ExoBusItem, curTime: Time) =
 		withContext(Dispatchers.IO){
 			stopTimesDAO.getStopTimes(
 				exoBusItem.stopName,

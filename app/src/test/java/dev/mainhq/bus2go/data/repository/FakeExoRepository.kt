@@ -11,7 +11,7 @@ import dev.mainhq.bus2go.domain.entity.TransitDataWithTime
 import dev.mainhq.bus2go.domain.repository.ExoRepository
 import dev.mainhq.bus2go.domain.entity.FuzzyQuery
 import java.time.LocalDate
-import kotlin.random.Random
+import java.time.LocalTime
 
 class FakeExoRepository: ExoRepository {
 
@@ -48,15 +48,23 @@ class FakeExoRepository: ExoRepository {
 	}.flatten()
 
 
-	val stopTimesBus = hashMapOf<ExoBusItem, Time>()
-	val stopTimesTrain = hashMapOf<ExoTrainItem, Time>()
+	val testDate = LocalDate.of(2025, 2, 4)
+	val stopTimesBus = hashMapOf<ExoBusItem, List<Time>>()
+	val stopTimesTrain = hashMapOf<ExoTrainItem, List<Time>>()
 
 	init {
-		exoBusTransitData.forEach {
-			stopTimesBus[it] = Time.fromUnix(Random.nextLong(0, Int.MAX_VALUE.toLong()))
+		exoBusTransitData.forEachIndexed { index, item ->
+			val hour = 6 + (index / 4) % 12
+			val minute = (index % 4) * 15
+			stopTimesBus[item] = (1..10)
+				.map { Time(testDate, LocalTime.of(hour, minute + it, 0)) }
 		}
-		exoTrainTransitData.forEach {
-			stopTimesTrain[it] = Time.fromUnix(Random.nextLong(0, Int.MAX_VALUE.toLong()))
+
+		exoTrainTransitData.forEachIndexed { index, item ->
+			val hour = 8 + (index / 2) % 12
+			val minute = (index % 4) * 15
+			stopTimesTrain[item] = (1..10)
+				.map { Time(testDate, LocalTime.of(hour, minute + it, 0)) }
 		}
 	}
 
@@ -73,7 +81,7 @@ class FakeExoRepository: ExoRepository {
 		}
 	}
 
-	override suspend fun getStopNames(direction1: String, direction2: String?): Pair<List<String>, List<String>> {
+	override suspend fun getBusStopNames(direction1: String, direction2: String?): Pair<List<String>, List<String>> {
 		return Pair(
 			exoBusTransitData.filter { it.direction == direction1 }.map { it.stopName },
 			exoBusTransitData.filter { it.direction == direction2 }.map { it.stopName }
@@ -87,9 +95,8 @@ class FakeExoRepository: ExoRepository {
 		)
 	}
 
-	override suspend fun getStopTimes(exoBusItem: ExoBusItem, curTime: Time): List<Time> {
-		return stopTimesBus.filter { it.key == exoBusItem && it.value > curTime }
-			.map { it.value }
+	override suspend fun getBusStopTimes(exoBusItem: ExoBusItem, curTime: Time): List<Time> {
+		return stopTimesBus[exoBusItem]?.filter { it > curTime } ?: listOf()
 	}
 
 	override suspend fun getOldStopTimes(exoTransitData: TransitData, curTime: Time): List<Time> {
@@ -100,24 +107,23 @@ class FakeExoRepository: ExoRepository {
 		exoFavouriteBusItem: ExoBusItem,
 		curTime: Time,
 	): TransitDataWithTime {
-		return stopTimesBus.filter { it.key == exoFavouriteBusItem && it.value > curTime }
-			.map { TransitDataWithTime(it.key, it.value) }
-			.first()
-
+		return stopTimesBus[exoFavouriteBusItem]
+			?.filter { it > curTime }
+			?.map { TransitDataWithTime(exoFavouriteBusItem, it) }
+			?.first()
+			?: TransitDataWithTime(exoFavouriteBusItem, null)
 	}
 
 	override suspend fun getTrainStopTimes(exoTrainItem: ExoTrainItem, curTime: Time): List<Time> {
-		return stopTimesTrain.filter { it.key == exoTrainItem && it.value > curTime }
-			.map { it.value }
+		return stopTimesTrain[exoTrainItem]?.filter { it > curTime } ?: listOf()
 	}
 
 	override suspend fun getFavouriteTrainStopTime(
 		exoFavouriteTrainItem: ExoTrainItem,
 		curTime: Time,
 	): TransitDataWithTime {
-		return stopTimesTrain.filter { it.key == exoFavouriteTrainItem && it.value > curTime }
-			.map { TransitDataWithTime(it.key, it.value) }
-			.first()
+		return TransitDataWithTime(exoFavouriteTrainItem,
+			stopTimesTrain[exoFavouriteTrainItem]?.first { it > curTime })
 	}
 
 	override suspend fun getBusTripHeadsigns(routeId: String): List<String> {
@@ -128,6 +134,7 @@ class FakeExoRepository: ExoRepository {
 	override suspend fun getTrainTripHeadsigns(routeId: Int, directionId: Int): List<String> {
 		return exoTrainTransitData
 			.filter { it.routeId.toInt() == routeId &&  it.directionId == directionId }
-			.map { it.direction }.toSet().toList()
+			.map { it.direction }
+			.toSet().toList()
 	}
 }

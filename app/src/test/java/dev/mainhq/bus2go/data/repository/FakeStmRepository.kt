@@ -11,7 +11,7 @@ import dev.mainhq.bus2go.domain.entity.stm.DirectionInfo
 import dev.mainhq.bus2go.domain.repository.StmRepository
 import dev.mainhq.bus2go.domain.entity.FuzzyQuery
 import java.time.LocalDate
-import kotlin.random.Random
+import java.time.LocalTime
 
 class FakeStmRepository: StmRepository {
 
@@ -41,16 +41,24 @@ class FakeStmRepository: StmRepository {
 	}.flatten()
 
 
-	val stopTimes = hashMapOf<StmBusItem, Time>()
+	val testDate = LocalDate.of(2025, 2, 4)
+	val stopTimes = hashMapOf<StmBusItem, List<Time>>()
 
 	init {
-		stmTransitData.forEach {
-			stopTimes[it] = Time.fromUnix(Random.nextLong(0, Int.MAX_VALUE.toLong()))
+		stmTransitData.forEachIndexed { index, item ->
+			val hour = 8 + (index / 2) % 12
+			val minute = (index % 4) * 15
+			val time = Time(testDate, LocalTime.of(hour, minute, 0))
+			stopTimes[item] = (1..10)
+				.map { Time(testDate, LocalTime.of(hour, minute + it, 0)) }
 		}
 	}
 
 	override suspend fun getMaxEndDate(): LocalDate? {
-		return stopTimes.map { it.value }.maxByOrNull { it }!!.localDate
+		return stopTimes.map { it.value.maxByOrNull { it.localDate } }
+			.filterNotNull()
+			.maxByOrNull { it }
+			?.localDate
 	}
 
 	override suspend fun getAllCalendarDates(): List<CalendarDates> {
@@ -87,28 +95,28 @@ class FakeStmRepository: StmRepository {
 	}
 
 	override suspend fun getStopTimes(stmTransitData: TransitData, curTime: Time): List<Time> {
-		return stopTimes
-			.filter { it.key == stmTransitData && it.value > curTime }
-			.map { it.value }
-			.map { Time((it - curTime)!!) }
+		return stopTimes[stmTransitData]
+			?.filter { it > curTime }
+			?.map { Time((it - curTime)!!) }
+			?: listOf()
 	}
 
+	/*
 	override suspend fun getStopTimes(
 		stopName: String,
 		headsign: String,
 		routeId: Int,
 		curTime: Time,
 	): List<Time> {
-		return stopTimes.map { it.value }
+		return stopTimes[StmBusItem(routeId, stopName, getDirectionInfo(routeId)[0].directionId, )]
 	}
+	 */
 
 	override suspend fun getFavouriteStopTime(
 		stmFavouriteBusItem: StmBusItem,
 		curTime: Time,
 	): TransitDataWithTime {
-		return stopTimes.filter { it.key == stmFavouriteBusItem }
-			.map { TransitDataWithTime(it.key, it.value) }
-			.first()
+		return TransitDataWithTime(stmFavouriteBusItem, stopTimes[stmFavouriteBusItem]?.first())
 	}
 
 	/**

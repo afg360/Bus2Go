@@ -25,7 +25,7 @@ class StopTimesViewModel(
 	init {
 		viewModelScope.launch {
 			while(true){
-				_arrivalTimes.value = getTransitTime(transitData)
+				_arrivalTimes.value = getTransitTime(Time.now(), transitData)
 				delay(5000)
 			}
 		}

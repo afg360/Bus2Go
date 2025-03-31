@@ -23,9 +23,10 @@ interface ExoRepository {
 	 * @return A pair of a list of stopNames in both directions. If only one direction is available,
 	 * the second list is empty.
 	 * */
-	suspend fun getStopNames(direction1 : String, direction2: String?) : Pair<List<String>, List<String>>
+	suspend fun getBusStopNames(direction1 : String, direction2: String?) : Pair<List<String>, List<String>>
 	suspend fun getTrainStopNames(routeId : String) : Pair<List<String>, List<String>>
-	suspend fun getStopTimes(exoBusItem: ExoBusItem, curTime: Time) : List<Time>
+	suspend fun getBusStopTimes(exoBusItem: ExoBusItem, curTime: Time) : List<Time>
+	//TODO? renaming of the method to getBusOldStopTimes and for trains...?
 	suspend fun getOldStopTimes(exoTransitData: TransitData, curTime: Time) : List<Time>
 	suspend fun getFavouriteBusStopTime(exoFavouriteBusItem: ExoBusItem, curTime: Time) : TransitDataWithTime
 	suspend fun getTrainStopTimes(exoTrainItem: ExoTrainItem, curTime: Time) : List<Time>
