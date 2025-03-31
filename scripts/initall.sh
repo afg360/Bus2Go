@@ -16,15 +16,16 @@ execute_stm(){
 		echo -e "\nUse the --no-download flag to initialise the database if you already have the data from the STM.\n"
 	else
 		#to replace below if needed
-		path=.
+		path=./stm
+		[ ! -d "$path" ] && mkdir "$path"
 
-		cd $path/stm
-		rm stm_info.db
+		rm "$path/stm_info.db"
 		if [[ $1 = "--no-download" ]]; then
-			python3 setup_stm_db.py "no-download" && cp -i 'stm_info.db' "$project" 
+			python3 setup_stm_db.py "no-download"
 		else
-			python3 setup_stm_db.py && cp -i 'stm_info.db' "$project"
+			python3 setup_stm_db.py 
 		fi
+		cp -i "$path/stm_info.db" "$project"
 		cd ..
 	fi
 }
@@ -36,15 +37,16 @@ execute_exo(){
 		echo -e "\nDownload and initialise the database only for data from Exo."
 		echo -e "\nUse the --no-download flag to initialise the database if you already have the data for Exo.\n"
 	else
-		path=.
-		cd $path/exo
-		rm exo_info.db
+		path=./exo
+		[ ! -d "$path" ] && mkdir "$path"
+
+		rm "$path/exo_info.db"
 		if [[ $1 = "--no-download" ]]; then
 			python3 setup_exo_db.py "no-download"
 		else
 			python3 setup_exo_db.py
 		fi
-		cp -i 'exo_info.db' "$project"
+		cp -i "$path/exo_info.db" "$project"
 		cd ..
 	fi
 }
@@ -56,7 +58,7 @@ clean() {
 	[ rm ./stm/*.txt 2> /dev/null ] || echo "Stm files already deleted"
 }
 
-if [[ $# -eq 1 && ($1 = "--help" || $1 = "-h") ]]; then
+usage() {
 	echo "Script to initialise databases containing static data from transit agencies.
 Usage: ./initall.sh [-h/--help] <agency-name | command> [<args>]
 
@@ -70,6 +72,10 @@ Args:
 Available commands:
 	clean -> deletes all the txt files in the subdir of this script
 	"
+}
+
+if [[ $# -eq 1 && ($1 = "--help" || $1 = "-h") ]]; then
+	usage
 
 elif [[ $1 = "clean" && $# -eq 1 ]]; then
 	clean
@@ -86,5 +92,6 @@ elif [[ $# -eq 1 && ($1 = "--no-download") ]]; then
 
 else
 	echo "Syntax Error!"
+	usage
 	exit 1
 fi

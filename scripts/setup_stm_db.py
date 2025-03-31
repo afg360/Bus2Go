@@ -10,9 +10,9 @@ def convert_str_to_date(date: str) -> datetime.datetime:
     """Convert the time string to a datetime"""
     return datetime.datetime(int(date[0:4]), int(date[4:6]), int(date[6:8]))
 
-def download(url : str): #destination : str) -> None:
+def download(url : str, path: str): #destination : str) -> None:
     """download and create respective directories"""
-    zip_file = "data.zip"   #f"{destination}.zip"
+    zip_file = f"{path}/data.zip"   #f"{destination}.zip"
     print(f"Downloading from {url}")
     try:
         response = requests.get(url)
@@ -23,7 +23,7 @@ def download(url : str): #destination : str) -> None:
             #if not os.path.exists(f"./{destination}"):
             #    os.makedirs(destination)
             with zipfile.ZipFile(zip_file, "r") as zip:
-                zip.extractall(f"./")#{destination}")
+                zip.extractall(f"{path}")#{destination}")
             print(f"Extracted file from {zip_file}")
             os.remove(zip_file)
             print("Removed zip file")
@@ -34,20 +34,20 @@ def download(url : str): #destination : str) -> None:
         exit(1)
 
 
-def db_data_init(conn) -> None:
+def db_data_init(conn, path: str) -> None:
     """Initialise the data in the database associated to that agency"""
-    calendar_table(conn)
-    calendar_dates_table(conn)
-    route_table(conn)
-    forms_table(conn)
-    shapes_table(conn)
-    stop_times_table(conn)
-    stops_table(conn)
-    trips_table(conn)
+    calendar_table(conn, path)
+    calendar_dates_table(conn, path)
+    route_table(conn, path)
+    forms_table(conn, path)
+    shapes_table(conn, path)
+    stop_times_table(conn, path)
+    stops_table(conn, path)
+    trips_table(conn, path)
     stops_info_table(conn)
 
 
-def calendar_table(conn):
+def calendar_table(conn, path: str):
     cursor = conn.cursor()
     cursor.execute("DROP TABLE IF EXISTS Calendar;")
     print("Dropped table Calendar")
@@ -63,7 +63,7 @@ def calendar_table(conn):
     print("Initialised table Calendar")
 
     print("Inserting table and adding data")
-    with open("calendar.txt", "r", encoding="utf-8") as file:
+    with open(f"{path}/calendar.txt", "r", encoding="utf-8") as file:
         file.readline()
         #we will be skipping calendar dates that are beyond today's date...
         #TEST, MIGHT BREAK STUFF
@@ -105,7 +105,7 @@ def calendar_table(conn):
 
     cursor.close()
 
-def calendar_dates_table(conn):
+def calendar_dates_table(conn, path: str):
     cursor = conn.cursor()
     cursor.execute("DROP TABLE IF EXISTS CalendarDates;")
     print("Dropped table CalendarDates")
@@ -120,7 +120,7 @@ def calendar_dates_table(conn):
     print("Initialised table CalendarDates")
 
     print("Inserting table and adding data")
-    with open("calendar_dates.txt", "r", encoding="utf-8") as file:
+    with open(f"{path}/calendar_dates.txt", "r", encoding="utf-8") as file:
         file.readline()
         #try to add a row. if it doesn't exist in calendar, 
         #simply skip (may be because we deleted the 
@@ -135,7 +135,7 @@ def calendar_dates_table(conn):
     cursor.close()
 
 
-def forms_table(conn):
+def forms_table(conn, path: str):
     cursor = conn.cursor()
     cursor.execute("DROP TABLE IF EXISTS Forms;")
     print("Dropped table forms")
@@ -149,7 +149,7 @@ def forms_table(conn):
 
     print("Inserting tables")
     queries = []
-    with open("./shapes.txt", "r", encoding="utf-8") as file:
+    with open(f"{path}/shapes.txt", "r", encoding="utf-8") as file:
         file.readline()
         prev = ""
         for line in file:
@@ -167,7 +167,7 @@ def forms_table(conn):
     cursor.close()
 
 
-def route_table(conn):
+def route_table(conn, path: str):
     cursor = conn.cursor()
     cursor.execute("DROP TABLE IF EXISTS Routes;")
     print("Dropped table routes")
@@ -183,7 +183,7 @@ def route_table(conn):
     print("Initialised table routes")
 
     print("Inserting table and adding data")
-    with open("routes.txt", "r", encoding="utf-8") as file:
+    with open(f"{path}/routes.txt", "r", encoding="utf-8") as file:
         file.readline()
         for line in file:
             tokens = line.replace("\n", "").replace("'", "''").split(",")
@@ -195,7 +195,7 @@ def route_table(conn):
     cursor.close()
 
 
-def shapes_table(conn):
+def shapes_table(conn, path: str):
     cursor = conn.cursor()
     cursor.execute("DROP TABLE IF EXISTS Shapes;")
     print("Dropped table shapes")
@@ -212,7 +212,7 @@ def shapes_table(conn):
 
     print("Inserting tables")
     queries = []
-    with open("shapes.txt", "r", encoding="utf-8") as file:
+    with open(f"{path}/shapes.txt", "r", encoding="utf-8") as file:
         file.readline()
         for line in file:
             tokens = line.split(",")
@@ -226,7 +226,7 @@ def shapes_table(conn):
     cursor.close()
 
 
-def stop_times_table(conn):
+def stop_times_table(conn, path):
     cursor = conn.cursor()
     # drop the table and index
     query = "DROP TABLE IF EXISTS StopTimes;"
@@ -250,7 +250,7 @@ def stop_times_table(conn):
     print("Inserting table and adding data")
 
     chunk_size = 1000000
-    with open("stop_times.txt", "r", encoding="utf-8") as file:
+    with open(f"{path}/stop_times.txt", "r", encoding="utf-8") as file:
         file.readline()
         chunk = []
         cursor.execute("BEGIN TRANSACTION;")
@@ -282,7 +282,7 @@ def stop_times_table(conn):
     cursor.close()
 
 
-def stops_table(conn):
+def stops_table(conn, path):
     cursor = conn.cursor()
 
     sql = "DROP TABLE IF EXISTS Stops;"
@@ -303,7 +303,7 @@ def stops_table(conn):
 
     print("Inserting tables")
     chunk = []
-    with open("stops.txt", "r", encoding="utf-8") as file:
+    with open(f"{path}/stops.txt", "r", encoding="utf-8") as file:
         file.readline()
         for line in file:
             tokens = line.split(",")
@@ -318,7 +318,7 @@ def stops_table(conn):
     cursor.close()
 
 
-def trips_table(conn):
+def trips_table(conn, path: str):
     cursor = conn.cursor()
 
     query = "DROP TABLE IF EXISTS Trips;"
@@ -343,7 +343,7 @@ def trips_table(conn):
 
     print("Inserting table and adding data")
     chunk_size = 500000
-    with open("trips.txt", "r", encoding="utf-8") as file:
+    with open(f"{path}/trips.txt", "r", encoding="utf-8") as file:
         file.readline()
         chunk = []
         i = 1
@@ -411,12 +411,13 @@ def stops_info_table(conn):
 
 
 def main():
+    path = "./stm"
     if not (len(sys.argv) > 1 and sys.argv[1] == "no-download"):
-        download("https://www.stm.info/sites/default/files/gtfs/gtfs_stm.zip")
+        download("https://www.stm.info/sites/default/files/gtfs/gtfs_stm.zip", path)
 
-    conn = sqlite3.connect("./stm_info.db")
+    conn = sqlite3.connect(f"{path}/stm_info.db")
     conn.execute('PRAGMA encoding = "UTF-8"')
-    db_data_init(conn)
+    db_data_init(conn, path)
     conn.close()
 
 

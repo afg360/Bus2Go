@@ -33,19 +33,19 @@ def download(url : str, destination : str) -> None:
         exit(1)
 
 
-def db_data_init(conn, agency : str) -> None:
+def db_data_init(conn, agency : str, path: str) -> None:
     """Initialise the data in the database associated to that agency"""
-    calendar_table(conn, agency)
-    calendar_dates_table(conn, agency)
-    route_table(conn, agency)
-    forms_table(conn, agency)
-    shapes_table(conn, agency)
-    stop_times_table(conn, agency)
-    stops_table(conn, agency)
-    trips_table(conn, agency)
+    calendar_table(conn, agency, path)
+    calendar_dates_table(conn, agency, path)
+    route_table(conn, agency, path)
+    forms_table(conn, agency, path)
+    shapes_table(conn, agency, path)
+    stop_times_table(conn, agency, path)
+    stops_table(conn, agency, path)
+    trips_table(conn, agency, path)
 
 
-def calendar_table(conn, agency) -> None:
+def calendar_table(conn, agency:str, path: str) -> None:
     cursor = conn.cursor()
     print("Connected to database exo_info.db")
     sql = """CREATE TABLE IF NOT EXISTS Calendar (
@@ -58,7 +58,7 @@ def calendar_table(conn, agency) -> None:
     cursor.execute(sql)
     print("Initialised table Calendar")
     print("Inserting table and adding data")
-    with open(f"./{agency}/calendar.txt", "r", encoding="utf-8") as file:
+    with open(f"{path}/{agency}/calendar.txt", "r", encoding="utf-8") as file:
         file.readline()
         today = datetime.datetime.today()
         for line in file:
@@ -95,7 +95,7 @@ def calendar_table(conn, agency) -> None:
     print("Successfully inserted table")
     cursor.close()
 
-def calendar_dates_table(conn, agency):
+def calendar_dates_table(conn, agency: str, path: str):
     cursor = conn.cursor()
     cursor.execute("DROP TABLE IF EXISTS CalendarDates;")
     print("Dropped table CalendarDates")
@@ -110,7 +110,7 @@ def calendar_dates_table(conn, agency):
     print("Initialised table CalendarDates")
 
     print("Inserting table and adding data")
-    with open(f"./{agency}/calendar_dates.txt", "r", encoding="utf-8") as file:
+    with open(f"{path}/{agency}/calendar_dates.txt", "r", encoding="utf-8") as file:
         file.readline()
         #try to add a row. if it doesn't exist in calendar, 
         #simply skip (may be because we deleted the 
@@ -124,7 +124,7 @@ def calendar_dates_table(conn, agency):
     print("Successfully inserted table")
     cursor.close()
 
-def forms_table(conn, agency):
+def forms_table(conn, agency: str, path: str):
     """Custom table to put together all unique shape_ids"""
     cursor = conn.cursor()
 
@@ -137,7 +137,7 @@ def forms_table(conn, agency):
 
     print("Inserting tables")
     queries = []
-    with open(f"./{agency}/shapes.txt", "r", encoding="utf-8") as file:
+    with open(f"{path}/{agency}/shapes.txt", "r", encoding="utf-8") as file:
         file.readline()
         prev = ""
         for line in file:
@@ -153,7 +153,7 @@ def forms_table(conn, agency):
     print("Successfully inserted table")
 
 
-def route_table(conn, agency):
+def route_table(conn, agency: str, path: str):
     cursor = conn.cursor()
     print("Connected to database exo_info.db")
 
@@ -169,7 +169,7 @@ def route_table(conn, agency):
     print("Initialised table Routes")
 
     print("Inserting table and adding data")
-    with open(f"./{agency}/routes.txt", "r", encoding="utf-8") as file:
+    with open(f"{path}/{agency}/routes.txt", "r", encoding="utf-8") as file:
         file.readline()
         for line in file:
             tokens = line.replace("\n", "").replace("'", "''").split(",")
@@ -181,7 +181,7 @@ def route_table(conn, agency):
     cursor.close()
 
 
-def shapes_table(conn, agency):
+def shapes_table(conn, agency: str, path: str):
     cursor = conn.cursor()
     print("Connected to database exo_info.db")
 
@@ -197,7 +197,7 @@ def shapes_table(conn, agency):
 
     print("Inserting tables")
     queries = []
-    with open(f"./{agency}/shapes.txt", "r", encoding="utf-8") as file:
+    with open(f"{path}/{agency}/shapes.txt", "r", encoding="utf-8") as file:
         file.readline()
         for line in file:
             tokens = line.split(",")
@@ -210,7 +210,7 @@ def shapes_table(conn, agency):
     cursor.close()
 
 
-def stop_times_table(conn, agency):
+def stop_times_table(conn, agency: str, path: str):
     cursor = conn.cursor()
     print("Connected to database exo_info.db")
 
@@ -228,7 +228,7 @@ def stop_times_table(conn, agency):
     print("Inserting table and adding data")
 
     chunk_size = 1000000
-    with open(f"./{agency}/stop_times.txt", "r", encoding="utf-8") as file:
+    with open(f"{path}/{agency}/stop_times.txt", "r", encoding="utf-8") as file:
         file.readline()
         chunk = []
         cursor.execute("BEGIN TRANSACTION;")
@@ -254,7 +254,7 @@ def stop_times_table(conn, agency):
     cursor.close()
 
 
-def stops_table(conn, agency):
+def stops_table(conn, agency: str, path: str):
     cursor = conn.cursor()
     print("Connected to database exo_info.db")
 
@@ -272,7 +272,7 @@ def stops_table(conn, agency):
 
     print("Inserting tables")
     chunk = []
-    with open(f"./{agency}/stops.txt", "r", encoding="utf-8") as file:
+    with open(f"{path}/{agency}/stops.txt", "r", encoding="utf-8") as file:
         file.readline()
         for line in file:
             tokens = line.split(",")
@@ -286,7 +286,7 @@ def stops_table(conn, agency):
     cursor.close()
 
 
-def trips_table(conn, agency):
+def trips_table(conn, agency: str, path: str):
     cursor = conn.cursor()
     print("Connected to database exo_info.db")
 
@@ -304,7 +304,7 @@ def trips_table(conn, agency):
 
     print("Inserting table and adding data")
     chunk_size = 500000
-    with open(f"./{agency}/trips.txt", "r", encoding="utf-8") as file:
+    with open(f"{path}/{agency}/trips.txt", "r", encoding="utf-8") as file:
         file.readline()
         chunk = []
         i = 1
@@ -344,21 +344,22 @@ def main():
     ]
     jobs = []
 
+    path = "./exo"
     import sys
     if not (len(sys.argv) > 1 and sys.argv[1] == "no-download"):
         for file in files:
             thread = threading.Thread(target=download, args=(
-                "https://exo.quebec/xdata/" + file + "/google_transit.zip", file
+                "https://exo.quebec/xdata/" + file + "/google_transit.zip", f"{path}/{file}"
             ))
             jobs.append(thread)
             thread.start()
         for job in jobs:
             job.join()
 
-    conn = sqlite3.connect("./exo_info.db")
+    conn = sqlite3.connect(f"{path}/exo_info.db")
     for dir in files:
         print(f"Initialising data for {dir}")
-        db_data_init(conn, dir)
+        db_data_init(conn, dir, path)
 
     cursor = conn.cursor()
     print("Creating index for StopTimes on stopid and tripid")
