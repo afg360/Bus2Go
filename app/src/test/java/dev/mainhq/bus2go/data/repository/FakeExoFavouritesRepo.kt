@@ -16,7 +16,7 @@ class FakeExoFavouritesRepo: ExoFavouritesRepository {
 		)
 	}.toMutableList()
 
-	val exoTrainItems = (1..10).map {
+	val exoTrainItems = (1..5).map {
 		ExoTrainItem(
 			it.toString(),
 			"Stm Bus $it",
