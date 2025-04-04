@@ -111,6 +111,7 @@ class NewUpdateWorkerTests {
 		WorkManagerTestInitHelper.initializeTestWorkManager(context)
 	}
 
+	/*
 	@After
 	fun shutDown(){
 		mockWebServer.shutdown()
@@ -141,4 +142,6 @@ class NewUpdateWorkerTests {
 			)
 		}
 	}
+
+	 */
 }

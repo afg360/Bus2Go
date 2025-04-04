@@ -9,6 +9,7 @@ import org.junit.Test
 class GetFavouritesTest {
 
 	//TODO sorting when the time comes...
+	//TODO verify that the items are the ones we expect
 
 	private lateinit var fakeExoFavouritesRepo: FakeExoFavouritesRepo
 	private lateinit var fakeStmFavouritesRepo: FakeStmFavouritesRepo

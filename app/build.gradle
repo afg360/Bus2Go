@@ -1,7 +1,6 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
-    id 'com.google.protobuf' version '0.9.4'
     id 'kotlin-android'
     id 'kotlin-parcelize'
     id 'kotlin-kapt'
@@ -15,19 +14,6 @@ android {
 
     sourceSets {
         androidTest.assets.srcDirs += files("$projectDir/schemas".toString())
-        main {
-            proto {
-                srcDirs 'src/main/protobuf'
-            }
-            java {
-                srcDirs += "$buildDir/generated/src/proto/release/java"
-            }
-        }
-        test {
-            proto {
-                srcDir 'src/test/protobuf'
-            }
-        }
     }
 
     defaultConfig {
@@ -54,43 +40,6 @@ android {
     }
     buildFeatures {
         viewBinding true
-    }
-}
-
-protobuf {
-    protoc {
-        artifact = 'com.google.protobuf:protoc:4.26.1'
-    }
-    plugins{
-        javalite {
-            artifact = 'com.google.protobuf:protoc-gen-javalite:4.26.1'
-        }
-    }
-    generateProtoTasks {
-        // all() returns the collection of all protoc tasks
-        all().configureEach { task ->
-            // Here you can configure the task
-            task.builtins {
-                java {
-                    option 'lite'
-                }
-            }
-            task.plugins {
-            }
-        }
-        ofSourceSet('main')
-
-        // (Android-only selectors)
-        // Returns tasks for a flavor
-        ofFlavor('demo')
-        // Returns tasks for a buildType
-        ofBuildType('release')
-        // Returns tasks for a variant
-        ofVariant('demoRelease')
-        // Returns non-androidTest tasks
-        ofNonTest()
-        // Return androidTest tasks
-        ofTest()
     }
 }
 
@@ -152,9 +101,6 @@ dependencies {
     implementation "io.ktor:ktor-client-okhttp:$ktor_version"
     implementation "io.ktor:ktor-client-cio:$ktor_version"
     
-    //Protobuf
-    def protobuf_version = "4.27.1"
-    implementation "com.google.protobuf:protobuf-javalite:$protobuf_version"
     
     def mockWebServer_version = "1.2.1"
     //Unit Testing
