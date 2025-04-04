@@ -17,6 +17,8 @@ class AddFavouriteTest {
 	private lateinit var fakeStmFavouritesRepo: FakeStmFavouritesRepo
 	private lateinit var addFavourite: AddFavourite
 
+	//TODO should i handle unique favourites only?
+
 	@Before
 	fun setup(){
 		fakeExoFavouritesRepo = FakeExoFavouritesRepo()
