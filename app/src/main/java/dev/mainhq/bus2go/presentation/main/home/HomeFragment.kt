@@ -40,6 +40,7 @@ import dev.mainhq.bus2go.presentation.main.home.favourites.FavouritesFragment
 import dev.mainhq.bus2go.presentation.main.home.favourites.FavouritesFragmentSharedViewModel
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 //We must have an empty constructor and instead pass elements inside the bundle??
@@ -110,6 +111,16 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 homeFragmentViewModel.searchQuery.collect { results ->
                     busListAdapter.updateData(results)
+                }
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED){
+                favouritesSharedViewModel.selectAllFavourites.collect { isChecked ->
+                    view.findViewById<AppBarLayout>(R.id.mainAppBar)?.also { appBarLayout ->
+                        appBarLayout.findViewById<MaterialCheckBox>(R.id.selectAllCheckbox).isChecked = isChecked
+                    }
                 }
             }
         }

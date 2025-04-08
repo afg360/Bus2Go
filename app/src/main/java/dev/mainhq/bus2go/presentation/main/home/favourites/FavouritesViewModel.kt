@@ -26,26 +26,16 @@ class FavouritesViewModel(
     //2) add observer to check for click events
     //3) eventually some sort of sorting/categorisation of favourites
 
-    /**
-     * A helper class that let's us know if a favouriteTransitDataWithTime is selected
-     **/
-    private data class FavouriteTransitDataWithTimeAndSelection(
-        val transitDataWithTime: TransitDataWithTime,
-        var isSelected: Boolean
-    )
 
     private val _favouriteTransitData: MutableStateFlow<List<FavouriteTransitDataWithTimeAndSelection>> = MutableStateFlow(listOf())
-    val favouriteTransitData get() = _favouriteTransitData
-        .map { list -> list.map { it.transitDataWithTime } }
-        .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5000),
-            listOf()
-        )
+    val favouriteTransitData get() = _favouriteTransitData.asStateFlow()
 
     //changes between selection mode for removing favourites and shit, or normal mode where we can click
     private val _selectionMode: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val selectionMode = _selectionMode.asStateFlow()
+
+    private val _isAllSelected: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val isAllSelected = _isAllSelected.asStateFlow()
 
     //private val _wasSelectionMode: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
@@ -62,9 +52,10 @@ class FavouritesViewModel(
                         // Find if this item existed in the previous list and was selected
                         //val existingItem = currentData.find { it.transitDataWithTime.favouriteTransitData.routeId == newItem.favouriteTransitData.routeId }
                         // Preserve selection state if item existed, otherwise default to false
+                        val currentItem = currentData.find { it.transitDataWithTime.favouriteTransitData == newItem.favouriteTransitData }
                         FavouriteTransitDataWithTimeAndSelection(
                             transitDataWithTime = newItem,
-                            isSelected = false //existingItem?.isSelected ?: false
+                            isSelected = currentItem?.isSelected ?: false
                         )
                     }
 
@@ -127,6 +118,7 @@ class FavouritesViewModel(
             )}
         }
     }
+
 
     fun removeFavourites(){
         viewModelScope.launch {

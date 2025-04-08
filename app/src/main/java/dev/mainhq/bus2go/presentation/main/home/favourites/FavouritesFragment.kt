@@ -80,6 +80,7 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
                     if (checkBoxView.isChecked) favouritesSharedViewModel.incrementNumFavouritesSelected()
                     else favouritesSharedViewModel.decrementNumFavouritesSelected()
                     favouritesViewModel.toggleFavouriteForRemoval(favouriteTransitData)
+                    favouritesSharedViewModel.toggleIsAllSelected(checkBoxView.isChecked)
                 }
                 else {
                     val intent = Intent(view.context, StopTimesActivity::class.java)
@@ -204,11 +205,14 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 favouritesSharedViewModel.selectAllFavourites.collect { isAllSelected ->
-                    if (isAllSelected == true) {
-                        favouritesViewModel.selectAllForRemoval()
-                    }
-                    else if (isAllSelected == false) {
-                        favouritesViewModel.deselectAllForRemoval()
+                    if (favouritesViewModel.selectionMode.value){
+                        if (isAllSelected) {
+                            favouritesViewModel.selectAllForRemoval()
+                        }
+                        else {
+                            favouritesViewModel.deselectAllForRemoval()
+                            favouritesSharedViewModel.resetNumFavouritesSelected()
+                        }
                     }
                 }
             }
@@ -221,8 +225,6 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
             override fun handleOnBackPressed() {
                 recyclerView.forEach { view ->
                     view.findViewById<MaterialCheckBox>(R.id.favourites_check_box).visibility = View.GONE
-                    /** Establish original layout (i.e. margins) */
-                    setMargins(view.findViewById(R.id.favouritesDataContainer), 20, 20)
                 }
                 favouritesViewModel.deactivateSelectionMode()
                 favouritesSharedViewModel.deactivateSelectionMode()
