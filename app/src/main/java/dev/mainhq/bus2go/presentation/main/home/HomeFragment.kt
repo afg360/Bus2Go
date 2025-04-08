@@ -18,8 +18,11 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.AppBarLayout
@@ -29,6 +32,7 @@ import com.google.android.material.search.SearchView
 import com.google.android.material.search.SearchView.TransitionState
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
+import dev.mainhq.bus2go.presentation.Bus2GoApplication
 import dev.mainhq.bus2go.presentation.choose_direction.ChooseDirection
 import dev.mainhq.bus2go.presentation.search_transit.SearchTransit
 import dev.mainhq.bus2go.presentation.settings.SettingsActivity
@@ -41,7 +45,19 @@ import kotlinx.coroutines.launch
 //We must have an empty constructor and instead pass elements inside the bundle??
 class HomeFragment: Fragment(R.layout.fragment_home) {
 
-    private val homeFragmentViewModel: HomeFragmentViewModel by viewModels()
+    private val homeFragmentViewModel: HomeFragmentViewModel by viewModels{
+        object: ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+                if (modelClass.isAssignableFrom(HomeFragmentViewModel::class.java)){
+                    return HomeFragmentViewModel(
+                        //FIXME
+                        (this@HomeFragment.requireActivity().application as Bus2GoApplication).appContainer.transitTimeInfoUseCases,
+                    ) as T
+                }
+                throw IllegalArgumentException("Gave wrong ViewModel class")
+            }
+        }
+    }
     private val homeFragmentSharedViewModel: HomeFragmentSharedViewModel by activityViewModels()
     private val favouritesSharedViewModel: FavouritesFragmentSharedViewModel by viewModels()
 
@@ -96,7 +112,9 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
                     busListAdapter.updateData(results)
                 }
             }
+        }
 
+        viewLifecycleOwner.lifecycleScope.launch {
             //change the appBar number displayed
             repeatOnLifecycle(Lifecycle.State.STARTED){
                 favouritesSharedViewModel.numberFavouritesSelected.collect { numSelected ->
@@ -113,7 +131,10 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
                 }
             }
 
-            //handling remove selection mode, coming from favourites fragment
+        }
+
+        //handling remove selection mode, coming from favourites fragment
+        viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED){
                 favouritesSharedViewModel.selectionMode.collect{ removeFavouritesMode ->
                     view.findViewById<AppBarLayout>(R.id.mainAppBar)?.also { appBarLayout ->

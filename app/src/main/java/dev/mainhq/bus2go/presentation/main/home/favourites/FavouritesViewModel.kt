@@ -2,8 +2,10 @@ package dev.mainhq.bus2go.presentation.main.home.favourites
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.domain.entity.TransitDataWithTime
 import dev.mainhq.bus2go.domain.use_case.FavouritesUseCases
+import dev.mainhq.bus2go.presentation.main.alarms.AlarmCreationDialogBottomNavBar
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,6 +47,7 @@ class FavouritesViewModel(
     private val _selectionMode: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val selectionMode = _selectionMode.asStateFlow()
 
+    //private val _wasSelectionMode: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
     init {
         //every 5 refresh the time displayed
@@ -53,8 +56,19 @@ class FavouritesViewModel(
                 //FIXME this code always resets the isSelected to false...
                 //FIXME code seems inneficient by going so many times to the repo... perhaps only
                 //do it when some time is less than some other time
-                _favouriteTransitData.value = favouritesUseCases.getFavouritesWithTimeData()
-                    .map{ FavouriteTransitDataWithTimeAndSelection(it, false) }
+                val currentData = _favouriteTransitData.value
+                val newData = favouritesUseCases.getFavouritesWithTimeData()
+                    .map { newItem ->
+                        // Find if this item existed in the previous list and was selected
+                        //val existingItem = currentData.find { it.transitDataWithTime.favouriteTransitData.routeId == newItem.favouriteTransitData.routeId }
+                        // Preserve selection state if item existed, otherwise default to false
+                        FavouriteTransitDataWithTimeAndSelection(
+                            transitDataWithTime = newItem,
+                            isSelected = false //existingItem?.isSelected ?: false
+                        )
+                    }
+
+                _favouriteTransitData.value = newData
                 delay(5000)
             }
         }
@@ -70,9 +84,11 @@ class FavouritesViewModel(
     }
 
     //FIXME needs an argument to know which favourite we selected
-    fun selectFavouriteForRemoval(index: Int){
+    fun toggleFavouriteForRemoval(transitData: TransitData){
         _favouriteTransitData.update { curList ->
-            curList[index].isSelected = true
+            val item = curList.find { it.transitDataWithTime.favouriteTransitData == transitData }
+            item?.isSelected = item?.isSelected?.also { isSelected -> !isSelected } ?: false
+            //curList[index].isSelected = true
             curList
         }
     }

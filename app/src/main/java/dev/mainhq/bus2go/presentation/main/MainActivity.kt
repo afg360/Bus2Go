@@ -5,8 +5,11 @@ import android.os.Bundle
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.viewmodel.CreationExtras
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.navigation.NavigationBarView
@@ -14,6 +17,7 @@ import dev.mainhq.bus2go.presentation.core.state.AppThemeState
 import dev.mainhq.bus2go.presentation.base.BaseActivity
 import dev.mainhq.bus2go.presentation.config.ConfigActivity
 import dev.mainhq.bus2go.R
+import dev.mainhq.bus2go.presentation.Bus2GoApplication
 //import dev.mainhq.bus2go.fragments.alarms.AlarmReceiver
 import dev.mainhq.bus2go.presentation.main.home.HomeFragment
 import dev.mainhq.bus2go.presentation.main.map.MapFragment
@@ -35,9 +39,23 @@ import kotlinx.coroutines.withContext
 
 class MainActivity : BaseActivity() {
 
-    private val mainActivityViewModel: MainActivityViewModel by viewModels()
+    private val mainActivityViewModel: MainActivityViewModel by viewModels{
+        object: ViewModelProvider.Factory{
+            override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+                if (modelClass.isAssignableFrom(MainActivityViewModel::class.java)){
+                    return MainActivityViewModel(
+                        (this@MainActivity.application as Bus2GoApplication).appContainer.checkDatabaseUpdateRequired,
+                        (this@MainActivity.application as Bus2GoApplication).appContainer.setDatabaseState,
+                        (this@MainActivity.application as Bus2GoApplication).appContainer.isFirstTimeAppLaunched,
+                    ) as T
+                }
+                throw IllegalArgumentException("Gave wrong ViewModel class")
+            }
+        }
+    }
+
     private val homeFragmentSharedViewModel: HomeFragmentSharedViewModel by viewModels()
-    private val alarmViewModel: AlarmCreationViewModel by viewModels()
+    //private val alarmViewModel: AlarmCreationViewModel by viewModels()
     //private val roomViewModel: RoomViewModel by viewModels()
 
 
@@ -53,33 +71,10 @@ class MainActivity : BaseActivity() {
                 startActivity(intent)
                 //AppThemeState.turnOffDbUpdateChecking()
             }
-            if (AppThemeState.displayIsDbUpdatedDialog)
-                checkAndUpdateDatabases()
-
             setContentView(R.layout.main_activity)
 
-            //sets essentially an "observer" that notifies the ui when the state changes
-            repeatOnLifecycle(Lifecycle.State.STARTED){
-                mainActivityViewModel.activityType.collect{ activityType ->
-                    when(activityType){
-                        ActivityType.HOME -> {
-                            supportFragmentManager.beginTransaction()
-                                .replace(R.id.mainFragmentContainer, HomeFragment())
-                                .commit()
-                        }
-                        ActivityType.MAP -> {
-                            supportFragmentManager.beginTransaction()
-                                .replace(R.id.mainFragmentContainer, MapFragment())
-                                .commit()
-                        }
-                        ActivityType.ALARMS -> {
-                            supportFragmentManager.beginTransaction()
-                                .replace(R.id.mainFragmentContainer, AlarmsFragment())
-                                .commit()
-                        }
-                    }
-                }
-            }
+            //if (AppThemeState.displayIsDbUpdatedDialog)
+            //    checkAndUpdateDatabases()
 
             findViewById<NavigationBarView>(R.id.bottomNavBarView).setOnItemSelectedListener {
                 //we change the state. Since the ui has an "observer", changes ui accordingly
@@ -111,56 +106,77 @@ class MainActivity : BaseActivity() {
                     }
                 }
             })
+
+            //sets essentially an "observer" that notifies the ui when the state changes
+            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED){
+                mainActivityViewModel.activityType.collect{ activityType ->
+                    when(activityType){
+                        ActivityType.HOME -> {
+                            supportFragmentManager.beginTransaction()
+                                .replace(R.id.mainFragmentContainer, HomeFragment())
+                                .commit()
+                        }
+                        ActivityType.MAP -> {
+                            supportFragmentManager.beginTransaction()
+                                .replace(R.id.mainFragmentContainer, ComingSoonFragment())
+                                .commit()
+                        }
+                        ActivityType.ALARMS -> {
+                            supportFragmentManager.beginTransaction()
+                                .replace(R.id.mainFragmentContainer, ComingSoonFragment())
+                                .commit()
+                        }
+                    }
+                }
+            }
         }
     }
 
     //TODO add some classes in data/domain layer handling this
     private suspend fun checkAndUpdateDatabases(){
-        repeatOnLifecycle(Lifecycle.State.CREATED){
-            mainActivityViewModel.showAlert.collect{ showAlert ->
-                if (showAlert){
-                    // Displays a dialog for the user to choose to update now or to get reminded later.
-                    withContext(Dispatchers.Main) {
-                        val dialog = MaterialAlertDialogBuilder(this@MainActivity)
-                            .setTitle("Update your databases")
-                            .setMessage(
-                                "It seems like your local databases are out of date. It is recommended that you " +
-                                        "update them so that you can enjoy accurate schedules."
-                            )
-                            .setPositiveButton("Update now") { dialogInterface, _ ->
-                                //TODO setup download jobs and shit, no server prepared yet so display a coming soon for now
-                                MaterialAlertDialogBuilder(this@MainActivity)
-                                    .setTitle("Coming Soon")
-                                    .setMessage("Unfortunately, we are not hosting the dbs at the moment. Please update" +
-                                            "the app when an update will be available.")
-                                    .show()
+        mainActivityViewModel.showAlert.collect{ showAlert ->
+            if (showAlert){
+                // Displays a dialog for the user to choose to update now or to get reminded later.
+                withContext(Dispatchers.Main) {
+                    val dialog = MaterialAlertDialogBuilder(this@MainActivity)
+                        .setTitle("Update your databases")
+                        .setMessage(
+                            "It seems like your local databases are out of date. It is recommended that you " +
+                                    "update them so that you can enjoy accurate schedules."
+                        )
+                        .setPositiveButton("Update now") { dialogInterface, _ ->
+                            //TODO setup download jobs and shit, no server prepared yet so display a coming soon for now
+                            MaterialAlertDialogBuilder(this@MainActivity)
+                                .setTitle("Coming Soon")
+                                .setMessage("Unfortunately, we are not hosting the dbs at the moment. Please update" +
+                                        "the app when an update will be available.")
+                                .show()
+                            dialogInterface.dismiss()
+                            mainActivityViewModel.setUpdateDbState(30)
+                        }
+                        .setNeutralButton("Remind me later") { dialogInterface, _ ->
+                            //TODO save the value in the application_state file (create a new dialog for choosing time before a reminder)
+                            val datePicker = MaterialDatePicker.Builder.datePicker()
+                                .setTitleText("Remind me in...")
+                                .setPositiveButtonText("Confirm")
+                                .setNegativeButtonText("Cancel")
+                                .build()
+                            datePicker.addOnPositiveButtonClickListener {
+                                mainActivityViewModel.setUpdateDbState(it)
                                 dialogInterface.dismiss()
-                                mainActivityViewModel.setUpdateDbState(30)
                             }
-                            .setNeutralButton("Remind me later") { dialogInterface, _ ->
-                                //TODO save the value in the application_state file (create a new dialog for choosing time before a reminder)
-                                val datePicker = MaterialDatePicker.Builder.datePicker()
-                                    .setTitleText("Remind me in...")
-                                    .setPositiveButtonText("Confirm")
-                                    .setNegativeButtonText("Cancel")
-                                    .build()
-                                datePicker.addOnPositiveButtonClickListener {
-                                    mainActivityViewModel.setUpdateDbState(it)
-                                    dialogInterface.dismiss()
-                                }
-                                datePicker.addOnNegativeButtonClickListener {
-                                    dialogInterface.dismiss()
-                                }
-                                datePicker.show(this@MainActivity.supportFragmentManager, null)
+                            datePicker.addOnNegativeButtonClickListener {
+                                dialogInterface.dismiss()
                             }
-                            .setNegativeButton("Don't remind me") { dialogInterface, _ ->
-                                mainActivityViewModel.setUpdateDbState(30)
-                                dialogInterface.cancel()
-                            }
-                            .create()
+                            datePicker.show(this@MainActivity.supportFragmentManager, null)
+                        }
+                        .setNegativeButton("Don't remind me") { dialogInterface, _ ->
+                            mainActivityViewModel.setUpdateDbState(30)
+                            dialogInterface.cancel()
+                        }
+                        .create()
 
-                        dialog.show()
-                    }
+                    dialog.show()
                 }
             }
         }
@@ -185,7 +201,5 @@ class MainActivity : BaseActivity() {
         // Cancel the alarm
         alarmManager.cancel(pendingIntent)
     }
-
      */
 }
-

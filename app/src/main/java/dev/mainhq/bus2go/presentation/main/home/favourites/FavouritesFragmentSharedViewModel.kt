@@ -24,7 +24,7 @@ class FavouritesFragmentSharedViewModel: ViewModel() {
 	}
 
 	fun deactivateSelectionMode(){
-		_selectionMode.value = true
+		_selectionMode.value = false
 		_numberFavouritesSelected.value = 0
 	}
 
@@ -32,13 +32,12 @@ class FavouritesFragmentSharedViewModel: ViewModel() {
 		_selectAllFavourites.value = !_selectAllFavourites.value!!
 	}
 
-	fun setSelectionMode(selectedMode: Boolean){
-		_selectionMode.value = selectedMode
+
+	fun incrementNumFavouritesSelected(){
+		_numberFavouritesSelected.value++
 	}
 
-	/** Should only be called by FavouritesFragment */
-	fun setNumberFavouritesSelected(num: Int){
-		_numberFavouritesSelected.value = num
+	fun decrementNumFavouritesSelected(){
+		_numberFavouritesSelected.value--
 	}
-
 }

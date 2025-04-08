@@ -38,7 +38,7 @@ class ChooseDirectionViewModel(
 		viewModelScope.launch {
 
 			//FIXME stopNames is nullable
-			val stopNames = getStopNames(routeInfo)
+			val stopNames = getStopNames.invoke(routeInfo)
 			if (stopNames == null){
 				println("No stop names found")
 				return@launch

@@ -31,9 +31,11 @@ import java.time.LocalTime
 class FavouritesListElemsAdapter(
     private var list : List<TransitDataWithTime>,
     private val onClickListener: (View, TransitData) -> Unit,
-    private val onLongClickListener: OnLongClickListener
+    private val onLongClickListener: (View, TransitData) -> Boolean,
 )
     : RecyclerView.Adapter<FavouritesListElemsAdapter.ViewHolder>(){
+
+    private var selectedMode = false
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(LayoutInflater.from(parent.context)
@@ -128,42 +130,32 @@ class FavouritesListElemsAdapter(
             }
         }
 
+        if (selectedMode) holder.checkBoxView.visibility = VISIBLE
+        else holder.checkBoxView.visibility = GONE
+
         holder.checkBoxView.setOnClickListener{
             holder.checkBoxView.isChecked = !holder.checkBoxView.isChecked
-        }
-
-        holder.itemView.setOnClickListener {
             onClickListener(it, info.favouriteTransitData)
         }
 
-        //holder.itemView.setOnLongClickListener(onLongClickListener)
-        holder.itemView.setOnLongClickListener {
-            val tmpRecyclerView = it.parent as RecyclerView
-            /** if recycler has never been long clicked/has been backed, check if the view is not selected and select it */
-            if (tmpRecyclerView.tag == null || tmpRecyclerView.tag == "unselected"){
-                if (!holder.checkBoxView.isChecked){
-                    /*
-                    /** Show the checkboxes for each of the favourite elements */
-                    recyclerView.forEach {view ->
-                        val viewGroup = (view as ViewGroup)[0] as ViewGroup
-                        (viewGroup[0] as MaterialCheckBox).visibility = VISIBLE
-                        val constraintLayout = viewGroup[1] as ConstraintLayout
-                        setMargins(constraintLayout, 10, 15)
-                    }
-                     */
-                    holder.checkBoxView.isChecked = true
-                }
-            }
-            onLongClickListener
-            true
+        holder.itemView.setOnClickListener { onClickListener(it, info.favouriteTransitData) }
+
+        holder.itemView.setOnLongClickListener{
+            onLongClickListener(it, info.favouriteTransitData)
         }
     }
 
     fun updateTime(list: List<TransitDataWithTime>){
         this.list = list
+        //notifyDataSetChanged()
         notifyItemRangeChanged(0, itemCount)
     }
 
+    /** Toggles what mode we are in */
+    fun updateSelectionMode(){
+        this.selectedMode = !this.selectedMode
+        notifyItemRangeChanged(0, itemCount)
+    }
 
     private fun getTimeRemaining(remainingTime: LocalTime?): String {
         //if (arrivalTime == null) return "Wtf"

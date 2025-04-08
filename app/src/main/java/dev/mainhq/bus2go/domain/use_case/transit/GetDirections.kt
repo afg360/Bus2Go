@@ -18,9 +18,7 @@ class GetDirections(
 	 **/
 	suspend operator fun invoke(routeInfo: RouteInfo): List<*> {
 		return when(routeInfo){
-			is ExoBusRouteInfo -> {
-				exoRepository.getBusTripHeadsigns(routeInfo.routeId)
-			}
+			is ExoBusRouteInfo -> exoRepository.getBusTripHeadsigns(routeInfo.routeId)
 			is ExoTrainRouteInfo -> throw IllegalArgumentException("You're not supposed to use this class for trains.")
 			is StmBusRouteInfo -> stmRepository.getDirectionInfo(routeInfo.routeId.toInt())
 		}

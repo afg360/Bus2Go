@@ -16,12 +16,16 @@ import dev.mainhq.bus2go.data.repository.StmFavouritesRepositoryImpl
 import dev.mainhq.bus2go.data.repository.StmRepositoryImpl
 import dev.mainhq.bus2go.domain.use_case.FavouritesUseCases
 import dev.mainhq.bus2go.domain.use_case.TransitTimeInfoUseCases
+import dev.mainhq.bus2go.domain.use_case.db_state.CheckDatabaseUpdateRequired
+import dev.mainhq.bus2go.domain.use_case.db_state.IsFirstTimeAppLaunched
+import dev.mainhq.bus2go.domain.use_case.db_state.SetDatabaseState
 import dev.mainhq.bus2go.domain.use_case.favourites.AddFavourite
 import dev.mainhq.bus2go.domain.use_case.favourites.GetFavourites
 import dev.mainhq.bus2go.domain.use_case.favourites.GetFavouritesWithTimeData
 import dev.mainhq.bus2go.domain.use_case.favourites.RemoveFavourite
 import dev.mainhq.bus2go.domain.use_case.settings.IsRealTimeEnabled
 import dev.mainhq.bus2go.domain.use_case.transit.GetDirections
+import dev.mainhq.bus2go.domain.use_case.transit.GetMinDateForUpdate
 import dev.mainhq.bus2go.domain.use_case.transit.GetRouteInfo
 import dev.mainhq.bus2go.domain.use_case.transit.GetStopNames
 import dev.mainhq.bus2go.domain.use_case.transit.GetTransitTime
@@ -112,6 +116,17 @@ class AppContainer(applicationContext: Context) {
 	val addFavourite = AddFavourite(
 		exoFavouritesRepository,
 		stmFavouritesRepository
+	)
+
+	val setDatabaseState = SetDatabaseState(appStateRepository)
+	val checkDatabaseUpdateRequired = CheckDatabaseUpdateRequired(
+		appStateRepository,
+		setDatabaseState,
+		GetMinDateForUpdate(exoRepository, stmRepository)
+	)
+
+	val isFirstTimeAppLaunched = IsFirstTimeAppLaunched(
+		appStateRepository
 	)
 
 	val getFavourites = GetFavourites(

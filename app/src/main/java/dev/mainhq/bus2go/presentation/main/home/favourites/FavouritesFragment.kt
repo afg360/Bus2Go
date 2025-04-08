@@ -11,14 +11,18 @@ import androidx.core.view.forEach
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
+import dev.mainhq.bus2go.presentation.Bus2GoApplication
 import dev.mainhq.bus2go.presentation.stopTimes.StopTimesActivity
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
 import kotlinx.coroutines.Dispatchers
@@ -36,12 +40,29 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
     private var connectivityManager: ConnectivityManager? = null
     private var networkCallback: NetworkCallback? = null
 
-    private val favouritesViewModel: FavouritesViewModel by viewModels()
+    //FIXME move this var to the viewModel...
+    private var wasSelectionMode = false
+
+    //FIXME use some sort of global state holder to cache the number of favourites currently saved
+    // so that "No favourites made yet" doesn't get displayed unnecessarily...
+
+    private val favouritesViewModel: FavouritesViewModel by viewModels{
+        object: ViewModelProvider.Factory{
+            override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+                if (modelClass.isAssignableFrom(FavouritesViewModel::class.java)){
+                    return FavouritesViewModel(
+                        (this@FavouritesFragment.requireActivity().application as Bus2GoApplication).appContainer.favouritesUseCases,
+                    ) as T
+                }
+                throw IllegalArgumentException("Gave wrong ViewModel class")
+            }
+        }
+    }
     private val favouritesSharedViewModel: FavouritesFragmentSharedViewModel by viewModels(
         ownerProducer = { requireParentFragment() }
     )
 
-    private val realTimeViewModel: RealTimeViewModel by viewModels()
+    //private val realTimeViewModel: RealTimeViewModel by viewModels()
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -54,8 +75,11 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
             listOf(),
             onClickListener = { itemView, favouriteTransitData -> //we are using the itemView of the holder
                 if (favouritesViewModel.selectionMode.value){
-                    val checkBoxView = itemView as MaterialCheckBox
+                    val checkBoxView = itemView.findViewById<MaterialCheckBox>(R.id.favourites_check_box)
                     checkBoxView.isChecked = !checkBoxView.isChecked
+                    if (checkBoxView.isChecked) favouritesSharedViewModel.incrementNumFavouritesSelected()
+                    else favouritesSharedViewModel.decrementNumFavouritesSelected()
+                    favouritesViewModel.toggleFavouriteForRemoval(favouriteTransitData)
                 }
                 else {
                     val intent = Intent(view.context, StopTimesActivity::class.java)
@@ -65,42 +89,30 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
                     view.clearFocus()
                 }
             },
-            onLongClickListener = {
-                favouritesViewModel.activateSelectionMode()
-                favouritesSharedViewModel.activateSelectionMode()
-                true
+            onLongClickListener = { itemView, favouriteTransitData ->
+                //TODO select the item being onLongClicked...
+                if (!favouritesViewModel.selectionMode.value) {
+                    favouritesViewModel.activateSelectionMode()
+                    true
+                }
+                else false
             }
         )
+        recyclerView.layoutManager = layoutManager
         recyclerView.adapter = adapter
 
-        lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){
-                favouritesSharedViewModel.selectAllFavourites.collect { isAllSelected ->
-                    if (isAllSelected == true){
-                        favouritesViewModel.selectAllForRemoval()
-                    }
-                    else if (isAllSelected == false) {
-                        favouritesViewModel.deselectAllForRemoval()
-                    }
-                }
-            }
-
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                favouritesViewModel.selectionMode.collect { selectedMode ->
-                    favouritesSharedViewModel.setSelectionMode(selectedMode)
-                    //TODO more shit
-                }
-            }
-
+        //sets up top Favourites text
+        viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 favouritesViewModel.favouriteTransitData.collect { favouritesList ->
+                    //inside the main thread by default, no need for withContext(Dispatchers.Main)
                     if (favouritesList.isEmpty()) {
-                        withContext(Dispatchers.Main) {
-                            view.findViewById<MaterialTextView>(R.id.favourites_text_view).text =
-                                getText(R.string.no_favourites)
-                        }
+                        view.findViewById<MaterialTextView>(R.id.favourites_text_view).text =
+                            getText(R.string.no_favourites)
                     }
                     else {
+                        view.findViewById<MaterialTextView>(R.id.favourites_text_view).text =
+                            getText(R.string.favourites)
                         adapter.updateTime(favouritesList)
                         /*
 						//check if connected to internet
@@ -173,6 +185,35 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
                 }
             }
         }
+
+        //updates recycler view adapter and top bar (search into selection mode and vice versa)
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                favouritesViewModel.selectionMode.collect { selectedMode ->
+                    if (wasSelectionMode != selectedMode){
+                        adapter.updateSelectionMode()
+                        wasSelectionMode = selectedMode
+                        if (selectedMode)
+                            favouritesSharedViewModel.activateSelectionMode()
+                    }
+                    //TODO more shit
+                }
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                favouritesSharedViewModel.selectAllFavourites.collect { isAllSelected ->
+                    if (isAllSelected == true) {
+                        favouritesViewModel.selectAllForRemoval()
+                    }
+                    else if (isAllSelected == false) {
+                        favouritesViewModel.deselectAllForRemoval()
+                    }
+                }
+            }
+        }
+
 
         /** This part allows us to press the back button when in selection mode of favourites to get out of it */
         onBackPressedCallback = object : OnBackPressedCallback(true) {
