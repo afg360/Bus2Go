@@ -39,6 +39,7 @@ class FavouritesListElemsAdapter(
 
     companion object {
         private val CHECKBOXES_PAYLOAD = "CHECKBOXES"
+        private val TIME_PAYLOAD = "TIME"
     }
 
     private var selectedMode = false
@@ -60,25 +61,14 @@ class FavouritesListElemsAdapter(
         else if (payloads[0] == CHECKBOXES_PAYLOAD) {
             holder.checkBoxView.isChecked = toRemoveList.contains(list[position].favouriteTransitData)
         }
+        else if (payloads[0] == TIME_PAYLOAD) {
+            setTimeLeft(holder, position)
+        }
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val info = list[position]
-
-        holder.arrivalTimeTextView.text = info.arrivalTime?.getTimeString()
-        if (info.arrivalTime == null){
-            holder.timeRemainingTextView.text =
-                holder.itemView.context.getString(R.string.none_for_the_rest_of_the_day)
-        }
-        else{
-            val timeRemaining = info.arrivalTime.timeRemaining()
-            holder.timeRemainingTextView.text = getTimeRemaining(timeRemaining)
-            //if (info.arrivalTime.timeRemaining()?.compareTo(Time(0,3,59)) == -1)
-            if (timeRemaining == null || timeRemaining < LocalTime.of(0, 4, 0))
-                holder.timeRemainingTextView.setTextColor(holder.itemView.resources.getColor(R.color.red, null))
-            else
-                holder.timeRemainingTextView.setTextColor(MaterialColors.getColor(holder.itemView, android.R.attr.editTextColor))
-        }
+        setTimeLeft(holder, position)
 
         when(info.favouriteTransitData) {
             //FIXME some margin issues with bus number and bus route long name
@@ -162,9 +152,27 @@ class FavouritesListElemsAdapter(
         }
     }
 
+    private fun setTimeLeft(holder: ViewHolder, position: Int){
+        val info = list[position]
+        holder.arrivalTimeTextView.text = info.arrivalTime?.getTimeString()
+        if (info.arrivalTime == null){
+            holder.timeRemainingTextView.text =
+                holder.itemView.context.getString(R.string.none_for_the_rest_of_the_day)
+        }
+        else{
+            val timeRemaining = info.arrivalTime.timeRemaining()
+            holder.timeRemainingTextView.text = getTimeRemaining(timeRemaining)
+            //if (info.arrivalTime.timeRemaining()?.compareTo(Time(0,3,59)) == -1)
+            if (timeRemaining == null || timeRemaining < LocalTime.of(0, 4, 0))
+                holder.timeRemainingTextView.setTextColor(holder.itemView.resources.getColor(R.color.red, null))
+            else
+                holder.timeRemainingTextView.setTextColor(MaterialColors.getColor(holder.itemView, android.R.attr.editTextColor))
+        }
+    }
+
     fun updateTime(list: List<TransitDataWithTime>){
         this.list = list
-        notifyItemRangeChanged(0, this.list.size)
+        notifyItemRangeChanged(0, this.list.size, TIME_PAYLOAD)
     }
 
     fun toggleForRemoval(items: List<TransitData>){

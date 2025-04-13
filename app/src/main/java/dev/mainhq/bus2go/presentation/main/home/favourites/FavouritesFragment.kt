@@ -37,9 +37,6 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
     companion object{
         const val NOT_CONNECTED = "Not connected to the internet yet"
 
-        private fun foo(view: View, transitData: TransitData){
-
-        }
     }
 
     private lateinit var onBackPressedCallback: OnBackPressedCallback
@@ -80,12 +77,7 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
             favouritesViewModel.favouriteTransitData.value,
             onClickListener = { itemView, favouriteTransitData -> //we are using the itemView of the holder
                 if (favouritesViewModel.selectionMode.value){
-                    val checkBoxView = itemView.findViewById<MaterialCheckBox>(R.id.favourites_check_box)
-                    checkBoxView.isChecked = !checkBoxView.isChecked
-                    if (checkBoxView.isChecked) favouritesSharedViewModel.incrementNumFavouritesSelected()
-                    else favouritesSharedViewModel.decrementNumFavouritesSelected()
-                    favouritesViewModel.toggleFavouriteForRemoval(favouriteTransitData)
-                    favouritesSharedViewModel.toggleIsAllSelected(checkBoxView.isChecked)
+                    selectFavourite(itemView, favouriteTransitData)
                 }
                 else {
                     val intent = Intent(view.context, StopTimesActivity::class.java)
@@ -96,9 +88,9 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
                 }
             },
             onLongClickListener = { itemView, favouriteTransitData ->
-                //TODO select the item being onLongClicked...
                 if (!favouritesViewModel.selectionMode.value) {
                     favouritesViewModel.activateSelectionMode()
+                    selectFavourite(itemView, favouriteTransitData)
                     true
                 }
                 else false
@@ -220,12 +212,16 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 favouritesSharedViewModel.selectAllFavourites.collect { isAllSelected ->
                     if (favouritesViewModel.selectionMode.value){
-                        if (isAllSelected) {
-                            favouritesViewModel.selectAllForRemoval()
-                        }
-                        else {
-                            favouritesViewModel.deselectAllForRemoval()
-                            favouritesSharedViewModel.resetNumFavouritesSelected()
+                        when (isAllSelected) {
+                            true -> {
+                                favouritesViewModel.selectAllForRemoval()
+                                favouritesSharedViewModel.setAllFavouritesSelected(favouritesViewModel.favouriteTransitData.value.size)
+                            }
+                            false -> {
+                                favouritesViewModel.deselectAllForRemoval()
+                                favouritesSharedViewModel.resetNumFavouritesSelected()
+                            }
+                            null -> {}
                         }
                     }
                 }
@@ -265,7 +261,15 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
                 }
             }
     }
-    
+
+    private fun selectFavourite(itemView: View, favouriteTransitData: TransitData){
+        val checkBoxView = itemView.findViewById<MaterialCheckBox>(R.id.favourites_check_box)
+        checkBoxView.isChecked = !checkBoxView.isChecked
+        if (checkBoxView.isChecked) favouritesSharedViewModel.incrementNumFavouritesSelected()
+        else favouritesSharedViewModel.decrementNumFavouritesSelected()
+        favouritesViewModel.toggleFavouriteForRemoval(favouriteTransitData)
+        favouritesSharedViewModel.toggleIsAllSelected(favouritesViewModel.favouritesToRemove.value.size == favouritesViewModel.favouriteTransitData.value.size)
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()

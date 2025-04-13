@@ -120,7 +120,7 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){
                 favouritesSharedViewModel.selectAllFavourites.collect { isChecked ->
                     view.findViewById<AppBarLayout>(R.id.mainAppBar)?.also { appBarLayout ->
-                        appBarLayout.findViewById<MaterialCheckBox>(R.id.selectAllCheckbox).isChecked = isChecked
+                        appBarLayout.findViewById<MaterialCheckBox>(R.id.selectAllCheckbox).isChecked = isChecked ?: false
                     }
                 }
             }
