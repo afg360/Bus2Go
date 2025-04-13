@@ -27,8 +27,11 @@ class FavouritesViewModel(
     //3) eventually some sort of sorting/categorisation of favourites
 
 
-    private val _favouriteTransitData: MutableStateFlow<List<FavouriteTransitDataWithTimeAndSelection>> = MutableStateFlow(listOf())
+    private val _favouriteTransitData: MutableStateFlow<List<TransitDataWithTime>> = MutableStateFlow(listOf())
     val favouriteTransitData get() = _favouriteTransitData.asStateFlow()
+
+    private val _favouritesToRemove: MutableStateFlow<List<TransitData>> = MutableStateFlow(listOf())
+    val favouritesToRemove get() = _favouritesToRemove.asStateFlow()
 
     //changes between selection mode for removing favourites and shit, or normal mode where we can click
     private val _selectionMode: MutableStateFlow<Boolean> = MutableStateFlow(false)
@@ -46,20 +49,7 @@ class FavouritesViewModel(
                 //FIXME this code always resets the isSelected to false...
                 //FIXME code seems inneficient by going so many times to the repo... perhaps only
                 //do it when some time is less than some other time
-                val currentData = _favouriteTransitData.value
-                val newData = favouritesUseCases.getFavouritesWithTimeData()
-                    .map { newItem ->
-                        // Find if this item existed in the previous list and was selected
-                        //val existingItem = currentData.find { it.transitDataWithTime.favouriteTransitData.routeId == newItem.favouriteTransitData.routeId }
-                        // Preserve selection state if item existed, otherwise default to false
-                        val currentItem = currentData.find { it.transitDataWithTime.favouriteTransitData == newItem.favouriteTransitData }
-                        FavouriteTransitDataWithTimeAndSelection(
-                            transitDataWithTime = newItem,
-                            isSelected = currentItem?.isSelected ?: false
-                        )
-                    }
-
-                _favouriteTransitData.value = newData
+                _favouriteTransitData.value = favouritesUseCases.getFavouritesWithTimeData()
                 delay(5000)
             }
         }
@@ -70,69 +60,55 @@ class FavouritesViewModel(
     }
 
     fun deactivateSelectionMode(){
-        cancelRemoval()
+        deselectAllForRemoval()
         _selectionMode.value = false
     }
 
     //FIXME needs an argument to know which favourite we selected
     fun toggleFavouriteForRemoval(transitData: TransitData){
-        _favouriteTransitData.update { curList ->
-            val item = curList.find { it.transitDataWithTime.favouriteTransitData == transitData }
-            item?.isSelected = item?.isSelected?.also { isSelected -> !isSelected } ?: false
-            //curList[index].isSelected = true
-            curList
+        //remove from removal
+        if (_favouritesToRemove.value.contains(transitData)){
+            _favouritesToRemove.update { curToRemoveList ->
+                val list = curToRemoveList.toMutableList()
+                list.remove(transitData)
+                list
+            }
         }
-    }
-
-    fun deselectFavouriteForRemoval(index: Int){
-        _favouriteTransitData.update { curList ->
-            curList[index].isSelected = false
-            curList
+        //add for removal
+        else {
+            _favouritesToRemove.update { curToRemoveList ->
+                val list = curToRemoveList.toMutableList()
+                list.add(transitData)
+                list
+            }
         }
     }
 
     fun selectAllForRemoval(){
-        _favouriteTransitData.update { list ->
-            list.map { FavouriteTransitDataWithTimeAndSelection(
-                it.transitDataWithTime,
-                true
-            )}
+        _favouritesToRemove.update {
+            _favouriteTransitData.value.map { it.favouriteTransitData }
         }
     }
 
     fun deselectAllForRemoval(){
-        _favouriteTransitData.update { list ->
-            list.map { FavouriteTransitDataWithTimeAndSelection(
-                it.transitDataWithTime,
-                false
-            )}
-        }
-    }
-
-    private fun cancelRemoval(){
-        //FIXME isnt even necessary to call this?
-        _favouriteTransitData.update { list ->
-            list.map { FavouriteTransitDataWithTimeAndSelection(
-                it.transitDataWithTime,
-                false
-            )}
+        _favouritesToRemove.update{
+            val list = it.toMutableList()
+            list.clear()
+            list
         }
     }
 
 
     fun removeFavourites(){
         viewModelScope.launch {
-            val jobs = _favouriteTransitData.value
-                .filter { it.isSelected }
+            val jobs = _favouritesToRemove.value
                 .map { favouriteTransitData ->
                     async {
-                        favouritesUseCases.removeFavourite(favouriteTransitData.transitDataWithTime.favouriteTransitData)
+                        favouritesUseCases.removeFavourite(favouriteTransitData)
                         _favouriteTransitData.update {
                             val list = it.toMutableList()
                             list.removeIf { data ->
-                                data.transitDataWithTime.favouriteTransitData ==
-                                        favouriteTransitData.transitDataWithTime
-                                            .favouriteTransitData
+                                data.favouriteTransitData == favouriteTransitData
                             }
                             return@update list
                         }

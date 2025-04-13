@@ -115,6 +115,7 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
             }
         }
 
+        //during selection mode, listen to click on select all
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){
                 favouritesSharedViewModel.selectAllFavourites.collect { isChecked ->
@@ -141,13 +142,14 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
                     }
                 }
             }
-
         }
 
+        //FIXME (deleting doesn't work yet)
         //handling remove selection mode, coming from favourites fragment
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){
                 favouritesSharedViewModel.selectionMode.collect{ removeFavouritesMode ->
+                    //FIXME instead find directly the related view...
                     view.findViewById<AppBarLayout>(R.id.mainAppBar)?.also { appBarLayout ->
                         if (removeFavouritesMode){
                             /** This is the search bar that will disappear in the appBar*/

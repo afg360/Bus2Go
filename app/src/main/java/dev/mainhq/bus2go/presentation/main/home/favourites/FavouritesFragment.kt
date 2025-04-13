@@ -22,10 +22,12 @@ import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
+import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.presentation.Bus2GoApplication
 import dev.mainhq.bus2go.presentation.stopTimes.StopTimesActivity
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -34,6 +36,10 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
 
     companion object{
         const val NOT_CONNECTED = "Not connected to the internet yet"
+
+        private fun foo(view: View, transitData: TransitData){
+
+        }
     }
 
     private lateinit var onBackPressedCallback: OnBackPressedCallback
@@ -64,7 +70,6 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
 
     //private val realTimeViewModel: RealTimeViewModel by viewModels()
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -72,7 +77,7 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
         val layoutManager = LinearLayoutManager(view.context)
         layoutManager.orientation = LinearLayoutManager.VERTICAL
         val adapter = FavouritesListElemsAdapter(
-            listOf(),
+            favouritesViewModel.favouriteTransitData.value,
             onClickListener = { itemView, favouriteTransitData -> //we are using the itemView of the holder
                 if (favouritesViewModel.selectionMode.value){
                     val checkBoxView = itemView.findViewById<MaterialCheckBox>(R.id.favourites_check_box)
@@ -97,12 +102,13 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
                     true
                 }
                 else false
-            }
+            },
+            favouritesViewModel.favouritesToRemove.value
         )
         recyclerView.layoutManager = layoutManager
         recyclerView.adapter = adapter
 
-        //sets up top Favourites text
+        //sets up top Favourites text and time remaining for each favourites
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 favouritesViewModel.favouriteTransitData.collect { favouritesList ->
@@ -183,6 +189,14 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
 					}
 						 */
                     }
+                }
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){
+                favouritesViewModel.favouritesToRemove.collect { favouritesToRemove ->
+                    adapter.toggleForRemoval(favouritesToRemove)
                 }
             }
         }
