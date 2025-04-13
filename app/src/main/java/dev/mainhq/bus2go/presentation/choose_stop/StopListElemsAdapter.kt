@@ -15,7 +15,7 @@ import dev.mainhq.bus2go.domain.entity.TransitData
 
 class StopListElemsAdapter (
     private var transitData: List<TransitData>,
-    private val addToFavouritesClickListener: (TransitData) -> Unit,
+    private val toggleFavouritesClickListener: (View, TransitData) -> Unit,
     private val onClickListener: (TransitData) -> Unit
 ) : RecyclerView.Adapter<StopListElemsAdapter.ViewHolder>() {
 
@@ -39,7 +39,9 @@ class StopListElemsAdapter (
             is StmBusItem -> holder.stopNameTextView
                 .setTextColor(holder.itemView.resources.getColor(R.color.basic_blue, null))
         }
-        holder.favouriteSelectedView.setOnClickListener { addToFavouritesClickListener(data) }
+        holder.favouriteSelectedView.setOnClickListener {
+            toggleFavouritesClickListener(it, data)
+        }
         holder.stopNameTextView.setOnClickListener { onClickListener(data) }
 
     }

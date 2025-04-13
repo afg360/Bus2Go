@@ -3,6 +3,7 @@ package dev.mainhq.bus2go.presentation.choose_stop
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.widget.ImageView
 import androidx.activity.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
@@ -20,6 +21,7 @@ import dev.mainhq.bus2go.presentation.Bus2GoApplication
 import dev.mainhq.bus2go.presentation.stopTimes.StopTimesActivity
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -32,7 +34,6 @@ import kotlin.IllegalStateException
 //and once the user clicks, either new activity OR new fragment? -> in the latter case need to implement onback
 //todo add possibility of searching amongst all the stops
 class ChooseStop() : BaseActivity() {
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,15 +69,17 @@ class ChooseStop() : BaseActivity() {
             val recyclerView = findViewById<RecyclerView>(R.id.stop_recycle_view)
             recyclerView.layoutManager = LinearLayoutManager(applicationContext)
             recyclerView.adapter = StopListElemsAdapter(transitData,
-                addToFavouritesClickListener = {
-                    if (chooseStopViewModel.favourites.value?.contains(it) == true){
-                        chooseStopViewModel.removeFavourite(it)
-                    }
-                    else if (chooseStopViewModel.favourites.value?.contains(it) == false){
-                        chooseStopViewModel.addFavourite(it)
+                //TODO update the little star
+                toggleFavouritesClickListener = { view, innerTransitData ->
+                    if (chooseStopViewModel.favourites.value.contains(innerTransitData)){
+                        chooseStopViewModel.removeFavourite(innerTransitData)
+                        view.findViewById<ImageView>(R.id.favourite_star_selection)
+                            .setBackgroundResource(R.drawable.favourite_drawable_off)
                     }
                     else {
-                        throw IllegalStateException("Clicking when favourites in the view model havent been init...")
+                        chooseStopViewModel.addFavourite(innerTransitData)
+                        view.findViewById<ImageView>(R.id.favourite_star_selection)
+                            .setBackgroundResource(R.drawable.favourite_drawable_on)
                     }
                 },
                 onClickListener = {
@@ -88,6 +91,15 @@ class ChooseStop() : BaseActivity() {
         }
         else{
             TODO("Display message saying no stops found")
+        }
+
+        //TODO
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED){
+                chooseStopViewModel.favourites.collectLatest {
+
+                }
+            }
         }
     }
 }

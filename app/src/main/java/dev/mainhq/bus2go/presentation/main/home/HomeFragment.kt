@@ -108,7 +108,7 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
         //use this instead of directly collecting to prevent collection when in background
         viewLifecycleOwner.lifecycleScope.launch {
             //FIXME use viewLifecycleOwner.repeatOnLifecycle instead?
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 homeFragmentViewModel.searchQuery.collect { results ->
                     busListAdapter.updateData(results)
                 }
@@ -116,7 +116,7 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED){
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){
                 favouritesSharedViewModel.selectAllFavourites.collect { isChecked ->
                     view.findViewById<AppBarLayout>(R.id.mainAppBar)?.also { appBarLayout ->
                         appBarLayout.findViewById<MaterialCheckBox>(R.id.selectAllCheckbox).isChecked = isChecked
@@ -127,7 +127,7 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
 
         viewLifecycleOwner.lifecycleScope.launch {
             //change the appBar number displayed
-            repeatOnLifecycle(Lifecycle.State.STARTED){
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){
                 favouritesSharedViewModel.numberFavouritesSelected.collect { numSelected ->
                     val deleteItemsWidget = view.findViewById<LinearLayout>(R.id.removeItemsWidget)
                     view.findViewById<MaterialTextView>(R.id.selectedNumsOfFavourites)
@@ -146,7 +146,7 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
 
         //handling remove selection mode, coming from favourites fragment
         viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED){
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){
                 favouritesSharedViewModel.selectionMode.collect{ removeFavouritesMode ->
                     view.findViewById<AppBarLayout>(R.id.mainAppBar)?.also { appBarLayout ->
                         if (removeFavouritesMode){

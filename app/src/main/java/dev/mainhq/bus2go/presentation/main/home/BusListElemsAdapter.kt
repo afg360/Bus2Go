@@ -54,10 +54,10 @@ class BusListElemsAdapter(
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
 	fun updateData(busData: List<RouteInfo>){
         this.busData = busData
-        notifyItemRangeChanged(0, itemCount) //TODO could compare the list itself, or apparently use DiffUtil
+        notifyDataSetChanged()
+        //notifyItemRangeChanged(0, this.busData.size) //TODO could compare the list itself, or apparently use DiffUtil
     }
 
     override fun getItemCount(): Int {
