@@ -69,19 +69,9 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
             favouritesSharedViewModel.toggleSelectAllFavourites()
         }
 
-        //TODO check wtf this code does again... the refreshing seems to get fucked when the bus just passed (which is why it shows 0min even for the new bus)
-        lifecycle.addObserver(object : DefaultLifecycleObserver {
-            override fun onResume(owner: LifecycleOwner) {
-                super.onResume(owner)
-                if (owner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED) && isAdded) {
-                    childFragmentManager.beginTransaction()
-                        .replace(
-                            R.id.favouritesFragmentContainer,
-                            FavouritesFragment()
-                        ).commit()
-                }
-            }
-        })
+        childFragmentManager.beginTransaction()
+            .replace(R.id.favouritesFragmentContainer, FavouritesFragment())
+            .commit()
 
         //recyclerView for when searching
         val recyclerView = view.findViewById<RecyclerView>(R.id.search_recycle_view)
