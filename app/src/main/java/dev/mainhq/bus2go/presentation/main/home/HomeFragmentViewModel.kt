@@ -15,6 +15,9 @@ class HomeFragmentViewModel(
 	private val _searchQuery: MutableStateFlow<List<RouteInfo>> = MutableStateFlow(listOf())
 	val searchQuery = _searchQuery.asStateFlow()
 
+	private val _isSearching: MutableStateFlow<Boolean> = MutableStateFlow(false)
+	val isSearching = _isSearching.asStateFlow()
+
 	fun onSearchQueryChange(query: String){
 		if (query.isEmpty()){
 			_searchQuery.value = listOf()

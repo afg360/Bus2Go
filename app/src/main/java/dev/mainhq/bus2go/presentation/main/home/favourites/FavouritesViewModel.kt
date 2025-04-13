@@ -40,8 +40,6 @@ class FavouritesViewModel(
     private val _selectionMode: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val selectionMode = _selectionMode.asStateFlow()
 
-    private val _isAllSelected: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val isAllSelected = _isAllSelected.asStateFlow()
 
     //private val _wasSelectionMode: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
@@ -51,6 +49,7 @@ class FavouritesViewModel(
             while (true){
                 //FIXME this code always resets the isSelected to false...
                 //FIXME code seems inneficient by going so many times to the repo... perhaps only
+                //FIXME useless when no favourites made...
                 //do it when some time is less than some other time
                 _favouriteTransitData.value = favouritesUseCases.getFavouritesWithTimeData()
                 delay(5000)
@@ -113,6 +112,9 @@ class FavouritesViewModel(
 
             _favouriteTransitData.value = _favouriteTransitData.value.filterNot { data ->
                 _favouritesToRemove.value.contains(data.favouriteTransitData)
+            }
+            if (_favouritesToRemove.value.isEmpty()){
+                _selectionMode.value = false
             }
             _favouritesToRemove.update { emptyList() }
         }

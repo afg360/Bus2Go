@@ -26,10 +26,8 @@ import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.presentation.Bus2GoApplication
 import dev.mainhq.bus2go.presentation.stopTimes.StopTimesActivity
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 
 class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
@@ -51,13 +49,10 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
 
     private val favouritesViewModel: FavouritesViewModel by viewModels{
         object: ViewModelProvider.Factory{
-            override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-                if (modelClass.isAssignableFrom(FavouritesViewModel::class.java)){
-                    return FavouritesViewModel(
-                        (this@FavouritesFragment.requireActivity().application as Bus2GoApplication).appContainer.favouritesUseCases,
-                    ) as T
-                }
-                throw IllegalArgumentException("Gave wrong ViewModel class")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return FavouritesViewModel(
+                    (this@FavouritesFragment.requireActivity().application as Bus2GoApplication).appContainer.favouritesUseCases,
+                ) as T
             }
         }
     }
@@ -208,6 +203,7 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
             }
         }
 
+        //(de)select all favourites for removal
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 favouritesSharedViewModel.selectAllFavourites.collect { isAllSelected ->
@@ -254,8 +250,10 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
                         }
                         .setPositiveButton(resources.getString(R.string.remove_confirmation_dialog_accept)) { dialog, _ ->
                             adapter.removeSelected()
-                            favouritesViewModel.removeFavourites()
                             favouritesSharedViewModel.resetNumFavouritesSelected()
+                            if (favouritesViewModel.favouriteTransitData.value.size == favouritesViewModel.favouritesToRemove.value.size)
+                                favouritesSharedViewModel.deactivateSelectionMode()
+                            favouritesViewModel.removeFavourites()
                             dialog.dismiss()
                         }
                         .show()

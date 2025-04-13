@@ -41,15 +41,12 @@ class MainActivity : BaseActivity() {
 
     private val mainActivityViewModel: MainActivityViewModel by viewModels{
         object: ViewModelProvider.Factory{
-            override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-                if (modelClass.isAssignableFrom(MainActivityViewModel::class.java)){
-                    return MainActivityViewModel(
-                        (this@MainActivity.application as Bus2GoApplication).appContainer.checkDatabaseUpdateRequired,
-                        (this@MainActivity.application as Bus2GoApplication).appContainer.setDatabaseState,
-                        (this@MainActivity.application as Bus2GoApplication).appContainer.isFirstTimeAppLaunched,
-                    ) as T
-                }
-                throw IllegalArgumentException("Gave wrong ViewModel class")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return MainActivityViewModel(
+                    (this@MainActivity.application as Bus2GoApplication).appContainer.checkDatabaseUpdateRequired,
+                    (this@MainActivity.application as Bus2GoApplication).appContainer.setDatabaseState,
+                    (this@MainActivity.application as Bus2GoApplication).appContainer.isFirstTimeAppLaunched,
+                ) as T
             }
         }
     }

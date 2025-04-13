@@ -50,16 +50,13 @@ class ChooseStop() : BaseActivity() {
 
         val chooseStopViewModel: ChooseStopViewModel by viewModels {
             object : ViewModelProvider.Factory {
-                override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-                    if (modelClass.isAssignableFrom(ChooseStopViewModel::class.java)){
-                        return ChooseStopViewModel(
-                            transitData.toList(),
-                            addFavourite = (application as Bus2GoApplication).appContainer.favouritesUseCases.addFavourite,
-                            removeFavourite = (application as Bus2GoApplication).appContainer.favouritesUseCases.removeFavourite,
-                            getFavourites = (application as Bus2GoApplication).appContainer.getFavourites,
-                        ) as T
-                    }
-                    throw IllegalArgumentException("Gave wrong ViewModel class")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return ChooseStopViewModel(
+                        transitData.toList(),
+                        addFavourite = (application as Bus2GoApplication).appContainer.favouritesUseCases.addFavourite,
+                        removeFavourite = (application as Bus2GoApplication).appContainer.favouritesUseCases.removeFavourite,
+                        getFavourites = (application as Bus2GoApplication).appContainer.getFavourites,
+                    ) as T
                 }
             }
         }

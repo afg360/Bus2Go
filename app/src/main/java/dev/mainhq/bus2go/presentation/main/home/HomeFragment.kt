@@ -6,23 +6,23 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.view.View.GONE
+import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import android.view.inputmethod.EditorInfo
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.AppBarLayout
@@ -40,7 +40,6 @@ import dev.mainhq.bus2go.presentation.main.home.favourites.FavouritesFragment
 import dev.mainhq.bus2go.presentation.main.home.favourites.FavouritesFragmentSharedViewModel
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 //We must have an empty constructor and instead pass elements inside the bundle??
@@ -48,14 +47,10 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
 
     private val homeFragmentViewModel: HomeFragmentViewModel by viewModels{
         object: ViewModelProvider.Factory {
-            override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-                if (modelClass.isAssignableFrom(HomeFragmentViewModel::class.java)){
-                    return HomeFragmentViewModel(
-                        //FIXME
-                        (this@HomeFragment.requireActivity().application as Bus2GoApplication).appContainer.transitTimeInfoUseCases,
-                    ) as T
-                }
-                throw IllegalArgumentException("Gave wrong ViewModel class")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return HomeFragmentViewModel(
+                    (this@HomeFragment.requireActivity().application as Bus2GoApplication).appContainer.transitTimeInfoUseCases,
+                ) as T
             }
         }
     }
@@ -97,7 +92,6 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
 
         //use this instead of directly collecting to prevent collection when in background
         viewLifecycleOwner.lifecycleScope.launch {
-            //FIXME use viewLifecycleOwner.repeatOnLifecycle instead?
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 homeFragmentViewModel.searchQuery.collect { results ->
                     busListAdapter.updateData(results)
@@ -134,7 +128,6 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
             }
         }
 
-        //FIXME (deleting doesn't work yet)
         //handling remove selection mode, coming from favourites fragment
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){
@@ -174,10 +167,10 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
         searchView.addTransitionListener { _, previousState, newState ->
             if (previousState == TransitionState.HIDDEN && newState == TransitionState.SHOWING){
                 //can add an animation
-                activity?.findViewById<CoordinatorLayout>(R.id.bottomNavCoordLayout)?.visibility = View.INVISIBLE
+                activity?.findViewById<CoordinatorLayout>(R.id.bottomNavCoordLayout)?.visibility = INVISIBLE
             }
             else if (previousState == TransitionState.SHOWN && newState == TransitionState.HIDING){
-                activity?.findViewById<CoordinatorLayout>(R.id.bottomNavCoordLayout)?.visibility = View.VISIBLE
+                activity?.findViewById<CoordinatorLayout>(R.id.bottomNavCoordLayout)?.visibility = VISIBLE
             }
         }
 
@@ -200,11 +193,13 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
         }
     }
 
+    //FIXME keep the last state
+    // for now, avoids to make the bottomNav disappear...
     override fun onPause() {
         super.onPause()
-        view?.findViewById<AppBarLayout>(R.id.mainAppBar)?.apply {
-            children.elementAt(0).visibility = VISIBLE
-            children.elementAt(1).visibility = GONE
-        }
+        view?.findViewById<SearchBar>(R.id.mainSearchBar)?.visibility = VISIBLE
+        view?.findViewById<ConstraintLayout>(R.id.selectionModeBar)?.visibility = GONE
+        activity?.findViewById<CoordinatorLayout>(R.id.bottomNavCoordLayout)?.visibility = VISIBLE
     }
+
 }
