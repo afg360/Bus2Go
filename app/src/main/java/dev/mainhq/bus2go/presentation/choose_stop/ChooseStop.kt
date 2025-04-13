@@ -62,41 +62,45 @@ class ChooseStop() : BaseActivity() {
         }
 
 
-        if (transitData.isNotEmpty()) {
-            val recyclerView = findViewById<RecyclerView>(R.id.stop_recycle_view)
-            recyclerView.layoutManager = LinearLayoutManager(applicationContext)
-            recyclerView.adapter = StopListElemsAdapter(transitData,
-                //TODO update the little star
-                toggleFavouritesClickListener = { view, innerTransitData ->
-                    if (chooseStopViewModel.favourites.value.contains(innerTransitData)){
-                        chooseStopViewModel.removeFavourite(innerTransitData)
-                        view.findViewById<ImageView>(R.id.favourite_star_selection)
-                            .setBackgroundResource(R.drawable.favourite_drawable_off)
+        lifecycleScope.launch(Dispatchers.Main) {
+            if (transitData.isNotEmpty()) {
+                val recyclerView = findViewById<RecyclerView>(R.id.stop_recycle_view)
+                recyclerView.layoutManager = LinearLayoutManager(applicationContext)
+                recyclerView.adapter = StopListElemsAdapter(
+                    transitData,
+                    chooseStopViewModel.favourites.filterNotNull().first(),
+                    //TODO update the little star
+                    toggleFavouritesClickListener = { view, innerTransitData ->
+                        if (chooseStopViewModel.favourites.value!!.contains(innerTransitData)){
+                            chooseStopViewModel.removeFavourite(innerTransitData)
+                            view.findViewById<ImageView>(R.id.favourite_star_selection)
+                                .setBackgroundResource(R.drawable.favourite_drawable_off)
+                        }
+                        else {
+                            chooseStopViewModel.addFavourite(innerTransitData)
+                            view.findViewById<ImageView>(R.id.favourite_star_selection)
+                                .setBackgroundResource(R.drawable.favourite_drawable_on)
+                        }
+                    },
+                    onClickListener = {
+                        val intent = Intent(this@ChooseStop, StopTimesActivity::class.java)
+                        intent.putExtra(ExtrasTagNames.TRANSIT_DATA, it)
+                        startActivity(intent)
                     }
-                    else {
-                        chooseStopViewModel.addFavourite(innerTransitData)
-                        view.findViewById<ImageView>(R.id.favourite_star_selection)
-                            .setBackgroundResource(R.drawable.favourite_drawable_on)
-                    }
-                },
-                onClickListener = {
-                    val intent = Intent(this, StopTimesActivity::class.java)
-                    intent.putExtra(ExtrasTagNames.TRANSIT_DATA, it)
-                    startActivity(intent)
-                }
-            )
-        }
-        else{
-            TODO("Display message saying no stops found")
+                )
+            }
+            else{
+                TODO("Display message saying no stops found")
+            }
         }
 
         //TODO
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED){
                 chooseStopViewModel.favourites.collectLatest {
-
                 }
             }
         }
+
     }
 }

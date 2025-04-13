@@ -24,38 +24,25 @@ class ChooseStopViewModel(
 	private val _stopNames: MutableStateFlow<List<TransitData>> = MutableStateFlow(transitData)
 	val stopNames = _stopNames.asStateFlow()
 
-	private val _favourites: MutableStateFlow<List<TransitData>> = MutableStateFlow(listOf())
+	private val _favourites: MutableStateFlow<List<TransitData>?> = MutableStateFlow(null)
 	val favourites = _favourites.asStateFlow()
 
 	init {
 		viewModelScope.launch {
-			when(transitData[0]){
-				is ExoBusItem -> {
-					_favourites.value = getFavourites()
-						.filter { it::class.java == ExoBusItem::class.java }
-				}
-				is ExoTrainItem -> {
-					_favourites.value = getFavourites()
-						.filter { it::class.java == ExoTrainItem::class.java }
-				}
-				is StmBusItem -> {
-					_favourites.value = getFavourites()
-						.filter { it::class.java == StmBusItem::class.java }
-				}
-			}
+			_favourites.value = getFavourites().filter { transitData.contains(it) }
 		}
 	}
 
 
 	fun addFavourite(data : TransitData){
 		_favourites.value.also { favourites ->
-			if (!favourites.contains(data)){
+			if (favourites?.contains(data) == false){
 				viewModelScope.launch {
 					addFavourite.invoke(data)
 					_favourites.update {
-						val list = it.toMutableList()
-						list.add(data)
-						return@update list
+						val list = it?.toMutableList()
+						list?.add(data)
+						list
 					}
 				}
 			}
@@ -67,12 +54,12 @@ class ChooseStopViewModel(
 
 	fun removeFavourite(data : TransitData){
 		favourites.value.also { favourites ->
-			if (favourites.contains(data)){
+			if (favourites?.contains(data) == true){
 				viewModelScope.launch {
 					removeFavourite.invoke(data)
 					_favourites.update {
-						val list = it.toMutableList()
-						list.remove(data)
+						val list = it?.toMutableList()
+						list?.remove(data)
 						return@update list
 					}
 					//TODO

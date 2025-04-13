@@ -15,6 +15,7 @@ import dev.mainhq.bus2go.domain.entity.TransitData
 
 class StopListElemsAdapter (
     private var transitData: List<TransitData>,
+    private val favourites: List<TransitData>,
     private val toggleFavouritesClickListener: (View, TransitData) -> Unit,
     private val onClickListener: (TransitData) -> Unit
 ) : RecyclerView.Adapter<StopListElemsAdapter.ViewHolder>() {
@@ -43,7 +44,8 @@ class StopListElemsAdapter (
             toggleFavouritesClickListener(it, data)
         }
         holder.stopNameTextView.setOnClickListener { onClickListener(data) }
-
+        if (favourites.contains(data))
+            holder.favouriteSelectedView.setBackgroundResource(R.drawable.favourite_drawable_on)
     }
 
     fun update(transitData: List<TransitData>){
@@ -65,5 +67,4 @@ class StopListElemsAdapter (
         }
 
     }
-
 }

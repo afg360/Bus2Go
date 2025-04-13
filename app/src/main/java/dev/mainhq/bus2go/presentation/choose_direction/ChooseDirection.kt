@@ -77,12 +77,12 @@ class ChooseDirection : BaseActivity() {
                     val rightDescr = findViewById<MaterialTextView>(R.id.description_route_1)
 
                     withContext(Dispatchers.Main) {
+                        busNumView.text = routeInfo.routeId
+                        busNameView.text = routeInfo.routeName
                         when(routeInfo){
                             is ExoBusRouteInfo -> {
                                 val leftDir = chooseDirectionViewModel.leftDirection.filterNotNull().first() as List<ExoBusItem>
                                 assert(leftDir.isNotEmpty())
-                                busNumView.text = routeInfo.routeId
-                                busNameView.text = routeInfo.routeName
 
                                 if (isUnidirectional == true) {
                                     intent.putExtra(ExtrasTagNames.TRANSIT_DATA, leftDir.toTypedArray())
@@ -135,9 +135,6 @@ class ChooseDirection : BaseActivity() {
                             is StmBusRouteInfo -> {
                                 val leftDir = chooseDirectionViewModel.leftDirection.filterNotNull().first() as List<StmBusItem>
                                 if (isUnidirectional == false) {
-                                    busNumView.text = routeInfo.routeId
-                                    busNameView.text = routeInfo.routeName
-
                                     val rightDir = chooseDirectionViewModel.rightDirection.filterNotNull().first() as List<StmBusItem>
 
                                     val leftButton = findViewById<MaterialButton>(R.id.route_0)
