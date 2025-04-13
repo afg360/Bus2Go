@@ -7,10 +7,13 @@ import dev.mainhq.bus2go.domain.entity.TransitDataWithTime
 import dev.mainhq.bus2go.domain.use_case.FavouritesUseCases
 import dev.mainhq.bus2go.presentation.main.alarms.AlarmCreationDialogBottomNavBar
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.coroutineContext
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -101,20 +104,17 @@ class FavouritesViewModel(
 
     fun removeFavourites(){
         viewModelScope.launch {
-            val jobs = _favouritesToRemove.value
+            _favouritesToRemove.value
                 .map { favouriteTransitData ->
                     async {
-                        favouritesUseCases.removeFavourite(favouriteTransitData)
-                        _favouriteTransitData.update {
-                            val list = it.toMutableList()
-                            list.removeIf { data ->
-                                data.favouriteTransitData == favouriteTransitData
-                            }
-                            return@update list
-                        }
+                        favouritesUseCases.removeFavourite.invoke(favouriteTransitData)
                     }
-                }
-            jobs.forEach { it.await() }
+                }.awaitAll()
+
+            _favouriteTransitData.value = _favouriteTransitData.value.filterNot { data ->
+                _favouritesToRemove.value.contains(data.favouriteTransitData)
+            }
+            _favouritesToRemove.update { emptyList() }
         }
     }
 

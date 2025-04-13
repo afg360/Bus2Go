@@ -253,8 +253,9 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
                             dialog.cancel()
                         }
                         .setPositiveButton(resources.getString(R.string.remove_confirmation_dialog_accept)) { dialog, _ ->
+                            adapter.removeSelected()
                             favouritesViewModel.removeFavourites()
-                            favouritesSharedViewModel.deactivateSelectionMode()
+                            favouritesSharedViewModel.resetNumFavouritesSelected()
                             dialog.dismiss()
                         }
                         .show()

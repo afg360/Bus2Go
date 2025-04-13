@@ -20,6 +20,7 @@ import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.domain.entity.TransitDataWithTime
 import dev.mainhq.bus2go.domain.entity.StmBusItem
 import okhttp3.internal.filterList
+import okhttp3.internal.toImmutableList
 import java.time.LocalTime
 
 //FIXME could make the list thing a bit more efficient and simply change all the times instead
@@ -178,6 +179,12 @@ class FavouritesListElemsAdapter(
     fun toggleForRemoval(items: List<TransitData>){
         this.toRemoveList = items
         notifyItemRangeChanged(0, itemCount, CHECKBOXES_PAYLOAD)
+    }
+
+    fun removeSelected(){
+        list = list.toMutableList().filter { !toRemoveList.contains(it.favouriteTransitData) }
+        toRemoveList = emptyList()
+        notifyDataSetChanged()
     }
 
     /** Toggles what mode we are in */
