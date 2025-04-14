@@ -75,6 +75,7 @@
                 />
             
             <!-- Only used for Exo buses -->
+            <!--
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/favouritesExoRouteLongNameTextView"
                 android:layout_width="220dp"
@@ -86,17 +87,32 @@
                 android:text="hello world"
                 android:textSize="12sp"
                 />
+                -->
 
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/favouritesStopNameTextView"
+            <LinearLayout
                 android:layout_width="202dp"
                 android:layout_height="wrap_content"
-                android:text="Stop Name"
-                android:textSize="15sp"
-                android:layout_marginStart="10dp"
-                android:fontFamily="@font/goli_regular"
+                android:orientation="horizontal"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/favouritesExoRouteLongNameTextView" />
+                app:layout_constraintTop_toBottomOf="@+id/favouritesTripheadsignTextView"
+                android:layout_marginStart="5dp"
+                >
+                
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/transit_stop_sign"
+                    />
+                
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/favouritesStopNameTextView"
+                    android:layout_width="195dp"
+                    android:layout_height="wrap_content"
+                    android:text="Stop Name"
+                    android:textSize="15sp"
+                    android:fontFamily="@font/goli_regular"
+                     />
+            </LinearLayout>
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

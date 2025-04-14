@@ -41,7 +41,8 @@
     <string name="from_to">From %1$s to %2$s</string>
     <string name="in_min">In %1$s min</string>
     <string name="in_more_than_an_hour"><![CDATA[In >> 1h]]></string>
-    <string name="none_for_the_rest_of_the_day">None for the rest of the day</string>
+    <!--<string name="none_for_the_rest_of_the_day">None for the rest of the day</string> -->
+    <string name="none_for_the_rest_of_the_day">None left</string>
     <string name="train_to">Train #%1$s, to %2$s</string>
     <string name="add_a_new_server">Add a new server</string>
     <string name="welcome">Welcome to Bus2Go!</string>

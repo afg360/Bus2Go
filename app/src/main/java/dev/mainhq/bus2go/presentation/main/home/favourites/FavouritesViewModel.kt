@@ -46,7 +46,6 @@ class FavouritesViewModel(
         //every 5 refresh the time displayed
         viewModelScope.launch {
             while (true){
-                //FIXME this code always resets the isSelected to false...
                 //FIXME code seems inneficient by going so many times to the repo... perhaps only
                 //FIXME useless when no favourites made...
                 //do it when some time is less than some other time

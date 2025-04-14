@@ -71,17 +71,25 @@ class FavouritesListElemsAdapter(
         val info = list[position]
         setTimeLeft(holder, position)
 
+        val directionStrLimit = 16
+
         when(info.favouriteTransitData) {
             //FIXME some margin issues with bus number and bus route long name
             is ExoBusItem -> {
                 holder.itemView.tag = info.favouriteTransitData
-                holder.routeLongNameTextView.text = "Bus: ${info.favouriteTransitData.routeLongName}"
-                holder.routeLongNameTextView.visibility = VISIBLE
-                holder.routeLongNameTextView.setTextColor(
-                    holder.itemView.resources.getColor(R.color.basic_purple, null)
-                )
+                //holder.routeLongNameTextView.text = "Bus: ${info.favouriteTransitData.routeLongName}"
+                //holder.routeLongNameTextView.visibility = VISIBLE
+                //holder.routeLongNameTextView.setTextColor(
+                //    holder.itemView.resources.getColor(R.color.basic_purple, null)
+                //)
                 holder.stopNameTextView.text = info.favouriteTransitData.stopName
-                holder.directionTextView.text = "To ${info.favouriteTransitData.direction}"
+                if (info.favouriteTransitData.direction.length > directionStrLimit){
+                    holder.directionTextView.text = "To ${info.favouriteTransitData.direction.substring(0, directionStrLimit)}..."
+                    holder.directionTextView.setOnClickListener {
+                        holder.directionTextView.text = "To ${info.favouriteTransitData.direction}"
+                    }
+                }
+                else holder.directionTextView.text = "To ${info.favouriteTransitData.direction}"
                 holder.tripHeadsignTextView.text = info.favouriteTransitData.routeId
                 holder.tripHeadsignTextView.setTextColor(
                     holder.itemView.resources.getColor(R.color.basic_purple, null)
@@ -95,8 +103,8 @@ class FavouritesListElemsAdapter(
             }
 
             is ExoTrainItem -> {
-                holder.routeLongNameTextView.text = "" //clear it out even if gone
-                holder.routeLongNameTextView.visibility = GONE
+                //holder.routeLongNameTextView.text = "" //clear it out even if gone
+                //holder.routeLongNameTextView.visibility = GONE
                 holder.directionTextView.text = holder.itemView.context
                     .getString(R.string.train_to, info.favouriteTransitData.trainNum.toString(), info.favouriteTransitData.direction)
                 holder.itemView.tag = info.favouriteTransitData
@@ -117,10 +125,16 @@ class FavouritesListElemsAdapter(
             }
 
             is StmBusItem -> {
-                holder.routeLongNameTextView.text = "" //clear it out even if gone
-                holder.routeLongNameTextView.visibility = GONE
+                //holder.routeLongNameTextView.text = "" //clear it out even if gone
+                //holder.routeLongNameTextView.visibility = GONE
                 holder.itemView.tag = info.favouriteTransitData
-                holder.directionTextView.text = "To ${info.favouriteTransitData.lastStop}"
+                if (info.favouriteTransitData.lastStop.length > directionStrLimit){
+                    holder.directionTextView.text = "To ${info.favouriteTransitData.lastStop.substring(0, directionStrLimit)}..."
+                    holder.directionTextView.setOnClickListener {
+                        holder.directionTextView.text = "To ${info.favouriteTransitData.lastStop}"
+                    }
+                }
+                else holder.directionTextView.text = "To ${info.favouriteTransitData.lastStop}"
                 holder.tripHeadsignTextView.text = info.favouriteTransitData.routeId
                 holder.tripHeadsignTextView.setTextColor(
                     holder.itemView.resources
@@ -210,6 +224,6 @@ class FavouritesListElemsAdapter(
         val timeRemainingTextView : MaterialTextView = view.findViewById(R.id.favouritesBusTimeRemainingTextView)
         val directionTextView : MaterialTextView = view.findViewById(R.id.favouritesDirectionTextView)
         /** Invisible for all except exo buses */
-        val routeLongNameTextView: MaterialTextView = view.findViewById(R.id.favouritesExoRouteLongNameTextView)
+        //val routeLongNameTextView: MaterialTextView = view.findViewById(R.id.favouritesExoRouteLongNameTextView)
     }
 }
