@@ -62,7 +62,7 @@ class StopTimeListElemsAdapter(
 
     fun update(timeData: List<Time>){
         this.timeData = timeData
-        notifyItemRangeChanged(0, itemCount)
+        notifyItemRangeChanged(0, timeData.size)
     }
 
     override fun getItemCount(): Int {

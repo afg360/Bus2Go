@@ -74,14 +74,15 @@ def calendar_table(conn, path: str):
             #date = Date(tokens[9])
             #for now, skip calendars where start_date == end_date
             #also, we skip dates that have passed the current date from when the script is being run
-            if date == convert_str_to_date(tokens[8]):
-                continue
-            if date.year < today.year:
-                continue
-            elif date.year == today.year and date.month < today.month:
-                continue
-            elif date.year == today.today and date.month == today.month and date.day < today.day:
-                continue
+            #seems to have a bug here...?
+            #if date == convert_str_to_date(tokens[8]):
+            #    continue
+            #if date.year < today.year:
+            #    continue
+            #elif date.year == today.year and date.month < today.month:
+            #    continue
+            #elif date.year == today.today and date.month == today.month and date.day < today.day:
+            #    continue
             #check all the possible letters
             days = ""
             if tokens[1] == "1":

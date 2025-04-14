@@ -64,15 +64,15 @@ def calendar_table(conn, agency:str, path: str) -> None:
         for line in file:
             tokens = line.replace("\n", "").replace("'", "''").split(",")
             #TODO we are ignoring one day holidays...
-            date = convert_str_to_date(tokens[9])
-            if date == convert_str_to_date(tokens[8]):
-                continue
-            if date.year < today.year:
-                continue
-            elif date.year == today.year and date.month < today.month:
-                continue
-            elif date.year == today.today and date.month == today.month and date.day < today.day:
-                continue
+            #date = convert_str_to_date(tokens[9])
+            #if date == convert_str_to_date(tokens[8]):
+            #    continue
+            #if date.year < today.year:
+            #    continue
+            #elif date.year == today.year and date.month < today.month:
+            #    continue
+            #elif date.year == today.today and date.month == today.month and date.day < today.day:
+            #    continue
             #check all the possible letters
             days = ""
             if tokens[1] == "1":

@@ -47,6 +47,8 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
     //FIXME use some sort of global state holder to cache the number of favourites currently saved
     // so that "No favourites made yet" doesn't get displayed unnecessarily...
 
+    //FIXME to follow strict clean architecture, event posting should be done outside of UI...
+
     private val favouritesViewModel: FavouritesViewModel by viewModels{
         object: ViewModelProvider.Factory{
             override fun <T : ViewModel> create(modelClass: Class<T>): T {

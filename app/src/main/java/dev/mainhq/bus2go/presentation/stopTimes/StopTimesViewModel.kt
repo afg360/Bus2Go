@@ -15,7 +15,7 @@ class StopTimesViewModel(
 	private val transitData: TransitData
 ): ViewModel() {
 
-	private val _arrivalTimes: MutableStateFlow<List<Time>> = MutableStateFlow(listOf())
+	private val _arrivalTimes: MutableStateFlow<List<Time>?> = MutableStateFlow(null)
 	val arrivalTimes = _arrivalTimes.asStateFlow()
 
 	//TODO caches the last time for use in the last 5 min just in case
