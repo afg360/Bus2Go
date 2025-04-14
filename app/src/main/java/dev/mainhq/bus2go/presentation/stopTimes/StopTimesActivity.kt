@@ -8,6 +8,8 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
 import android.os.Build
 import android.view.View
+import android.view.View.INVISIBLE
+import android.view.View.VISIBLE
 import androidx.activity.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
@@ -24,6 +26,8 @@ import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.domain.entity.StmBusItem
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
 import dev.mainhq.bus2go.domain.entity.Time
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 
 
 class StopTimesActivity : BaseActivity() {
@@ -78,20 +82,22 @@ class StopTimesActivity : BaseActivity() {
         val recyclerView: RecyclerView = findViewById(R.id.time_recycle_view)
         recyclerView.layoutManager = layoutManager
         val adapter = StopTimeListElemsAdapter(listOf(), fromAlarmCreation)
+        recyclerView.adapter = adapter
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED){
-                stopTimesViewModel.arrivalTimes.collect { arrivalTimes ->
-                    if (arrivalTimes.isEmpty()){
-                        adapter.update(listOf())
-                        recyclerView.visibility = View.GONE
-                        val noTransitLeftTextView = findViewById<MaterialTextView>(R.id.no_available_transit_left_text_view)
-                        noTransitLeftTextView.visibility = View.VISIBLE
-                        noTransitLeftTextView.text
-                    }
-                    else{
-                        adapter.update(arrivalTimes)
-                    }
+                val arrivalTimes = stopTimesViewModel.arrivalTimes.filterNotNull()
+                    .first()
+                val noTransitLeftTextView = findViewById<MaterialTextView>(R.id.no_available_transit_left_text_view)
+                if (arrivalTimes.isEmpty()){
+                    adapter.update(listOf())
+                    recyclerView.visibility = View.GONE
+                    noTransitLeftTextView.visibility = VISIBLE
+                }
+                else{
+                    adapter.update(arrivalTimes)
+                    recyclerView.visibility = VISIBLE
+                    noTransitLeftTextView.visibility = INVISIBLE
                 }
             }
         }

@@ -59,7 +59,7 @@ class ChooseDirectionViewModel(
 						)
 					}
 
-					if (headsigns.size == 1){
+					if (headsigns.size > 1){
 						_rightDirection.value = stopNames.second.map {
 							ExoBusItem(
 								routeId = routeInfo.routeId,

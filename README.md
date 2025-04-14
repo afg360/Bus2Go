@@ -8,6 +8,9 @@ For the moment, only data from the [STM](https://stm.info/en) and [Exo](https://
 >The data provided by the transport agencies have their own respective licences, available
 at their websites.
 
+> [!WARNING]
+> Part of the code is being refactored to follow as much as possible clean architecture. Some new bugs may therefore have appeared.
+
 # Features
 - Check bus schedules
 - Add them to favourite to access them on the home screen

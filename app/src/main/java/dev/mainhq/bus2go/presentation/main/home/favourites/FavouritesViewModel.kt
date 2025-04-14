@@ -29,7 +29,6 @@ class FavouritesViewModel(
     //2) add observer to check for click events
     //3) eventually some sort of sorting/categorisation of favourites
 
-
     private val _favouriteTransitData: MutableStateFlow<List<TransitDataWithTime>> = MutableStateFlow(listOf())
     val favouriteTransitData get() = _favouriteTransitData.asStateFlow()
 
