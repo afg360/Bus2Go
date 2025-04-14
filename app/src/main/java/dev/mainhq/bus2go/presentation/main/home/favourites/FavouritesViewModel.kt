@@ -60,7 +60,11 @@ class FavouritesViewModel(
                     .map{
                         if (it.arrivalTime != null) {
                             val timeRemaining = it.arrivalTime.timeRemaining()
-                            val isUrgent = (timeRemaining == null || timeRemaining < LocalTime.of(0, 4, 0))
+                            val isUrgent = if (timeRemaining == null || timeRemaining < LocalTime.of(0, 4, 0))
+                                Urgency.IMMINENT
+                            else if (timeRemaining < LocalTime.of(0, 15, 0))
+                                Urgency.SOON
+                            else Urgency.DISTANT
 
                             when(it.favouriteTransitData){
                                 is ExoBusItem -> {
@@ -98,7 +102,7 @@ class FavouritesViewModel(
                                         stopNameText = it.favouriteTransitData.stopName,
                                         arrivalTimeText = it.arrivalTime.getTimeString(),
                                         timeRemainingText = getTimeRemaining(timeRemaining),
-                                        dataDisplayColor = R.color.basic_blue,
+                                        dataDisplayColor = R.color.cool_teal,
                                         isUrgent = isUrgent
                                     )
                                 }
@@ -113,10 +117,10 @@ class FavouritesViewModel(
                                         toTruncate = it.favouriteTransitData.direction.length > FavouritesDisplayModel.DIRECTION_STR_LIMIT,
                                         tripHeadsignText = it.favouriteTransitData.routeId,
                                         stopNameText = it.favouriteTransitData.stopName,
-                                        arrivalTimeText = "None left",
-                                        timeRemainingText = null,
+                                        arrivalTimeText = null,
+                                        timeRemainingText = "None left",
                                         dataDisplayColor = R.color.basic_purple,
-                                        isUrgent = false
+                                        isUrgent = Urgency.DISTANT
                                     )
                                 }
                                 is ExoTrainItem -> {
@@ -126,10 +130,10 @@ class FavouritesViewModel(
                                         toTruncate = it.favouriteTransitData.direction.length > FavouritesDisplayModel.DIRECTION_STR_LIMIT,
                                         tripHeadsignText = it.favouriteTransitData.routeName,
                                         stopNameText = it.favouriteTransitData.stopName,
-                                        arrivalTimeText = "None left",
-                                        timeRemainingText = null,
+                                        arrivalTimeText = null,
+                                        timeRemainingText = "None left",
                                         dataDisplayColor = R.color.orange,
-                                        isUrgent = false
+                                        isUrgent = Urgency.DISTANT
                                     )
                                 }
                                 is StmBusItem -> {
@@ -139,10 +143,10 @@ class FavouritesViewModel(
                                         toTruncate = it.favouriteTransitData.lastStop.length > FavouritesDisplayModel.DIRECTION_STR_LIMIT,
                                         tripHeadsignText = it.favouriteTransitData.routeId,
                                         stopNameText = it.favouriteTransitData.stopName,
-                                        arrivalTimeText = "None left",
-                                        timeRemainingText = null,
-                                        dataDisplayColor = R.color.basic_blue,
-                                        isUrgent = false
+                                        arrivalTimeText = null,
+                                        timeRemainingText = "None left",
+                                        dataDisplayColor = R.color.cool_teal,
+                                        isUrgent = Urgency.DISTANT
                                     )
                                 }
                             }

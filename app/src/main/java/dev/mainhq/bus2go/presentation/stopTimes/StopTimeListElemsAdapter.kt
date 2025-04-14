@@ -29,7 +29,7 @@ class StopTimeListElemsAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val time = timeData[position]
         holder.timeTextView.text = time.getTimeString()
-        if (position == 0 && !fromAlarmCreation){
+        if (position < 3 && !fromAlarmCreation){
             //TODO may need to use a LocalDateTime here...
             val curTime = Time(LocalDateTime.now())
             //Duration.between =! arg1 - arg2, == arg2 - arg1

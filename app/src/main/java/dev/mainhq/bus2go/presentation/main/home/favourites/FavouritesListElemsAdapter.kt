@@ -6,6 +6,7 @@ import android.view.View.GONE
 import android.view.View.OnLongClickListener
 import android.view.View.VISIBLE
 import android.view.ViewGroup
+import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.get
 import androidx.core.view.size
@@ -83,9 +84,10 @@ class FavouritesListElemsAdapter(
         else holder.directionTextView.text = info.directionText
         holder.tripHeadsignTextView.text = info.tripHeadsignText
 
+        //val drawable = holder.itemView.resources.getDrawable(R.drawable.favourites_tripheadsign_background, null)
+        //drawable.setTint(holder.itemView.resources.getColor(info.dataDisplayColor, null))
+        //holder.tripHeadsignTextView.setBackgroundDrawable(drawable)
         holder.tripHeadsignTextView.setTextColor(holder.itemView.resources.getColor(info.dataDisplayColor, null))
-        holder.stopNameTextView.setTextColor(holder.itemView.resources.getColor(info.dataDisplayColor, null))
-        holder.directionTextView.setTextColor(holder.itemView.resources.getColor(info.dataDisplayColor, null))
 
         if (selectedMode) holder.checkBoxView.visibility = VISIBLE
         else holder.checkBoxView.visibility = GONE
@@ -101,12 +103,22 @@ class FavouritesListElemsAdapter(
 
     private fun setTimeLeft(holder: ViewHolder, position: Int){
         val info = list[position]
-        holder.arrivalTimeTextView.text = info.arrivalTimeText
-        holder.timeRemainingTextView.text = info.timeRemainingText ?: "None left"
-        if (info.isUrgent)
-            holder.timeRemainingTextView.setTextColor(holder.itemView.resources.getColor(R.color.red, null))
-        else
-            holder.timeRemainingTextView.setTextColor(MaterialColors.getColor(holder.itemView, android.R.attr.editTextColor))
+        holder.timeRemainingTextView.text = info.timeRemainingText
+        if (info.arrivalTimeText == null) {
+            holder.timeRemainingTextView.textSize = 20F
+            holder.timeRemainingTextView.setTextColor(holder.itemView.resources.getColor(R.color.light_grey, null))
+            holder.arrivalTimeTextView.visibility = GONE
+        }
+        else {
+            holder.timeRemainingTextView.textSize = 30F
+            holder.arrivalTimeTextView.text = info.arrivalTimeText
+            holder.arrivalTimeTextView.visibility = VISIBLE
+            when (info.isUrgent){
+                Urgency.IMMINENT -> holder.timeRemainingTextView.setTextColor(holder.itemView.resources.getColor(R.color.red, null))
+                Urgency.SOON -> holder.timeRemainingTextView.setTextColor(holder.itemView.resources.getColor(R.color.yellow, null))
+                Urgency.DISTANT -> holder.timeRemainingTextView.setTextColor(MaterialColors.getColor(holder.itemView, android.R.attr.editTextColor))
+            }
+        }
     }
 
     fun updateTime(list: List<FavouritesDisplayModel>){

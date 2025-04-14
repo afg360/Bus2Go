@@ -11,11 +11,11 @@ data class FavouritesDisplayModel(
 	val toTruncate: Boolean,
 	val tripHeadsignText: String,
 	val stopNameText: String,
-	val arrivalTimeText: String,
-	//null if the arrivalTimeText displays None left
-	val timeRemainingText: String?,
+	//null if the timeRemainingText displays None left
+	val arrivalTimeText: String?,
+	val timeRemainingText: String,
 	val dataDisplayColor: Int,
-	val isUrgent: Boolean
+	val isUrgent: Urgency
 ) {
 
 	companion object{
