@@ -10,6 +10,7 @@ import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.domain.use_case.transit.GetTransitTime
 import dev.mainhq.bus2go.domain.entity.Time
 import dev.mainhq.bus2go.presentation.main.home.favourites.Urgency
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,8 +22,8 @@ class StopTimesViewModel(
 	private val transitData: TransitData
 ): ViewModel() {
 
-	private val _displayText: MutableStateFlow<String?> = MutableStateFlow(null)
-	val displayText = _displayText.asStateFlow()
+	private val _stopTimesHeaderDisplayModel: MutableStateFlow<StopTimesHeaderDisplayModel?> = MutableStateFlow(null)
+	val stopTimesHeaderDisplayModel = _stopTimesHeaderDisplayModel.asStateFlow()
 
 	private val _arrivalTimes: MutableStateFlow<List<StopTimesDisplayModel>?> = MutableStateFlow(null)
 	val arrivalTimes = _arrivalTimes.asStateFlow()
@@ -32,12 +33,34 @@ class StopTimesViewModel(
 	val lastTime = _lastTime.asStateFlow()
 
 	init {
-		_displayText.value = when(transitData){
-			is ExoBusItem -> "${transitData.routeId} ${transitData.stopName} -> ${transitData.headsign}"
-			is ExoTrainItem -> "#${transitData.trainNum} ${transitData.stopName} -> ${transitData.direction}"
-			is StmBusItem -> "${transitData.routeId} ${transitData.stopName} -> ${transitData.direction}"
+		_stopTimesHeaderDisplayModel.value = when(transitData){
+			is ExoBusItem -> StopTimesHeaderDisplayModel(
+				R.color.basic_purple,
+				if (transitData.routeId.length < 10) 35f else 24f,
+				transitData.routeId,
+				transitData.headsign,
+				transitData.stopName
+			)
+			is ExoTrainItem -> StopTimesHeaderDisplayModel(
+				R.color.orange,
+				if (transitData.routeName.length < 10) 35f else 24f,
+				//FIXME use a string resource here...
+				"Train ${transitData.routeName}",
+				transitData.direction,
+				transitData.stopName
+			)
+			is StmBusItem -> {
+				StopTimesHeaderDisplayModel(
+					R.color.basic_blue,
+					if (transitData.routeId.length < 10) 35f else 24f,
+					transitData.routeId,
+					//remove anything inside parenthesis to reduce text...
+					transitData.lastStop.replace(Regex("\\(.*\\)"), ""),
+					transitData.stopName
+				)
+			}
 		}
-		viewModelScope.launch {
+		viewModelScope.launch(Dispatchers.Default) {
 			while(true){
 				_arrivalTimes.value = getTransitTime(Time.now(), transitData).map {
 					val timeRemaining = it.timeRemaining()

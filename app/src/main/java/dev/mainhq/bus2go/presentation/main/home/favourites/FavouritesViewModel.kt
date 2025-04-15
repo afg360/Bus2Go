@@ -8,6 +8,7 @@ import dev.mainhq.bus2go.domain.entity.ExoTrainItem
 import dev.mainhq.bus2go.domain.entity.StmBusItem
 import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.domain.use_case.FavouritesUseCases
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
@@ -43,7 +44,7 @@ class FavouritesViewModel(
     init {
         //refreshes the data every second
         //FIXME when the activity is onPause, stop generating data as it wastes battery life...
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.Default) {
             var running = true
             while (running){
                 //FIXME code seems inefficient by going so many times to the repo... perhaps only
@@ -95,7 +96,7 @@ class FavouritesViewModel(
                                         stopNameText = it.favouriteTransitData.stopName,
                                         arrivalTimeText = it.arrivalTime.getTimeString(),
                                         timeRemainingText = getTimeRemaining(timeRemaining),
-                                        dataDisplayColor = R.color.cool_teal,
+                                        dataDisplayColor = R.color.basic_blue,
                                         urgency = isUrgent
                                     )
                                 }
@@ -138,7 +139,7 @@ class FavouritesViewModel(
                                         stopNameText = it.favouriteTransitData.stopName,
                                         arrivalTimeText = null,
                                         timeRemainingText = "None left",
-                                        dataDisplayColor = R.color.cool_teal,
+                                        dataDisplayColor = R.color.basic_blue,
                                         urgency = Urgency.DISTANT
                                     )
                                 }

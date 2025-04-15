@@ -1,6 +1,5 @@
 package dev.mainhq.bus2go.presentation.stopTimes
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,14 +19,10 @@ import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.presentation.base.BaseActivity
 import dev.mainhq.bus2go.presentation.Bus2GoApplication
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.domain.entity.ExoBusItem
-import dev.mainhq.bus2go.domain.entity.ExoTrainItem
 import dev.mainhq.bus2go.domain.entity.TransitData
-import dev.mainhq.bus2go.domain.entity.StmBusItem
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
-import dev.mainhq.bus2go.domain.entity.Time
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 
@@ -39,12 +34,13 @@ class StopTimesActivity : BaseActivity() {
 
 	override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.times_activity)
+        setContentView(R.layout.stop_times_activity)
 
         @Suppress("DEPRECATION")
         val transitData = (if (Build.VERSION.SDK_INT >= 33)
             intent.getParcelableExtra(ExtrasTagNames.TRANSIT_DATA, TransitData::class.java)
-            else  intent.getParcelableExtra(ExtrasTagNames.TRANSIT_DATA)) ?: throw IllegalStateException("You forgot to give a TransitData")
+            else  intent.getParcelableExtra(ExtrasTagNames.TRANSIT_DATA))
+            ?: throw IllegalStateException("You forgot to give a TransitData")
 
         val stopTimesViewModel: StopTimesViewModel by viewModels{
             object : ViewModelProvider.Factory {
@@ -63,7 +59,16 @@ class StopTimesActivity : BaseActivity() {
         fromAlarmCreation = intent.getBooleanExtra("ALARMS", false)
 
         lifecycleScope.launch(Dispatchers.Main) {
-            findViewById<MaterialTextView>(R.id.time_title_text_view).text = stopTimesViewModel.displayText.filterNotNull().first()
+            //FIXME there seems to be some delay when displaying the header...
+            val stopTimesHeaderDisplayModel = stopTimesViewModel.stopTimesHeaderDisplayModel.filterNotNull().first()
+            findViewById<MaterialTextView>(R.id.time_transit_route_id_text_view).also{
+                it.text = stopTimesHeaderDisplayModel.routeIdText
+                it.textSize = stopTimesHeaderDisplayModel.routeIdTextSize
+                it.setTextColor(resources.getColor(stopTimesHeaderDisplayModel.routeIdTextColor, null))
+            }
+            //FIXME use string resources to say "to blablabla"
+            findViewById<MaterialTextView>(R.id.time_direction_text_view).text = stopTimesHeaderDisplayModel.directionText
+            findViewById<MaterialTextView>(R.id.time_stop_name_text_view).text = stopTimesHeaderDisplayModel.stopNameText
         }
 
         val layoutManager = LinearLayoutManager(applicationContext)
