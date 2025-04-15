@@ -3,26 +3,14 @@ package dev.mainhq.bus2go.presentation.main.home.favourites
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
-import android.view.View.OnLongClickListener
 import android.view.View.VISIBLE
 import android.view.ViewGroup
-import androidx.annotation.DrawableRes
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.view.get
-import androidx.core.view.size
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.domain.entity.ExoBusItem
-import dev.mainhq.bus2go.domain.entity.ExoTrainItem
 import dev.mainhq.bus2go.domain.entity.TransitData
-import dev.mainhq.bus2go.domain.entity.TransitDataWithTime
-import dev.mainhq.bus2go.domain.entity.StmBusItem
-import okhttp3.internal.filterList
-import okhttp3.internal.toImmutableList
-import java.time.LocalTime
 
 //FIXME could make the list thing a bit more efficient and simply change all the times instead
 /**
@@ -113,7 +101,7 @@ class FavouritesListElemsAdapter(
             holder.timeRemainingTextView.textSize = 30F
             holder.arrivalTimeTextView.text = info.arrivalTimeText
             holder.arrivalTimeTextView.visibility = VISIBLE
-            when (info.isUrgent){
+            when (info.urgency){
                 Urgency.IMMINENT -> holder.timeRemainingTextView.setTextColor(holder.itemView.resources.getColor(R.color.red, null))
                 Urgency.SOON -> holder.timeRemainingTextView.setTextColor(holder.itemView.resources.getColor(R.color.yellow, null))
                 Urgency.DISTANT -> holder.timeRemainingTextView.setTextColor(MaterialColors.getColor(holder.itemView, android.R.attr.editTextColor))

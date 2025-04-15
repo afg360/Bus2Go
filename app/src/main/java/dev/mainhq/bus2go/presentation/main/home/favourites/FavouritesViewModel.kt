@@ -7,19 +7,12 @@ import dev.mainhq.bus2go.domain.entity.ExoBusItem
 import dev.mainhq.bus2go.domain.entity.ExoTrainItem
 import dev.mainhq.bus2go.domain.entity.StmBusItem
 import dev.mainhq.bus2go.domain.entity.TransitData
-import dev.mainhq.bus2go.domain.entity.TransitDataWithTime
 import dev.mainhq.bus2go.domain.use_case.FavouritesUseCases
-import dev.mainhq.bus2go.presentation.main.alarms.AlarmCreationDialogBottomNavBar
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.conflate
-import kotlinx.coroutines.flow.coroutineContext
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalTime
@@ -77,7 +70,7 @@ class FavouritesViewModel(
                                         arrivalTimeText = it.arrivalTime.getTimeString(),
                                         timeRemainingText = getTimeRemaining(timeRemaining),
                                         dataDisplayColor = R.color.basic_purple,
-                                        isUrgent = isUrgent
+                                        urgency = isUrgent
                                     )
                                 }
                                 is ExoTrainItem -> {
@@ -90,7 +83,7 @@ class FavouritesViewModel(
                                         arrivalTimeText = it.arrivalTime.getTimeString(),
                                         timeRemainingText = getTimeRemaining(timeRemaining),
                                         dataDisplayColor = R.color.orange,
-                                        isUrgent = isUrgent
+                                        urgency = isUrgent
                                     )
                                 }
                                 is StmBusItem -> {
@@ -103,7 +96,7 @@ class FavouritesViewModel(
                                         arrivalTimeText = it.arrivalTime.getTimeString(),
                                         timeRemainingText = getTimeRemaining(timeRemaining),
                                         dataDisplayColor = R.color.cool_teal,
-                                        isUrgent = isUrgent
+                                        urgency = isUrgent
                                     )
                                 }
                             }
@@ -120,7 +113,7 @@ class FavouritesViewModel(
                                         arrivalTimeText = null,
                                         timeRemainingText = "None left",
                                         dataDisplayColor = R.color.basic_purple,
-                                        isUrgent = Urgency.DISTANT
+                                        urgency = Urgency.DISTANT
                                     )
                                 }
                                 is ExoTrainItem -> {
@@ -133,7 +126,7 @@ class FavouritesViewModel(
                                         arrivalTimeText = null,
                                         timeRemainingText = "None left",
                                         dataDisplayColor = R.color.orange,
-                                        isUrgent = Urgency.DISTANT
+                                        urgency = Urgency.DISTANT
                                     )
                                 }
                                 is StmBusItem -> {
@@ -146,7 +139,7 @@ class FavouritesViewModel(
                                         arrivalTimeText = null,
                                         timeRemainingText = "None left",
                                         dataDisplayColor = R.color.cool_teal,
-                                        isUrgent = Urgency.DISTANT
+                                        urgency = Urgency.DISTANT
                                     )
                                 }
                             }

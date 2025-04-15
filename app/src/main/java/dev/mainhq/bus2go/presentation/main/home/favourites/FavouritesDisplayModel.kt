@@ -15,7 +15,7 @@ data class FavouritesDisplayModel(
 	val arrivalTimeText: String?,
 	val timeRemainingText: String,
 	val dataDisplayColor: Int,
-	val isUrgent: Urgency
+	val urgency: Urgency
 ) {
 
 	companion object{
