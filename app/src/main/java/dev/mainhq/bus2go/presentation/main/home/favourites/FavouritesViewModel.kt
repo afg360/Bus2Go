@@ -152,7 +152,10 @@ class FavouritesViewModel(
     }
 
     private fun getTimeRemaining(remainingTime: LocalTime?): String {
-        return if (remainingTime != null && remainingTime.hour > 0) "In ${remainingTime.hour} h, ${remainingTime.minute} min"
+        return if (remainingTime != null && remainingTime.hour > 0) {
+            if (remainingTime.minute > 9) "In ${remainingTime.hour}h${remainingTime.minute}"
+             else "In ${remainingTime.hour}h0${remainingTime.minute}"
+        }
         else if (remainingTime != null) "In ${remainingTime.minute} min"
         else "Bus has passed??"
     }
