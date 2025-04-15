@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".presentation.ui.fragments.Favourites">
+    tools:context=".presentation.main.home.favourites.FavouritesFragment">
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/favourites_text_view"
