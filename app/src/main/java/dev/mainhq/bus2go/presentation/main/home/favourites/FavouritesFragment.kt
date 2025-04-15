@@ -74,6 +74,20 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
         val layoutManager = LinearLayoutManager(view.context)
         layoutManager.orientation = LinearLayoutManager.VERTICAL
 
+        //This part allows us to press the back button when in selection mode of favourites to get out of it
+        //we set the callback to false to prioritise it only when selection mode is activated
+        onBackPressedCallback = object : OnBackPressedCallback(false) {
+            /** Hides all the checkboxes of the items in the recyclerview, deselects them, and puts back the searchbar as the nav bar */
+            override fun handleOnBackPressed() {
+                recyclerView?.forEach { view ->
+                    view.findViewById<MaterialCheckBox>(R.id.favourites_check_box).visibility = View.GONE
+                }
+                favouritesViewModel.deactivateSelectionMode()
+                favouritesSharedViewModel.deactivateSelectionMode()
+                onBackPressedCallback.isEnabled = false
+            }
+        }
+
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
             favouritesViewModel.favouriteTransitData.collect{ uiState ->
                 when(uiState){
@@ -96,6 +110,7 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
                                 if (!favouritesViewModel.selectionMode.value) {
                                     favouritesViewModel.activateSelectionMode()
                                     selectFavourite(itemView, favouriteTransitData)
+                                    onBackPressedCallback.isEnabled = true
                                     true
                                 }
                                 else false
@@ -248,19 +263,6 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
                         }
                     }
                 }
-            }
-        }
-
-
-        /** This part allows us to press the back button when in selection mode of favourites to get out of it */
-        onBackPressedCallback = object : OnBackPressedCallback(true) {
-            /** Hides all the checkboxes of the items in the recyclerview, deselects them, and puts back the searchbar as the nav bar */
-            override fun handleOnBackPressed() {
-                recyclerView?.forEach { view ->
-                    view.findViewById<MaterialCheckBox>(R.id.favourites_check_box).visibility = View.GONE
-                }
-                favouritesViewModel.deactivateSelectionMode()
-                favouritesSharedViewModel.deactivateSelectionMode()
             }
         }
 

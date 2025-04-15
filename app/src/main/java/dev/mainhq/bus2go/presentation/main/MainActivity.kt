@@ -9,7 +9,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.lifecycle.viewmodel.CreationExtras
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.navigation.NavigationBarView
@@ -92,7 +91,7 @@ class MainActivity : BaseActivity() {
                 }
             }
 
-            onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true){
+            onBackPressedDispatcher.addCallback(this@MainActivity, object : OnBackPressedCallback(true){
                 override fun handleOnBackPressed() {
                     //Toast.makeText(this@MainActivity, "First back", Toast.LENGTH_SHORT).show()
                     if (mainActivityViewModel.activityType.value == ActivityType.HOME) {
