@@ -26,6 +26,8 @@ import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.domain.entity.StmBusItem
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
 import dev.mainhq.bus2go.domain.entity.Time
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 
@@ -39,7 +41,6 @@ class StopTimesActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.times_activity)
 
-        //TODO parcelised data
         @Suppress("DEPRECATION")
         val transitData = (if (Build.VERSION.SDK_INT >= 33)
             intent.getParcelableExtra(ExtrasTagNames.TRANSIT_DATA, TransitData::class.java)
@@ -61,20 +62,8 @@ class StopTimesActivity : BaseActivity() {
 
         fromAlarmCreation = intent.getBooleanExtra("ALARMS", false)
 
-        val time = Time.now()
-        val textView = findViewById<MaterialTextView>(R.id.time_title_text_view)
-
-        @SuppressLint("SetTextI18n")
-        when(transitData){
-            is ExoBusItem -> {
-                textView.text = "${transitData.routeId} ${transitData.stopName} -> ${transitData.headsign}"
-            }
-            is ExoTrainItem -> {
-                textView.text = "#${transitData.trainNum} ${transitData.stopName} -> ${transitData.direction}"
-            }
-            is StmBusItem -> {
-                textView.text = "${transitData.routeId} ${transitData.stopName} -> ${transitData.direction}"
-            }
+        lifecycleScope.launch(Dispatchers.Main) {
+            findViewById<MaterialTextView>(R.id.time_title_text_view).text = stopTimesViewModel.displayText.filterNotNull().first()
         }
 
         val layoutManager = LinearLayoutManager(applicationContext)
@@ -86,18 +75,18 @@ class StopTimesActivity : BaseActivity() {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED){
-                val arrivalTimes = stopTimesViewModel.arrivalTimes.filterNotNull()
-                    .first()
-                val noTransitLeftTextView = findViewById<MaterialTextView>(R.id.no_available_transit_left_text_view)
-                if (arrivalTimes.isEmpty()){
-                    adapter.update(listOf())
-                    recyclerView.visibility = View.GONE
-                    noTransitLeftTextView.visibility = VISIBLE
-                }
-                else{
-                    adapter.update(arrivalTimes)
-                    recyclerView.visibility = VISIBLE
-                    noTransitLeftTextView.visibility = INVISIBLE
+                stopTimesViewModel.arrivalTimes.filterNotNull().collect{ arrivalTimes ->
+                    val noTransitLeftTextView = findViewById<MaterialTextView>(R.id.no_available_transit_left_text_view)
+                    if (arrivalTimes.isEmpty()){
+                        adapter.update(listOf())
+                        recyclerView.visibility = View.GONE
+                        noTransitLeftTextView.visibility = VISIBLE
+                    }
+                    else{
+                        adapter.update(arrivalTimes)
+                        recyclerView.visibility = VISIBLE
+                        noTransitLeftTextView.visibility = INVISIBLE
+                    }
                 }
             }
         }

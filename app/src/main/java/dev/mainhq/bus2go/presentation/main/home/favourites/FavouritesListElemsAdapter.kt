@@ -3,25 +3,14 @@ package dev.mainhq.bus2go.presentation.main.home.favourites
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
-import android.view.View.OnLongClickListener
 import android.view.View.VISIBLE
 import android.view.ViewGroup
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.view.get
-import androidx.core.view.size
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.domain.entity.ExoBusItem
-import dev.mainhq.bus2go.domain.entity.ExoTrainItem
 import dev.mainhq.bus2go.domain.entity.TransitData
-import dev.mainhq.bus2go.domain.entity.TransitDataWithTime
-import dev.mainhq.bus2go.domain.entity.StmBusItem
-import okhttp3.internal.filterList
-import okhttp3.internal.toImmutableList
-import java.time.LocalTime
 
 //FIXME could make the list thing a bit more efficient and simply change all the times instead
 /**
@@ -31,7 +20,7 @@ import java.time.LocalTime
  * @param onLongClickListener An onLongClickListener for each item in the adapter.
  **/
 class FavouritesListElemsAdapter(
-    private var list : List<TransitDataWithTime>,
+    private var list : List<FavouritesDisplayModel>,
     private val onClickListener: (View, TransitData) -> Unit,
     private val onLongClickListener: (View, TransitData) -> Boolean,
     private var toRemoveList: List<TransitData>
@@ -39,8 +28,8 @@ class FavouritesListElemsAdapter(
     : RecyclerView.Adapter<FavouritesListElemsAdapter.ViewHolder>(){
 
     companion object {
-        private val CHECKBOXES_PAYLOAD = "CHECKBOXES"
-        private val TIME_PAYLOAD = "TIME"
+        private const val CHECKBOXES_PAYLOAD = "CHECKBOXES"
+        private const val TIME_PAYLOAD = "TIME"
     }
 
     private var selectedMode = false
@@ -60,7 +49,7 @@ class FavouritesListElemsAdapter(
         if (payloads.isEmpty())
             onBindViewHolder(holder, position)
         else if (payloads[0] == CHECKBOXES_PAYLOAD) {
-            holder.checkBoxView.isChecked = toRemoveList.contains(list[position].favouriteTransitData)
+            holder.checkBoxView.isChecked = list[position].isToRemove(toRemoveList)
         }
         else if (payloads[0] == TIME_PAYLOAD) {
             setTimeLeft(holder, position)
@@ -71,80 +60,27 @@ class FavouritesListElemsAdapter(
         val info = list[position]
         setTimeLeft(holder, position)
 
-        when(info.favouriteTransitData) {
-            //FIXME some margin issues with bus number and bus route long name
-            is ExoBusItem -> {
-                holder.itemView.tag = info.favouriteTransitData
-                holder.routeLongNameTextView.text = "Bus: ${info.favouriteTransitData.routeLongName}"
-                holder.routeLongNameTextView.visibility = VISIBLE
-                holder.routeLongNameTextView.setTextColor(
-                    holder.itemView.resources.getColor(R.color.basic_purple, null)
-                )
-                holder.stopNameTextView.text = info.favouriteTransitData.stopName
-                holder.directionTextView.text = "To ${info.favouriteTransitData.direction}"
-                holder.tripHeadsignTextView.text = info.favouriteTransitData.routeId
-                holder.tripHeadsignTextView.setTextColor(
-                    holder.itemView.resources.getColor(R.color.basic_purple, null)
-                )
-                holder.stopNameTextView.setTextColor(
-                    holder.itemView.resources.getColor(R.color.basic_purple, null)
-                )
-                holder.directionTextView.setTextColor(
-                    holder.itemView.resources.getColor(R.color.basic_purple, null)
-                )
-            }
-
-            is ExoTrainItem -> {
-                holder.routeLongNameTextView.text = "" //clear it out even if gone
-                holder.routeLongNameTextView.visibility = GONE
-                holder.directionTextView.text = holder.itemView.context
-                    .getString(R.string.train_to, info.favouriteTransitData.trainNum.toString(), info.favouriteTransitData.direction)
-                holder.itemView.tag = info.favouriteTransitData
-                holder.stopNameTextView.text = info.favouriteTransitData.stopName
-                holder.tripHeadsignTextView.text = info.favouriteTransitData.routeName
-                //FIXME for testing purposes, the below is added
-                holder.tripHeadsignTextView.tag = info.favouriteTransitData.direction
-                holder.tripHeadsignTextView.setTextColor(
-                    holder.itemView.resources
-                        .getColor(R.color.orange, null)
-                )
-                holder.stopNameTextView.setTextColor(
-                    holder.itemView.resources
-                        .getColor(R.color.orange, null)
-                )
-                holder.directionTextView.setTextColor(holder.itemView.resources
-                    .getColor(R.color.orange,null))
-            }
-
-            is StmBusItem -> {
-                holder.routeLongNameTextView.text = "" //clear it out even if gone
-                holder.routeLongNameTextView.visibility = GONE
-                holder.itemView.tag = info.favouriteTransitData
-                holder.directionTextView.text = "To ${info.favouriteTransitData.lastStop}"
-                holder.tripHeadsignTextView.text = info.favouriteTransitData.routeId
-                holder.tripHeadsignTextView.setTextColor(
-                    holder.itemView.resources
-                        .getColor(R.color.basic_blue, null)
-                )
-                holder.stopNameTextView.text = info.favouriteTransitData.stopName
-                holder.stopNameTextView.setTextColor(
-                    holder.itemView.resources.getColor(R.color.basic_blue, null)
-                )
-                holder.directionTextView.setTextColor(
-                    holder.itemView.resources.getColor(R.color.basic_blue, null)
-                )
+        holder.stopNameTextView.text = info.stopNameText
+        if (info.toTruncate){
+            holder.directionTextView.text = "${info.directionText.substring(0, FavouritesDisplayModel.DIRECTION_STR_LIMIT)}..."
+            holder.directionTextView.setOnClickListener {
+                if (holder.directionTextView.text.contains("..."))
+                    holder.directionTextView.text = info.directionText
+                else holder.directionTextView.text = "${info.directionText.substring(0, FavouritesDisplayModel.DIRECTION_STR_LIMIT)}..."
             }
         }
+        else holder.directionTextView.text = info.directionText
+        holder.tripHeadsignTextView.text = info.tripHeadsignText
+
+        //val drawable = holder.itemView.resources.getDrawable(R.drawable.favourites_tripheadsign_background, null)
+        //drawable.setTint(holder.itemView.resources.getColor(info.dataDisplayColor, null))
+        //holder.tripHeadsignTextView.setBackgroundDrawable(drawable)
+        holder.tripHeadsignTextView.setTextColor(holder.itemView.resources.getColor(info.dataDisplayColor, null))
 
         if (selectedMode) holder.checkBoxView.visibility = VISIBLE
         else holder.checkBoxView.visibility = GONE
 
         holder.checkBoxView.isChecked = toRemoveList.contains(info.favouriteTransitData)
-
-        //holder.checkBoxView.setOnClickListener{
-            //holder.checkBoxView.isChecked = !holder.checkBoxView.isChecked
-            //onClickListener(it, info.favouriteTransitData)
-        //}
 
         holder.itemView.setOnClickListener { onClickListener(it, info.favouriteTransitData) }
 
@@ -155,23 +91,25 @@ class FavouritesListElemsAdapter(
 
     private fun setTimeLeft(holder: ViewHolder, position: Int){
         val info = list[position]
-        holder.arrivalTimeTextView.text = info.arrivalTime?.getTimeString()
-        if (info.arrivalTime == null){
-            holder.timeRemainingTextView.text =
-                holder.itemView.context.getString(R.string.none_for_the_rest_of_the_day)
+        holder.timeRemainingTextView.text = info.timeRemainingText
+        if (info.arrivalTimeText == null) {
+            holder.timeRemainingTextView.textSize = 20F
+            holder.timeRemainingTextView.setTextColor(holder.itemView.resources.getColor(R.color.light_grey, null))
+            holder.arrivalTimeTextView.visibility = GONE
         }
-        else{
-            val timeRemaining = info.arrivalTime.timeRemaining()
-            holder.timeRemainingTextView.text = getTimeRemaining(timeRemaining)
-            //if (info.arrivalTime.timeRemaining()?.compareTo(Time(0,3,59)) == -1)
-            if (timeRemaining == null || timeRemaining < LocalTime.of(0, 4, 0))
-                holder.timeRemainingTextView.setTextColor(holder.itemView.resources.getColor(R.color.red, null))
-            else
-                holder.timeRemainingTextView.setTextColor(MaterialColors.getColor(holder.itemView, android.R.attr.editTextColor))
+        else {
+            holder.timeRemainingTextView.textSize = 30F
+            holder.arrivalTimeTextView.text = info.arrivalTimeText
+            holder.arrivalTimeTextView.visibility = VISIBLE
+            when (info.urgency){
+                Urgency.IMMINENT -> holder.timeRemainingTextView.setTextColor(holder.itemView.resources.getColor(R.color.red, null))
+                Urgency.SOON -> holder.timeRemainingTextView.setTextColor(holder.itemView.resources.getColor(R.color.yellow, null))
+                Urgency.DISTANT -> holder.timeRemainingTextView.setTextColor(MaterialColors.getColor(holder.itemView, android.R.attr.editTextColor))
+            }
         }
     }
 
-    fun updateTime(list: List<TransitDataWithTime>){
+    fun updateTime(list: List<FavouritesDisplayModel>){
         this.list = list
         notifyItemRangeChanged(0, this.list.size, TIME_PAYLOAD)
     }
@@ -182,7 +120,7 @@ class FavouritesListElemsAdapter(
     }
 
     fun removeSelected(){
-        list = list.toMutableList().filter { !toRemoveList.contains(it.favouriteTransitData) }
+        list = list.toMutableList().filter { !it.isToRemove(toRemoveList) }
         toRemoveList = emptyList()
         notifyDataSetChanged()
     }
@@ -193,13 +131,6 @@ class FavouritesListElemsAdapter(
         notifyItemRangeChanged(0, itemCount)
     }
 
-    private fun getTimeRemaining(remainingTime: LocalTime?): String {
-        //if (arrivalTime == null) return "Wtf"
-        //val remainingTime = arrivalTime.timeRemaining()
-        return if (remainingTime != null && remainingTime.hour > 0) "In ${remainingTime.hour} h, ${remainingTime.minute} min"
-                else if (remainingTime != null) "In ${remainingTime.minute} min"
-            else "Bus has passed??"
-    }
 
     class ViewHolder(view : View) : RecyclerView.ViewHolder(view){
         var checkBoxView : MaterialCheckBox = view.findViewById(R.id.favourites_check_box)
@@ -210,6 +141,6 @@ class FavouritesListElemsAdapter(
         val timeRemainingTextView : MaterialTextView = view.findViewById(R.id.favouritesBusTimeRemainingTextView)
         val directionTextView : MaterialTextView = view.findViewById(R.id.favouritesDirectionTextView)
         /** Invisible for all except exo buses */
-        val routeLongNameTextView: MaterialTextView = view.findViewById(R.id.favouritesExoRouteLongNameTextView)
+        //val routeLongNameTextView: MaterialTextView = view.findViewById(R.id.favouritesExoRouteLongNameTextView)
     }
 }
