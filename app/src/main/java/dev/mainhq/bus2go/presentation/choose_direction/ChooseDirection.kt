@@ -66,8 +66,20 @@ class ChooseDirection : BaseActivity() {
         }
 
 		//set a loading screen first before displaying the correct buttons
-        val busNumView: MaterialTextView = findViewById(R.id.chooseBusNum)
-        val busNameView: MaterialTextView = findViewById(R.id.chooseBusDir)
+        val busNumView = findViewById<MaterialTextView>(R.id.chooseBusNum)
+        val busNameView = findViewById<MaterialTextView>(R.id.chooseBusDir)
+        val buttonRoute0 = findViewById<MaterialButton>(R.id.route_0)
+        val buttonRoute1 = findViewById<MaterialButton>(R.id.route_1)
+
+        lifecycleScope.launch(Dispatchers.Main) {
+            val colour = chooseDirectionViewModel.textColour.filterNotNull().first()
+            busNumView.setTextColor(resources.getColor(colour, null))
+            //busNameView.setTextColor(resources.getColor(colour, null))
+            busNumView.text = routeInfo.routeId
+            busNameView.text = routeInfo.routeName
+            buttonRoute0.setBackgroundColor(resources.getColor(colour, null))
+            buttonRoute1.setBackgroundColor(resources.getColor(colour, null))
+        }
 
         lifecycleScope.launch(Dispatchers.Main) {
             repeatOnLifecycle(Lifecycle.State.STARTED){
@@ -75,8 +87,7 @@ class ChooseDirection : BaseActivity() {
                 val leftDescr = findViewById<MaterialTextView>(R.id.description_route_0)
                 val rightDescr = findViewById<MaterialTextView>(R.id.description_route_1)
 
-                busNumView.text = routeInfo.routeId
-                busNameView.text = routeInfo.routeName
+
                 val isUnidirectional = chooseDirectionViewModel.isUnidirectional.filterNotNull().first()
                 when(routeInfo){
                     is ExoBusRouteInfo -> {
@@ -94,12 +105,12 @@ class ChooseDirection : BaseActivity() {
                             assert(rightDir.isNotEmpty())
 
                             findViewById<MaterialTextView>(R.id.description_route_0).text = leftDir.first().headsign
-                            findViewById<MaterialButton>(R.id.route_0).setOnClickListener {
+                            buttonRoute0.setOnClickListener {
                                 intent.putExtra(ExtrasTagNames.TRANSIT_DATA, leftDir.toTypedArray())
                                 startActivity(intent)
                             }
                             findViewById<MaterialTextView>(R.id.description_route_1).text = rightDir.first().headsign
-                            findViewById<MaterialButton>(R.id.route_1).setOnClickListener {
+                            buttonRoute1.setOnClickListener {
                                 intent.putExtra(ExtrasTagNames.TRANSIT_DATA, rightDir.toTypedArray())
                                 startActivity(intent)
                             }
@@ -114,14 +125,14 @@ class ChooseDirection : BaseActivity() {
 
                             findViewById<MaterialTextView>(R.id.description_route_0).text =
                                 getString(R.string.train_direction, leftDir.first().direction)
-                            findViewById<MaterialButton>(R.id.route_0).setOnClickListener {
+                            buttonRoute0.setOnClickListener {
                                 intent.putExtra(ExtrasTagNames.TRANSIT_DATA, leftDir.toTypedArray())
                                 startActivity(intent)
                             }
 
                             findViewById<MaterialTextView>(R.id.description_route_1).text =
                                 getString(R.string.train_direction, rightDir.first().direction)
-                            findViewById<MaterialButton>(R.id.route_1).setOnClickListener {
+                            buttonRoute1.setOnClickListener {
                                 intent.putExtra(ExtrasTagNames.TRANSIT_DATA, rightDir.toTypedArray())
                                 startActivity(intent)
                             }
@@ -135,36 +146,34 @@ class ChooseDirection : BaseActivity() {
                         if (!isUnidirectional) {
                             var rightDir = chooseDirectionViewModel.rightDirection.filterNotNull().first() as List<StmBusItem>
 
-                            val leftButton = findViewById<MaterialButton>(R.id.route_0)
-                            val rightButton = findViewById<MaterialButton>(R.id.route_1)
                             //left thing must always be East or South
                             if (leftDir.first().direction.lowercase() == "est"){
-                                leftButton.text = getString(R.string.west)
-                                rightButton.text = getString(R.string.east)
+                                buttonRoute0.text = getString(R.string.west)
+                                buttonRoute1.text = getString(R.string.east)
                                 val tmp = leftDir
                                 leftDir = rightDir
                                 rightDir = tmp
                             }
                             else if (leftDir.first().direction.lowercase() == "ouest") {
-                                leftButton.text = getString(R.string.west)
-                                rightButton.text = getString(R.string.east)
+                                buttonRoute0.text = getString(R.string.west)
+                                buttonRoute1.text = getString(R.string.east)
                             }
                             else if (leftDir.first().direction.lowercase() == "north") {
-                                leftButton.text = getString(R.string.north)
-                                rightButton.text = getString(R.string.south)
+                                buttonRoute0.text = getString(R.string.north)
+                                buttonRoute1.text = getString(R.string.south)
                             }
                             else {
-                                leftButton.text = getString(R.string.north)
-                                rightButton.text = getString(R.string.south)
+                                buttonRoute0.text = getString(R.string.north)
+                                buttonRoute1.text = getString(R.string.south)
                                 val tmp = leftDir
                                 leftDir = rightDir
                                 rightDir = tmp
                             }
-                            leftButton.setOnClickListener {
+                            buttonRoute0.setOnClickListener {
                                 intent.putExtra(ExtrasTagNames.TRANSIT_DATA, leftDir.toTypedArray())
                                 startActivity(intent)
                             }
-                            rightButton.setOnClickListener {
+                            buttonRoute1.setOnClickListener {
                                 intent.putExtra(ExtrasTagNames.TRANSIT_DATA, rightDir.toTypedArray())
                                 startActivity(intent)
                             }

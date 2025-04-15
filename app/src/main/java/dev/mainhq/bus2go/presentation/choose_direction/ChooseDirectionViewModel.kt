@@ -2,6 +2,7 @@ package dev.mainhq.bus2go.presentation.choose_direction
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.domain.entity.ExoBusItem
 import dev.mainhq.bus2go.domain.entity.ExoBusRouteInfo
 import dev.mainhq.bus2go.domain.entity.ExoTrainItem
@@ -24,11 +25,17 @@ class ChooseDirectionViewModel(
 	private val getStopNames: GetStopNames
 ): ViewModel() {
 
+	//TODO use UiState sealed class insted of nullable stateFlows to stay consistent
+
 	private val _leftDirection: MutableStateFlow<List<TransitData>?> = MutableStateFlow(null)
 	val leftDirection = _leftDirection.asStateFlow()
 
 	private val _rightDirection: MutableStateFlow<List<TransitData>?> = MutableStateFlow(null)
 	val rightDirection = _rightDirection.asStateFlow()
+
+	//FIXME could use inside of a class with the other data instead...
+	private val _textColour: MutableStateFlow<Int?> = MutableStateFlow(null)
+	val textColour = _textColour.asStateFlow()
 
 	//if becomes true, let the user know
 	private val _isUnidirectional: MutableStateFlow<Boolean?> = MutableStateFlow(null)
@@ -36,18 +43,12 @@ class ChooseDirectionViewModel(
 
 	init {
 		viewModelScope.launch {
-
-			//FIXME stopNames is nullable
-			val stopNames = getStopNames.invoke(routeInfo)
-			if (stopNames == null){
-				println("No stop names found")
-				return@launch
-			}
-
-			//FIXME instead of creating 1 item with empty stotpName (we are using it wrong),
-			//create a list of ExoBusItem s
+			//FIXME instead of creating 1 item with empty stopName (we are using it wrong),
+			// create a list of ExoBusItems
 			when(routeInfo){
 				is ExoBusRouteInfo -> {
+					_textColour.value = R.color.basic_purple
+					val stopNames = getStopNames.invoke(routeInfo)
 					val headsigns = getDirections(routeInfo)
 					_leftDirection.value = stopNames.first.map {
 						ExoBusItem(
@@ -77,6 +78,8 @@ class ChooseDirectionViewModel(
 
 				}
 				is ExoTrainRouteInfo -> {
+					_textColour.value = R.color.orange
+					val stopNames = getStopNames.invoke(routeInfo)
 					_leftDirection.value = stopNames.first.map {
 						ExoTrainItem(
 							routeId = routeInfo.routeId,
@@ -103,6 +106,8 @@ class ChooseDirectionViewModel(
 					_isUnidirectional.value = false
 				}
 				is StmBusRouteInfo -> {
+					_textColour.value = R.color.basic_blue
+					val stopNames = getStopNames.invoke(routeInfo)
 					val directions = getDirections(routeInfo) as List<DirectionInfo>
 					_leftDirection.value = stopNames.first.map {
 						StmBusItem(

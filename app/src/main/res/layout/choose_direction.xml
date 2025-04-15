@@ -4,35 +4,36 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".presentation.choose_direction.ChooseDirection"
     >
-
-    <!-- Could instead make this activity swippable. title on top is the bus, and then down is all the stops. swipe left or right for wtv
-    they want -->
-    <!-- menu items -->
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/chooseBusDir"
-        android:layout_width="245dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="100dp"
-        android:text="line"
-        android:textAlignment="center"
-        android:textSize="40sp"
-        android:fontFamily="@font/goli_medium"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/chooseBusNum"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="25dp"
-        android:textSize="40sp"
-        android:text="busline"
-        android:fontFamily="@font/goli_medium"
-        app:layout_constraintTop_toBottomOf="@id/chooseBusDir"
+        android:layout_marginTop="45dp"
+        android:textSize="50sp"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        />
+    
+    <!-- Could instead make this activity swippable. title on top is the bus, and then down is all the stops. swipe left or right for wtv
+    they want -->
+    <!-- menu items -->
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/chooseBusDir"
+        android:layout_width="wrap_content"
+        android:maxWidth="275dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:textAlignment="center"
+        android:textSize="30sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/chooseBusNum"
+        app:layout_constraintBottom_toTopOf="@id/route_0"
+        android:translationY="-70dp"
         />
 
     <!-- TODO Set a description for left button e.g. first stop to last stop in the direction -->
@@ -40,23 +41,23 @@
         android:id="@+id/route_0"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
+        android:layout_marginBottom="250dp"
         android:text="LEFT"
-        android:fontFamily="@font/goli_regular"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/route_1"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/chooseBusDir" />
+        />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/description_route_0"
-        android:layout_width="175dp"
+        android:layout_width="wrap_content"
+        android:maxWidth="180dp"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:padding="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="5dp"
         android:text="description route 0"
+        android:textAlignment="center"
         android:textSize="20sp"
-        android:fontFamily="@font/goli_medium"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/route_0"
         app:layout_constraintEnd_toStartOf="@+id/description_route_1"
@@ -67,22 +68,23 @@
         android:id="@+id/route_1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
+        android:layout_marginBottom="250dp"
         android:text="RIGHT"
-        android:fontFamily="@font/goli_regular"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@+id/route_0"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/chooseBusDir" />
+        />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/description_route_1"
-        android:layout_width="175dp"
+        android:layout_width="wrap_content"
+        android:maxWidth="180dp"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:text="description route 1"
+        android:layout_marginStart="5dp"
+        android:layout_marginEnd="10dp"
+        android:text="description route 0"
+        android:textAlignment="center"
         android:textSize="20sp"
-        android:fontFamily="@font/goli_medium"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/route_1"
         app:layout_constraintStart_toEndOf="@+id/description_route_0"
