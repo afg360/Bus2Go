@@ -39,12 +39,12 @@ class CommonModule(applicationContext: Context) {
 		 */
 
 	private val stmRepository = StmRepositoryImpl(
-		stmDatabase.calendarDao(),
-		stmDatabase.calendarDatesDao(),
-		stmDatabase.routesDao(),
-		stmDatabase.stopDao(),
-		stmDatabase.stopsInfoDao(),
-		stmDatabase.tripsDao()
+		stmDatabase?.calendarDao(),
+		stmDatabase?.calendarDatesDao(),
+		stmDatabase?.routesDao(),
+		stmDatabase?.stopDao(),
+		stmDatabase?.stopsInfoDao(),
+		stmDatabase?.tripsDao()
 	)
 
 	private val appStateRepository = AppStateRepositoryImpl(
@@ -56,16 +56,13 @@ class CommonModule(applicationContext: Context) {
 		applicationContext.stmFavouritesDataStore
 	)
 
-	private val exoDatabase = Room.databaseBuilder(applicationContext, AppDatabaseExo::class.java, AppDatabaseExo.DATABASE_NAME)
-		.createFromAsset(AppDatabaseExo.DATABASE_PATH)
-		.addMigrations(AppDatabaseExo.MIGRATION_1_2)
-		.build()
+	private val exoDatabase = AppDatabaseExo.getInstance(applicationContext)
 
 	private val exoRepository = ExoRepositoryImpl(
-		exoDatabase.calendarDao(),
-		exoDatabase.routesDao(),
-		exoDatabase.stopTimesDao(),
-		exoDatabase.tripsDao()
+		exoDatabase?.calendarDao(),
+		exoDatabase?.routesDao(),
+		exoDatabase?.stopTimesDao(),
+		exoDatabase?.tripsDao()
 	)
 
 	private val exoFavouritesRepository = ExoFavouritesRepositoryImpl(

@@ -1,6 +1,7 @@
 package dev.mainhq.bus2go.data.data_source.local.database.stm;
 
 import android.content.Context
+import android.util.Log
 import androidx.room.Database;
 import androidx.room.Room
 import androidx.room.RoomDatabase;
@@ -24,9 +25,13 @@ import dev.mainhq.bus2go.data.data_source.local.database.stm.entity.Shapes
 import dev.mainhq.bus2go.data.data_source.local.database.stm.entity.Stops
 import dev.mainhq.bus2go.data.data_source.local.database.stm.entity.StopsInfo
 import dev.mainhq.bus2go.data.data_source.local.database.stm.entity.Trips
+import java.io.IOException
 
-@Database(entities = [Routes::class, Trips::class, StopsInfo::class,
-    Stops::class, Calendar::class, CalendarDates::class, Shapes::class, Forms::class], version = 2)
+@Database(
+    entities = [Routes::class, Trips::class, StopsInfo::class,
+        Stops::class, Calendar::class, CalendarDates::class, Shapes::class, Forms::class],
+    version = 2
+)
 @TypeConverters(Converters::class)
 abstract class AppDatabaseSTM : RoomDatabase() {
     abstract fun routesDao() : RoutesDAO
@@ -44,24 +49,32 @@ abstract class AppDatabaseSTM : RoomDatabase() {
         private var INSTANCE: AppDatabaseSTM? = null
 
         @Synchronized
-        fun getInstance(context: Context): AppDatabaseSTM {
+        fun getInstance(context: Context): AppDatabaseSTM? {
             return INSTANCE ?: createDatabase(context).also { INSTANCE = it }
         }
 
-        private fun createDatabase(context: Context): AppDatabaseSTM {
+        private fun createDatabase(context: Context): AppDatabaseSTM? {
             val dbFile = context.getDatabasePath(DATABASE_NAME)
 
             //FIXME this is a hack, better checks need to be performed to determine the correct
             // db to read
-            return if (dbFile.exists() && dbFile.length() > 0) {
-                Room.databaseBuilder(context, AppDatabaseSTM::class.java, DATABASE_NAME)
-                    .fallbackToDestructiveMigration()
-                    .build()
-            } else {
-                Room.databaseBuilder(context, AppDatabaseSTM::class.java, DATABASE_NAME)
-                    .createFromAsset(DATABASE_PATH)
-                    .fallbackToDestructiveMigration()
-                    .build()
+            try {
+                return if (dbFile.exists() && dbFile.length() > 0) {
+                    Room.databaseBuilder(context, AppDatabaseSTM::class.java, DATABASE_NAME)
+                        .addMigrations(MIGRATION_1_2)
+                        .build()
+                }
+                else {
+                    Room.databaseBuilder(context, AppDatabaseSTM::class.java, DATABASE_NAME)
+                        .createFromAsset(DATABASE_PATH)
+                        .addMigrations(MIGRATION_1_2)
+                        .build()
+                }
+            }
+            catch (ioe: IOException){
+                //FIXME shouldnt have that logcat here but is convenient @ the moment...
+                Log.e("DATABASES", "STM Database not found...")
+                return null
             }
         }
 
@@ -72,7 +85,7 @@ abstract class AppDatabaseSTM : RoomDatabase() {
         }
 
         //we will add a calendar_dates table
-        val MIGRATION_1_2 = object : Migration(1, 2) {
+        private val MIGRATION_1_2 = object : Migration(1, 2) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 //changes:
                 //  added a table CalendarDates

@@ -7,15 +7,16 @@ import dev.mainhq.bus2go.domain.entity.ExoBusItem
 import dev.mainhq.bus2go.domain.entity.ExoTrainItem
 import dev.mainhq.bus2go.domain.entity.FuzzyQuery
 import dev.mainhq.bus2go.domain.entity.Time
+import dev.mainhq.bus2go.domain.core.Result
 import java.time.LocalDate
 
 interface ExoRepository {
 
-	suspend fun getMaxEndDate() : LocalDate?
+	suspend fun getMaxEndDate() : Result<LocalDate?>
 
 	//suspend fun getBusDir(routeId: String) : String
 	/** Queries for buses and trains with a name matching with the query. */
-	suspend fun getRouteInfo(routeId : FuzzyQuery) : List<RouteInfo>
+	suspend fun getRouteInfo(routeId : FuzzyQuery) : Result<List<RouteInfo>>
 
 	/**
 	 * @param direction1 AKA headsign
@@ -23,15 +24,15 @@ interface ExoRepository {
 	 * @return A pair of a list of stopNames in both directions. If only one direction is available,
 	 * the second list is empty.
 	 * */
-	suspend fun getBusStopNames(direction1 : String, direction2: String?) : Pair<List<String>, List<String>>
-	suspend fun getTrainStopNames(routeId : String) : Pair<List<String>, List<String>>
-	suspend fun getBusStopTimes(exoBusItem: ExoBusItem, curTime: Time) : List<Time>
+	suspend fun getBusStopNames(direction1 : String, direction2: String?) : Result<Pair<List<String>, List<String>>>
+	suspend fun getTrainStopNames(routeId : String) : Result<Pair<List<String>, List<String>>>
+	suspend fun getBusStopTimes(exoBusItem: ExoBusItem, curTime: Time) : Result<List<Time>>
 	//TODO? renaming of the method to getBusOldStopTimes and for trains...?
-	suspend fun getOldStopTimes(exoTransitData: TransitData, curTime: Time) : List<Time>
-	suspend fun getFavouriteBusStopTime(exoFavouriteBusItem: ExoBusItem, curTime: Time) : TransitDataWithTime
-	suspend fun getTrainStopTimes(exoTrainItem: ExoTrainItem, curTime: Time) : List<Time>
-	suspend fun getFavouriteTrainStopTime(exoFavouriteTrainItem: ExoTrainItem, curTime: Time) : TransitDataWithTime
+	suspend fun getOldStopTimes(exoTransitData: TransitData, curTime: Time) : Result<List<Time>>
+	suspend fun getFavouriteBusStopTime(exoFavouriteBusItem: ExoBusItem, curTime: Time) : Result<TransitDataWithTime>
+	suspend fun getTrainStopTimes(exoTrainItem: ExoTrainItem, curTime: Time) : Result<List<Time>>
+	suspend fun getFavouriteTrainStopTime(exoFavouriteTrainItem: ExoTrainItem, curTime: Time) : Result<TransitDataWithTime>
 
-	suspend fun getBusTripHeadsigns(routeId : String) : List<String>
-	suspend fun getTrainTripHeadsigns(routeId : Int, directionId: Int) : List<String> //not used by anything right now...
+	suspend fun getBusTripHeadsigns(routeId : String) : Result<List<String>>
+	suspend fun getTrainTripHeadsigns(routeId : Int, directionId: Int) : Result<List<String>> //not used by anything right now...
 }
