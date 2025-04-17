@@ -55,7 +55,8 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
         object: ViewModelProvider.Factory{
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return FavouritesViewModel(
-                    (this@FavouritesFragment.requireActivity().application as Bus2GoApplication).appContainer.favouritesUseCases,
+                    (this@FavouritesFragment.requireActivity().application as Bus2GoApplication).appContainer.getFavouritesWithTimeData,
+                    (this@FavouritesFragment.requireActivity().application as Bus2GoApplication).appContainer.removeFavourite,
                 ) as T
             }
         }

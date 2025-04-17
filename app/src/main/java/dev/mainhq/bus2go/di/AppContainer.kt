@@ -14,8 +14,6 @@ import dev.mainhq.bus2go.data.repository.ExoRepositoryImpl
 import dev.mainhq.bus2go.data.repository.SettingsRepositoryImpl
 import dev.mainhq.bus2go.data.repository.StmFavouritesRepositoryImpl
 import dev.mainhq.bus2go.data.repository.StmRepositoryImpl
-import dev.mainhq.bus2go.domain.use_case.FavouritesUseCases
-import dev.mainhq.bus2go.domain.use_case.TransitTimeInfoUseCases
 import dev.mainhq.bus2go.domain.use_case.db_state.CheckDatabaseUpdateRequired
 import dev.mainhq.bus2go.domain.use_case.db_state.IsFirstTimeAppLaunched
 import dev.mainhq.bus2go.domain.use_case.db_state.SetDatabaseState
@@ -81,44 +79,25 @@ open class AppContainer(applicationContext: Context) {
 
 	private val loggerImpl = LoggerImpl()
 
-	val favouritesUseCases = FavouritesUseCases(
-		GetFavouritesWithTimeData(
-			exoFavouritesRepository,
-			exoRepository,
-			stmFavouritesRepository,
-			stmRepository
-		),
-		AddFavourite(
-			exoFavouritesRepository,
-			stmFavouritesRepository
-		),
-		RemoveFavourite(
-			exoFavouritesRepository,
-			stmFavouritesRepository
-		),
-		IsRealTimeEnabled(
-			settingsRepository
-		)
+	val getRouteInfo = GetRouteInfo(
+		exoRepository,
+		stmRepository
 	)
 
-	val transitTimeInfoUseCases = TransitTimeInfoUseCases(
-		GetRouteInfo(
-			exoRepository,
-			stmRepository,
-		),
-		GetStopNames(
-			loggerImpl,
-			exoRepository,
-			stmRepository
-		),
-		GetTransitTime(
-			exoRepository,
-			stmRepository
-		)
+	val getFavouritesWithTimeData = GetFavouritesWithTimeData(
+		exoFavouritesRepository,
+		exoRepository,
+		stmFavouritesRepository,
+		stmRepository
 	)
 
 	//FIXME not ideal to make them like this...
 	val addFavourite = AddFavourite(
+		exoFavouritesRepository,
+		stmFavouritesRepository
+	)
+
+	val removeFavourite = RemoveFavourite(
 		exoFavouritesRepository,
 		stmFavouritesRepository
 	)

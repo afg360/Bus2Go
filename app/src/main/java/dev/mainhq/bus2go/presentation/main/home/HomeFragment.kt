@@ -48,7 +48,7 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
         object: ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return HomeFragmentViewModel(
-                    (this@HomeFragment.requireActivity().application as Bus2GoApplication).appContainer.transitTimeInfoUseCases,
+                    (this@HomeFragment.requireActivity().application as Bus2GoApplication).appContainer.getRouteInfo,
                 ) as T
             }
         }

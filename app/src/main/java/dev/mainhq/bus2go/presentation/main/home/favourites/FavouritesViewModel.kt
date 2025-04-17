@@ -7,7 +7,8 @@ import dev.mainhq.bus2go.domain.entity.ExoBusItem
 import dev.mainhq.bus2go.domain.entity.ExoTrainItem
 import dev.mainhq.bus2go.domain.entity.StmBusItem
 import dev.mainhq.bus2go.domain.entity.TransitData
-import dev.mainhq.bus2go.domain.use_case.FavouritesUseCases
+import dev.mainhq.bus2go.domain.use_case.favourites.GetFavouritesWithTimeData
+import dev.mainhq.bus2go.domain.use_case.favourites.RemoveFavourite
 import dev.mainhq.bus2go.presentation.core.UiState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -21,7 +22,8 @@ import java.time.LocalTime
 
 
 class FavouritesViewModel(
-    private val favouritesUseCases: FavouritesUseCases
+    private val getFavouritesWithTimeData: GetFavouritesWithTimeData,
+    private val removeFavourite: RemoveFavourite
 ) : ViewModel(){
 
     //TODO
@@ -54,7 +56,7 @@ class FavouritesViewModel(
                 //FIXME useless when no favourites made...
                 //do it when some time is less than some other time
                 _favouriteTransitData.value = UiState.Success(
-                    favouritesUseCases.getFavouritesWithTimeData()
+                    getFavouritesWithTimeData()
                         .map{
                             if (it.arrivalTime != null) {
                                 val timeRemaining = it.arrivalTime.timeRemaining()
@@ -221,7 +223,7 @@ class FavouritesViewModel(
             _favouritesToRemove.value
                 .map { favouriteTransitData ->
                     async {
-                        favouritesUseCases.removeFavourite.invoke(favouriteTransitData)
+                        removeFavourite.invoke(favouriteTransitData)
                     }
                 }.awaitAll()
 
