@@ -17,12 +17,11 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.presentation.base.BaseActivity
-import dev.mainhq.bus2go.presentation.Bus2GoApplication
+import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 

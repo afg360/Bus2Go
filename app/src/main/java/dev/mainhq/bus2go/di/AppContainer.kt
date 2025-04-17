@@ -30,11 +30,16 @@ import dev.mainhq.bus2go.domain.use_case.transit.GetRouteInfo
 import dev.mainhq.bus2go.domain.use_case.transit.GetStopNames
 import dev.mainhq.bus2go.domain.use_case.transit.GetTransitTime
 
-class AppContainer(applicationContext: Context) {
-	private val stmDatabase = Room.databaseBuilder(applicationContext, AppDatabaseSTM::class.java, AppDatabaseSTM.DATABASE_NAME)
+open class AppContainer(applicationContext: Context) {
+	//TODO change back to a private val
+	private val stmDatabase = AppDatabaseSTM.getInstance(applicationContext)
+		/*
+		Room.databaseBuilder(applicationContext, AppDatabaseSTM::class.java, AppDatabaseSTM.DATABASE_NAME)
 		.createFromAsset(AppDatabaseSTM.DATABASE_PATH)
 		.addMigrations(AppDatabaseSTM.MIGRATION_1_2)
 		.build()
+
+		 */
 
 	private val stmRepository = StmRepositoryImpl(
 		stmDatabase.calendarDao(),

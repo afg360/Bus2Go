@@ -16,3 +16,4 @@
 local.properties
 /archive
 *.norg
+**/.env

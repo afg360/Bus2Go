@@ -1,6 +1,5 @@
 package dev.mainhq.bus2go.presentation.main
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
@@ -12,21 +11,14 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.navigation.NavigationBarView
-import dev.mainhq.bus2go.presentation.core.state.AppThemeState
 import dev.mainhq.bus2go.presentation.base.BaseActivity
-import dev.mainhq.bus2go.presentation.config.ConfigActivity
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.presentation.Bus2GoApplication
+import dev.mainhq.bus2go.Bus2GoApplication
 //import dev.mainhq.bus2go.fragments.alarms.AlarmReceiver
 import dev.mainhq.bus2go.presentation.main.home.HomeFragment
-import dev.mainhq.bus2go.presentation.main.map.MapFragment
-import dev.mainhq.bus2go.presentation.main.alarms.AlarmsFragment
-import dev.mainhq.bus2go.presentation.main.alarms.AlarmCreationViewModel
 import dev.mainhq.bus2go.presentation.main.home.HomeFragmentSharedViewModel
 import dev.mainhq.bus2go.presentation.utils.ActivityType
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -44,7 +36,6 @@ class MainActivity : BaseActivity() {
                 return MainActivityViewModel(
                     (this@MainActivity.application as Bus2GoApplication).appContainer.checkDatabaseUpdateRequired,
                     (this@MainActivity.application as Bus2GoApplication).appContainer.setDatabaseState,
-                    (this@MainActivity.application as Bus2GoApplication).appContainer.isFirstTimeAppLaunched,
                 ) as T
             }
         }
@@ -57,52 +48,45 @@ class MainActivity : BaseActivity() {
 
 	override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.main_activity)
+
+        //if (AppThemeState.displayIsDbUpdatedDialog)
+        //    checkAndUpdateDatabases()
+
+        findViewById<NavigationBarView>(R.id.bottomNavBarView).setOnItemSelectedListener {
+            //we change the state. Since the ui has an "observer", changes ui accordingly
+            when(it.itemId) {
+                R.id.homeScreenButton -> {
+                    mainActivityViewModel.setActivityType(ActivityType.HOME)
+                    true
+                }
+                R.id.mapButton -> {
+                    mainActivityViewModel.setActivityType(ActivityType.MAP)
+                    true
+                }
+                R.id.alarmsButton -> {
+                    mainActivityViewModel.setActivityType(ActivityType.ALARMS)
+                    true
+                }
+                else -> false
+            }
+        }
+
+        onBackPressedDispatcher.addCallback(this@MainActivity, object : OnBackPressedCallback(true){
+            override fun handleOnBackPressed() {
+                //Toast.makeText(this@MainActivity, "First back", Toast.LENGTH_SHORT).show()
+                if (mainActivityViewModel.activityType.value == ActivityType.HOME) {
+                    //use a shared viewModel instead
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        homeFragmentSharedViewModel.triggerBackPressed()
+                    }
+                }
+            }
+        })
+
 
         //TODO check if need to start configuration activity here
         lifecycleScope.launch(Dispatchers.Main) {
-            val isFirstTime = mainActivityViewModel.isFirstTime.filterNotNull().first()
-            if (isFirstTime){
-                val intent = Intent(applicationContext, ConfigActivity::class.java)
-                /** Once the configuration is done, we will automatically start the MainActivity */
-                startActivity(intent)
-                //AppThemeState.turnOffDbUpdateChecking()
-            }
-            setContentView(R.layout.main_activity)
-
-            //if (AppThemeState.displayIsDbUpdatedDialog)
-            //    checkAndUpdateDatabases()
-
-            findViewById<NavigationBarView>(R.id.bottomNavBarView).setOnItemSelectedListener {
-                //we change the state. Since the ui has an "observer", changes ui accordingly
-                when(it.itemId) {
-                    R.id.homeScreenButton -> {
-                        mainActivityViewModel.setActivityType(ActivityType.HOME)
-                        true
-                    }
-                    R.id.mapButton -> {
-                        mainActivityViewModel.setActivityType(ActivityType.MAP)
-                        true
-                    }
-                    R.id.alarmsButton -> {
-                        mainActivityViewModel.setActivityType(ActivityType.ALARMS)
-                        true
-                    }
-                    else -> false
-                }
-            }
-
-            onBackPressedDispatcher.addCallback(this@MainActivity, object : OnBackPressedCallback(true){
-                override fun handleOnBackPressed() {
-                    //Toast.makeText(this@MainActivity, "First back", Toast.LENGTH_SHORT).show()
-                    if (mainActivityViewModel.activityType.value == ActivityType.HOME) {
-                        //use a shared viewModel instead
-                        lifecycleScope.launch(Dispatchers.Main) {
-                            homeFragmentSharedViewModel.triggerBackPressed()
-                        }
-                    }
-                }
-            })
-
             //sets essentially an "observer" that notifies the ui when the state changes
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED){
                 mainActivityViewModel.activityType.collect{ activityType ->

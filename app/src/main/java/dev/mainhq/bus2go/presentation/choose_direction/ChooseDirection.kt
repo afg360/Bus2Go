@@ -22,11 +22,10 @@ import dev.mainhq.bus2go.domain.entity.ExoTrainRouteInfo
 import dev.mainhq.bus2go.domain.entity.RouteInfo
 import dev.mainhq.bus2go.domain.entity.StmBusItem
 import dev.mainhq.bus2go.domain.entity.StmBusRouteInfo
-import dev.mainhq.bus2go.presentation.Bus2GoApplication
+import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.presentation.choose_stop.ChooseStop
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlin.IllegalStateException
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
 import kotlinx.coroutines.flow.filterNotNull

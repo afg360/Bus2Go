@@ -2,9 +2,7 @@ package dev.mainhq.bus2go.presentation.search_transit
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import androidx.activity.viewModels
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -15,14 +13,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.presentation.Bus2GoApplication
+import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.presentation.base.BaseActivity
 import dev.mainhq.bus2go.presentation.choose_direction.ChooseDirection
 import dev.mainhq.bus2go.presentation.main.home.BusListElemsAdapter
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.lang.IllegalStateException
 

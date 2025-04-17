@@ -4,22 +4,10 @@ import android.app.NotificationManager
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.work.ListenableWorker
-import androidx.work.WorkManager
-import androidx.work.WorkerFactory
-import androidx.work.WorkerParameters
-import androidx.work.testing.TestListenableWorkerBuilder
 import androidx.work.testing.WorkManagerTestInitHelper
-import com.squareup.okhttp.mockwebserver.MockResponse
 import com.squareup.okhttp.mockwebserver.MockWebServer
-import dev.mainhq.bus2go.workers.UpdateManagerWorker
-import junit.framework.TestCase.assertEquals
-import kotlinx.coroutines.runBlocking
-import org.junit.After
 import org.junit.Before
-import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.*
 
 @RunWith(AndroidJUnit4::class)

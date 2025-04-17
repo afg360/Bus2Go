@@ -23,7 +23,7 @@ import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.domain.exceptions.Bus2GoBaseException
-import dev.mainhq.bus2go.presentation.Bus2GoApplication
+import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.presentation.core.UiState
 import dev.mainhq.bus2go.presentation.stopTimes.StopTimesActivity
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames

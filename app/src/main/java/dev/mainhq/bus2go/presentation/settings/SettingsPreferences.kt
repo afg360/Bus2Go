@@ -14,7 +14,7 @@ import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.workers.UpdateManagerWorker
+import dev.mainhq.bus2go.data.worker.UpdateManagerWorker
 import java.util.concurrent.TimeUnit
 
 class SettingsPreferences : PreferenceFragmentCompat() ,

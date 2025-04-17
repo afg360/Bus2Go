@@ -14,7 +14,6 @@ import java.time.LocalDate
 class MainActivityViewModel(
 	private val checkDatabaseUpdateRequired: CheckDatabaseUpdateRequired,
 	private val setDatabaseState: SetDatabaseState,
-	private val isFirstTimeAppLaunchedUseCase: IsFirstTimeAppLaunched
 ): ViewModel() {
 
 	private val _activityType: MutableStateFlow<ActivityType> = MutableStateFlow(ActivityType.HOME)
@@ -26,15 +25,7 @@ class MainActivityViewModel(
 	private val _showAlert: MutableStateFlow<Boolean> = MutableStateFlow(false)
 	val showAlert: StateFlow<Boolean> get() = _showAlert
 
-	//set to null so that we wait for the actual value
-	private val _isFirstTime: MutableStateFlow<Boolean?> = MutableStateFlow(null)
-	val isFirstTime: StateFlow<Boolean?> get() = _isFirstTime
 
-	init{
-		viewModelScope.launch {
-			_isFirstTime.value = isFirstTimeAppLaunchedUseCase()
-		}
-	}
 
 	fun setActivityType(activityType: ActivityType){
 		//prevents spamming and rerendering of the same fragment...

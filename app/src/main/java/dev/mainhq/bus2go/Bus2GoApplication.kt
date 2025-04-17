@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go.presentation
+package dev.mainhq.bus2go
 
 import android.app.Application
 import android.content.pm.PackageInfo
@@ -6,26 +6,26 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
 import dev.mainhq.bus2go.di.AppContainer
-import dev.mainhq.bus2go.workers.UpdateManagerWorker.Companion.FILE_NAME
+import dev.mainhq.bus2go.data.worker.UpdateManagerWorker.Companion.FILE_NAME
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 
-class Bus2GoApplication : Application() {
+open class Bus2GoApplication : Application() {
 	lateinit var appContainer: AppContainer
 
 	override fun onCreate() {
 		super.onCreate()
-		appContainer = AppContainer(applicationContext)
 		//check if an apk exists, and delete it if useless
+		appContainer = AppContainer(applicationContext)
 		MainScope().launch {
 			cleanUp()
 		}
-
 	}
 
+	//TODO refactor this shit
 	private suspend fun cleanUp(){
 		val file = withContext(Dispatchers.IO) {
 			File(applicationContext.cacheDir, FILE_NAME)

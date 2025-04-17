@@ -2,6 +2,7 @@ package dev.mainhq.bus2go.presentation.config
 
 import android.os.Bundle
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.google.android.material.button.MaterialButton
@@ -10,14 +11,13 @@ import dev.mainhq.bus2go.R
 
 class ConfigThemeFragment: Fragment(R.layout.fragment_config_theme) {
 
-	private val viewModel: ConfigurationStateViewModel by activityViewModels()
+	private val viewModel: ConfigSharedViewModel by activityViewModels()
 
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 		super.onViewCreated(view, savedInstanceState)
 
-		viewModel.setFragmentTag(this::class.java.name)
-
-		view.findViewById<MaterialSwitch>(R.id.configSelectThemeSwitch).setOnCheckedChangeListener { compoundButton, boolean ->
+		view.findViewById<MaterialSwitch>(R.id.configSelectThemeSwitch)
+			.setOnCheckedChangeListener { compoundButton, boolean ->
 				if (boolean) {
 					compoundButton.text = "Dark"
 					//AppThemeState.setTheme(true)
@@ -29,9 +29,13 @@ class ConfigThemeFragment: Fragment(R.layout.fragment_config_theme) {
 		}
 
 		view.findViewById<MaterialButton>(R.id.configSelectThemeContinueButton).setOnClickListener {
-			parentFragmentManager.beginTransaction()
-				.replace(R.id.configActivityFragmentContainer, ConfigDatabasesFragment())
-				.commit()
+			viewModel.setFragment(FragmentUsed.DATABASES)
 		}
+
+		requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object: OnBackPressedCallback(true){
+			override fun handleOnBackPressed() {
+				viewModel.setFragment(FragmentUsed.WELCOME)
+			}
+		})
 	}
 }

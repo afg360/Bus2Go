@@ -10,14 +10,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import dev.mainhq.bus2go.presentation.base.BaseActivity
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.data.data_source.local.database.exo.entity.StopTimes
 import dev.mainhq.bus2go.domain.entity.TransitData
-import dev.mainhq.bus2go.presentation.Bus2GoApplication
+import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.presentation.stopTimes.StopTimesActivity
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
 import kotlinx.coroutines.Dispatchers
@@ -25,7 +23,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlin.IllegalStateException
 
 //todo

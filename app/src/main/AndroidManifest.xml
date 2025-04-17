@@ -7,20 +7,18 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
 
-    <!--FOR TESTING ONLY ENABLE HTTP CONNECTIONS -->
     <application
-        android:name=".presentation.Bus2GoApplication"
-        android:usesCleartextTraffic="true"
+        android:name=".Bus2GoApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/bus2go_dark_ic_launcher"
-        android:label="@string/app_name"
         android:roundIcon="@mipmap/bus2go_dark_ic_launcher_round"
+        android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/MaterialTheme.Bus2Go"
         android:versionCode="4"
-        android:versionName="v1.2.1-alpha"
+        android:versionName="v1.3.0-alpha"
         tools:targetApi="31">
         <!-- Used for FileProvider class, to install the downloaded update apk -->
         <provider
@@ -46,13 +44,20 @@
             android:exported="false">
 
         </activity>
+        <activity android:name=".presentation.launcher.LauncherActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        
         <!-- Need to change the android:theme attr -->
         <activity
             android:name=".presentation.main.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity

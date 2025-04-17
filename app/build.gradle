@@ -11,23 +11,55 @@ plugins {
 android {
     namespace 'dev.mainhq.bus2go'
     compileSdk 34
-
-    sourceSets {
-        androidTest.assets.srcDirs += files("$projectDir/schemas".toString())
-    }
-
+    
     defaultConfig {
         applicationId "dev.mainhq.bus2go"
         minSdk 26
         targetSdk 34
         versionCode 4
-        versionName "v1.2.1-alpha"
+        versionName "v1.3.0-alpha"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
-
+    
+    flavorDimensions += [ "dbPackaging" ]
+    productFlavors {
+        liteDb {
+            isDefault true
+            dimension "dbPackaging"
+            applicationIdSuffix ".lite"
+        }
+        bundledDb {
+            dimension "dbPackaging"
+            applicationIdSuffix ".bundled"
+        }
+    }
+    
+    sourceSets {
+        androidTest.assets.srcDirs += files("$projectDir/schemas".toString())
+    }
+    
+    //include properties defined locally
+    def localProperties = new Properties()
+    localProperties.load(new FileInputStream(rootProject.file("local.properties")))
+    
     buildTypes {
-        release {
+        debug {
+            isDefault true
+            debuggable true
             minifyEnabled false
+            applicationIdSuffix ".debug"
+            android.buildFeatures.buildConfig true
+            buildConfigField "String", "LOCAL_HOST", "\"${localProperties.getProperty('LOCAL_HOST', '127.0.0.1')}\""
+            buildConfigField "int", "DEFAULT_PORT", "${localProperties.getProperty('DEFAULT_PORT', '8000')}"
+        }
+        
+        alpha {
+            minifyEnabled true
+            applicationIdSuffix ".alpha"
+        }
+        
+        release {
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }

@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go.workers
+package dev.mainhq.bus2go.data.worker
 
 import android.app.NotificationChannel
 import android.app.NotificationManager

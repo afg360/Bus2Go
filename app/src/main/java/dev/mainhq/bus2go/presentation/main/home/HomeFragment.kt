@@ -31,7 +31,7 @@ import com.google.android.material.search.SearchView
 import com.google.android.material.search.SearchView.TransitionState
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.presentation.Bus2GoApplication
+import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.presentation.choose_direction.ChooseDirection
 import dev.mainhq.bus2go.presentation.search_transit.SearchTransit
 import dev.mainhq.bus2go.presentation.settings.SettingsActivity

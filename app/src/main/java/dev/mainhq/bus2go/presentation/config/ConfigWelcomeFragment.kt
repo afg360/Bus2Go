@@ -10,18 +10,13 @@ import dev.mainhq.bus2go.R
 
 class ConfigWelcomeFragment: Fragment(R.layout.fragment_config_welcome) {
 
-	private val viewModel: ConfigurationStateViewModel by activityViewModels()
+	private val viewModel: ConfigSharedViewModel by activityViewModels()
 
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 		super.onViewCreated(view, savedInstanceState)
 
-		viewModel.setFragmentTag(this::class.java.name)
-
 		view.findViewById<MaterialButton>(R.id.configureContinueButton).setOnClickListener {
-			val transaction = parentFragmentManager.beginTransaction()
-			transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-				.replace(R.id.configActivityFragmentContainer, ConfigThemeFragment())
-				.commit()
+			viewModel.setFragment(FragmentUsed.THEME)
 		}
 	}
 }

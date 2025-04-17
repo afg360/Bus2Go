@@ -1,6 +1,8 @@
 package dev.mainhq.bus2go.data.data_source.local.database.stm;
 
+import android.content.Context
 import androidx.room.Database;
+import androidx.room.Room
 import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters
 import androidx.room.migration.Migration
@@ -39,6 +41,35 @@ abstract class AppDatabaseSTM : RoomDatabase() {
     companion object {
         const val DATABASE_NAME = "stm_info.db"
         const val DATABASE_PATH = "database/$DATABASE_NAME"
+        private var INSTANCE: AppDatabaseSTM? = null
+
+        @Synchronized
+        fun getInstance(context: Context): AppDatabaseSTM {
+            return INSTANCE ?: createDatabase(context).also { INSTANCE = it }
+        }
+
+        private fun createDatabase(context: Context): AppDatabaseSTM {
+            val dbFile = context.getDatabasePath(DATABASE_NAME)
+
+            //FIXME this is a hack, better checks need to be performed to determine the correct
+            // db to read
+            return if (dbFile.exists() && dbFile.length() > 0) {
+                Room.databaseBuilder(context, AppDatabaseSTM::class.java, DATABASE_NAME)
+                    .fallbackToDestructiveMigration()
+                    .build()
+            } else {
+                Room.databaseBuilder(context, AppDatabaseSTM::class.java, DATABASE_NAME)
+                    .createFromAsset(DATABASE_PATH)
+                    .fallbackToDestructiveMigration()
+                    .build()
+            }
+        }
+
+        //FIXME Needs to be called when db is being updated...
+        fun invalidateInstance() {
+            INSTANCE?.close()
+            INSTANCE = null
+        }
 
         //we will add a calendar_dates table
         val MIGRATION_1_2 = object : Migration(1, 2) {
