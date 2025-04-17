@@ -24,7 +24,7 @@ class LauncherActivity: BaseActivity() {
 		object: ViewModelProvider.Factory{
 			override fun <T : ViewModel> create(modelClass: Class<T>): T {
 				return LauncherActivityViewModel(
-					(this@LauncherActivity.application as Bus2GoApplication).appContainer.isFirstTimeAppLaunched
+					(this@LauncherActivity.application as Bus2GoApplication).commonModule.isFirstTimeAppLaunched
 				) as T
 			}
 		}

@@ -5,8 +5,9 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
-import dev.mainhq.bus2go.di.AppContainer
+import dev.mainhq.bus2go.di.CommonModule
 import dev.mainhq.bus2go.data.worker.UpdateManagerWorker.Companion.FILE_NAME
+import dev.mainhq.bus2go.di.AppModule
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
@@ -14,12 +15,15 @@ import kotlinx.coroutines.withContext
 import java.io.File
 
 open class Bus2GoApplication : Application() {
-	lateinit var appContainer: AppContainer
+	lateinit var commonModule: CommonModule
+	lateinit var appModule: AppModule
 
 	override fun onCreate() {
 		super.onCreate()
 		//check if an apk exists, and delete it if useless
-		appContainer = AppContainer(applicationContext)
+		commonModule = CommonModule(applicationContext)
+		appModule = AppModule(applicationContext)
+
 		MainScope().launch {
 			cleanUp()
 		}

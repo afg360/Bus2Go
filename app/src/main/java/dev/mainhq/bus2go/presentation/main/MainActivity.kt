@@ -34,8 +34,8 @@ class MainActivity : BaseActivity() {
         object: ViewModelProvider.Factory{
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return MainActivityViewModel(
-                    (this@MainActivity.application as Bus2GoApplication).appContainer.checkDatabaseUpdateRequired,
-                    (this@MainActivity.application as Bus2GoApplication).appContainer.setDatabaseState,
+                    (this@MainActivity.application as Bus2GoApplication).commonModule.checkDatabaseUpdateRequired,
+                    (this@MainActivity.application as Bus2GoApplication).commonModule.setDatabaseState,
                 ) as T
             }
         }

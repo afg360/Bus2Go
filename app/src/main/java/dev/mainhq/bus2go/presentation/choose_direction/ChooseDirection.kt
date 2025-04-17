@@ -55,8 +55,8 @@ class ChooseDirection : BaseActivity() {
                     if (modelClass.isAssignableFrom(ChooseDirectionViewModel::class.java)){
                         return ChooseDirectionViewModel(
                             routeInfo = routeInfo,
-                            getDirections = (this@ChooseDirection.application as Bus2GoApplication).appContainer.getDirections,
-                            getStopNames = (this@ChooseDirection.application as Bus2GoApplication).appContainer.getStopNames,
+                            getDirections = (this@ChooseDirection.application as Bus2GoApplication).commonModule.getDirections,
+                            getStopNames = (this@ChooseDirection.application as Bus2GoApplication).commonModule.getStopNames,
                         ) as T
                     }
                     throw IllegalArgumentException("Gave wrong ViewModel class")

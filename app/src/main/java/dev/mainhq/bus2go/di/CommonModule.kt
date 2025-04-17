@@ -21,14 +21,13 @@ import dev.mainhq.bus2go.domain.use_case.favourites.AddFavourite
 import dev.mainhq.bus2go.domain.use_case.favourites.GetFavourites
 import dev.mainhq.bus2go.domain.use_case.favourites.GetFavouritesWithTimeData
 import dev.mainhq.bus2go.domain.use_case.favourites.RemoveFavourite
-import dev.mainhq.bus2go.domain.use_case.settings.IsRealTimeEnabled
 import dev.mainhq.bus2go.domain.use_case.transit.GetDirections
 import dev.mainhq.bus2go.domain.use_case.transit.GetMinDateForUpdate
 import dev.mainhq.bus2go.domain.use_case.transit.GetRouteInfo
 import dev.mainhq.bus2go.domain.use_case.transit.GetStopNames
 import dev.mainhq.bus2go.domain.use_case.transit.GetTransitTime
 
-open class AppContainer(applicationContext: Context) {
+class CommonModule(applicationContext: Context) {
 	//TODO change back to a private val
 	private val stmDatabase = AppDatabaseSTM.getInstance(applicationContext)
 		/*

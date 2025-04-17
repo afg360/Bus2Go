@@ -32,7 +32,7 @@ class SearchTransit : BaseActivity() {
             override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
                 if (modelClass.isAssignableFrom(SearchTransitViewModel::class.java)){
                     return SearchTransitViewModel(
-                        (this@SearchTransit.application as Bus2GoApplication).appContainer.getRouteInfo,
+                        (this@SearchTransit.application as Bus2GoApplication).commonModule.getRouteInfo,
                     ) as T
                 }
                 throw IllegalArgumentException("Gave wrong ViewModel class")

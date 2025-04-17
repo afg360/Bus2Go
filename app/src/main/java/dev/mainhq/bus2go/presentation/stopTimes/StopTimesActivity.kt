@@ -46,7 +46,7 @@ class StopTimesActivity : BaseActivity() {
                 override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
                     if (modelClass.isAssignableFrom(StopTimesViewModel::class.java)){
                         return StopTimesViewModel(
-                            (this@StopTimesActivity.application as Bus2GoApplication).appContainer.getTransitTime,
+                            (this@StopTimesActivity.application as Bus2GoApplication).commonModule.getTransitTime,
                             transitData
                         ) as T
                     }

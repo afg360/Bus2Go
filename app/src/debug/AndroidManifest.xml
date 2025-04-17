@@ -2,10 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
     <application
-        android:name=".DebugBus2GoApplication"
         android:usesCleartextTraffic="true"
         android:icon="@mipmap/ic_launcher"
-        tools:replace="android:icon, android:name"
+        tools:replace="android:icon"
         >
         
     </application>

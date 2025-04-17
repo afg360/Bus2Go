@@ -50,9 +50,9 @@ class ChooseStop() : BaseActivity() {
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
                     return ChooseStopViewModel(
                         transitData.toList(),
-                        addFavourite = (application as Bus2GoApplication).appContainer.addFavourite,
-                        removeFavourite = (application as Bus2GoApplication).appContainer.removeFavourite,
-                        getFavourites = (application as Bus2GoApplication).appContainer.getFavourites,
+                        addFavourite = (application as Bus2GoApplication).commonModule.addFavourite,
+                        removeFavourite = (application as Bus2GoApplication).commonModule.removeFavourite,
+                        getFavourites = (application as Bus2GoApplication).commonModule.getFavourites,
                     ) as T
                 }
             }

@@ -9,17 +9,13 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.work.OneTimeWorkRequest
-import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dev.mainhq.bus2go.presentation.core.state.AppThemeState
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.data.worker.DatabaseDownloadManagerWorker
 import dev.mainhq.bus2go.Bus2GoApplication
-import dev.mainhq.bus2go.di.DebugAppContainer
 import dev.mainhq.bus2go.domain.entity.DbToDownload
 
 class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
@@ -34,8 +30,8 @@ class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
 			override fun <T : ViewModel> create(modelClass: Class<T>): T {
 				return ConfigDatabasesFragmentViewModel(
 					//TODO this is shit
-					((this@ConfigDatabasesFragment.requireActivity().application as Bus2GoApplication)
-						.appContainer as DebugAppContainer).scheduleDownloadDatabaseTask
+					(this@ConfigDatabasesFragment.requireActivity().application as Bus2GoApplication)
+						.appModule.scheduleDownloadDatabaseTask
 				) as T
 			}
 		}
