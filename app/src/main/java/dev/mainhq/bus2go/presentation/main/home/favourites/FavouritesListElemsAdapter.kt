@@ -116,7 +116,7 @@ class FavouritesListElemsAdapter(
 
     fun toggleForRemoval(items: List<TransitData>){
         this.toRemoveList = items
-        notifyItemRangeChanged(0, itemCount, CHECKBOXES_PAYLOAD)
+        notifyItemRangeChanged(0, this.list.size, CHECKBOXES_PAYLOAD)
     }
 
     fun removeSelected(){
@@ -128,7 +128,7 @@ class FavouritesListElemsAdapter(
     /** Toggles what mode we are in */
     fun updateSelectionMode(){
         this.selectedMode = !this.selectedMode
-        notifyItemRangeChanged(0, itemCount)
+        notifyItemRangeChanged(0, this.list.size)
     }
 
 

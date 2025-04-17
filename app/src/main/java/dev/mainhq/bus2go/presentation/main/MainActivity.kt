@@ -1,7 +1,6 @@
 package dev.mainhq.bus2go.presentation.main
 
 import android.os.Bundle
-import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
@@ -16,7 +15,6 @@ import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.Bus2GoApplication
 //import dev.mainhq.bus2go.fragments.alarms.AlarmReceiver
 import dev.mainhq.bus2go.presentation.main.home.HomeFragment
-import dev.mainhq.bus2go.presentation.main.home.HomeFragmentSharedViewModel
 import dev.mainhq.bus2go.presentation.utils.ActivityType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -41,7 +39,6 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    private val homeFragmentSharedViewModel: HomeFragmentSharedViewModel by viewModels()
     //private val alarmViewModel: AlarmCreationViewModel by viewModels()
     //private val roomViewModel: RoomViewModel by viewModels()
 
@@ -71,18 +68,6 @@ class MainActivity : BaseActivity() {
                 else -> false
             }
         }
-
-        onBackPressedDispatcher.addCallback(this@MainActivity, object : OnBackPressedCallback(true){
-            override fun handleOnBackPressed() {
-                //Toast.makeText(this@MainActivity, "First back", Toast.LENGTH_SHORT).show()
-                if (mainActivityViewModel.activityType.value == ActivityType.HOME) {
-                    //use a shared viewModel instead
-                    lifecycleScope.launch(Dispatchers.Main) {
-                        homeFragmentSharedViewModel.triggerBackPressed()
-                    }
-                }
-            }
-        })
 
 
         //TODO check if need to start configuration activity here

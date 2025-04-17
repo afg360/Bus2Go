@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
 import androidx.activity.OnBackPressedCallback
-import androidx.core.view.forEach
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -70,62 +69,50 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        var adapter: FavouritesListElemsAdapter? = null
         val recyclerView = view.findViewById<RecyclerView>(R.id.favouritesRecyclerView)
         val layoutManager = LinearLayoutManager(view.context)
         layoutManager.orientation = LinearLayoutManager.VERTICAL
+        val adapter = FavouritesListElemsAdapter(
+            listOf(),
+            onClickListener = { itemView, favouriteTransitData -> //we are using the itemView of the holder
+                if (favouritesViewModel.selectionMode.value){
+                    selectFavourite(itemView, favouriteTransitData)
+                }
+                else {
+                    val intent = Intent(view.context, StopTimesActivity::class.java)
+                    intent.putExtra(ExtrasTagNames.TRANSIT_DATA, favouriteTransitData)
+
+                    itemView.context.startActivity(intent)
+                    view.clearFocus()
+                }
+            },
+            onLongClickListener = { itemView, favouriteTransitData ->
+                if (!favouritesViewModel.selectionMode.value) {
+                    favouritesViewModel.activateSelectionMode()
+                    selectFavourite(itemView, favouriteTransitData)
+                    onBackPressedCallback.isEnabled = true
+                    true
+                }
+                else false
+            },
+            favouritesViewModel.favouritesToRemove.value
+        )
+        recyclerView.layoutManager = layoutManager
+        recyclerView.adapter = adapter
 
         //This part allows us to press the back button when in selection mode of favourites to get out of it
         //we set the callback to false to prioritise it only when selection mode is activated
         onBackPressedCallback = object : OnBackPressedCallback(false) {
             /** Hides all the checkboxes of the items in the recyclerview, deselects them, and puts back the searchbar as the nav bar */
             override fun handleOnBackPressed() {
-                recyclerView?.forEach { view ->
-                    view.findViewById<MaterialCheckBox>(R.id.favourites_check_box).visibility = View.GONE
+                (0 until recyclerView.childCount).forEach { i ->
+                    layoutManager.getChildAt(i)?.let { view ->
+                        view.findViewById<MaterialCheckBox>(R.id.favourites_check_box).visibility = View.GONE
+                    }
                 }
                 favouritesViewModel.deactivateSelectionMode()
                 favouritesSharedViewModel.deactivateSelectionMode()
                 onBackPressedCallback.isEnabled = false
-            }
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){
-                favouritesViewModel.favouriteTransitData.collect{ uiState ->
-                    when(uiState){
-                        is UiState.Success<List<FavouritesDisplayModel>> -> {
-                            adapter = FavouritesListElemsAdapter(
-                                uiState.data,
-                                onClickListener = { itemView, favouriteTransitData -> //we are using the itemView of the holder
-                                    if (favouritesViewModel.selectionMode.value){
-                                        selectFavourite(itemView, favouriteTransitData)
-                                    }
-                                    else {
-                                        val intent = Intent(view.context, StopTimesActivity::class.java)
-                                        intent.putExtra(ExtrasTagNames.TRANSIT_DATA, favouriteTransitData)
-
-                                        itemView.context.startActivity(intent)
-                                        view.clearFocus()
-                                    }
-                                },
-                                onLongClickListener = { itemView, favouriteTransitData ->
-                                    if (!favouritesViewModel.selectionMode.value) {
-                                        favouritesViewModel.activateSelectionMode()
-                                        selectFavourite(itemView, favouriteTransitData)
-                                        onBackPressedCallback.isEnabled = true
-                                        true
-                                    }
-                                    else false
-                                },
-                                favouritesViewModel.favouritesToRemove.value
-                            )
-                            recyclerView.layoutManager = layoutManager
-                            recyclerView.adapter = adapter
-                        }
-                        UiState.Loading -> {}
-                        is UiState.Error -> throw object: Bus2GoBaseException("Wtf"){}
-                    }
-                }
             }
         }
 
@@ -142,7 +129,7 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
                             else {
                                 view.findViewById<MaterialTextView>(R.id.favourites_text_view).text =
                                     getText(R.string.favourites)
-                                adapter?.updateTime(uiState.data)
+                                adapter.updateTime(uiState.data)
                                 /*
 								//check if connected to internet
 								connectivityManager = requireActivity().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -222,7 +209,7 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){
                 favouritesViewModel.favouritesToRemove.filterNotNull().collect { favouritesToRemove ->
-                    adapter?.toggleForRemoval(favouritesToRemove)
+                    adapter.toggleForRemoval(favouritesToRemove)
                 }
             }
         }
@@ -232,7 +219,7 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 favouritesViewModel.selectionMode.collect { selectedMode ->
                     if (wasSelectionMode != selectedMode){
-                        adapter?.updateSelectionMode()
+                        adapter.updateSelectionMode()
                         wasSelectionMode = selectedMode
                         if (selectedMode)
                             favouritesSharedViewModel.activateSelectionMode()
@@ -269,7 +256,7 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
             }
         }
 
-        requireActivity().onBackPressedDispatcher.addCallback(onBackPressedCallback)
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, onBackPressedCallback)
 
         parentFragment?.view?.findViewById<LinearLayout>(R.id.removeItemsWidget)
             ?.setOnClickListener { _ ->
@@ -281,7 +268,7 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
                             dialog.cancel()
                         }
                         .setPositiveButton(resources.getString(R.string.remove_confirmation_dialog_accept)) { dialog, _ ->
-                            adapter?.removeSelected()
+                            adapter.removeSelected()
                             favouritesSharedViewModel.resetNumFavouritesSelected()
                             when(val uiState = favouritesViewModel.favouriteTransitData.value){
                                 is UiState.Success<List<FavouritesDisplayModel>> -> {
@@ -319,7 +306,6 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        onBackPressedCallback.remove()
         networkCallback?.also{
             connectivityManager?.unregisterNetworkCallback(it)
         }

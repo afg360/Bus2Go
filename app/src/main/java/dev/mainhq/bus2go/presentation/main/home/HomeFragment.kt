@@ -11,6 +11,7 @@ import android.view.View.VISIBLE
 import android.view.inputmethod.EditorInfo
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.children
@@ -37,6 +38,7 @@ import dev.mainhq.bus2go.presentation.search_transit.SearchTransit
 import dev.mainhq.bus2go.presentation.settings.SettingsActivity
 import dev.mainhq.bus2go.presentation.main.home.favourites.FavouritesFragment
 import dev.mainhq.bus2go.presentation.main.home.favourites.FavouritesFragmentSharedViewModel
+import dev.mainhq.bus2go.presentation.utils.ActivityType
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -53,7 +55,6 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
             }
         }
     }
-    private val homeFragmentSharedViewModel: HomeFragmentSharedViewModel by activityViewModels()
     private val favouritesSharedViewModel: FavouritesFragmentSharedViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -183,8 +184,18 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
             else super.onOptionsItemSelected(menuItem)
         }
 
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true){
+            override fun handleOnBackPressed() {
+                lifecycleScope.launch(Dispatchers.Main) {
+                    homeFragmentViewModel.triggerBackPressed()
+                }
+            }
+        })
+
+
         lifecycleScope.launch(Dispatchers.Main) {
-            homeFragmentSharedViewModel.isBackPressed.collect {
+            homeFragmentViewModel.isBackPressed.collect {
                 if (searchView.currentTransitionState == TransitionState.SHOWN) {
                     searchView.hide()
                 }
