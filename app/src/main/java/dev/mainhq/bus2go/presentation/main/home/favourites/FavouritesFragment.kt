@@ -90,39 +90,41 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
         }
 
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
-            favouritesViewModel.favouriteTransitData.collect{ uiState ->
-                when(uiState){
-                    is UiState.Success<List<FavouritesDisplayModel>> -> {
-                        adapter = FavouritesListElemsAdapter(
-                            uiState.data,
-                            onClickListener = { itemView, favouriteTransitData -> //we are using the itemView of the holder
-                                if (favouritesViewModel.selectionMode.value){
-                                    selectFavourite(itemView, favouriteTransitData)
-                                }
-                                else {
-                                    val intent = Intent(view.context, StopTimesActivity::class.java)
-                                    intent.putExtra(ExtrasTagNames.TRANSIT_DATA, favouriteTransitData)
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){
+                favouritesViewModel.favouriteTransitData.collect{ uiState ->
+                    when(uiState){
+                        is UiState.Success<List<FavouritesDisplayModel>> -> {
+                            adapter = FavouritesListElemsAdapter(
+                                uiState.data,
+                                onClickListener = { itemView, favouriteTransitData -> //we are using the itemView of the holder
+                                    if (favouritesViewModel.selectionMode.value){
+                                        selectFavourite(itemView, favouriteTransitData)
+                                    }
+                                    else {
+                                        val intent = Intent(view.context, StopTimesActivity::class.java)
+                                        intent.putExtra(ExtrasTagNames.TRANSIT_DATA, favouriteTransitData)
 
-                                    itemView.context.startActivity(intent)
-                                    view.clearFocus()
-                                }
-                            },
-                            onLongClickListener = { itemView, favouriteTransitData ->
-                                if (!favouritesViewModel.selectionMode.value) {
-                                    favouritesViewModel.activateSelectionMode()
-                                    selectFavourite(itemView, favouriteTransitData)
-                                    onBackPressedCallback.isEnabled = true
-                                    true
-                                }
-                                else false
-                            },
-                            favouritesViewModel.favouritesToRemove.value
-                        )
-                        recyclerView.layoutManager = layoutManager
-                        recyclerView.adapter = adapter
+                                        itemView.context.startActivity(intent)
+                                        view.clearFocus()
+                                    }
+                                },
+                                onLongClickListener = { itemView, favouriteTransitData ->
+                                    if (!favouritesViewModel.selectionMode.value) {
+                                        favouritesViewModel.activateSelectionMode()
+                                        selectFavourite(itemView, favouriteTransitData)
+                                        onBackPressedCallback.isEnabled = true
+                                        true
+                                    }
+                                    else false
+                                },
+                                favouritesViewModel.favouritesToRemove.value
+                            )
+                            recyclerView.layoutManager = layoutManager
+                            recyclerView.adapter = adapter
+                        }
+                        UiState.Loading -> {}
+                        is UiState.Error -> throw object: Bus2GoBaseException("Wtf"){}
                     }
-                    UiState.Loading -> {}
-                    is UiState.Error -> throw object: Bus2GoBaseException("Wtf"){}
                 }
             }
         }
