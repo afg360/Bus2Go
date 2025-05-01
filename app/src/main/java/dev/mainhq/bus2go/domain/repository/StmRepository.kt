@@ -19,7 +19,7 @@ interface StmRepository {
 	//FIXME use Time objects instead of multiple strings
 
 	/** @return Latest calendar date before data not being up to date. **/
-	suspend fun getMaxEndDate() : Result<LocalDate?>
+	suspend fun getMaxEndDate() : Result<LocalDate>
 
 	suspend fun getAllCalendarDates(): Result<List<CalendarDates>>
 

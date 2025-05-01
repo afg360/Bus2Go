@@ -2,6 +2,7 @@ package dev.mainhq.bus2go.presentation.main.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.entity.RouteInfo
 import dev.mainhq.bus2go.domain.use_case.transit.GetRouteInfo
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -31,7 +32,14 @@ class HomeFragmentViewModel(
 		}
 		else{
 			viewModelScope.launch {
-				_searchQuery.value = getRouteInfo(query)
+				when(val routeInfo = getRouteInfo.invoke(query)){
+					is Result.Error -> {
+						TODO()
+					}
+					is Result.Success<List<RouteInfo>> -> {
+						_searchQuery.value = routeInfo.data
+					}
+				}
 			}
 		}
 	}

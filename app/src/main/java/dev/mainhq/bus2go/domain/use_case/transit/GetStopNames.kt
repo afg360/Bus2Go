@@ -1,10 +1,12 @@
 package dev.mainhq.bus2go.domain.use_case.transit
 
 import dev.mainhq.bus2go.domain.core.Logger
+import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.entity.ExoBusRouteInfo
 import dev.mainhq.bus2go.domain.entity.ExoTrainRouteInfo
 import dev.mainhq.bus2go.domain.entity.RouteInfo
 import dev.mainhq.bus2go.domain.entity.StmBusRouteInfo
+import dev.mainhq.bus2go.domain.entity.stm.DirectionInfo
 import dev.mainhq.bus2go.domain.exceptions.DatabaseFormatingException
 import dev.mainhq.bus2go.domain.exceptions.DirectionsMissingException
 import dev.mainhq.bus2go.domain.repository.ExoRepository
@@ -26,37 +28,46 @@ class GetStopNames(
 	 * @throws DatabaseFormatingException When the database contains STM routeId which is not a number.
 	 * @throws DirectionsMissingException When the database cannot have directions for an ExoBus.
 	 **/
-	suspend operator fun invoke(routeInfo: RouteInfo): Pair<List<String>, List<String>> {
+	suspend operator fun invoke(routeInfo: RouteInfo): Result<Pair<List<String>, List<String>>> {
 		when(routeInfo){
 			is ExoBusRouteInfo -> {
-				val directions = exoRepository.getBusTripHeadsigns(routeInfo.routeId)
-				return if (directions.isEmpty()) throw DirectionsMissingException("The route $routeInfo doesn't have any directions to it...")
-				else if (directions.size == 1) exoRepository.getBusStopNames(directions.first(), null)
-				else exoRepository.getBusStopNames(
-					directions.first(),
-					directions.last()
-				)
+				return when(val directions = exoRepository.getBusTripHeadsigns(routeInfo.routeId)){
+					is Result.Error -> directions
+					is Result.Success<List<DirectionInfo>> -> {
+						return if (directions.data.isEmpty()) Result.Error(DirectionsMissingException("The route $routeInfo doesn't have any directions to it..."))
+						else if (directions.data.size == 1)
+							exoRepository.getBusStopNames(directions.data.first().tripHeadSign, null)
+						else exoRepository.getBusStopNames(
+							directions.data.first().tripHeadSign,
+							directions.data.last().tripHeadSign
+						)
+					}
+				}
 			}
 			is ExoTrainRouteInfo -> return exoRepository.getTrainStopNames(routeInfo.routeId)
 			is StmBusRouteInfo -> {
 				//busNum <= 5 are skipped, bcz these are metros
 				try {
 					if (routeInfo.routeId.toInt() > 5) {
-						val directions = stmRepository.getDirectionInfo(routeInfo.routeId.toInt())
-						return stmRepository.getStopNames(
-							directions.first().tripHeadSign,
-							directions.last().tripHeadSign,
-							routeInfo.routeId
-						)
+						return when(val directions = stmRepository.getDirectionInfo(routeInfo.routeId.toInt())){
+							is Result.Success -> {
+								stmRepository.getStopNames(
+									directions.data.first().tripHeadSign,
+									directions.data.last().tripHeadSign,
+									routeInfo.routeId
+								)
+							}
+							is Result.Error -> directions
+						}
 					}
 					else {
 						logger.warn("STM_BUS_NUM", "A metro bus num was given... not dealing with this shit for now...")
-						return Pair(listOf(), listOf())
+						return Result.Success(Pair(listOf(), listOf()))
 					}
 				}
 				catch (nfm: NumberFormatException){
 					logger.error("STM_ROUTE_ID", "Expected an integer in the db but received a string", null)
-					throw DatabaseFormatingException("Expected an integer in the db but received a string")
+					return Result.Error(DatabaseFormatingException("Expected an integer in the db but received a string"))
 				}
 			}
 		}

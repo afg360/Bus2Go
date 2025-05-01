@@ -3,6 +3,7 @@ package dev.mainhq.bus2go.domain.repository
 import dev.mainhq.bus2go.domain.entity.ExoBusItem
 import dev.mainhq.bus2go.domain.entity.ExoTrainItem
 
+//TODO output a result object (in case of failure, we will retry...), or maybe a boolean...
 interface ExoFavouritesRepository {
 
 	suspend fun getExoBusFavourites(): List<ExoBusItem>

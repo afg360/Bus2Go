@@ -8,11 +8,12 @@ import dev.mainhq.bus2go.domain.entity.ExoTrainItem
 import dev.mainhq.bus2go.domain.entity.FuzzyQuery
 import dev.mainhq.bus2go.domain.entity.Time
 import dev.mainhq.bus2go.domain.core.Result
+import dev.mainhq.bus2go.domain.entity.stm.DirectionInfo
 import java.time.LocalDate
 
 interface ExoRepository {
 
-	suspend fun getMaxEndDate() : Result<LocalDate?>
+	suspend fun getMaxEndDate() : Result<LocalDate>
 
 	//suspend fun getBusDir(routeId: String) : String
 	/** Queries for buses and trains with a name matching with the query. */
@@ -33,6 +34,8 @@ interface ExoRepository {
 	suspend fun getTrainStopTimes(exoTrainItem: ExoTrainItem, curTime: Time) : Result<List<Time>>
 	suspend fun getFavouriteTrainStopTime(exoFavouriteTrainItem: ExoTrainItem, curTime: Time) : Result<TransitDataWithTime>
 
-	suspend fun getBusTripHeadsigns(routeId : String) : Result<List<String>>
-	suspend fun getTrainTripHeadsigns(routeId : Int, directionId: Int) : Result<List<String>> //not used by anything right now...
+	suspend fun getBusTripHeadsigns(routeId : String) : Result<List<DirectionInfo>>
+
+	//not used by anything right now...
+	suspend fun getTrainTripHeadsigns(routeId : Int, directionId: Int) : Result<List<String>>
 }

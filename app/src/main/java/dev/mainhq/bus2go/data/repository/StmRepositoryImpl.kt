@@ -32,7 +32,7 @@ class StmRepositoryImpl(
 	private val tripsDAO: TripsDAO?
 ): StmRepository {
 
-	override suspend fun getMaxEndDate(): Result<LocalDate?> {
+	override suspend fun getMaxEndDate(): Result<LocalDate> {
 		return calendarDAO?.let{
 			withContext(Dispatchers.IO){ Result.Success(it.getMaxEndDate()) }
 		} ?: Result.Error(null)
@@ -143,7 +143,9 @@ class StmRepositoryImpl(
 	override suspend fun getDirectionInfo(routeId: Int): Result<List<DirectionInfo>> {
 		return tripsDAO?.let {
 			withContext(Dispatchers.IO) {
-				Result.Success(it.getDirectionInfo(routeId))
+				Result.Success(it.getDirectionInfo(routeId)
+					.map { DirectionInfo.StmDirectionInfo(it.tripHeadSign, it.directionId) }
+				)
 			}
 		} ?: Result.Error(null)
 	}

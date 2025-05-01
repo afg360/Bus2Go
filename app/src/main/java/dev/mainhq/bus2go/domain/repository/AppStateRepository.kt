@@ -2,6 +2,7 @@ package dev.mainhq.bus2go.domain.repository
 
 import java.time.LocalDate
 
+//TODO output a result object (in case of failure, we will retry...), or maybe a boolean...
 interface AppStateRepository {
 
 	/** Retrieves the expiration date of databases stored for the app. **/

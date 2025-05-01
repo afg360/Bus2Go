@@ -1,5 +1,6 @@
 package dev.mainhq.bus2go.domain.use_case.transit
 
+import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.entity.ExoBusItem
 import dev.mainhq.bus2go.domain.entity.ExoTrainItem
 import dev.mainhq.bus2go.domain.entity.TransitData
@@ -17,7 +18,7 @@ class GetTransitTime(
 	private val stmRepository: StmRepository,
 ) {
 
-	suspend operator fun invoke(curTime: Time, transitData: TransitData): List<Time>{
+	suspend operator fun invoke(curTime: Time, transitData: TransitData): Result<List<Time>> {
 		when(transitData){
 			is ExoBusItem -> return exoRepository.getBusStopTimes(
 				transitData,

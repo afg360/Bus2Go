@@ -3,6 +3,7 @@ package dev.mainhq.bus2go.presentation.stopTimes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.mainhq.bus2go.R
+import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.entity.ExoBusItem
 import dev.mainhq.bus2go.domain.entity.ExoTrainItem
 import dev.mainhq.bus2go.domain.entity.StmBusItem
@@ -62,23 +63,33 @@ class StopTimesViewModel(
 		}
 		viewModelScope.launch(Dispatchers.Default) {
 			while(true){
-				_arrivalTimes.value = getTransitTime(Time.now(), transitData).map {
-					val timeRemaining = it.timeRemaining()
-					val timeLeftTextDisplay = timeRemaining?.let {
-						//FIXMe instead of checking hour, check if smaller than an hour
-						if (timeRemaining.hour == 0) timeRemaining.minute.toString()
-						else "" //empty string that will be replaced by the resource value
-					} ?: "Passed bus???"
-					val urgency = if (timeRemaining == null || timeRemaining < LocalTime.of(0, 4, 0))
-						Urgency.IMMINENT
-					else if (timeRemaining < LocalTime.of(0, 15, 0)) Urgency.SOON
-					else Urgency.DISTANT
-					StopTimesDisplayModel(
-						arrivalTime = it,
-						timeLeftTextDisplay = timeLeftTextDisplay,
-						urgency = urgency
-					)
+
+				when(val transitTime = getTransitTime.invoke(Time.now(), transitData)){
+					is Result.Error -> {
+						TODO()
+					}
+
+					is Result.Success<List<Time>> -> {
+						_arrivalTimes.value = transitTime.data.map{
+							val timeRemaining = it.timeRemaining()
+							val timeLeftTextDisplay = timeRemaining?.let {
+								//FIXMe instead of checking hour, check if smaller than an hour
+								if (timeRemaining.hour == 0) timeRemaining.minute.toString()
+								else "" //empty string that will be replaced by the resource value
+							} ?: "Passed bus???"
+							val urgency = if (timeRemaining == null || timeRemaining < LocalTime.of(0, 4, 0))
+								Urgency.IMMINENT
+							else if (timeRemaining < LocalTime.of(0, 15, 0)) Urgency.SOON
+							else Urgency.DISTANT
+							StopTimesDisplayModel(
+								arrivalTime = it,
+								timeLeftTextDisplay = timeLeftTextDisplay,
+								urgency = urgency
+							)
+						}
+					}
 				}
+
 				delay(1000)
 			}
 		}

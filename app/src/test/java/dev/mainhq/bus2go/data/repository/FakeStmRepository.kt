@@ -1,5 +1,6 @@
 package dev.mainhq.bus2go.data.repository
 
+import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.entity.RouteInfo
 import dev.mainhq.bus2go.domain.entity.StmBusItem
 import dev.mainhq.bus2go.domain.entity.StmBusRouteInfo
@@ -54,51 +55,53 @@ class FakeStmRepository: StmRepository {
 		}
 	}
 
-	override suspend fun getMaxEndDate(): LocalDate? {
-		return stopTimes.map { it.value.maxByOrNull { it.localDate } }
+	override suspend fun getMaxEndDate(): Result<LocalDate?> {
+		return Result.Success(stopTimes.map { stopTime -> stopTime.value.maxByOrNull { it.localDate } }
 			.filterNotNull()
 			.maxByOrNull { it }
 			?.localDate
+		)
 	}
 
-	override suspend fun getAllCalendarDates(): List<CalendarDates> {
+	override suspend fun getAllCalendarDates(): Result<List<CalendarDates>> {
 		throw IllegalStateException("Not implemented")
 	}
 
 
-	override suspend fun getBusRouteInfo(routeId: FuzzyQuery): List<RouteInfo> {
-		return stmRouteInfo.filter { it.routeId.contains(routeId.query) || it.routeName.contains(routeId.query) }
+	override suspend fun getBusRouteInfo(routeId: FuzzyQuery): Result<List<RouteInfo>> {
+		return Result.Success(stmRouteInfo.filter { it.routeId.contains(routeId.query) || it.routeName.contains(routeId.query) })
 	}
 
-	override suspend fun getStopName(stopId: Int): String {
+	override suspend fun getStopName(stopId: Int): Result<String> {
 		if (stopId >= stmTransitData.size){
 			throw IllegalArgumentException("The fake stm repo only contains ${stmTransitData.size} entries...")
 		}
-		return stmTransitData[stopId].stopName
+		return Result.Success(stmTransitData[stopId].stopName)
 	}
 
 	override suspend fun getStopNames(
 		headsign1: String,
 		headsign2: String,
 		routeId: String,
-	): Pair<List<String>, List<String>> {
-		return Pair(
+	): Result<Pair<List<String>, List<String>>> {
+		return Result.Success(Pair(
 			stmTransitData.filter { it.routeId == routeId && it.direction == headsign1 }
 				.map { it.stopName },
 			stmTransitData.filter { it.routeId == routeId && it.direction == headsign2 }
 				.map { it.stopName }
-		)
+		))
 	}
 
-	override suspend fun getOldTimes(stmTransitData: TransitData, curTime: Time): List<Time> {
+	override suspend fun getOldTimes(stmTransitData: TransitData, curTime: Time): Result<List<Time>> {
 		throw IllegalStateException("Not implemented")
 	}
 
-	override suspend fun getStopTimes(stmTransitData: TransitData, curTime: Time): List<Time> {
-		return stopTimes[stmTransitData]
+	override suspend fun getStopTimes(stmTransitData: TransitData, curTime: Time): Result<List<Time>> {
+		return Result.Success(stopTimes[stmTransitData]
 			?.filter { it > curTime }
 			?.map { Time((it - curTime)!!) }
 			?: listOf()
+		)
 	}
 
 	/*
@@ -115,18 +118,18 @@ class FakeStmRepository: StmRepository {
 	override suspend fun getFavouriteStopTime(
 		stmFavouriteBusItem: StmBusItem,
 		curTime: Time,
-	): TransitDataWithTime {
-		return TransitDataWithTime(stmFavouriteBusItem, stopTimes[stmFavouriteBusItem]?.first())
+	): Result<TransitDataWithTime> {
+		return Result.Success(TransitDataWithTime(stmFavouriteBusItem, stopTimes[stmFavouriteBusItem]?.first()))
 	}
 
 	/**
 	 * @throws NumberFormatException If the stored routeId contains some wrongly formatted routeId
 	 **/
-	override suspend fun getDirectionInfo(routeId: Int): List<DirectionInfo> {
-		return stmTransitData
+	override suspend fun getDirectionInfo(routeId: Int): Result<List<DirectionInfo>> {
+		return Result.Success(stmTransitData
 			.filter { it.routeId.all { it.isDigit() } }
 			.filter { it.routeId.toInt() == routeId }
-			.map { DirectionInfo(it.direction, it.directionId)
-		}
+			.map { DirectionInfo.StmDirectionInfo(it.direction, it.directionId) }
+		)
 	}
 }

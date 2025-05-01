@@ -8,7 +8,7 @@ import dev.mainhq.bus2go.domain.entity.stm.DirectionInfo
 interface TripsDAO {
     @Query("SELECT DISTINCT trip_headsign as tripHeadSign,direction_id as directionId " +
             "FROM Trips WHERE route_id = (:routeId) ORDER BY trip_headsign;")
-    suspend fun getDirectionInfo(routeId : Int) : List<DirectionInfo>
+    suspend fun getDirectionInfo(routeId : Int) : List<DirectionInfo.StmDirectionInfo>
 
     //@Query("SELECT DISTINCT route_id FROM Trips;")
     //suspend fun getRouteId() : List<Int>

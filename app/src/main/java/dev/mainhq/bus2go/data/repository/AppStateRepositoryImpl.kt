@@ -18,6 +18,8 @@ class AppStateRepositoryImpl(
 	private val dataDir: File
 ): AppStateRepository {
 
+	//FIXME use the result pattern for cleaner handling of IO errors
+
 	override suspend fun getDatabaseState(): LocalDate? {
 		return withContext(Dispatchers.IO) {
 			appStateDataStore.data.first()[AppStateDataStoreKeys.DATABASES_STATE]?.let{

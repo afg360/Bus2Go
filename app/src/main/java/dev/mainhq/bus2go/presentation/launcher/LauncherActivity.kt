@@ -35,9 +35,8 @@ class LauncherActivity: BaseActivity() {
 		lifecycleScope.launch(Dispatchers.Main) {
 			repeatOnLifecycle(Lifecycle.State.STARTED){
 				val isFirstTime = launcherActivityViewModel.isFirstTime.filterNotNull().first()
-				if (isFirstTime){
+				if (isFirstTime)
 					startActivity(Intent(applicationContext, ConfigActivity::class.java))
-				}
 				else startActivity(Intent(applicationContext, MainActivity::class.java))
 				finish()
 			}

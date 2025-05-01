@@ -3,6 +3,7 @@ package dev.mainhq.bus2go.presentation.choose_direction
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.mainhq.bus2go.R
+import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.entity.ExoBusItem
 import dev.mainhq.bus2go.domain.entity.ExoBusRouteInfo
 import dev.mainhq.bus2go.domain.entity.ExoTrainItem
@@ -45,97 +46,122 @@ class ChooseDirectionViewModel(
 		viewModelScope.launch {
 			//FIXME instead of creating 1 item with empty stopName (we are using it wrong),
 			// create a list of ExoBusItems
-			when(routeInfo){
-				is ExoBusRouteInfo -> {
-					_textColour.value = R.color.basic_purple
-					val stopNames = getStopNames.invoke(routeInfo)
-					val headsigns = getDirections(routeInfo)
-					_leftDirection.value = stopNames.first.map {
-						ExoBusItem(
-							routeId = routeInfo.routeId,
-							stopName = it,
-							direction = stopNames.first.last(),
-							routeLongName = routeInfo.routeName,
-							headsign = headsigns[0] as String
-						)
-					}
-
-					if (headsigns.size > 1){
-						_rightDirection.value = stopNames.second.map {
-							ExoBusItem(
-								routeId = routeInfo.routeId,
-								stopName = it,
-								direction = stopNames.second.last(),
-								routeLongName = routeInfo.routeName,
-								headsign = headsigns[1] as String
-							)
-						}
-						_isUnidirectional.value = false
-					}
-					else {
-						_isUnidirectional.value = true
-					}
-
+			when(val stopNames = getStopNames.invoke(routeInfo)){
+				is Result.Error -> {
+					//TODO print a message in the ui (either dialog, or snackbar to incite download
+					// and then abort the rest of the function...
 				}
-				is ExoTrainRouteInfo -> {
-					_textColour.value = R.color.orange
-					val stopNames = getStopNames.invoke(routeInfo)
-					_leftDirection.value = stopNames.first.map {
-						ExoTrainItem(
-							routeId = routeInfo.routeId,
-							//DO NOT SET IT YET SINCE WE ARE ONLY CHOOSING A DIR
-							stopName = it,
-							direction = stopNames.first.last(),
-							trainNum = routeInfo.trainNum,
-							routeName = routeInfo.routeName,
-							directionId = 0,
-						)
-					}
 
-					_rightDirection.value = stopNames.second.map {
-						ExoTrainItem(
-							routeId = routeInfo.routeId,
-							//DO NOT SET IT YET SINCE WE ARE ONLY CHOOSING A DIR
-							stopName = it,
-							direction = stopNames.second.last(),
-							trainNum = routeInfo.trainNum,
-							routeName = routeInfo.routeName,
-							directionId = 1,
-						)
-					}
-					_isUnidirectional.value = false
-				}
-				is StmBusRouteInfo -> {
-					_textColour.value = R.color.basic_blue
-					val stopNames = getStopNames.invoke(routeInfo)
-					val directions = getDirections(routeInfo) as List<DirectionInfo>
-					_leftDirection.value = stopNames.first.map {
-						StmBusItem(
-							routeId = routeInfo.routeId,
-							stopName = it,
-							direction = directions[0].tripHeadSign,
-							directionId = directions[0].directionId,
-							lastStop = stopNames.first.last()
-						)
-					}
+				is Result.Success<Pair<List<String>, List<String>>> -> {
+					when(routeInfo){
+						is ExoBusRouteInfo -> {
+							_textColour.value = R.color.basic_purple
+							when(val headsigns = getDirections.invoke(routeInfo)){
+								is Result.Error -> {
+									TODO()
+								}
 
-					if (directions.size > 1){
-						_rightDirection.value = stopNames.second.map {
-							StmBusItem(
-								routeId = routeInfo.routeId,
-								stopName = it,
-								direction = directions[1].tripHeadSign,
-								directionId = directions[1].directionId,
-								lastStop = stopNames.second.last()
-							)
+								is Result.Success<List<DirectionInfo>> -> {
+									_leftDirection.value = stopNames.data.first.map {
+										ExoBusItem(
+											routeId = routeInfo.routeId,
+											stopName = it,
+											direction = stopNames.data.first.last(),
+											routeLongName = routeInfo.routeName,
+											headsign = headsigns.data[0].tripHeadSign
+										)
+									}
+
+									if (headsigns.data.size > 1){
+										_rightDirection.value = stopNames.data.second.map {
+											ExoBusItem(
+												routeId = routeInfo.routeId,
+												stopName = it,
+												direction = stopNames.data.second.last(),
+												routeLongName = routeInfo.routeName,
+												headsign = headsigns.data[1].tripHeadSign
+											)
+										}
+										_isUnidirectional.value = false
+									}
+									else {
+										_isUnidirectional.value = true
+									}
+								}
+							}
+
 						}
-						_isUnidirectional.value = false
-					}
-					else {
-						_isUnidirectional.value = true
+
+						is ExoTrainRouteInfo -> {
+							_textColour.value = R.color.orange
+							_leftDirection.value = stopNames.data.first.map {
+								ExoTrainItem(
+									routeId = routeInfo.routeId,
+									//DO NOT SET IT YET SINCE WE ARE ONLY CHOOSING A DIR
+									stopName = it,
+									direction = stopNames.data.first.last(),
+									trainNum = routeInfo.trainNum,
+									routeName = routeInfo.routeName,
+									directionId = 0,
+								)
+							}
+
+							_rightDirection.value = stopNames.data.second.map {
+								ExoTrainItem(
+									routeId = routeInfo.routeId,
+									//DO NOT SET IT YET SINCE WE ARE ONLY CHOOSING A DIR
+									stopName = it,
+									direction = stopNames.data.second.last(),
+									trainNum = routeInfo.trainNum,
+									routeName = routeInfo.routeName,
+									directionId = 1,
+								)
+							}
+							_isUnidirectional.value = false
+						}
+
+						is StmBusRouteInfo -> {
+							_textColour.value = R.color.basic_blue
+							when(val directions = getDirections.invoke(routeInfo)){
+								is Result.Error -> {
+									TODO()
+								}
+
+								is Result.Success<List<DirectionInfo>> -> {
+									//FIXME this is a mini hack...
+									directions.data as List<DirectionInfo.StmDirectionInfo>
+									_leftDirection.value = stopNames.data.first.map {
+										StmBusItem(
+											routeId = routeInfo.routeId,
+											stopName = it,
+											direction = directions.data[0].tripHeadSign,
+											directionId = directions.data[0].directionId,
+											lastStop = stopNames.data.first.last()
+										)
+									}
+
+									if (directions.data.size > 1){
+										_rightDirection.value = stopNames.data.second.map {
+											StmBusItem(
+												routeId = routeInfo.routeId,
+												stopName = it,
+												direction = directions.data[1].tripHeadSign,
+												directionId = directions.data[1].directionId,
+												lastStop = stopNames.data.second.last()
+											)
+										}
+										_isUnidirectional.value = false
+									}
+									else {
+										_isUnidirectional.value = true
+									}
+								}
+							}
+						}
 					}
 				}
 			}
+
 		}
 	}
 }

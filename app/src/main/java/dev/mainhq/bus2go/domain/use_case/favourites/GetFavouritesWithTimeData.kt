@@ -19,7 +19,7 @@ class GetFavouritesWithTimeData(
 ) {
 
 	//FIXME perhaps use a flow instead since we will be continusously updating the curTime
-	suspend operator fun invoke(): List<TransitDataWithTime>{
+	suspend operator fun invoke(): Result<List<TransitDataWithTime>> {
 		val time = Time.now()
 		//TODO some cleanup to be able to actually deal with failures
 		//before the filter, if we are empty we are chill. else, if we are empty after, we must notify
@@ -38,6 +38,6 @@ class GetFavouritesWithTimeData(
 		}.filter { it.instanceOf(Result.Success::class) }
 			.map { (it as Result.Success).data }
 
-		return stmBusFavourites + exoBusFavourites + exoTrainFavourites
+		return Result.Success(stmBusFavourites + exoBusFavourites + exoTrainFavourites)
 	}
 }

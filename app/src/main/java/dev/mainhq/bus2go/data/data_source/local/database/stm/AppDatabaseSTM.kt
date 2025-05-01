@@ -59,12 +59,14 @@ abstract class AppDatabaseSTM : RoomDatabase() {
             //FIXME this is a hack, better checks need to be performed to determine the correct
             // db to read
             try {
+                //from downloads if downlaoded
                 return if (dbFile.exists() && dbFile.length() > 0) {
                     Room.databaseBuilder(context, AppDatabaseSTM::class.java, DATABASE_NAME)
                         .addMigrations(MIGRATION_1_2)
                         .build()
                 }
                 else {
+                    //from assets if bundled
                     Room.databaseBuilder(context, AppDatabaseSTM::class.java, DATABASE_NAME)
                         .createFromAsset(DATABASE_PATH)
                         .addMigrations(MIGRATION_1_2)

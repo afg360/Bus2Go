@@ -14,6 +14,7 @@ import dev.mainhq.bus2go.domain.entity.ExoTrainItem
 import dev.mainhq.bus2go.domain.repository.ExoRepository
 import dev.mainhq.bus2go.domain.entity.FuzzyQuery
 import dev.mainhq.bus2go.domain.entity.Time
+import dev.mainhq.bus2go.domain.entity.stm.DirectionInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
@@ -26,7 +27,7 @@ class ExoRepositoryImpl(
 	private val tripsDAO: TripsDAO?
 ): ExoRepository {
 
-	override suspend fun getMaxEndDate(): Result<LocalDate?> {
+	override suspend fun getMaxEndDate(): Result<LocalDate> {
 		return calendarDAO?.let{ Result.Success(it.getMaxEndDate()) } ?: Result.Error(null)
 	}
 
@@ -155,10 +156,10 @@ class ExoRepositoryImpl(
 		} ?: Result.Error(null)
 	}
 
-	override suspend fun getBusTripHeadsigns(routeId: String): Result<List<String>> {
+	override suspend fun getBusTripHeadsigns(routeId: String): Result<List<DirectionInfo>> {
 		return tripsDAO?.let {
 			withContext(Dispatchers.IO){
-				Result.Success(it.getBusTripHeadsigns(routeId))
+				Result.Success(it.getBusTripHeadsigns(routeId).map { DirectionInfo.ExoBusDirectionInfo(it) })
 			}
 		} ?: Result.Error(null)
 	}
