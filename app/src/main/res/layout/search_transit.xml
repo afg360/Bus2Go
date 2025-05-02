@@ -20,14 +20,24 @@
         />
 
 <!-- need to convert the app bar as a piece more than a whole background-->
+    
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/search_transit_no_db_msg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:text="No db"
+        />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/search_recycle_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:visibility="visible"
         app:layout_constraintTop_toBottomOf="@id/query_result_text"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        />
 
 </LinearLayout>

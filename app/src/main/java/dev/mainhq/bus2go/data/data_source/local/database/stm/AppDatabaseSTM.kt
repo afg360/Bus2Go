@@ -59,19 +59,19 @@ abstract class AppDatabaseSTM : RoomDatabase() {
             //FIXME this is a hack, better checks need to be performed to determine the correct
             // db to read
             try {
-                //from downloads if downlaoded
-                return if (dbFile.exists() && dbFile.length() > 0) {
+                //from downloads if downloaded
+                return if (dbFile.exists() && dbFile.length() > 0)
                     Room.databaseBuilder(context, AppDatabaseSTM::class.java, DATABASE_NAME)
                         .addMigrations(MIGRATION_1_2)
                         .build()
-                }
-                else {
+                //FIXME does it work even if bundled...?
+                else if (context.assets.list("database")?.contains("stm_info.db") == true)
                     //from assets if bundled
                     Room.databaseBuilder(context, AppDatabaseSTM::class.java, DATABASE_NAME)
                         .createFromAsset(DATABASE_PATH)
                         .addMigrations(MIGRATION_1_2)
                         .build()
-                }
+                else null
             }
             catch (ioe: IOException){
                 //FIXME shouldnt have that logcat here but is convenient @ the moment...

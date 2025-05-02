@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.entity.RouteInfo
 import dev.mainhq.bus2go.domain.use_case.transit.GetRouteInfo
+import dev.mainhq.bus2go.presentation.core.UiState
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -15,7 +16,7 @@ class HomeFragmentViewModel(
 	private val getRouteInfo: GetRouteInfo
 ): ViewModel() {
 
-	private val _searchQuery: MutableStateFlow<List<RouteInfo>> = MutableStateFlow(listOf())
+	private val _searchQuery: MutableStateFlow<UiState<List<RouteInfo>>> = MutableStateFlow(UiState.Success(listOf()))
 	val searchQuery = _searchQuery.asStateFlow()
 
 	private val _isSearching: MutableStateFlow<Boolean> = MutableStateFlow(false)
@@ -28,17 +29,14 @@ class HomeFragmentViewModel(
 
 	fun onSearchQueryChange(query: String){
 		if (query.isEmpty()){
-			_searchQuery.value = listOf()
+			_searchQuery.value = UiState.Success(listOf())
 		}
 		else{
 			viewModelScope.launch {
 				when(val routeInfo = getRouteInfo.invoke(query)){
-					is Result.Error -> {
-						TODO()
-					}
-					is Result.Success<List<RouteInfo>> -> {
-						_searchQuery.value = routeInfo.data
-					}
+					is Result.Error -> UiState.Error("no db ma man...")
+					is Result.Success<List<RouteInfo>> ->
+						_searchQuery.value = UiState.Success(routeInfo.data)
 				}
 			}
 		}

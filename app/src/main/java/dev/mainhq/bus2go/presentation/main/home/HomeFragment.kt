@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import android.view.View.GONE
 import android.view.View.INVISIBLE
@@ -33,7 +34,9 @@ import com.google.android.material.search.SearchView.TransitionState
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.Bus2GoApplication
+import dev.mainhq.bus2go.domain.entity.RouteInfo
 import dev.mainhq.bus2go.presentation.choose_direction.ChooseDirection
+import dev.mainhq.bus2go.presentation.core.UiState
 import dev.mainhq.bus2go.presentation.search_transit.SearchTransit
 import dev.mainhq.bus2go.presentation.settings.SettingsActivity
 import dev.mainhq.bus2go.presentation.main.home.favourites.FavouritesFragment
@@ -94,7 +97,13 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 homeFragmentViewModel.searchQuery.collect { results ->
-                    busListAdapter.updateData(results)
+                    when(results){
+                        is UiState.Error ->
+                            Log.d("DATABASE", "You have jack shit: ${results.message}")
+                        UiState.Loading -> throw IllegalStateException("Wtf")
+                        is UiState.Success<List<RouteInfo>> ->
+                            busListAdapter.updateData(results.data)
+                    }
                 }
             }
         }

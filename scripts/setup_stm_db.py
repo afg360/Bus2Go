@@ -240,7 +240,7 @@ def stop_times_table(conn, path):
     # init the table
     query = """CREATE TABLE StopTimes (
     	id INTEGER PRIMARY KEY NOT NULL,
-    	trip_id INTEGER NOT NULL REFERENCES Trips(trip_id),
+    	trip_id INTEGER NOT NULL -- REFERENCES Trips(trip_id),
     	arrival_time TEXT NOT NULL,
     	departure_time TEXT NOT NULL,
     	stop_id INTEGER NOT NULL REFERENCES Stops(stop_id),
@@ -388,14 +388,14 @@ def stops_info_table(conn):
         print("Creating table StopsInfo")
         cursor.execute(create)
 
-        #sql = """INSERT INTO StopsInfo(stop_name,route_id,trip_headsign,days,arrival_time,stop_seq)
         sql = """INSERT INTO StopsInfo(stop_name,route_id,trip_headsign,service_id,arrival_time,stop_seq)
         SELECT stops.stop_name,trips.route_id,trips.trip_headsign,calendar.service_id,arrival_time,stoptimes.stop_seq
         --SELECT stops.stop_name,trips.route_id,trips.trip_headsign,calendar.days,arrival_time,stoptimes.stop_seq
         FROM stoptimes JOIN trips ON stoptimes.trip_id = trips.trip_id
         JOIN calendar ON calendar.service_id = trips.service_id
-        JOIN stops ON stoptimes.stop_id = stops.stop_code;
+        JOIN stops ON stoptimes.stop_id = stops.stop_id
         """
+        # why am i doing stoptimes.stop_id = stops.stop_code...
         print("Inserting data into StopsInfo")
         cursor.execute(sql)
         print("Dropping table and index StopTimes")

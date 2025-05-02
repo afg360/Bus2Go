@@ -68,7 +68,7 @@ abstract class AppDatabaseExo : RoomDatabase() {
                         .addMigrations(MIGRATION_1_2)
                         .build()
                 }
-                else {
+                else if (context.assets.list("database")?.contains("exo_info.db") == true){
                     Room.databaseBuilder(context, AppDatabaseExo::class.java,
                         DATABASE_NAME
                     )
@@ -76,6 +76,7 @@ abstract class AppDatabaseExo : RoomDatabase() {
                         .addMigrations(MIGRATION_1_2)
                         .build()
                 }
+                else null
             }
             catch (ioe: IOException){
                 Log.e("DATABASES", "Exo database not found")

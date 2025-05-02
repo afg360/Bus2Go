@@ -14,7 +14,6 @@ import io.ktor.utils.io.ByteReadChannel
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import java.nio.ByteBuffer
 
 class DatabaseDownloadRepositoryImpl(
 	baseUrl: String?,
@@ -46,17 +45,25 @@ class DatabaseDownloadRepositoryImpl(
 					//saves the file in the filesDir, needs to be moved to the databases dir
 					val tmpFile = File(applicationContext.filesDir, "$DB_DEBUG_NAME.part")
 					FileOutputStream(tmpFile).use { outputStream ->
-						val buffer = ByteBuffer.allocate(DEFAULT_BUFFER_SIZE)
+						val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
 						while (!channel.isClosedForRead){
-							val bytesRead = channel.readAvailable(buffer)
+							val bytesRead = channel.readAvailable(buffer, 0, buffer.size)
 							if (bytesRead <= 0) break
-							outputStream.write(buffer.array(), 0, bytesRead)
+							outputStream.write(buffer, 0, bytesRead)
 						}
 					}
 					Log.d("DATABASE", "Moving to databases directory")
 					val databasesDir = applicationContext.getDatabasePath(DB_DEBUG_NAME).parentFile
 						?: throw IllegalStateException("Cannot access databases directory")
-					tmpFile.renameTo(File(databasesDir, DB_DEBUG_NAME))
+
+					val destFile = File(databasesDir, DB_DEBUG_NAME)
+					if (destFile.exists()) {
+						destFile.delete()
+					}
+
+					if (!tmpFile.renameTo(destFile)) {
+						throw IOException("Failed to move database file to databases directory")
+					}
 					true
 				}
 				catch (ne: NetworkException){

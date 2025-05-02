@@ -2,6 +2,8 @@ package dev.mainhq.bus2go.presentation.search_transit
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.view.View
 import androidx.activity.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
@@ -12,10 +14,12 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textview.MaterialTextView
-import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.Bus2GoApplication
+import dev.mainhq.bus2go.R
+import dev.mainhq.bus2go.domain.entity.RouteInfo
 import dev.mainhq.bus2go.presentation.base.BaseActivity
 import dev.mainhq.bus2go.presentation.choose_direction.ChooseDirection
+import dev.mainhq.bus2go.presentation.core.UiState
 import dev.mainhq.bus2go.presentation.main.home.BusListElemsAdapter
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
 import kotlinx.coroutines.launch
@@ -49,19 +53,36 @@ class SearchTransit : BaseActivity() {
 
         val recyclerView : RecyclerView = findViewById(R.id.search_recycle_view)
         val layoutManager = LinearLayoutManager(applicationContext)
-        val adapter = BusListElemsAdapter(searchTransitViewModel.routeInfo.value){ data ->
-            val intent = Intent(this, ChooseDirection::class.java)
-            intent.putExtra(ExtrasTagNames.ROUTE_INFO, data)
-            startActivity(intent)
-        }
-        recyclerView.adapter = adapter
-        layoutManager.orientation = LinearLayoutManager.VERTICAL
-        recyclerView.layoutManager = layoutManager
 
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED){
-                searchTransitViewModel.routeInfo.collect{ routeInfo ->
-                    adapter.updateData(routeInfo)
+        when(val routeInfo = searchTransitViewModel.routeInfo.value){
+            is UiState.Error -> {
+                recyclerView.visibility = View.GONE
+                findViewById<MaterialTextView>(R.id.search_transit_no_db_msg).visibility = View.VISIBLE
+            }
+
+            UiState.Loading -> BusListElemsAdapter(listOf()){}
+
+            is UiState.Success<List<RouteInfo>> -> {
+                val adapter = BusListElemsAdapter(routeInfo.data) { data ->
+                    val intent = Intent(this, ChooseDirection::class.java)
+                    intent.putExtra(ExtrasTagNames.ROUTE_INFO, data)
+                    startActivity(intent)
+                }
+
+                recyclerView.adapter = adapter
+                layoutManager.orientation = LinearLayoutManager.VERTICAL
+                recyclerView.layoutManager = layoutManager
+
+                lifecycleScope.launch {
+                    repeatOnLifecycle(Lifecycle.State.STARTED){
+                        searchTransitViewModel.routeInfo.collect{ routeInfoUiState ->
+                            when(routeInfoUiState){
+                                is UiState.Error -> Log.d("DATABASE", "No database detected")
+                                UiState.Loading -> {}
+                                is UiState.Success<List<RouteInfo>> -> adapter.updateData(routeInfoUiState.data)
+                            }
+                        }
+                    }
                 }
             }
         }

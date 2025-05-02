@@ -3,7 +3,6 @@ package dev.mainhq.bus2go.data.data_source.remote
 import dev.mainhq.bus2go.domain.exceptions.NetworkException
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.get
 import io.ktor.client.request.prepareGet
 import io.ktor.client.statement.HttpResponse
@@ -34,7 +33,7 @@ object NetworkClient {
 			)
 		}
 		catch (ioe: IOException){
-			throw NetworkException("Error when trying to query db", ioe)
+			throw NetworkException("Error when trying to query the backend server", ioe)
 		}
 	}
 
@@ -43,7 +42,7 @@ object NetworkClient {
 			return client.prepareGet(url).execute(block)
 		}
 		catch (ioe: IOException){
-			throw NetworkException("Error when trying to query db", ioe)
+			throw NetworkException("Error when trying to query the backend server", ioe)
 		}
 	}
 
