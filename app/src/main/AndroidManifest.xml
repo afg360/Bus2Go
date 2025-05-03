@@ -17,8 +17,6 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/MaterialTheme.Bus2Go"
-        android:versionCode="4"
-        android:versionName="v1.3.0-alpha"
         tools:targetApi="31">
         <!-- Used for FileProvider class, to install the downloaded update apk -->
         <provider

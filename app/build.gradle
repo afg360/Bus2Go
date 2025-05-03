@@ -17,7 +17,7 @@ android {
         minSdk 26
         targetSdk 34
         versionCode 4
-        versionName "v1.3.0-alpha"
+        versionName "1.3.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     
@@ -48,6 +48,7 @@ android {
             debuggable true
             minifyEnabled false
             applicationIdSuffix ".debug"
+            versionNameSuffix "-debug"
             android.buildFeatures.buildConfig true
             buildConfigField "String", "LOCAL_HOST", "\"${localProperties.getProperty('LOCAL_HOST', '127.0.0.1')}\""
             buildConfigField "int", "DEFAULT_PORT", "${localProperties.getProperty('DEFAULT_PORT', '8000')}"
@@ -56,6 +57,7 @@ android {
         alpha {
             minifyEnabled true
             applicationIdSuffix ".alpha"
+            versionNameSuffix "-alpha"
         }
         
         release {
