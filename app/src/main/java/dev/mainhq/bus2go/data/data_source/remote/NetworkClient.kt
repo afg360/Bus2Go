@@ -42,6 +42,7 @@ object NetworkClient {
 			return client.prepareGet(url).execute(block)
 		}
 		catch (ioe: IOException){
+			//FIXME instead use a logger to log, and maybe do some notification or snackbar or something...
 			throw NetworkException("Error when trying to query the backend server", ioe)
 		}
 	}

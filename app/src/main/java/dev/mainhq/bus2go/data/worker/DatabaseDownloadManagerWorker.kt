@@ -36,10 +36,15 @@ class DatabaseDownloadManagerWorker(
 		notificationManager.createNotificationChannel(notifChannel)
 		Log.d("DB WORKER", "Started db download work")
 
+		//TODO notify when download starts (and show a bar perhaps)
+		// once download done, notify for decompressing
+		// finally notify with the priority high that Download Complete
+		// and in notifications, show a "tap to restart"
+
 		return withContext(Dispatchers.IO){
 			val status = when (dbToDownload) {
 				"STM" -> dbDownloadRepository.download(DbToDownload.STM)
-				"EXO" -> dbDownloadRepository.download(DbToDownload.STM)
+				"EXO" -> dbDownloadRepository.download(DbToDownload.EXO)
 				else -> throw IllegalStateException("You forgot to add the correct key")
 			}
 			if (!status) {

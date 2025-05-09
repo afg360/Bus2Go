@@ -73,7 +73,7 @@ class CommonModule(applicationContext: Context) {
 		applicationContext
 	)
 
-	private val loggerImpl = LoggerImpl()
+	val loggerImpl = LoggerImpl()
 
 	val getRouteInfo = GetRouteInfo(
 		exoRepository,

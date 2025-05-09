@@ -7,22 +7,21 @@ import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.work.workDataOf
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dev.mainhq.bus2go.presentation.core.state.AppThemeState
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.Bus2GoApplication
-import dev.mainhq.bus2go.domain.entity.DbToDownload
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
-
-	//store states here (or perhaps inside a ViewModel)
-	private var isStmChecked = true
-	private var isExoChecked = false
 
 	private val sharedViewModel : ConfigSharedViewModel by activityViewModels()
 	private val viewModel: ConfigDatabasesFragmentViewModel by viewModels {
@@ -41,15 +40,30 @@ class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
 		super.onViewCreated(view, savedInstanceState)
 
 		val continueButton =  view.findViewById<MaterialButton>(R.id.configDownloadDatabaseContinueButton)
+		val stmCheckbox = view.findViewById<MaterialCheckBox>(R.id.configStmDatabaseCheckBox)
+		val exoCheckBox = view.findViewById<MaterialCheckBox>(R.id.configExoDatabaseCheckBox)
 
-		view.findViewById<MaterialCheckBox>(R.id.configStmDatabaseCheckBox).setOnCheckedChangeListener { compoundButton, b ->
-			isStmChecked = b
-			setButtonText(continueButton)
+		stmCheckbox.isChecked = viewModel.isStmChecked()
+		exoCheckBox.isChecked = viewModel.isExoChecked()
+
+		viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){
+				stmCheckbox.setOnCheckedChangeListener { _, _ ->
+					viewModel.toggleStm()
+				}
+
+				exoCheckBox.setOnCheckedChangeListener { _, _ ->
+					viewModel.toggleExo()
+				}
+			}
 		}
 
-		view.findViewById<MaterialCheckBox>(R.id.configExoDatabaseCheckBox).setOnCheckedChangeListener { compoundButton, b ->
-			isExoChecked = b
-			setButtonText(continueButton)
+		viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){
+				viewModel.dbToDownload.collect{
+					continueButton.text = if (it == null) "Skip" else "Continue"
+				}
+			}
 		}
 
 		requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object: OnBackPressedCallback(true){
@@ -61,7 +75,6 @@ class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
 		continueButton.setOnClickListener {
 			//if none checked, display the skip, and create a dialog for a skip
 			if (continueButton.text == "Continue") {
-				val data = workDataOf(Pair("stm", isStmChecked), Pair("exo", isExoChecked))
 				//TODO let the user know how much data it may take...
 				MaterialAlertDialogBuilder(requireContext())
 					.setTitle("Confirm")
@@ -69,7 +82,7 @@ class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
 					.setMessage("Are you sure to download the selected packages for download?")
 					.setPositiveButton("Yes"){ dialogInterface, _ ->
 						Log.d("DATABASE-CONFIG", "Initiating download of data")
-						viewModel.download(DbToDownload.STM)
+						viewModel.scheduleDownloadWork()
 						dialogInterface.dismiss()
 						AppThemeState.turnOffDbUpdateChecking()
 						sharedViewModel.triggerEvent(true)
@@ -90,15 +103,6 @@ class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
 					}
 					.show()
 			}
-		}
-	}
-
-	private fun setButtonText(button: MaterialButton){
-		if (!isStmChecked && !isExoChecked){
-			button.text = "Skip"
-		}
-		else{
-			button.text = "Continue"
 		}
 	}
 }

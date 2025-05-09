@@ -250,7 +250,6 @@ def stop_times_table(conn, agency: str, path: str):
             conn.commit()
     print("Successfully inserted table")
 
-
     cursor.close()
 
 

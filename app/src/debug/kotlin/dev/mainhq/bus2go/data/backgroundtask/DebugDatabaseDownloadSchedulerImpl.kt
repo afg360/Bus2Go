@@ -34,7 +34,7 @@ class DebugDatabaseDownloadSchedulerImpl(
 		workManager.enqueue(
 			OneTimeWorkRequest.Builder(DatabaseDownloadManagerWorker::class.java)
 				.addTag("DatabaseDownloadTask")
-				.setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 10, TimeUnit.SECONDS)
+				.setBackoffCriteria(BackoffPolicy.LINEAR, 10, TimeUnit.SECONDS)
 				.setInputData(workDataOf(Pair(DatabaseDownloadManagerWorker.KEY, key)))
 				.build()
 		)
