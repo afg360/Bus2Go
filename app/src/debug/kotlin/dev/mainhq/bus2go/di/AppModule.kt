@@ -8,6 +8,7 @@ import dev.mainhq.bus2go.data.backgroundtask.DebugDatabaseDownloadSchedulerImpl
 import dev.mainhq.bus2go.data.core.LoggerImpl
 import dev.mainhq.bus2go.data.repository.DatabaseDownloadRepositoryImpl
 import dev.mainhq.bus2go.domain.backgroundtask.DatabaseDownloadScheduler
+import dev.mainhq.bus2go.domain.use_case.CheckIsBus2GoServer
 import dev.mainhq.bus2go.domain.use_case.ScheduleDownloadDatabaseTask
 
 class AppModule(applicationContext: Context) {
@@ -26,4 +27,6 @@ class AppModule(applicationContext: Context) {
 		applicationContext,
 		(applicationContext as Bus2GoApplication).commonModule.loggerImpl
 	)
+
+	val checkIsBus2GoServer = CheckIsBus2GoServer(dbDownloadRepository)
 }

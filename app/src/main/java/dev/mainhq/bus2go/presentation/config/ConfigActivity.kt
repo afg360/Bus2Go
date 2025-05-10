@@ -29,7 +29,7 @@ class ConfigActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.config_activity)
 
-        //null when the first time the activity is created, otherwise not null
+        //null when it's the first time the activity is created, otherwise not null
         if (savedInstanceState == null){
             viewModel.setFragment(FragmentUsed.WELCOME)
         }
@@ -66,6 +66,7 @@ class ConfigActivity : BaseActivity() {
     }
 
     private suspend fun setApplicationState(){
+        //TODO
         appStateDataStore.edit { settings ->
             settings[booleanPreferencesKey("isFirstTime")] = false
         }

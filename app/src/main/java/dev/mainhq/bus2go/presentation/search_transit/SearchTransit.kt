@@ -80,11 +80,14 @@ class SearchTransit : BaseActivity() {
                                 is UiState.Error -> Log.d("DATABASE", "No database detected")
                                 UiState.Loading -> {}
                                 is UiState.Success<List<RouteInfo>> -> adapter.updateData(routeInfoUiState.data)
+                                UiState.Init -> TODO()
                             }
                         }
                     }
                 }
             }
+
+            UiState.Init -> TODO()
         }
     }
     

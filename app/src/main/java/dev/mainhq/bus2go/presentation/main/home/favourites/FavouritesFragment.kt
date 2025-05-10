@@ -201,6 +201,7 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
                         }
                         UiState.Loading -> {}
                         is UiState.Error -> throw object: Bus2GoBaseException("Wtf"){}
+                        UiState.Init -> TODO()
                     }
                 }
             }
@@ -243,6 +244,7 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
                                     }
                                     UiState.Loading -> {}
                                     is UiState.Error -> throw  object : Bus2GoBaseException("Wtf"){}
+                                    UiState.Init -> TODO()
                                 }
                             }
                             false -> {
@@ -279,6 +281,7 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
                                 }
                                 UiState.Loading -> {}
                                 is UiState.Error -> throw object : Bus2GoBaseException("Wtf") {}
+                                UiState.Init -> TODO()
                             }
                         }
                         .show()
@@ -300,6 +303,7 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
             }
             UiState.Loading -> {}
             is UiState.Error -> throw object : Bus2GoBaseException("Wtf") {}
+            UiState.Init -> TODO()
         }
 
     }

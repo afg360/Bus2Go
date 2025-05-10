@@ -7,6 +7,7 @@ import dev.mainhq.bus2go.domain.core.Logger
 import dev.mainhq.bus2go.domain.entity.DbToDownload
 import dev.mainhq.bus2go.domain.exceptions.NetworkException
 import dev.mainhq.bus2go.domain.repository.DatabaseDownloadRepository
+import dev.mainhq.bus2go.domain.core.Result
 import io.ktor.client.call.body
 import io.ktor.http.URLBuilder
 import io.ktor.http.set
@@ -33,6 +34,11 @@ class DatabaseDownloadRepositoryImpl(
 		private const val COMPRESSION_EXT = "gz"
 
 		private const val TAG = "DATABASE_DOWNLOAD"
+	}
+
+	//TODO
+	override suspend fun testIsBus2Go(): Result<Boolean> {
+		return Result.Success(false)
 	}
 
 	override suspend fun download(dbToDownload: DbToDownload): Boolean {

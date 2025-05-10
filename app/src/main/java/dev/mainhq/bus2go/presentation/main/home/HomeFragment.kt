@@ -103,6 +103,7 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
                         UiState.Loading -> throw IllegalStateException("Wtf")
                         is UiState.Success<List<RouteInfo>> ->
                             busListAdapter.updateData(results.data)
+                        UiState.Init -> TODO()
                     }
                 }
             }

@@ -50,7 +50,7 @@
     
     <com.google.android.material.button.MaterialButton
         android:id="@+id/config_select_server_continue_button"
-        android:layout_width="wrap_content"
+        android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:layout_marginVertical="100dp"
         android:text="@string/config_continue"
@@ -60,5 +60,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         />
+    
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/config_server_continue_button_progress_indicator"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:indeterminate="true"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="@id/config_select_server_continue_button"
+        app:layout_constraintBottom_toBottomOf="@id/config_select_server_continue_button"
+        app:layout_constraintStart_toStartOf="@id/config_select_server_continue_button"
+        app:layout_constraintEnd_toEndOf="@id/config_select_server_continue_button"
+        />
+    
 
 </androidx.constraintlayout.widget.ConstraintLayout>
