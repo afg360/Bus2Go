@@ -42,18 +42,26 @@ class DatabaseDownloadRepositoryImpl(
 		)
 		urlBuilder.set {
 			pathSegments = when(dbToDownload){
-				DbToDownload.ALL -> listOf("api", "debug", "sample_data") //FIXME get rid of this one, wrong
+				DbToDownload.ALL -> listOf("api", "debug", "sample_data", "stm")
 				DbToDownload.STM -> listOf("api", "debug", "sample_data", "stm")
 				DbToDownload.EXO -> listOf("api", "download", "v1", "exo")
 			}
 		}
 		val url = urlBuilder.build()
+
+		//TODO make async calls
+		if (dbToDownload == DbToDownload.ALL){
+			urlBuilder.set { pathSegments = listOf("api", "download", "v1", "exo") }
+			val newUrl = urlBuilder.build()
+		}
+
 		//saves the file in the filesDir, needs to be moved to the databases dir
 		val dbName = when(dbToDownload){
 			DbToDownload.STM -> DB_DEBUG_NAME_STM
 			DbToDownload.EXO -> DB_DEBUG_NAME_EXO
 			DbToDownload.ALL -> TODO()
 		}
+
 
 		logger?.debug(TAG, "Beginning Download")
 		val downloadStatus = NetworkClient.getAndExecute(url){

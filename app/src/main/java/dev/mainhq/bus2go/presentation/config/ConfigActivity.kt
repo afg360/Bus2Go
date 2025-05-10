@@ -40,6 +40,7 @@ class ConfigActivity : BaseActivity() {
                     val fragment = when(fragmentToUse){
                         FragmentUsed.WELCOME -> ConfigWelcomeFragment()
                         FragmentUsed.THEME -> ConfigThemeFragment()
+                        FragmentUsed.SERVER -> ConfigServerFragment()
                         FragmentUsed.DATABASES -> ConfigDatabasesFragment()
                     }
 

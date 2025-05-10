@@ -29,7 +29,7 @@ class ConfigThemeFragment: Fragment(R.layout.fragment_config_theme) {
 		}
 
 		view.findViewById<MaterialButton>(R.id.configSelectThemeContinueButton).setOnClickListener {
-			viewModel.setFragment(FragmentUsed.DATABASES)
+			viewModel.setFragment(FragmentUsed.SERVER)
 		}
 
 		requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object: OnBackPressedCallback(true){

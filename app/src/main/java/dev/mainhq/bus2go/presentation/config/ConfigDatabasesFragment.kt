@@ -6,7 +6,6 @@ import android.view.View
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -24,7 +23,8 @@ import kotlinx.coroutines.launch
 class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
 
 	private val sharedViewModel : ConfigSharedViewModel by activityViewModels()
-	private val viewModel: ConfigDatabasesFragmentViewModel by viewModels {
+	//using an activityViewModels allows us to make the viewmodel persist even when the fragment is killed
+	private val viewModel: ConfigDatabasesFragmentViewModel by activityViewModels {
 		object: ViewModelProvider.Factory{
 			override fun <T : ViewModel> create(modelClass: Class<T>): T {
 				return ConfigDatabasesFragmentViewModel(
@@ -46,16 +46,12 @@ class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
 		stmCheckbox.isChecked = viewModel.isStmChecked()
 		exoCheckBox.isChecked = viewModel.isExoChecked()
 
-		viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
-			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){
-				stmCheckbox.setOnCheckedChangeListener { _, _ ->
-					viewModel.toggleStm()
-				}
+		stmCheckbox.setOnCheckedChangeListener { _, _ ->
+			viewModel.toggleStm()
+		}
 
-				exoCheckBox.setOnCheckedChangeListener { _, _ ->
-					viewModel.toggleExo()
-				}
-			}
+		exoCheckBox.setOnCheckedChangeListener { _, _ ->
+			viewModel.toggleExo()
 		}
 
 		viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
@@ -68,7 +64,7 @@ class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
 
 		requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object: OnBackPressedCallback(true){
 			override fun handleOnBackPressed() {
-				sharedViewModel.setFragment(FragmentUsed.THEME)
+				sharedViewModel.setFragment(FragmentUsed.SERVER)
 			}
 		})
 

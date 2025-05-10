@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
+    
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/config_select_server_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="50dp"
+        android:text="Select a server"
+        android:textSize="45sp"
+        android:textAlignment="center"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+    
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/config_select_server_description"
+        android:layout_width="350dp"
+        android:layout_height="wrap_content"
+        android:text="Please select a Bus2Go server to connect to"
+        android:textSize="30sp"
+        android:textAlignment="center"
+        app:layout_constraintTop_toBottomOf="@id/config_select_server_title"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
+    
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/config_select_server_textInputLayout"
+        android:layout_width="300dp"
+        android:layout_height="70dp"
+        android:hint="api.bus2go.app"
+        app:helperTextEnabled="true"
+        app:helperText="An ip address..."
+        app:layout_constraintTop_toBottomOf="@id/config_select_server_description"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        >
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/config_select_server_textInputEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:inputType="text|textNoSuggestions|textUri"
+            />
+    </com.google.android.material.textfield.TextInputLayout>
+    
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/config_select_server_continue_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="100dp"
+        android:text="@string/config_continue"
+        android:textSize="20sp"
+        android:textColor="@color/light"
+        app:layout_constraintTop_toBottomOf="@id/config_select_server_textInputLayout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,5 +1,5 @@
 package dev.mainhq.bus2go.presentation.config
 
 enum class FragmentUsed {
-	WELCOME, THEME, DATABASES
+	WELCOME, THEME, SERVER, DATABASES
 }
