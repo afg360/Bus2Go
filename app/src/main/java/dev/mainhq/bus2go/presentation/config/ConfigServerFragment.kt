@@ -17,6 +17,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.progressindicator.CircularProgressIndicator
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.R
@@ -74,13 +75,25 @@ class ConfigServerFragment: Fragment(R.layout.fragment_config_server) {
 				viewModel.serverResponse.collect{
 					when(it){
 						is UiState.Error -> {
-							//if device not connected to internet, make a Toast to notify user
+							//if device not connected to internet, make a SnackBar and allow retry
+							//FIXME this is not the way to do it
 							progressIndicator.visibility = View.GONE
 							button.text = viewModel.buttonText.value
 							button.isEnabled = true
-							textInput.error = "Invalid Server"
-							Toast.makeText(requireContext(), it.message, Toast.LENGTH_SHORT)
-								.show()
+							if (it.message == "Not connected to the internet")
+								//TODO add a swippable behaviour bcz this is annoying...
+								Snackbar.make(requireContext(), view, it.message, Snackbar.LENGTH_INDEFINITE)
+									.setAction("Retry"){
+										//FIXME Button quirks because constantly updated...
+										viewModel.checkIsBus2GoServer()
+									}
+									.show()
+
+							else {
+								textInput.error = "Invalid Server"
+								Toast.makeText(requireContext(), it.message, Toast.LENGTH_SHORT)
+									.show()
+							}
 						}
 						UiState.Loading -> {
 							button.isEnabled = false

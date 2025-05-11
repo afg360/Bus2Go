@@ -94,7 +94,7 @@ class ConfigServerFragmentViewModel(
 						}
 
 						is Result.Success<Boolean> -> {
-							_buttonText.value = if (result.data) "Skip" else "Continue"
+							_buttonText.value = if (result.data) "Continue" else "Skip"
 							_serverResponse.value = UiState.Success(result.data)
 						}
 					}
