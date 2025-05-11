@@ -4,6 +4,7 @@ import dev.mainhq.bus2go.data.core.TestLogger
 import dev.mainhq.bus2go.data.repository.FakeExoRepository
 import dev.mainhq.bus2go.data.repository.FakeStmRepository
 import dev.mainhq.bus2go.domain.core.Logger
+import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.entity.ExoBusItem
 import dev.mainhq.bus2go.domain.entity.ExoTrainItem
 import dev.mainhq.bus2go.domain.entity.StmBusItem
@@ -36,7 +37,8 @@ class GetTransitTimeTest {
 	fun `Get Exo Bus Transit Time from non-existing bus, expect empty list`(){
 		runBlocking {
 			val transitdata = ExoBusItem("foo", "bar", "non-existing", "longName", "random")
-			assert(getTransitTime(curTime, transitdata).isEmpty())
+			val info = getTransitTime.invoke(curTime, transitdata) as Result.Success<List<Time>>
+			assert(info.data.isEmpty())
 		}
 	}
 
@@ -44,7 +46,8 @@ class GetTransitTimeTest {
 	fun `Get Exo Train Transit Time from non-existing train, expect empty list`(){
 		runBlocking {
 			val transitdata = ExoTrainItem("foo", "bar", "non-existing", 99, "random", 10)
-			assert(getTransitTime(curTime, transitdata).isEmpty())
+			val info = getTransitTime.invoke(curTime, transitdata) as Result.Success<List<Time>>
+			assert(info.data.isEmpty())
 		}
 	}
 
@@ -52,7 +55,8 @@ class GetTransitTimeTest {
 	fun `Get Stm Bus Transit Time from non-existing bus, expect empty list`(){
 		runBlocking {
 			val transitdata = StmBusItem("foo", "bar", "non-existing", 10, "random")
-			assert(getTransitTime(curTime, transitdata).isEmpty())
+			val info = getTransitTime.invoke(curTime, transitdata) as Result.Success<List<Time>>
+			assert(info.data.isEmpty())
 		}
 	}
 
@@ -61,7 +65,8 @@ class GetTransitTimeTest {
 		runBlocking {
 			val transitdata = fakeExoRepository.exoBusTransitData.random()
 			val time = fakeExoRepository.stopTimesBus[transitdata]!!
-			assert(getTransitTime(curTime, transitdata).size == time.size)
+			val info = getTransitTime.invoke(curTime, transitdata) as Result.Success<List<Time>>
+			assert(info.data.size == time.size)
 		}
 	}
 
@@ -70,7 +75,8 @@ class GetTransitTimeTest {
 		runBlocking {
 			val transitdata = fakeExoRepository.exoTrainTransitData.random()
 			val time = fakeExoRepository.stopTimesTrain[transitdata]!!
-			assert(getTransitTime(curTime, transitdata).size == time.size)
+			val info = getTransitTime.invoke(curTime, transitdata) as Result.Success<List<Time>>
+			assert(info.data.size == time.size)
 		}
 	}
 
@@ -79,7 +85,8 @@ class GetTransitTimeTest {
 		runBlocking {
 			val transitdata = fakeStmRepository.stmTransitData.random()
 			val time = fakeStmRepository.stopTimes[transitdata]!!
-			assert(getTransitTime(curTime, transitdata).size == time.size)
+			val info = getTransitTime.invoke(curTime, transitdata) as Result.Success<List<Time>>
+			assert(info.data.size == time.size)
 		}
 	}
 

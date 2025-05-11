@@ -4,8 +4,10 @@ import dev.mainhq.bus2go.data.core.TestLogger
 import dev.mainhq.bus2go.data.repository.FakeExoRepository
 import dev.mainhq.bus2go.data.repository.FakeStmRepository
 import dev.mainhq.bus2go.domain.core.Logger
+import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.entity.ExoBusRouteInfo
 import dev.mainhq.bus2go.domain.entity.ExoTrainRouteInfo
+import dev.mainhq.bus2go.domain.entity.RouteInfo
 import dev.mainhq.bus2go.domain.entity.StmBusRouteInfo
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
@@ -29,17 +31,18 @@ class GetRouteInfoTest {
 	@Test
 	fun `Query random things, expect empty list`(){
 		runBlocking {
-			assert(getRouteInfo.invoke("random data that doesn't exist").isEmpty())
+			val info = getRouteInfo.invoke("random data that doesn't exist") as Result.Success<List<RouteInfo>>
+			assert(info.data.isEmpty())
 		}
 	}
 
 	@Test
 	fun `Query a shared routeId portion, expect a list of many type`(){
 		runBlocking {
-			val res = getRouteInfo.invoke("1")
+			val res = getRouteInfo.invoke("1") as Result.Success<List<RouteInfo>>
 
 			//we have 2 stm buses, 3 exo buses, 1 train containing a 1
-			assert(res.size == 6)
+			assert(res.data.size == 6)
 		}
 	}
 
@@ -47,7 +50,8 @@ class GetRouteInfoTest {
 	fun `Query STM only, expect list of Stm Route Info`(){
 		runBlocking {
 			val query = fakeStmRepository.stmRouteInfo.random().routeName
-			assert(getRouteInfo.invoke(query).all { it::class.java == StmBusRouteInfo::class.java })
+			val info = getRouteInfo.invoke(query) as Result.Success<List<RouteInfo>>
+			assert(info.data.all { it::class.java == StmBusRouteInfo::class.java })
 		}
 	}
 
@@ -55,7 +59,8 @@ class GetRouteInfoTest {
 	fun `Query Exo Bus only, expect list of Exo Route Info`(){
 		runBlocking {
 			val query = fakeExoRepository.exoBusRouteInfo.random().routeName
-			assert(getRouteInfo.invoke(query).all { it::class.java == ExoBusRouteInfo::class.java })
+			val info = getRouteInfo.invoke(query) as Result.Success<List<RouteInfo>>
+			assert(info.data.all { it::class.java == ExoBusRouteInfo::class.java })
 		}
 	}
 
@@ -63,7 +68,8 @@ class GetRouteInfoTest {
 	fun `Query Exo train, expect list of Exo Route Info`(){
 		runBlocking {
 			val query = fakeExoRepository.exoTrainRouteInfo.random().routeName
-			assert(getRouteInfo.invoke(query).all { it::class.java == ExoTrainRouteInfo::class.java })
+			val info = getRouteInfo.invoke(query) as Result.Success<List<RouteInfo>>
+			assert(info.data.all { it::class.java == ExoTrainRouteInfo::class.java })
 		}
 	}
 

@@ -24,8 +24,9 @@ class AppModule(applicationContext: Context) {
 	val dbDownloadRepository = DatabaseDownloadRepositoryImpl(
 		//may be defined during runtime (from settings in case it is customised)
 		BuildConfig.LOCAL_HOST,
-		applicationContext,
-		(applicationContext as Bus2GoApplication).commonModule.loggerImpl
+		applicationContext as Bus2GoApplication,
+		applicationContext.commonModule.networkMonitor,
+		applicationContext.commonModule.loggerImpl
 	)
 
 	val checkIsBus2GoServer = CheckIsBus2GoServer(dbDownloadRepository)

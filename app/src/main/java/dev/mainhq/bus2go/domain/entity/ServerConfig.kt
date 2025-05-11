@@ -1,7 +1,5 @@
 package dev.mainhq.bus2go.domain.entity
 
-import androidx.core.text.isDigitsOnly
-
 sealed class ServerConfig {
 	abstract val data: String
 	data class DomainName(override val data: String): ServerConfig()
@@ -14,20 +12,28 @@ sealed class ServerConfig {
 			//may be an ip address
 			if (elems.size == 4){
 				//check if it is a domain name
-				if (string.length > 15) return DomainName(string)
+				if (string.length > 15) {
+					//in all elems there must be @ least 1 letter
+					return if (elems.last().length >= 2 && elems.all{elem -> elem.any { it.isLetter()} } )
+						DomainName(string)
+					else null
+				}
 				//we may have an ip address
 				else {
 					//verify if each elem is a number between 0 and 255, and if all numerical data
-					val isIp = elems.filter { it.isDigitsOnly() }
+					val isIp = elems.filter { elem -> elem.all{ it.isDigit() } }
 						.map{ it.toInt() }
 						.filter { it in 0..255 }
 						.size == 4
-					return if (isIp) IpAddress(string) else null
+					return if (isIp) IpAddress(string)
+					else if (elems.last().length >= 2 && elems.all{elem -> elem.any { it.isLetter()} } )
+						DomainName(string)
+					else null
 				}
 			}
-			//must be a domain name (since we must have foo.bar
-			//FIXME verify the domain name exists...
-			else if (elems.size > 1 && !elems.any { it.isDigitsOnly() }) return DomainName(string)
+			//must be a domain name (since we must have foo.bar)
+			else if (elems.size > 1 && elems.last().length >= 2 && elems.all{elem -> !elem.all { it.isDigit() } } )
+				return DomainName(string)
 			else return null
 		}
 	}

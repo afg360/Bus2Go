@@ -1,13 +1,12 @@
-package dev.mainhq.bus2go
+package dev.mainhq.bus2go.domain.entity
 
-import dev.mainhq.bus2go.domain.entity.Time
 import junit.framework.TestCase.assertEquals
 import org.junit.Test
 import java.time.LocalDateTime
 import java.time.LocalDate
 import java.time.LocalTime
 
-class TimeClassTests {
+class TimeTest {
 
     @Test
     fun testSubNoSecs() {

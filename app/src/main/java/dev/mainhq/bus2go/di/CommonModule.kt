@@ -8,6 +8,7 @@ import dev.mainhq.bus2go.data.data_source.local.database.stm.AppDatabaseSTM
 import dev.mainhq.bus2go.data.data_source.local.datastore.app_state.appStateDataStore
 import dev.mainhq.bus2go.data.data_source.local.datastore.exo.exoFavouritesDataStore
 import dev.mainhq.bus2go.data.data_source.local.datastore.stm.stmFavouritesDataStore
+import dev.mainhq.bus2go.data.data_source.remote.NetworkMonitor
 import dev.mainhq.bus2go.data.repository.AppStateRepositoryImpl
 import dev.mainhq.bus2go.data.repository.ExoFavouritesRepositoryImpl
 import dev.mainhq.bus2go.data.repository.ExoRepositoryImpl
@@ -74,6 +75,7 @@ class CommonModule(applicationContext: Context) {
 	)
 
 	val loggerImpl = LoggerImpl()
+	val networkMonitor = NetworkMonitor.getInstance(applicationContext, loggerImpl)
 
 	val getRouteInfo = GetRouteInfo(
 		exoRepository,

@@ -1,8 +1,6 @@
 package dev.mainhq.bus2go.presentation.main.home.favourites
 
 import android.content.Intent
-import android.net.ConnectivityManager
-import android.net.ConnectivityManager.NetworkCallback
 import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
@@ -26,21 +24,13 @@ import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.presentation.core.UiState
 import dev.mainhq.bus2go.presentation.stopTimes.StopTimesActivity
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 
 
 class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
 
-    companion object{
-        const val NOT_CONNECTED = "Not connected to the internet yet"
-
-    }
-
     private lateinit var onBackPressedCallback: OnBackPressedCallback
-    private var connectivityManager: ConnectivityManager? = null
-    private var networkCallback: NetworkCallback? = null
 
     //FIXME move this var to the viewModel...
     private var wasSelectionMode = false
@@ -130,73 +120,6 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
                                 view.findViewById<MaterialTextView>(R.id.favourites_text_view).text =
                                     getText(R.string.favourites)
                                 adapter.updateTime(uiState.data)
-                                /*
-								//check if connected to internet
-								connectivityManager = requireActivity().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-								if (connectivityManager?.activeNetwork == null){
-									Log.d(Companion::NOT_CONNECTED.name, NOT_CONNECTED)
-									lifecycleScope.launch {
-										recyclerViewDisplay(view, favouritesList, new=true)
-									}
-								}
-								val networkRequest = NetworkRequest.Builder()
-									.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-									.addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-									//.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
-									.build()
-
-								networkCallback = object: NetworkCallback() {
-									// do your websocketing shit here, not outside of it
-									override fun onAvailable(network: Network) {
-										super.onAvailable(network)
-										println("A network became available")
-										//do some work in a thread?
-										lifecycleScope.launch {
-											if (isRealtimeEnabled){
-												isUsingRealTime = true
-												//getRealTime will never return if the connection is alright since it is an infinite loop
-												//need to deal with it with perhaps an exception
-												if (realTimeViewModel.getRealTime(listSTM) == 1) {
-													Toast.makeText( context, "An error occured trying to connect to the bus2go server",
-														Toast.LENGTH_SHORT
-													).show()
-												}
-											}
-											else
-												recyclerViewDisplay(view, mutableList, new=true)
-										}
-									}
-
-									// Network capabilities have changed for the network
-									override fun onCapabilitiesChanged( network: Network, networkCapabilities: NetworkCapabilities ) {
-										super.onCapabilitiesChanged(network, networkCapabilities)
-										val unmetered = networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
-										//println("Network Capabilities have changed")
-									}
-
-									// lost network connection
-									override fun onLost(network: Network) {
-										super.onLost(network)
-										println("Lost connection to network")
-										isUsingRealTime = false
-										//tmp solution for now. needs to adapt to data already received by server if it exists
-										lifecycleScope.launch {
-											recyclerViewDisplay(view, mutableList, new=true)
-										}
-									}
-
-									override fun onUnavailable() {
-										super.onUnavailable()
-										println("Networks are unavailable")
-										isUsingRealTime = false
-										lifecycleScope.launch {
-											recyclerViewDisplay(view, mutableList, new=true)
-										}
-									}
-								}
-								connectivityManager!!.registerNetworkCallback(networkRequest, networkCallback!!)
-							}
-								 */
                             }
                         }
                         UiState.Loading -> {}
@@ -307,12 +230,4 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
         }
 
     }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        networkCallback?.also{
-            connectivityManager?.unregisterNetworkCallback(it)
-        }
-    }
-
 }

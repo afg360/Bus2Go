@@ -4,6 +4,7 @@ import dev.mainhq.bus2go.data.core.TestLogger
 import dev.mainhq.bus2go.data.repository.FakeExoRepository
 import dev.mainhq.bus2go.data.repository.FakeStmRepository
 import dev.mainhq.bus2go.domain.core.Logger
+import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.entity.ExoBusItem
 import dev.mainhq.bus2go.domain.entity.ExoBusRouteInfo
 import dev.mainhq.bus2go.domain.entity.ExoTrainRouteInfo
@@ -33,8 +34,8 @@ class GetStopNamesTest {
 	fun `Get stop names for stm metro, expect Pair of empty`(){
 		runBlocking {
 			val metroRouteInfo =  fakeStmRepository.stmRouteInfo.find { it.routeId.toInt() <= 5 }!!
-			val stopNames = getStopNames(metroRouteInfo)
-			assert(stopNames.first.isEmpty() && stopNames.second.isEmpty())
+			val stopNames = getStopNames.invoke(metroRouteInfo) as Result.Success<Pair<List<String>, List<String>>>
+			assert(stopNames.data.first.isEmpty() && stopNames.data.second.isEmpty())
 		}
 	}
 
@@ -42,7 +43,7 @@ class GetStopNamesTest {
 	fun `Get stop names for bad formatted routeId, expect DatabaseFormatingException`(){
 		runBlocking {
 			val metroRouteInfo =  fakeStmRepository.stmRouteInfo.find { it.routeId.any{ !it.isDigit() } }!!
-			val stopNames = getStopNames(metroRouteInfo)
+			val stopNames = getStopNames.invoke(metroRouteInfo) as Result.Success<Pair<List<String>, List<String>>>
 		}
 	}
 
@@ -68,8 +69,8 @@ class GetStopNamesTest {
 		//TODO improve the test by comparing the actual data queried and the method used
 		runBlocking {
 			val routeInfo = fakeExoRepository.exoBusRouteInfo.random()
-			val stopNames = getStopNames(routeInfo)
-			assert(stopNames.first.isNotEmpty() && stopNames.second.isNotEmpty())
+			val stopNames = getStopNames.invoke(routeInfo) as Result.Success<Pair<List<String>, List<String>>>
+			assert(stopNames.data.first.isNotEmpty() && stopNames.data.second.isNotEmpty())
 		}
 	}
 
@@ -77,6 +78,7 @@ class GetStopNamesTest {
 	fun `Get stopNames for exo buses from non-existing routeInfo, expect DirectionMissingException`(){
 		runBlocking {
 			val routeInfo = ExoBusRouteInfo("random", "non-existing route")
+			//FIXME doesnt compare right types
 			assert(getStopNames(routeInfo) == Pair<List<ExoBusItem>, List<ExoBusItem>>(listOf(), listOf()))
 		}
 	}
@@ -84,8 +86,8 @@ class GetStopNamesTest {
 	@Test
 	fun `Get stopNames for exo trains, expect stopNames`(){
 		runBlocking {
-			val stopNames = getStopNames(fakeExoRepository.exoTrainRouteInfo.random())
-			assert(stopNames.first.isNotEmpty() && stopNames.first.isNotEmpty())
+			val stopNames = getStopNames.invoke(fakeExoRepository.exoTrainRouteInfo.random()) as Result.Success<Pair<List<String>, List<String>>>
+			assert(stopNames.data.first.isNotEmpty() && stopNames.data.first.isNotEmpty())
 		}
 	}
 
@@ -93,8 +95,8 @@ class GetStopNamesTest {
 	fun `Get stopNames for non-existing exo trains, expect empty lists`(){
 		runBlocking {
 			val routeInfo = ExoTrainRouteInfo("foo", "bar", 3)
-			val stopNames = getStopNames(routeInfo)
-			assert(stopNames.first.isEmpty() && stopNames.first.isEmpty())
+			val stopNames = getStopNames.invoke(routeInfo) as Result.Success<Pair<List<String>, List<String>>>
+			assert(stopNames.data.first.isEmpty() && stopNames.data.second.isEmpty())
 		}
 	}
 

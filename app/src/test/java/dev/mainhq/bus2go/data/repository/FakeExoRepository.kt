@@ -1,5 +1,6 @@
 package dev.mainhq.bus2go.data.repository
 
+import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.entity.ExoBusItem
 import dev.mainhq.bus2go.domain.entity.ExoBusRouteInfo
 import dev.mainhq.bus2go.domain.entity.ExoTrainItem
@@ -10,6 +11,7 @@ import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.domain.entity.TransitDataWithTime
 import dev.mainhq.bus2go.domain.repository.ExoRepository
 import dev.mainhq.bus2go.domain.entity.FuzzyQuery
+import dev.mainhq.bus2go.domain.entity.stm.DirectionInfo
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -68,73 +70,78 @@ class FakeExoRepository: ExoRepository {
 		}
 	}
 
-	override suspend fun getMaxEndDate(): LocalDate? {
-		return LocalDate.now()
+	override suspend fun getMaxEndDate(): Result<LocalDate> {
+		return Result.Success(LocalDate.now())
 	}
 
 
-	override suspend fun getRouteInfo(routeId: FuzzyQuery): List<RouteInfo> {
+	override suspend fun getRouteInfo(routeId: FuzzyQuery): Result<List<RouteInfo>> {
 		//create a list of arbitrary routeInfos
 		//then return a subset of the list that respect the query
-		return (exoBusRouteInfo + exoTrainRouteInfo).filter {
+		return Result.Success((exoBusRouteInfo + exoTrainRouteInfo).filter {
 			it.routeId.contains(routeId.query) || it.routeName.contains(routeId.query)
-		}
+		})
 	}
 
-	override suspend fun getBusStopNames(direction1: String, direction2: String?): Pair<List<String>, List<String>> {
-		return Pair(
+	override suspend fun getBusStopNames(direction1: String, direction2: String?): Result<Pair<List<String>, List<String>>> {
+		return Result.Success(Pair(
 			exoBusTransitData.filter { it.direction == direction1 }.map { it.stopName },
 			exoBusTransitData.filter { it.direction == direction2 }.map { it.stopName }
-		)
+		))
 	}
 
-	override suspend fun getTrainStopNames(routeId: String): Pair<List<String>, List<String>> {
-		return Pair(
+	override suspend fun getTrainStopNames(routeId: String): Result<Pair<List<String>, List<String>>> {
+		return Result.Success(Pair(
 			exoTrainTransitData.filter { it.routeId == routeId }.map { it.stopName },
 			exoTrainTransitData.filter { it.routeId == routeId }.map { it.stopName }
-		)
+		))
 	}
 
-	override suspend fun getBusStopTimes(exoBusItem: ExoBusItem, curTime: Time): List<Time> {
-		return stopTimesBus[exoBusItem]?.filter { it > curTime } ?: listOf()
+	override suspend fun getBusStopTimes(exoBusItem: ExoBusItem, curTime: Time): Result<List<Time>> {
+		return Result.Success(stopTimesBus[exoBusItem]?.filter { it > curTime } ?: listOf())
 	}
 
-	override suspend fun getOldStopTimes(exoTransitData: TransitData, curTime: Time): List<Time> {
+	override suspend fun getOldStopTimes(exoTransitData: TransitData, curTime: Time): Result<List<Time>> {
 		throw IllegalStateException("Not implemented")
 	}
 
 	override suspend fun getFavouriteBusStopTime(
 		exoFavouriteBusItem: ExoBusItem,
 		curTime: Time,
-	): TransitDataWithTime {
-		return stopTimesBus[exoFavouriteBusItem]
+	): Result<TransitDataWithTime> {
+		return Result.Success(stopTimesBus[exoFavouriteBusItem]
 			?.filter { it > curTime }
 			?.map { TransitDataWithTime(exoFavouriteBusItem, it) }
 			?.first()
 			?: TransitDataWithTime(exoFavouriteBusItem, null)
+		)
 	}
 
-	override suspend fun getTrainStopTimes(exoTrainItem: ExoTrainItem, curTime: Time): List<Time> {
-		return stopTimesTrain[exoTrainItem]?.filter { it > curTime } ?: listOf()
+	override suspend fun getTrainStopTimes(exoTrainItem: ExoTrainItem, curTime: Time): Result<List<Time>> {
+		return Result.Success(stopTimesTrain[exoTrainItem]?.filter { it > curTime } ?: listOf())
 	}
 
 	override suspend fun getFavouriteTrainStopTime(
 		exoFavouriteTrainItem: ExoTrainItem,
 		curTime: Time,
-	): TransitDataWithTime {
-		return TransitDataWithTime(exoFavouriteTrainItem,
-			stopTimesTrain[exoFavouriteTrainItem]?.first { it > curTime })
+	): Result<TransitDataWithTime> {
+		return Result.Success(TransitDataWithTime(exoFavouriteTrainItem,
+			stopTimesTrain[exoFavouriteTrainItem]?.first { it > curTime }))
 	}
 
-	override suspend fun getBusTripHeadsigns(routeId: String): List<String> {
-		return exoBusTransitData.filter { it.routeId == routeId }.map { it.headsign }
-			.toSet().toList()
+	override suspend fun getBusTripHeadsigns(routeId: String): Result<List<DirectionInfo>> {
+		return Result.Success(
+			exoBusTransitData.filter { it.routeId == routeId }
+				.map { DirectionInfo.ExoBusDirectionInfo(it.headsign) }
+				.toSet().toList()
+		)
 	}
 
-	override suspend fun getTrainTripHeadsigns(routeId: Int, directionId: Int): List<String> {
-		return exoTrainTransitData
+	override suspend fun getTrainTripHeadsigns(routeId: Int, directionId: Int): Result<List<String>> {
+		return Result.Success(exoTrainTransitData
 			.filter { it.routeId.toInt() == routeId &&  it.directionId == directionId }
 			.map { it.direction }
 			.toSet().toList()
+		)
 	}
 }

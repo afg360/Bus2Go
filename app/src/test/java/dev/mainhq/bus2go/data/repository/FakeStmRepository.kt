@@ -55,12 +55,10 @@ class FakeStmRepository: StmRepository {
 		}
 	}
 
-	override suspend fun getMaxEndDate(): Result<LocalDate?> {
-		return Result.Success(stopTimes.map { stopTime -> stopTime.value.maxByOrNull { it.localDate } }
-			.filterNotNull()
-			.maxByOrNull { it }
-			?.localDate
-		)
+	override suspend fun getMaxEndDate(): Result<LocalDate> {
+		return stopTimes.map { stopTime -> stopTime.value.maxByOrNull { it.localDate } }
+			.filterNotNull().maxByOrNull { it }
+			?.localDate?.let { Result.Success(it) } ?: Result.Error(null)
 	}
 
 	override suspend fun getAllCalendarDates(): Result<List<CalendarDates>> {

@@ -6,6 +6,7 @@ import android.text.TextWatcher
 import android.view.View
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
@@ -22,6 +23,8 @@ import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.presentation.core.UiState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 //TODO eventually there will either be a special ip address, or a list of available domain names...
@@ -46,7 +49,6 @@ class ConfigServerFragment: Fragment(R.layout.fragment_config_server) {
 		val progressIndicator = view.findViewById<CircularProgressIndicator>(R.id.config_server_continue_button_progress_indicator)
 
 		val textInput = view.findViewById<TextInputEditText>(R.id.config_select_server_textInputEditText)
-		textInput.setText(viewModel.textInputText.value)
 
 		val button = view.findViewById<MaterialButton>(R.id.config_select_server_continue_button)
 		button.setOnClickListener{
@@ -76,7 +78,8 @@ class ConfigServerFragment: Fragment(R.layout.fragment_config_server) {
 							progressIndicator.visibility = View.GONE
 							button.text = viewModel.buttonText.value
 							button.isEnabled = true
-							Toast.makeText(requireContext(), "Not connected to the internet...?", Toast.LENGTH_SHORT)
+							textInput.error = "Invalid Server"
+							Toast.makeText(requireContext(), it.message, Toast.LENGTH_SHORT)
 								.show()
 						}
 						UiState.Loading -> {
@@ -89,9 +92,12 @@ class ConfigServerFragment: Fragment(R.layout.fragment_config_server) {
 							button.text = viewModel.buttonText.value
 							button.isEnabled = true
 							//if the response was valid, go to databases
-							if (it.data) sharedViewModel.setFragment(FragmentUsed.DATABASES)
+							if (it.data) {
+								viewModel.cancel()
+								sharedViewModel.setFragment(FragmentUsed.DATABASES)
+							}
 							//else show an error on the inputText, and display "Skip" on the button (or perhaps a retry)
-							else textInput.error = "Invalid Bus2Go server"
+							else textInput.error = "Invalid server"
 						}
 						UiState.Init -> {
 							progressIndicator.visibility = View.GONE
@@ -106,8 +112,11 @@ class ConfigServerFragment: Fragment(R.layout.fragment_config_server) {
 		viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){
 				viewModel.textInputText.collect{
-					textInput.setOnFocusChangeListener { _, hasFocus ->
-						if (!hasFocus) textInput.setText(it)
+					when (it) {
+						is UiState.Error -> textInput.error = "Invalid Url"
+						UiState.Init -> textInput.setText("")
+						UiState.Loading -> TODO()
+						is UiState.Success<String> -> if (!textInput.hasFocus()) textInput.setText(it.data)
 					}
 				}
 			}
@@ -130,12 +139,30 @@ class ConfigServerFragment: Fragment(R.layout.fragment_config_server) {
 			}
 		}
 
-		requireActivity().onBackPressedDispatcher.addCallback(
-			viewLifecycleOwner,
-			object: OnBackPressedCallback(true){
-				override fun handleOnBackPressed() {
-					sharedViewModel.setFragment(FragmentUsed.THEME)
-				}
-		})
+		val mainBackPressCallBack = object: OnBackPressedCallback(true){
+			override fun handleOnBackPressed() {
+				viewModel.cancel()
+				sharedViewModel.setFragment(FragmentUsed.THEME)
+			}
+		}
+		requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, mainBackPressCallBack)
+
+		val backPressedCallback = object : OnBackPressedCallback(false){
+			override fun handleOnBackPressed() {
+				textInput.clearFocus()
+			}
+		}
+		requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, backPressedCallback)
+
+		textInput.setOnFocusChangeListener { _, focused ->
+			if (focused){
+				mainBackPressCallBack.isEnabled = false
+				backPressedCallback.isEnabled = true
+			}
+			else {
+				mainBackPressCallBack.isEnabled = true
+				backPressedCallback.isEnabled = false
+			}
+		}
 	}
 }
