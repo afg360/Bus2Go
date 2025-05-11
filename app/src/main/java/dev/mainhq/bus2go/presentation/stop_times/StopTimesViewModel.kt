@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go.presentation.stopTimes
+package dev.mainhq.bus2go.presentation.stop_times
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

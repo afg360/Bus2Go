@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go.presentation.stopTimes
+package dev.mainhq.bus2go.presentation.stop_times
 
 import dev.mainhq.bus2go.domain.entity.Time
 import dev.mainhq.bus2go.presentation.main.home.favourites.Urgency

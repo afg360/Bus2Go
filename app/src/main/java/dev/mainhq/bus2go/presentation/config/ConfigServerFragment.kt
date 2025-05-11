@@ -9,6 +9,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -33,12 +34,17 @@ import kotlinx.coroutines.launch
 class ConfigServerFragment: Fragment(R.layout.fragment_config_server) {
 
 	private val sharedViewModel: ConfigSharedViewModel by activityViewModels()
+
+	//perhaps instead use by viewModels with a savedStateHandle...
 	private val viewModel: ConfigServerFragmentViewModel by activityViewModels{
 		object: ViewModelProvider.Factory {
 			override fun <T : ViewModel> create(modelClass: Class<T>): T {
-				return ConfigServerFragmentViewModel(
-					(requireActivity().application as Bus2GoApplication).appModule.checkIsBus2GoServer
-				) as T
+				return (requireActivity().application as Bus2GoApplication).let{
+					ConfigServerFragmentViewModel(
+						it.appModule.checkIsBus2GoServer,
+						it.commonModule.saveBus2GoServer
+					) as T
+				}
 			}
 		}
 	}
@@ -128,7 +134,7 @@ class ConfigServerFragment: Fragment(R.layout.fragment_config_server) {
 					when (it) {
 						is UiState.Error -> textInput.error = "Invalid Url"
 						UiState.Init -> textInput.setText("")
-						UiState.Loading -> TODO()
+						UiState.Loading -> TODO("Wtf")
 						is UiState.Success<String> -> if (!textInput.hasFocus()) textInput.setText(it.data)
 					}
 				}

@@ -2,17 +2,17 @@ package dev.mainhq.bus2go.domain.entity
 
 import org.junit.Test
 
-class ServerConfigTest {
+class UrlCheckerTest {
 
 	@Test
 	fun `Test Build Empty String Expect Null`(){
-		assert(ServerConfig.build("") == null)
+		assert(UrlChecker.check("") == null)
 	}
 
 	//Ip Addresses
 	@Test
 	fun `Test Build Empty Ip Expect Null`(){
-		assert(ServerConfig.build("....") == null)
+		assert(UrlChecker.check("....") == null)
 	}
 
 	@Test
@@ -24,7 +24,7 @@ class ServerConfigTest {
 			val str2 = str.substring(it until str.length)
 			val copy = str1 + num + str2
 			println(copy)
-			assert(ServerConfig.build(copy) == null)
+			assert(UrlChecker.check(copy) == null)
 		}
 	}
 
@@ -36,18 +36,18 @@ class ServerConfigTest {
 			"12.1230.21.232",
 			"2123.12.01.232",
 		)
-		nums.forEach{ assert(ServerConfig.build(it) == null) }
+		nums.forEach{ assert(UrlChecker.check(it) == null) }
 
 	}
 
 	@Test
 	fun `Test Build Wrong Ip3 Format Expect Null`(){
-		assert(ServerConfig.build("1....") == null)
+		assert(UrlChecker.check("1....") == null)
 	}
 
 	@Test
 	fun `Test Build Wrong Ip4 Format Expect Null`(){
-		assert(ServerConfig.build("1....") == null)
+		assert(UrlChecker.check("1....") == null)
 	}
 
 	//Domain Names

@@ -1,6 +1,7 @@
 <PreferenceScreen
     xmlns:app="http://schemas.android.com/apk/res-auto"
     >
+    <!-- TODO store some sort of version number for the settings, so that migrations are made more easily... -->
     <PreferenceCategory
         app:title="@string/general_settings"
         >
@@ -20,6 +21,7 @@
             app:defaultValue="true"
             >
         </SwitchPreferenceCompat>
+        <!-- TODO customisation options/screen for changing tags, colors, etc. -->
     </PreferenceCategory>
 
     <PreferenceCategory
@@ -30,15 +32,7 @@
             app:title="@string/real_time_data_updates"
             app:summary="@string/real_time_data_updates_summary"
             />
-        <!--
-        <Preference
-            app:key="server-choice"
-            app:title="Configure server"
-            app:summary="Configure the server you will connect to when gathering real time data"
-            app:dependency="real-time-data"
-            app:fragment="dev.mainhq.bus2go.fragments.preferences.ServerPreferences"
-            />
-            -->
+        
         <EditTextPreference
             app:key="server-choice"
             app:title="Configure your server"

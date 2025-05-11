@@ -43,8 +43,7 @@ class ConfigDatabasesFragmentViewModel(
 	}
 
 	fun scheduleDownloadWork(){
-		if (_dbToDownload.value == null)
-			TODO("Wtf...")
+		if (_dbToDownload.value == null) TODO("Wtf...")
 		viewModelScope.launch {
 			scheduleDownloadDatabaseTask.invoke(_dbToDownload.value!!)
 		}

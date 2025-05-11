@@ -21,31 +21,33 @@ class SettingsPreferences : PreferenceFragmentCompat() ,
     SharedPreferences.OnSharedPreferenceChangeListener {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.settings, rootKey)
-        
+
+        //TODO perform a migration from sharedPreferences to DataStorePreferences if needed, by checking
+        // some field existence...
+
         //temporarily output the current software version
-         findPreference<Preference?>("info")?.let {
+        findPreference<Preference?>("info")?.let {
             val packageInfo: PackageInfo = requireContext().packageManager.getPackageInfo(requireContext().packageName, 0)
             val versionName = packageInfo.versionName ?: throw IllegalStateException("Cannot have a null value version name!")
             it.summary = "Software version: $versionName"
         }
-        
-        
+
         preferenceManager.findPreference<EditTextPreference>("server-choice")?.also{
             it.setOnPreferenceChangeListener { _, newValue ->
                 val newValueString = newValue as String
                 it.text = newValueString
                 //could be a domain name or an ip address so don't use numpad
-                
+
                 Toast.makeText(requireContext(), "Server changed", Toast.LENGTH_SHORT).show()
                 true
             }
         }
-        
+
         //todo: fragment with more info and help
         //how to contribute, etc
         //version of the database
     }
-    
+
     /*
     override fun onPreferenceTreeClick(preference: Preference): Boolean {
         if (preference.key == "server-choice"){
@@ -58,7 +60,7 @@ class SettingsPreferences : PreferenceFragmentCompat() ,
         return super.onPreferenceTreeClick(preference)
     }
      */
-    
+
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         sharedPreferences?.also{
             when (key){

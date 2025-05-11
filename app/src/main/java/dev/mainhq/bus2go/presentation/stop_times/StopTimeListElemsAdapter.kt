@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go.presentation.stopTimes
+package dev.mainhq.bus2go.presentation.stop_times
 
 import android.view.LayoutInflater
 import android.view.View

@@ -29,25 +29,21 @@ class ConfigActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.config_activity)
 
-        //null when it's the first time the activity is created, otherwise not null
-        if (savedInstanceState == null){
-            viewModel.setFragment(FragmentUsed.WELCOME)
-        }
-
         lifecycleScope.launch(Dispatchers.Main) {
             repeatOnLifecycle(Lifecycle.State.STARTED){
-                viewModel.currentFragment.filterNotNull().collect{ fragmentToUse ->
-                    val fragment = when(fragmentToUse){
-                        FragmentUsed.WELCOME -> ConfigWelcomeFragment()
-                        FragmentUsed.THEME -> ConfigThemeFragment()
-                        FragmentUsed.SERVER -> ConfigServerFragment()
-                        FragmentUsed.DATABASES -> ConfigDatabasesFragment()
+                viewModel.currentFragment.collect{ fragmentToUse ->
+                    if (fragmentToUse != null) {
+                        val fragment = when (fragmentToUse) {
+                            FragmentUsed.WELCOME -> ConfigWelcomeFragment()
+                            FragmentUsed.THEME -> ConfigThemeFragment()
+                            FragmentUsed.SERVER -> ConfigServerFragment()
+                            FragmentUsed.DATABASES -> ConfigDatabasesFragment()
+                        }
+
+                        supportFragmentManager.beginTransaction()
+                            .replace(R.id.configActivityFragmentContainer, fragment)
+                            .commit()
                     }
-
-                    supportFragmentManager.beginTransaction()
-                        .replace(R.id.configActivityFragmentContainer, fragment)
-                        .commit()
-
                 }
             }
         }
@@ -62,11 +58,10 @@ class ConfigActivity : BaseActivity() {
                 }
             }
         }
-
     }
 
+    //TODO
     private suspend fun setApplicationState(){
-        //TODO
         appStateDataStore.edit { settings ->
             settings[booleanPreferencesKey("isFirstTime")] = false
         }

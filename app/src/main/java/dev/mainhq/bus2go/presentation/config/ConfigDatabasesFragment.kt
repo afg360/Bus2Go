@@ -17,14 +17,20 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dev.mainhq.bus2go.presentation.core.state.AppThemeState
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.Bus2GoApplication
+import dev.mainhq.bus2go.domain.core.Result
+import dev.mainhq.bus2go.presentation.core.UiState
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
 
 	private val sharedViewModel : ConfigSharedViewModel by activityViewModels()
-	//using an activityViewModels allows us to make the viewmodel persist even when the fragment is killed
-	private val viewModel: ConfigDatabasesFragmentViewModel by activityViewModels {
+
+	//need to access the actual server
+	private val serverSharedViewModel: ConfigServerFragmentViewModel by activityViewModels()
+
+	private val viewModel: ConfigDatabasesFragmentViewModel by activityViewModels{
 		object: ViewModelProvider.Factory{
 			override fun <T : ViewModel> create(modelClass: Class<T>): T {
 				return ConfigDatabasesFragmentViewModel(
@@ -46,13 +52,8 @@ class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
 		stmCheckbox.isChecked = viewModel.isStmChecked()
 		exoCheckBox.isChecked = viewModel.isExoChecked()
 
-		stmCheckbox.setOnCheckedChangeListener { _, _ ->
-			viewModel.toggleStm()
-		}
-
-		exoCheckBox.setOnCheckedChangeListener { _, _ ->
-			viewModel.toggleExo()
-		}
+		stmCheckbox.setOnCheckedChangeListener { _, _ -> viewModel.toggleStm() }
+		exoCheckBox.setOnCheckedChangeListener { _, _ -> viewModel.toggleExo() }
 
 		viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){
@@ -78,10 +79,11 @@ class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
 					.setMessage("Are you sure to download the selected packages for download?")
 					.setPositiveButton("Yes"){ dialogInterface, _ ->
 						Log.d("DATABASE-CONFIG", "Initiating download of data")
-						viewModel.scheduleDownloadWork()
-						dialogInterface.dismiss()
-						AppThemeState.turnOffDbUpdateChecking()
-						sharedViewModel.triggerEvent(true)
+						viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+							dialogInterface.dismiss()
+							AppThemeState.turnOffDbUpdateChecking()
+							sharedViewModel.triggerEvent(true)
+						}
 					}
 					.setNegativeButton("Cancel"){ dialogInterface, _ -> /*close the dialog*/ dialogInterface.dismiss() }
 					.show()

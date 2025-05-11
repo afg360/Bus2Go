@@ -22,7 +22,7 @@ import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.domain.exceptions.Bus2GoBaseException
 import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.presentation.core.UiState
-import dev.mainhq.bus2go.presentation.stopTimes.StopTimesActivity
+import dev.mainhq.bus2go.presentation.stop_times.StopTimesActivity
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch

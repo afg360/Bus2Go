@@ -16,7 +16,7 @@ import dev.mainhq.bus2go.presentation.base.BaseActivity
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.Bus2GoApplication
-import dev.mainhq.bus2go.presentation.stopTimes.StopTimesActivity
+import dev.mainhq.bus2go.presentation.stop_times.StopTimesActivity
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest

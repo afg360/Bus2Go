@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go.presentation.stopTimes
+package dev.mainhq.bus2go.presentation.stop_times
 
 data class StopTimesHeaderDisplayModel(
 	val routeIdTextColor: Int,

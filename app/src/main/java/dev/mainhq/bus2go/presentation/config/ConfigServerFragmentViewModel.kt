@@ -3,8 +3,9 @@ package dev.mainhq.bus2go.presentation.config
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.mainhq.bus2go.domain.core.Result
-import dev.mainhq.bus2go.domain.entity.ServerConfig
+import dev.mainhq.bus2go.domain.entity.UrlChecker
 import dev.mainhq.bus2go.domain.use_case.CheckIsBus2GoServer
+import dev.mainhq.bus2go.domain.use_case.SaveBus2GoServer
 import dev.mainhq.bus2go.presentation.core.UiState
 import io.ktor.util.reflect.instanceOf
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -21,7 +22,8 @@ import kotlinx.coroutines.withContext
 //TODO will eventually need a use case to handle a list of available public servers...
 
 class ConfigServerFragmentViewModel(
-	private val checkIsBus2GoServer: CheckIsBus2GoServer
+	private val checkIsBus2GoServer: CheckIsBus2GoServer,
+	private val saveBus2GoServer: SaveBus2GoServer
 ): ViewModel() {
 
 
@@ -35,23 +37,16 @@ class ConfigServerFragmentViewModel(
 	private val _serverResponse: MutableStateFlow<UiState<Boolean>> = MutableStateFlow(UiState.Init)
 	val serverResponse = _serverResponse.asStateFlow()
 
+	private val _savingServerState: MutableStateFlow<UiState<String>> = MutableStateFlow(UiState.Init)
+	val savingServerState = _savingServerState.asStateFlow()
+
 	private var job: Job? = null
 
-	private val _isActive = MutableStateFlow(true)
-	val isActive = _isActive.asStateFlow()
 
-	fun activate(){
-		_isActive.value = true
-	}
-
-	fun deActivate(){
-		_isActive.value = false
-	}
-
-	fun setServer(server: String){
+	fun setServer(potentialUrl: String){
 		//FIXME do some user input handling here
 		//TODO verify if the user added an "http[s]://" thingy and whatnot
-		val config = ServerConfig.build(server)
+		val config = UrlChecker.check(potentialUrl)
 		viewModelScope.launch(Dispatchers.Main) {
 			if (config == null) {
 				_buttonText.value = "Skip"
@@ -68,6 +63,7 @@ class ConfigServerFragmentViewModel(
 		}
 	}
 
+	/** Called when the user clicks on Continue after having written a potential bsu2go server */
 	fun checkIsBus2GoServer() {
 		//before doing this shit, check if _serverResponse is already in success mode from the previous data...
 		//if it is, no need to check back
@@ -77,7 +73,6 @@ class ConfigServerFragmentViewModel(
 			//capture the textInputText
 			val value = _textInputText.first()
 			if (value.instanceOf(UiState.Error::class)) _serverResponse.value = UiState.Error("")
-			//TODO remove, only for debugging
 			val coroutineExceptionHandler = CoroutineExceptionHandler{_, throwable ->
 				throwable.printStackTrace()
 			}
@@ -94,7 +89,12 @@ class ConfigServerFragmentViewModel(
 						}
 
 						is Result.Success<Boolean> -> {
-							_buttonText.value = if (result.data) "Continue" else "Skip"
+							if (result.data){
+								_buttonText.value = "Continue"
+								//FIXME for the moment ignore success/failure status
+								saveBus2GoServer.invoke(value.data)
+							}
+							 else _buttonText.value = "Skip"
 							_serverResponse.value = UiState.Success(result.data)
 						}
 					}

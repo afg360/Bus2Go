@@ -1,12 +1,12 @@
 package dev.mainhq.bus2go.domain.entity
 
-sealed class ServerConfig {
+sealed class UrlChecker {
 	abstract val data: String
-	data class DomainName(override val data: String): ServerConfig()
-	data class IpAddress(override val data: String): ServerConfig()
+	data class DomainName(override val data: String): UrlChecker()
+	data class IpAddress(override val data: String): UrlChecker()
 
 	companion object {
-		fun build(string: String): ServerConfig? {
+		fun check(string: String): UrlChecker? {
 			val elems = string.split(".")
 			if (elems.any { it.isBlank() }) return null
 			//may be an ip address

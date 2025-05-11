@@ -38,7 +38,7 @@
             >
 
         </activity>
-        <activity android:name=".presentation.stopTimes.StopTimesActivity"
+        <activity android:name=".presentation.stop_times.StopTimesActivity"
             android:exported="false">
 
         </activity>

@@ -1,8 +1,5 @@
 package dev.mainhq.bus2go.presentation.config
 
-import android.app.Application
-import android.app.Fragment
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -11,7 +8,7 @@ import kotlinx.coroutines.flow.asStateFlow
  * 	the activity when configuration is done */
 class ConfigSharedViewModel : ViewModel() {
 
-	private val _currentFragment: MutableStateFlow<FragmentUsed?> = MutableStateFlow(null)
+	private val _currentFragment: MutableStateFlow<FragmentUsed?> = MutableStateFlow(FragmentUsed.WELCOME)
 	val currentFragment = _currentFragment.asStateFlow()
 
 	private val _event = MutableStateFlow(false)
@@ -23,7 +20,6 @@ class ConfigSharedViewModel : ViewModel() {
 	}
 
 	fun setFragment(fragment: FragmentUsed){
-		//_currentFragmentId.value = id
 		_currentFragment.value = fragment
 	}
 }
