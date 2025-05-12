@@ -19,11 +19,5 @@ class ConfigWelcomeFragment: Fragment(R.layout.fragment_config_welcome) {
 		view.findViewById<MaterialButton>(R.id.config_continue_button).setOnClickListener {
 			viewModel.setFragment(nextFrag)
 		}
-
-		requireActivity().onBackPressedDispatcher.addCallback(object: OnBackPressedCallback(true){
-			override fun handleOnBackPressed() {
-				requireActivity().finish()
-			}
-		})
 	}
 }

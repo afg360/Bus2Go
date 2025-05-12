@@ -50,6 +50,7 @@ class ConfigThemeFragment: Fragment(R.layout.fragment_config_theme) {
 		requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object: OnBackPressedCallback(true){
 			override fun handleOnBackPressed() {
 				sharedViewModel.setFragment(prevFrag)
+				isEnabled = false
 			}
 		})
 	}

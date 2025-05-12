@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:title="Updates"
+    app:allowDividerBelow="true"
+    >
+    <PreferenceCategory
+        app:title="App Updates"
+        >
+        <!--TODO rename the below to app-update-notifications -->
+        <SwitchPreferenceCompat
+            app:key="update-notifications"
+            app:title="@string/update_notifications"
+            app:summary="@string/update_notifications_summary"
+            app:icon="@drawable/baseline_notifications_24"
+            />
+        <SwitchPreferenceCompat
+            app:key="auto-updates"
+            app:title="@string/auto_updates"
+            app:icon="@drawable/baseline_update_24"
+            app:summary="@string/auto_updates_summary"
+            app:dependency="update-notifications"
+            />
+    </PreferenceCategory>
+    
+    <PreferenceCategory
+        app:title="Database Updates"
+        >
+        <Preference app:title="Manual Download" />
+        <SwitchPreferenceCompat
+            app:key="db-update-notifications"
+            app:title="@string/db_update_notifs"
+            app:summary="@string/db_update_notifs_summary"
+            app:icon="@drawable/baseline_notifications_24"
+            />
+        <SwitchPreferenceCompat
+            app:key="db-auto-updates"
+            app:title="@string/db_auto_updates"
+            app:icon="@drawable/baseline_update_24"
+            app:summary="@string/db_auto_updates_summary"
+            app:dependency="db-update-notifications"
+            />
+    </PreferenceCategory>
+</PreferenceScreen>

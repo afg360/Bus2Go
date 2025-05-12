@@ -105,6 +105,7 @@ class ConfigNotificationsFragment: Fragment(R.layout.fragment_config_notificatio
 		requireActivity().onBackPressedDispatcher.addCallback(object: OnBackPressedCallback(true){
 			override fun handleOnBackPressed() {
 				sharedViewModel.setFragment(prevFrag)
+				isEnabled = false
 			}
 
 		})

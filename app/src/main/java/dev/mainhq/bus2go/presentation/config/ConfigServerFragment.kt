@@ -165,6 +165,8 @@ class ConfigServerFragment: Fragment(R.layout.fragment_config_server) {
 			override fun handleOnBackPressed() {
 				viewModel.cancel()
 				sharedViewModel.setFragment(prevFrag)
+				//must be reenabled when clicking on the EditTextView
+				//isEnabled = false
 			}
 		}
 		requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, mainBackPressCallBack)
@@ -172,6 +174,7 @@ class ConfigServerFragment: Fragment(R.layout.fragment_config_server) {
 		val backPressedCallback = object : OnBackPressedCallback(false){
 			override fun handleOnBackPressed() {
 				textInput.clearFocus()
+				isEnabled = false
 			}
 		}
 		requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, backPressedCallback)

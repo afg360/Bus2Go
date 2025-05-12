@@ -83,6 +83,10 @@ class DatabaseDownloadRepositoryImpl(
 				}
 			}
 		}
+		catch (iae: IllegalArgumentException){
+			logger?.error(TAG, "Malformed URL", iae)
+			return Result.Error(null, "The URL was malformed")
+		}
 		catch (coe: ConnectTimeoutException){
 			logger?.error(TAG, "Connection timed out...", coe)
 			return Result.Error(null, "Connection has timed out")

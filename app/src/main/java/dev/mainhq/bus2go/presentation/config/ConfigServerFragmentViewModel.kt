@@ -46,6 +46,8 @@ class ConfigServerFragmentViewModel(
 	fun setServer(potentialUrl: String){
 		//FIXME do some user input handling here
 		//TODO verify if the user added an "http[s]://" thingy and whatnot
+		job?.cancel()
+		_serverResponse.value = UiState.Init
 		val config = UrlChecker.check(potentialUrl)
 		viewModelScope.launch(Dispatchers.Main) {
 			if (config == null) {

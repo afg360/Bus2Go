@@ -66,6 +66,7 @@ class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
 		requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object: OnBackPressedCallback(true){
 			override fun handleOnBackPressed() {
 				sharedViewModel.setFragment(prevFrag)
+				isEnabled = false
 			}
 		})
 
@@ -82,6 +83,7 @@ class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
 						viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
 							dialogInterface.dismiss()
 							AppThemeState.turnOffDbUpdateChecking()
+							viewModel.scheduleDownloadWork()
 							sharedViewModel.setFragment(nextFrag)
 						}
 					}

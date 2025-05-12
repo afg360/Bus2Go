@@ -23,7 +23,7 @@
     <string name="remove_confirmation_dialog_decline">No</string>
     <string name="remove_confirmation_dialog_accept">Yes</string>
     <string name="general_settings">General Settings</string>
-    <string name="internet_settings">Internet Settings</string>
+    <string name="data_sync_settings">Data and Syncing</string>
     <string name="real_time_data_updates">Real time data updates</string>
     <string name="real_time_data_updates_summary">Toggle on or off to enable real time data updates (uses internet)</string>
     <string name="language_summary">Choose the main language of the app</string>
@@ -49,4 +49,6 @@
     <string name="train_direction">To %1$s</string>
     <string name="db_update_notifs">Database Updates</string>
     <string name="db_update_notifs_summary">Enable notifications for when new databases are available</string>
+    <string name="db_auto_updates">Automatic Database Updates</string>
+    <string name="db_auto_updates_summary">Toggle on or off to enable the app to update automatically after new databases have been found</string>
 </resources>

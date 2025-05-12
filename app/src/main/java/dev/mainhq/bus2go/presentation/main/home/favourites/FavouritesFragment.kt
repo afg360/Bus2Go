@@ -102,6 +102,7 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
                 }
                 favouritesViewModel.deactivateSelectionMode()
                 favouritesSharedViewModel.deactivateSelectionMode()
+                //essentially this.isEnabled...?
                 onBackPressedCallback.isEnabled = false
             }
         }

@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     >
+    
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/settingsAppBar"
         android:layout_width="match_parent"
@@ -24,13 +25,28 @@
             android:layout_height="1dp"
             app:layout_constraintTop_toBottomOf="@id/settingsToolBar"
             />
+    </com.google.android.material.appbar.AppBarLayout>
+    
+    <!-- Used for when changing server (querying server) -->
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/preferences_loading_bar"
+        android:layout_width="5dp"
+        android:layout_height="5dp"
+        android:indeterminate="true"
+        android:layout_marginTop="5dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/settingsAppBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/preferencesFragmentContainer"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
+            app:layout_constraintTop_toBottomOf="@id/preferences_loading_bar"
+            app:layout_constraintBottom_toBottomOf="parent"
             />
-    </com.google.android.material.appbar.AppBarLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

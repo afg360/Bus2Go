@@ -5,7 +5,9 @@ import androidx.lifecycle.viewModelScope
 import androidx.work.workDataOf
 import dev.mainhq.bus2go.domain.entity.DbToDownload
 import dev.mainhq.bus2go.domain.use_case.ScheduleDownloadDatabaseTask
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
@@ -46,6 +48,7 @@ class ConfigDatabasesFragmentViewModel(
 		if (_dbToDownload.value == null) TODO("Wtf...")
 		viewModelScope.launch {
 			scheduleDownloadDatabaseTask.invoke(_dbToDownload.value!!)
+			//TODO send a notification
 		}
 	}
 }

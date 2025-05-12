@@ -4,7 +4,15 @@ import android.content.SharedPreferences
 import android.content.pm.PackageInfo
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Toast
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
@@ -13,14 +21,32 @@ import androidx.work.Constraints
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.data.worker.UpdateManagerWorker
+import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
-class SettingsPreferences : PreferenceFragmentCompat() ,
-    SharedPreferences.OnSharedPreferenceChangeListener {
+class SettingsMainFragment : PreferenceFragmentCompat(),
+    SharedPreferences.OnSharedPreferenceChangeListener
+{
+
+    private val sharedViewModel: SettingsSharedViewModel by activityViewModels()
+    private val viewModel: SettingsMainFragmentViewModel by viewModels{
+        object: ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return (requireActivity().application as Bus2GoApplication).let {
+                    SettingsMainFragmentViewModel(
+                        it.appModule.checkIsBus2GoServer,
+                        it.commonModule.saveBus2GoServer
+                    ) as T
+                }
+            }
+        }
+    }
+
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-        setPreferencesFromResource(R.xml.settings, rootKey)
+        setPreferencesFromResource(R.xml.settings_main, rootKey)
 
         //TODO perform a migration from sharedPreferences to DataStorePreferences if needed, by checking
         // some field existence...
@@ -34,11 +60,15 @@ class SettingsPreferences : PreferenceFragmentCompat() ,
 
         preferenceManager.findPreference<EditTextPreference>("server-choice")?.also{
             it.setOnPreferenceChangeListener { _, newValue ->
-                val newValueString = newValue as String
-                it.text = newValueString
-                //could be a domain name or an ip address so don't use numpad
+                sharedViewModel.setLoading(true)
+                viewModel.checkIsBus2GoServer(newValue as String)
+                false
+            }
+        }
 
-                Toast.makeText(requireContext(), "Server changed", Toast.LENGTH_SHORT).show()
+        preferenceManager.findPreference<Preference>("update-entry")?.also{
+            it.setOnPreferenceClickListener {
+                sharedViewModel.setFragment(FragmentUsed.UPDATES)
                 true
             }
         }
@@ -48,18 +78,6 @@ class SettingsPreferences : PreferenceFragmentCompat() ,
         //version of the database
     }
 
-    /*
-    override fun onPreferenceTreeClick(preference: Preference): Boolean {
-        if (preference.key == "server-choice"){
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.preferencesFragmentContainer, ServerPreferences())
-                .addToBackStack(null)
-                .commit()
-            return true
-        }
-        return super.onPreferenceTreeClick(preference)
-    }
-     */
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         sharedPreferences?.also{
@@ -67,6 +85,7 @@ class SettingsPreferences : PreferenceFragmentCompat() ,
                 "real-time-data" -> {
                     Log.d("REALTIME", "feedback clicked")
                 }
+                //FIXME wrong place to be...
                 "update-notifications" -> {
                     val isOn = sharedPreferences.getBoolean("update-notifications", false)
                     if (isOn) {
@@ -100,6 +119,25 @@ class SettingsPreferences : PreferenceFragmentCompat() ,
             }
         }
 
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){
+                viewModel.toastText.collect{
+                    sharedViewModel.setLoading(false)
+                    Toast.makeText(requireContext(), it.string, Toast.LENGTH_SHORT).show()
+                    val editTextPreference = preferenceManager.findPreference<EditTextPreference>("server-choice")
+                    if (it.isValid){
+                        editTextPreference?.text = it.data
+                    }
+                    else editTextPreference?.text = ""
+                }
+            }
+        }
     }
 
     override fun onResume() {
