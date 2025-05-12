@@ -29,7 +29,7 @@
     <string name="language_summary">Choose the main language of the app</string>
     <string name="auto_updates">Automatic updates</string>
     <string name="auto_updates_summary">Toggle on or off to enable the app to update automatically after a new release has been found</string>
-    <string name="update_notifications">Update notifications</string>
+    <string name="update_notifications">App Updates</string>
     <string name="update_notifications_summary">Toggle on/off to activate/deactivate notifications for new updates of the application</string>
     <string name="home">Home</string>
     <string name="map">Map</string>
@@ -47,4 +47,6 @@
     <string name="welcome">Welcome to Bus2Go!</string>
     <string name="config_continue">Continue</string>
     <string name="train_direction">To %1$s</string>
+    <string name="db_update_notifs">Database Updates</string>
+    <string name="db_update_notifs_summary">Enable notifications for when new databases are available</string>
 </resources>

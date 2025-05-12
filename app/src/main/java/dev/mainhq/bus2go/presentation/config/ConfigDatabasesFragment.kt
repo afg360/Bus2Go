@@ -27,8 +27,8 @@ class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
 
 	private val sharedViewModel : ConfigSharedViewModel by activityViewModels()
 
-	//need to access the actual server
-	private val serverSharedViewModel: ConfigServerFragmentViewModel by activityViewModels()
+	private val prevFrag = FragmentUsed.SERVER
+	private val nextFrag = FragmentUsed.NOTIFICATIONS
 
 	private val viewModel: ConfigDatabasesFragmentViewModel by activityViewModels{
 		object: ViewModelProvider.Factory{
@@ -65,7 +65,7 @@ class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
 
 		requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object: OnBackPressedCallback(true){
 			override fun handleOnBackPressed() {
-				sharedViewModel.setFragment(FragmentUsed.SERVER)
+				sharedViewModel.setFragment(prevFrag)
 			}
 		})
 
@@ -82,7 +82,7 @@ class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
 						viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
 							dialogInterface.dismiss()
 							AppThemeState.turnOffDbUpdateChecking()
-							sharedViewModel.triggerEvent(true)
+							sharedViewModel.setFragment(nextFrag)
 						}
 					}
 					.setNegativeButton("Cancel"){ dialogInterface, _ -> /*close the dialog*/ dialogInterface.dismiss() }
@@ -94,7 +94,7 @@ class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
 					.setMessage("You won't be able to properly use the app without a database installed (you can always download one later)")
 					.setPositiveButton("Yes, skip") { dialogInterface, _ ->
 						dialogInterface.dismiss()
-						sharedViewModel.triggerEvent(true)
+						sharedViewModel.setFragment(nextFrag)
 					}
 					.setNegativeButton("Cancel"){ dialogInterface, _ ->
 						dialogInterface.dismiss()

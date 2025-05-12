@@ -15,6 +15,7 @@ import dev.mainhq.bus2go.data.repository.ExoRepositoryImpl
 import dev.mainhq.bus2go.data.repository.SettingsRepositoryImpl
 import dev.mainhq.bus2go.data.repository.StmFavouritesRepositoryImpl
 import dev.mainhq.bus2go.data.repository.StmRepositoryImpl
+import dev.mainhq.bus2go.domain.use_case.SaveAllNotifSettings
 import dev.mainhq.bus2go.domain.use_case.SaveBus2GoServer
 import dev.mainhq.bus2go.domain.use_case.db_state.CheckDatabaseUpdateRequired
 import dev.mainhq.bus2go.domain.use_case.db_state.IsFirstTimeAppLaunched
@@ -79,6 +80,7 @@ class CommonModule(applicationContext: Context) {
 	val networkMonitor = NetworkMonitor.getInstance(applicationContext, loggerImpl)
 
 	val saveBus2GoServer = SaveBus2GoServer(settingsRepository)
+	val saveAllNotifSettings = SaveAllNotifSettings(settingsRepository)
 
 	val getRouteInfo = GetRouteInfo(
 		exoRepository,

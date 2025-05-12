@@ -33,6 +33,9 @@ import kotlinx.coroutines.launch
 
 class ConfigServerFragment: Fragment(R.layout.fragment_config_server) {
 
+	private val prevFrag = FragmentUsed.THEME
+	private val nextFrag = FragmentUsed.DATABASES
+
 	private val sharedViewModel: ConfigSharedViewModel by activityViewModels()
 
 	//perhaps instead use by viewModels with a savedStateHandle...
@@ -113,7 +116,7 @@ class ConfigServerFragment: Fragment(R.layout.fragment_config_server) {
 							//if the response was valid, go to databases
 							if (it.data) {
 								viewModel.cancel()
-								sharedViewModel.setFragment(FragmentUsed.DATABASES)
+								sharedViewModel.setFragment(nextFrag)
 							}
 							//else show an error on the inputText, and display "Skip" on the button (or perhaps a retry)
 							else textInput.error = "Invalid server"
@@ -161,7 +164,7 @@ class ConfigServerFragment: Fragment(R.layout.fragment_config_server) {
 		val mainBackPressCallBack = object: OnBackPressedCallback(true){
 			override fun handleOnBackPressed() {
 				viewModel.cancel()
-				sharedViewModel.setFragment(FragmentUsed.THEME)
+				sharedViewModel.setFragment(prevFrag)
 			}
 		}
 		requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, mainBackPressCallBack)

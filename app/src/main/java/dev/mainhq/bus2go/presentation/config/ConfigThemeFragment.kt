@@ -17,6 +17,9 @@ import kotlinx.coroutines.launch
 
 class ConfigThemeFragment: Fragment(R.layout.fragment_config_theme) {
 
+	private val prevFrag = FragmentUsed.WELCOME
+	private val nextFrag = FragmentUsed.SERVER
+
 	private val sharedViewModel: ConfigSharedViewModel by activityViewModels()
 
 	private val viewModel: ConfigThemeFragmentViewModel by activityViewModels()
@@ -41,12 +44,12 @@ class ConfigThemeFragment: Fragment(R.layout.fragment_config_theme) {
 		}
 
 		view.findViewById<MaterialButton>(R.id.configSelectThemeContinueButton).setOnClickListener {
-			sharedViewModel.setFragment(FragmentUsed.SERVER)
+			sharedViewModel.setFragment(nextFrag)
 		}
 
 		requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object: OnBackPressedCallback(true){
 			override fun handleOnBackPressed() {
-				sharedViewModel.setFragment(FragmentUsed.WELCOME)
+				sharedViewModel.setFragment(prevFrag)
 			}
 		})
 	}

@@ -38,6 +38,7 @@ class ConfigActivity : BaseActivity() {
                             FragmentUsed.THEME -> ConfigThemeFragment()
                             FragmentUsed.SERVER -> ConfigServerFragment()
                             FragmentUsed.DATABASES -> ConfigDatabasesFragment()
+                            FragmentUsed.NOTIFICATIONS -> ConfigNotificationsFragment()
                         }
 
                         supportFragmentManager.beginTransaction()

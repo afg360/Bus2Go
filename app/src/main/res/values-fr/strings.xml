@@ -26,8 +26,10 @@
     <string name="language_summary">Choisissez la langue de l\'application</string>
     <string name="auto_updates">Mises à jour automatiques</string>
     <string name="auto_updates_summary">Activez ou désactivez pour permettre à l\'application de chercher se mettre à jour automatiquement après avoir trouvé une nouvelle version</string>
-    <string name="update_notifications">Notifications de mises à jour</string>
-    <string name="update_notifications_summary">Activez pour permettre l\'activation de notifications qui vous tiendront au courant des nouvelles mises à jour disponibles</string>
+    <string name="update_notifications">Notifications de mises à jour de l\'application</string>
+    <string name="update_notifications_summary">Activez pour activer les notifications qui vous tiendront au courant des nouvelles mises à jour disponibles pour l\'application</string>
+    <string name="db_update_notifs">Notifications de mises à jour de base de données</string>
+    <string name="db_update_notifs_summary">Activez pour vous notifiez de nouvelles bases de données disponibles</string>
     <string name="home">Accueil</string>
     <string name="map">Carte</string>
     <string name="alarms">Alarmes</string>
@@ -43,5 +45,5 @@
     <string name="add_a_new_server">Ajouter un nouveau serveur</string>
     <string name="train_direction">Vers %1$s</string>
     <string name="welcome">Bienvenue!</string>
-    <string name="config_continue">Continue</string>
+    <string name="config_continue">Continuer</string>
 </resources>

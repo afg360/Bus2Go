@@ -40,17 +40,28 @@
             app:defaultValue="0.0.0.0"
             />
         <SwitchPreferenceCompat
-            app:key="update-notifications"
-            app:title="@string/update_notifications"
-            app:icon="@drawable/baseline_notifications_24"
-            app:summary="@string/update_notifications_summary"
-            />
-        <SwitchPreferenceCompat
             app:key="auto-updates"
             app:title="@string/auto_updates"
             app:icon="@drawable/baseline_update_24"
             app:summary="@string/auto_updates_summary"
             app:dependency="update-notifications"
+            />
+    </PreferenceCategory>
+    
+    <PreferenceCategory
+        app:title="Notifications"
+        app:icon="@drawable/baseline_notifications_24"
+        >
+        <!--TODO rename the below to app-update-notifications -->
+        <SwitchPreferenceCompat
+            app:key="update-notifications"
+            app:title="@string/update_notifications"
+            app:summary="@string/update_notifications_summary"
+            />
+        <SwitchPreferenceCompat
+            app:key="db-update-notifications"
+            app:title="@string/db_update_notifs"
+            app:summary="@string/db_update_notifs_summary"
             />
     </PreferenceCategory>
 
@@ -69,10 +80,15 @@
             app:icon="@drawable/baseline_feedback_24"
             app:summary="Report technical issues or suggest new features"/>
     </PreferenceCategory>
-    <Preference
-        app:key="info"
-        app:title="App Info"
-        app:icon="@drawable/baseline_info_outline_24"
-        />
+    
+    <PreferenceCategory
+        app:title="About"
+        >
+        <Preference
+            app:key="info"
+            app:title="App Info"
+            app:icon="@drawable/baseline_info_outline_24"
+            />
+    </PreferenceCategory>
 
 </PreferenceScreen>
