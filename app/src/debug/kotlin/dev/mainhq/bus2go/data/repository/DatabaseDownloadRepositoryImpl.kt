@@ -9,13 +9,13 @@ import dev.mainhq.bus2go.domain.entity.DbToDownload
 import dev.mainhq.bus2go.domain.exceptions.NetworkException
 import dev.mainhq.bus2go.domain.repository.DatabaseDownloadRepository
 import dev.mainhq.bus2go.domain.core.Result
+import dev.mainhq.bus2go.domain.entity.NotificationType
+import dev.mainhq.bus2go.domain.repository.NotificationsRepository
 import io.ktor.client.call.body
 import io.ktor.client.network.sockets.ConnectTimeoutException
 import io.ktor.http.URLBuilder
 import io.ktor.http.set
 import io.ktor.utils.io.ByteReadChannel
-import io.ktor.utils.io.core.readText
-import io.ktor.utils.io.readRemaining
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
@@ -34,6 +34,7 @@ class DatabaseDownloadRepositoryImpl(
 	baseUrl: String?,
 	private val applicationContext: Context,
 	private val networkMonitor: NetworkMonitor,
+	private val notificationsRepository: NotificationsRepository,
 	private val logger: Logger?
 ): DatabaseDownloadRepository {
 
@@ -53,7 +54,7 @@ class DatabaseDownloadRepositoryImpl(
 
 	//TODO
 	override suspend fun testIsBus2Go(str: String): Result<Boolean> {
-		//TODO eventually also set a header to send perhaps to prove identity from client
+		//TODO eventually also set a header to send to prove perhaps identity from client
 		if (!networkMonitor.isConnected()) {
 			logger?.error(TAG, "Not connected")
 			return Result.Error(null, "Not connected to the internet")
@@ -136,8 +137,12 @@ class DatabaseDownloadRepositoryImpl(
 		logger?.debug(TAG, "Beginning Download")
 		val downloadStatus = NetworkClient.getAndExecute(url){
 			try {
+				val contentLength = it.headers["content-length"]?.toInt()
+					?: throw NetworkException("Content-Length HTTP header not set by server...")
 				val channel = it.body<ByteReadChannel>()
 				val tmpCompressedFile = File(applicationContext.filesDir, "$dbName.$COMPRESSION_EXT.part")
+				var totalDownloaded = 0
+				notificationsRepository.notify(NotificationType.DbDownloading(0))
 				//download of compressed databases
 				FileOutputStream(tmpCompressedFile).use { outputStream ->
 					val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
@@ -145,6 +150,10 @@ class DatabaseDownloadRepositoryImpl(
 						val bytesRead = channel.readAvailable(buffer, 0, buffer.size)
 						if (bytesRead <= 0) break
 						outputStream.write(buffer, 0, bytesRead)
+						totalDownloaded += bytesRead
+						notificationsRepository.notify(
+							NotificationType.DbDownloading(totalDownloaded / contentLength)
+						)
 					}
 				}
 				true
@@ -190,6 +199,7 @@ class DatabaseDownloadRepositoryImpl(
 			FileInputStream(compressedFile).use { fileIn ->
 				GZIPInputStream(fileIn).use { zstdIn ->
 					FileOutputStream(destFile).use { fileOut ->
+						notificationsRepository.notify(NotificationType.DbExtracting)
 						val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
 						var bytesRead: Int
 						while (zstdIn.read(buffer).also { bytesRead = it } != -1) {

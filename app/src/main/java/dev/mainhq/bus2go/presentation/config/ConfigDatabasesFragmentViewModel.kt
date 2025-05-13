@@ -48,7 +48,6 @@ class ConfigDatabasesFragmentViewModel(
 		if (_dbToDownload.value == null) TODO("Wtf...")
 		viewModelScope.launch {
 			scheduleDownloadDatabaseTask.invoke(_dbToDownload.value!!)
-			//TODO send a notification
 		}
 	}
 }

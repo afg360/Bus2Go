@@ -4,7 +4,7 @@ import dev.mainhq.bus2go.domain.entity.DbToDownload
 import dev.mainhq.bus2go.domain.backgroundtask.DatabaseDownloadScheduler
 
 class ScheduleDownloadDatabaseTask(
-	private val databaseDownloadScheduler: DatabaseDownloadScheduler
+	private val databaseDownloadScheduler: DatabaseDownloadScheduler,
 ) {
 
 	//TODO perhaps return some sort of success or failure thing

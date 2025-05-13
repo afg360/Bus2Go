@@ -1,17 +1,18 @@
 package dev.mainhq.bus2go.di
 
 import android.content.Context
-import androidx.room.Room
 import dev.mainhq.bus2go.data.core.LoggerImpl
 import dev.mainhq.bus2go.data.data_source.local.database.exo.AppDatabaseExo
 import dev.mainhq.bus2go.data.data_source.local.database.stm.AppDatabaseSTM
 import dev.mainhq.bus2go.data.data_source.local.datastore.app_state.appStateDataStore
 import dev.mainhq.bus2go.data.data_source.local.datastore.exo.exoFavouritesDataStore
 import dev.mainhq.bus2go.data.data_source.local.datastore.stm.stmFavouritesDataStore
+import dev.mainhq.bus2go.data.data_source.notifications.NotificationHandler
 import dev.mainhq.bus2go.data.data_source.remote.NetworkMonitor
 import dev.mainhq.bus2go.data.repository.AppStateRepositoryImpl
 import dev.mainhq.bus2go.data.repository.ExoFavouritesRepositoryImpl
 import dev.mainhq.bus2go.data.repository.ExoRepositoryImpl
+import dev.mainhq.bus2go.data.repository.NotificationRepositoryImpl
 import dev.mainhq.bus2go.data.repository.SettingsRepositoryImpl
 import dev.mainhq.bus2go.data.repository.StmFavouritesRepositoryImpl
 import dev.mainhq.bus2go.data.repository.StmRepositoryImpl
@@ -31,16 +32,8 @@ import dev.mainhq.bus2go.domain.use_case.transit.GetStopNames
 import dev.mainhq.bus2go.domain.use_case.transit.GetTransitTime
 
 class CommonModule(applicationContext: Context) {
-	//TODO change back to a private val
+
 	private val stmDatabase = AppDatabaseSTM.getInstance(applicationContext)
-		/*
-		Room.databaseBuilder(applicationContext, AppDatabaseSTM::class.java, AppDatabaseSTM.DATABASE_NAME)
-		.createFromAsset(AppDatabaseSTM.DATABASE_PATH)
-		.addMigrations(AppDatabaseSTM.MIGRATION_1_2)
-		.build()
-
-		 */
-
 	private val stmRepository = StmRepositoryImpl(
 		stmDatabase?.calendarDao(),
 		stmDatabase?.calendarDatesDao(),
@@ -60,7 +53,6 @@ class CommonModule(applicationContext: Context) {
 	)
 
 	private val exoDatabase = AppDatabaseExo.getInstance(applicationContext)
-
 	private val exoRepository = ExoRepositoryImpl(
 		exoDatabase?.calendarDao(),
 		exoDatabase?.routesDao(),
@@ -75,6 +67,9 @@ class CommonModule(applicationContext: Context) {
 	private val settingsRepository = SettingsRepositoryImpl(
 		applicationContext
 	)
+
+	private val notificationHandler = NotificationHandler(applicationContext)
+	val notificationsRepository = NotificationRepositoryImpl(notificationHandler)
 
 	val loggerImpl = LoggerImpl()
 	val networkMonitor = NetworkMonitor.getInstance(applicationContext, loggerImpl)

@@ -10,6 +10,8 @@ import androidx.work.WorkerParameters
 import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.domain.entity.DbToDownload
+import dev.mainhq.bus2go.domain.entity.NotificationType
+import dev.mainhq.bus2go.domain.repository.NotificationsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -18,9 +20,8 @@ import kotlinx.coroutines.withContext
 class DatabaseDownloadManagerWorker(
 	context: Context,
 	workerParams: WorkerParameters,
+	private val notificationsRepository: NotificationsRepository
 ) : CoroutineWorker(context, workerParams) {
-
-	private lateinit var notificationManager: NotificationManager
 
 	companion object {
 		const val KEY = "DB_TO_DOWNLOAD"
@@ -31,9 +32,7 @@ class DatabaseDownloadManagerWorker(
 		val dbToDownload = inputData.getString(KEY) ?: throw IllegalStateException("Expected an input")
 		val dbDownloadRepository = (applicationContext as Bus2GoApplication).appModule.dbDownloadRepository
 
-		notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-		val notifChannel = NotificationChannel("DbDownload", "Database Download", NotificationManager.IMPORTANCE_DEFAULT)
-		notificationManager.createNotificationChannel(notifChannel)
+		notificationsRepository.notify(NotificationType.DbUpdateAvailable(dbToDownload))
 		Log.d("DB WORKER", "Started db download work")
 
 		//TODO notify when download starts (and show a bar perhaps)
@@ -49,28 +48,14 @@ class DatabaseDownloadManagerWorker(
 			}
 			if (!status) {
 				withContext(Dispatchers.Main) {
-					notificationManager.notify(
-						1,
-						NotificationCompat.Builder(applicationContext, "DbDownload")
-							.setSmallIcon(R.drawable.baseline_language_24)
-							.setContentTitle("Failed Download")
-							.setContentText("Failed to download the $dbToDownload database")
-							.build()
-					)
+					notificationsRepository.notify(NotificationType.DbUpdateError)
 				}
 				Result.retry()
 			}
 			else {
 				withContext(Dispatchers.Main) {
 					Log.d("DB WORKER", "Downloaded succesfully")
-					notificationManager.notify(
-						1,
-						NotificationCompat.Builder(applicationContext, "DbDownload")
-							.setSmallIcon(R.drawable.baseline_language_24)
-							.setContentTitle("Stm db download")
-							.setContentText("Download success")
-							.build()
-					)
+					notificationsRepository.notify(NotificationType.DbUpdateDone)
 				}
 				Result.success()
 			}

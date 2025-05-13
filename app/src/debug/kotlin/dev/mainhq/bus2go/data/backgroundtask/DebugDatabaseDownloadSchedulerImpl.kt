@@ -1,7 +1,7 @@
 package dev.mainhq.bus2go.data.backgroundtask
 
 import androidx.work.BackoffPolicy
-import androidx.work.OneTimeWorkRequest
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import dev.mainhq.bus2go.data.worker.DatabaseDownloadManagerWorker
@@ -20,22 +20,18 @@ class DebugDatabaseDownloadSchedulerImpl(
 				enqueueTask("EXO")
 			}
 
-			DbToDownload.STM -> {
-				enqueueTask("STM")
-			}
+			DbToDownload.STM -> enqueueTask("STM")
 
-			DbToDownload.EXO -> {
-				enqueueTask("EXO")
-			}
+			DbToDownload.EXO -> enqueueTask("EXO")
 		}
 	}
 
 	private fun enqueueTask(key: String){
 		workManager.enqueue(
-			OneTimeWorkRequest.Builder(DatabaseDownloadManagerWorker::class.java)
+			OneTimeWorkRequestBuilder<DatabaseDownloadManagerWorker>()
 				.addTag("DatabaseDownloadTask")
 				.setBackoffCriteria(BackoffPolicy.LINEAR, 10, TimeUnit.SECONDS)
-				.setInputData(workDataOf(Pair(DatabaseDownloadManagerWorker.KEY, key)))
+				.setInputData(workDataOf(DatabaseDownloadManagerWorker.KEY to key))
 				.build()
 		)
 	}

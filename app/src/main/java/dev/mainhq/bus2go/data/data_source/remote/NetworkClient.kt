@@ -13,6 +13,7 @@ import io.ktor.http.Url
 import io.ktor.utils.io.ByteReadChannel
 import java.io.IOException
 import java.util.concurrent.TimeUnit
+import java.net.UnknownHostException
 
 object NetworkClient {
 	private val client = HttpClient(OkHttp){
@@ -28,7 +29,13 @@ object NetworkClient {
 		}
 	}
 
-	/** @throws NetworkException When the get call is not successful. */
+	/**
+	 * @return A Result.Success if no exception AND no http error occurred. Otherwise returns a
+	 * Result.Error
+	 * @throws IllegalArgumentException
+	 * @throws ConnectTimeoutException
+	 * @throws UnknownHostException
+	 **/
 	suspend fun get(url: Url): Result<ByteReadChannel> {
 		try {
 			val response = client.get(url) {}
@@ -52,11 +59,6 @@ object NetworkClient {
 		catch (cte: ConnectTimeoutException){
 			throw ConnectTimeoutException("Request has timed out", cte)
 		}
-		/*
-		catch (ioe: IOException){
-			throw NetworkException("Error when trying to query the backend server", ioe)
-		}
-		 */
 	}
 
 	//FIXME handle http responses here...
