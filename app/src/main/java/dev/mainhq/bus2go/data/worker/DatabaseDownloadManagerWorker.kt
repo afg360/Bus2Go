@@ -27,17 +27,11 @@ class DatabaseDownloadManagerWorker(
 	private val notificationsRepository =
 		(applicationContext as Bus2GoApplication).commonModule.notificationsRepository
 
-	private val appStaterepository =
-		(applicationContext as Bus2GoApplication).commonModule.appStateRepository
-
 	override suspend fun doWork(): Result {
-		//before downloading whole database, check if database was already fully downloaded
-		//to verify if db is up to date, query backend server to check if the file name/version matches
-		//check which databases to download
 		val dbToDownload =
 			inputData.getString(KEY) ?: throw IllegalStateException("Expected an input")
 
-		notificationsRepository.notify(NotificationType.DbUpdateAvailable(dbToDownload))
+		//notificationsRepository.notify(NotificationType.DbUpdateAvailable(dbToDownload))
 		Log.d("DB WORKER", "Started db download work")
 
 		//TODO notify when download starts (and show a bar perhaps)
@@ -66,6 +60,7 @@ class DatabaseDownloadManagerWorker(
 			}
 			catch (e: Exception) {
 				Log.e("DB_WORKER", "An exception occurred...\n ${e.stackTrace}")
+				notificationsRepository.notify(NotificationType.DbUpdateError)
 				Result.failure()
 			}
 		}

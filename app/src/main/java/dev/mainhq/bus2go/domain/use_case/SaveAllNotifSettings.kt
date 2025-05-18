@@ -1,12 +1,15 @@
 package dev.mainhq.bus2go.domain.use_case
 
+import dev.mainhq.bus2go.domain.repository.AppStateRepository
 import dev.mainhq.bus2go.domain.repository.SettingsRepository
 
 class SaveAllNotifSettings(
-	private val settingsRepository: SettingsRepository
+	private val settingsRepository: SettingsRepository,
+	private val appStateRepository: AppStateRepository
 ) {
 
-	operator fun invoke(appUpdateNotif: Boolean, dbUpdateNotif: Boolean): Boolean{
+	suspend operator fun invoke(appUpdateNotif: Boolean, dbUpdateNotif: Boolean): Boolean{
+		appStateRepository.setIsFirstTime()
 		return settingsRepository.saveAppUpdateNotifSetting(appUpdateNotif)
 				&& settingsRepository.saveDbUpdateNotifSetting(dbUpdateNotif)
 	}

@@ -60,7 +60,7 @@ class AppStateRepositoryImpl(
 	 * However, for long time users, check if the databases exist. If they don't, then we are sure
 	 * it is their first time.
 	 **/
-	override suspend fun isFirstTime(): Boolean {
+	override suspend fun getIsFirstTime(): Boolean {
 		return withContext(Dispatchers.IO){
 			val isFirstTime = appStateDataStore.data.first()[AppStateDataStoreKeys.IS_FIRST_TIME]
 			if  (isFirstTime == null){
@@ -72,6 +72,14 @@ class AppStateRepositoryImpl(
 				return@withContext true
 			}
 			return@withContext isFirstTime
+		}
+	}
+
+	override suspend fun setIsFirstTime() {
+		withContext(Dispatchers.IO){
+			appStateDataStore.edit { mutablePreferences ->
+				mutablePreferences[AppStateDataStoreKeys.IS_FIRST_TIME] = false
+			}
 		}
 	}
 }

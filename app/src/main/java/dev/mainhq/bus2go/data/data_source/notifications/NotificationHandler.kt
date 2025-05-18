@@ -2,7 +2,9 @@ package dev.mainhq.bus2go.data.data_source.notifications
 
 import android.Manifest
 import android.app.Notification
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationChannelCompat
@@ -17,10 +19,13 @@ class NotificationHandler(private val appContext: Context) {
 		private const val appUpdateNotifId = 1
 		private const val DB_UPDATES = "db_updates"
 		private const val dbUpdateNotifId  = 2
+		private const val URGENT = "urgent"
+		private const val urgentNotifId  = 3
 
 		private val notifChannels = mapOf(
 			APP_UPDATES to "App Updates",
-			DB_UPDATES to "Database Updates"
+			DB_UPDATES to "Database Updates",
+			URGENT to "Urgent Notifications"
 		)
 	}
 
@@ -40,9 +45,17 @@ class NotificationHandler(private val appContext: Context) {
 		.setShowBadge(false)
 		.build()
 
+	private val urgentNotifChannel = NotificationChannelCompat.Builder(
+		URGENT,
+		NotificationManagerCompat.IMPORTANCE_HIGH
+	).setName(notifChannels[URGENT])
+		.setShowBadge(false)
+		.build()
+
 	init {
 		notificationManager.createNotificationChannel(appNotifChannel)
 		notificationManager.createNotificationChannel(dbNotifChannel)
+		notificationManager.createNotificationChannel(urgentNotifChannel)
 	}
 
 	/* ---------------------- App Update Notifications ------------------------- */
@@ -74,6 +87,15 @@ class NotificationHandler(private val appContext: Context) {
 
 	/** Used to inform the user to tap it to install the new update. */
 	fun notifyAppUpdateDone(){
+		//val file = File(appContext.cacheDir, )
+		//for installing the newly downloaded apk
+		val intent = Intent(Intent.ACTION_VIEW).apply {
+			//setDataAndType(
+			//	FileProvider.getUriForFile(appContext,
+			//		"${appContext.packageName}.provider", file),
+			//	"application/vnd.android.package-archive"
+			//)
+		}
 		createNotificationBuilder(
 			channelId = APP_UPDATES,
 			title = "Tap to Install",
@@ -81,7 +103,9 @@ class NotificationHandler(private val appContext: Context) {
 			icon = R.drawable.baseline_update_24,
 			priority = NotificationCompat.PRIORITY_HIGH
 		).setOngoing(true).setProgress(0, 0, false)
-			//.addAction()
+			.setContentIntent(
+				PendingIntent.getActivity(appContext, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+			)
 			.build()
 			.also { postNotif(appUpdateNotifId, it) }
 	}
@@ -92,10 +116,9 @@ class NotificationHandler(private val appContext: Context) {
 			channelId = APP_UPDATES,
 			title = "App Update Error",
 			description = "Error trying to update Bus2Go... Tap to retry",
-			icon = R.drawable.baseline_update_24,
+			icon = R.drawable.error_notif_sign,
 			priority = NotificationCompat.PRIORITY_HIGH
 		).setOngoing(false).setProgress(0, 0, false)
-			//.addAction()
 			.build()
 			.also { postNotif(appUpdateNotifId, it) }
 	}
@@ -112,7 +135,7 @@ class NotificationHandler(private val appContext: Context) {
 			priority = NotificationCompat.PRIORITY_DEFAULT
 		).setOngoing(false)
 			.build()
-			.also { postNotif(appUpdateNotifId, it) }
+			.also { postNotif(dbUpdateNotifId, it) }
 
 	}
 
@@ -122,10 +145,10 @@ class NotificationHandler(private val appContext: Context) {
 			title = "Downloading Bus2Go database...",
 			description = "Downloading a new version of a Bus2Go database",
 			icon = R.drawable.baseline_update_24, //TODO change
-			priority = NotificationCompat.PRIORITY_DEFAULT
+			priority = NotificationCompat.PRIORITY_LOW
 		).setOngoing(true).setProgress(contentLength, current, false)
 			.build()
-			.also { postNotif(appUpdateNotifId, it) }
+			.also { postNotif(dbUpdateNotifId, it) }
 	}
 
 	fun notifyDbExtracting(){
@@ -137,23 +160,43 @@ class NotificationHandler(private val appContext: Context) {
 			priority = NotificationCompat.PRIORITY_DEFAULT
 		).setOngoing(true).setProgress(0, 0, true)
 			.build()
-			.also { postNotif(appUpdateNotifId, it) }
+			.also { postNotif(dbUpdateNotifId, it) }
 	}
 
 	fun notifyDbUpdateDone(){
+		//FIXME for it to work, need to schedule a restart using alarm manager and broadcast receivers,
+		// and then completely shutdown the app using android.os.killProcess()
+		val intent = appContext.packageManager.getLaunchIntentForPackage(appContext.packageName)
+		val pendingIntent = PendingIntent.getActivity(
+			appContext,
+			1234,
+			Intent.makeRestartActivityTask(intent?.component),
+			PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
+		)
+
 		createNotificationBuilder(
-			channelId = DB_UPDATES,
+			channelId = URGENT,
 			title = "Tap to Restart",
 			description = "Tap to restart bus2go to finish the updating of the database.",
 			icon = R.drawable.baseline_update_24,
-			priority = NotificationCompat.PRIORITY_DEFAULT
+			priority = NotificationCompat.PRIORITY_HIGH
 		).setOngoing(false).setProgress(0, 0, false)
+			.setContentIntent(pendingIntent)
 			.build()
-			.also { postNotif(appUpdateNotifId, it) }
+			.also { postNotif(urgentNotifId, it) }
 	}
 
 	//TODO
 	fun notifyDbDownloadFailed(){
+		createNotificationBuilder(
+			channelId = DB_UPDATES,
+			title = "Error trying to download database",
+			description = "You may try to redownload the database in the settings",
+			icon = R.drawable.error_notif_sign, //TODO change
+			priority = NotificationCompat.PRIORITY_HIGH
+		).setOngoing(false).setProgress(0, 0, false)
+			.build()
+			.also { postNotif(dbUpdateNotifId, it) }
 	}
 
 	//TODO other possible notifications...?
@@ -173,7 +216,7 @@ class NotificationHandler(private val appContext: Context) {
 		title: String,
 		description: String,
 		icon: Int,
-		priority: Int
+		priority: Int,
 	) : NotificationCompat.Builder {
 		return NotificationCompat.Builder(appContext, channelId)
 			.setContentTitle(title)

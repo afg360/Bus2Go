@@ -1,6 +1,5 @@
 package dev.mainhq.bus2go.domain.repository
 
-import dev.mainhq.bus2go.domain.core.Result
 import java.time.LocalDate
 
 //TODO output a result object (in case of failure, we will retry...), or maybe a boolean...
@@ -17,5 +16,8 @@ interface AppStateRepository {
 	suspend fun getExoDatabaseVersion(): Int
 
 	/** Checks if it is the first time that the app has been launched. **/
-	suspend fun isFirstTime(): Boolean
+	suspend fun getIsFirstTime(): Boolean
+
+	/** Initialises the isFirstTime flag. */
+	suspend fun setIsFirstTime()
 }

@@ -20,6 +20,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.materialswitch.MaterialSwitch
 import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.R
+import dev.mainhq.bus2go.presentation.core.collectFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -63,16 +64,17 @@ class ConfigNotificationsFragment: Fragment(R.layout.fragment_config_notificatio
 					if (ContextCompat.checkSelfPermission(
 							requireContext(),
 							Manifest.permission.POST_NOTIFICATIONS
-						) == PackageManager.PERMISSION_GRANTED
-					) viewModel.saveSettings()
-					else requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+						) != PackageManager.PERMISSION_GRANTED
+					)
+					requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
 				}
-				else {
-					if (!viewModel.saveSettings()){
-						Toast.makeText(requireContext(), "Something went wrong...", Toast.LENGTH_SHORT)
-							.show()
-					}
+				viewModel.saveSettings()
+				/*
+				if (!viewModel.saveSettings()){
+					Toast.makeText(requireContext(), "Something went wrong...", Toast.LENGTH_SHORT)
+						.show()
 				}
+				 */
 			}
 			sharedViewModel.triggerEvent(true)
 		}
@@ -88,21 +90,8 @@ class ConfigNotificationsFragment: Fragment(R.layout.fragment_config_notificatio
 			viewModel.setDbUpdateNotifs(boolean)
 		}
 
-		viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main){
-			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){
-				viewModel.appUpdateNotifs.collect{
-					appNotifs.isChecked = it
-				}
-			}
-		}
-
-		viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main){
-			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){
-				viewModel.dbUpdateNotifs.collect{
-					dbNotifs.isChecked = it
-				}
-			}
-		}
+		collectFlow(viewModel.appUpdateNotifs){ appNotifs.isChecked = it }
+		collectFlow(viewModel.dbUpdateNotifs){ dbNotifs.isChecked = it }
 
 		/*
 		requireActivity().onBackPressedDispatcher.addCallback(object: OnBackPressedCallback(true){

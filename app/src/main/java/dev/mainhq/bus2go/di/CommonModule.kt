@@ -75,7 +75,7 @@ class CommonModule(applicationContext: Context) {
 	val networkMonitor = NetworkMonitor.getInstance(applicationContext, loggerImpl)
 
 	val saveBus2GoServer = SaveBus2GoServer(settingsRepository)
-	val saveAllNotifSettings = SaveAllNotifSettings(settingsRepository)
+	val saveAllNotifSettings = SaveAllNotifSettings(settingsRepository, appStateRepository)
 
 	val getRouteInfo = GetRouteInfo(
 		exoRepository,

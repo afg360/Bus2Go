@@ -12,6 +12,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.materialswitch.MaterialSwitch
 import dev.mainhq.bus2go.R
+import dev.mainhq.bus2go.presentation.core.collectFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -33,14 +34,10 @@ class ConfigThemeFragment: Fragment(R.layout.fragment_config_theme) {
 			viewModel.setDarkMode(boolean)
 		}
 
-		viewLifecycleOwner.lifecycleScope.launch {
-			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){
-				viewModel.darkMode.collect{
-					switch.isChecked = it
-					if (it) switch.text = "Dark"
-					else switch.text = "Light"
-				}
-			}
+		collectFlow(viewModel.darkMode){
+			switch.isChecked = it
+			if (it) switch.text = "Dark"
+			else switch.text = "Light"
 		}
 
 		view.findViewById<MaterialButton>(R.id.configSelectThemeContinueButton).setOnClickListener {

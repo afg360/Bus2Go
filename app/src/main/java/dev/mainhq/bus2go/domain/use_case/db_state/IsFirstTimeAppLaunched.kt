@@ -7,6 +7,6 @@ class IsFirstTimeAppLaunched(
 ) {
 
 	suspend operator fun invoke(): Boolean{
-		return appStateRepository.isFirstTime()
+		return appStateRepository.getIsFirstTime()
 	}
 }

@@ -19,6 +19,7 @@ import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.presentation.core.UiState
+import dev.mainhq.bus2go.presentation.core.collectFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -55,14 +56,7 @@ class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
 		stmCheckbox.setOnCheckedChangeListener { _, _ -> viewModel.toggleStm() }
 		exoCheckBox.setOnCheckedChangeListener { _, _ -> viewModel.toggleExo() }
 
-		viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
-			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){
-				viewModel.dbToDownload.collect{
-					continueButton.text = if (it == null) "Skip" else "Continue"
-				}
-			}
-		}
-
+		collectFlow(viewModel.dbToDownload){ continueButton.text = if (it == null) "Skip" else "Continue" }
 		requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object: OnBackPressedCallback(true){
 			override fun handleOnBackPressed() {
 				sharedViewModel.setFragment(prevFrag)

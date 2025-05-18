@@ -23,6 +23,7 @@ import com.google.android.material.textfield.TextInputEditText
 import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.presentation.core.UiState
+import dev.mainhq.bus2go.presentation.core.collectFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
@@ -78,69 +79,60 @@ class ConfigServerFragment: Fragment(R.layout.fragment_config_server) {
 			else viewModel.checkIsBus2GoServer()
 		}
 
-		viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
-			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){
-				//TODO try the ip/domain name to see if it is a valid bus2go backend and if it is on...
-				viewModel.serverResponse.collect{
-					when(it){
-						is UiState.Error -> {
-							//if device not connected to internet, make a SnackBar and allow retry
-							//FIXME this is not the way to do it
-							progressIndicator.visibility = View.GONE
-							button.text = viewModel.buttonText.value
-							button.isEnabled = true
-							if (it.message == "Not connected to the internet")
-								//TODO add a swippable behaviour bcz this is annoying...
-								Snackbar.make(requireContext(), view, it.message, Snackbar.LENGTH_INDEFINITE)
-									.setAction("Retry"){
-										//FIXME Button quirks because constantly updated...
-										viewModel.checkIsBus2GoServer()
-									}
-									.show()
+		collectFlow(viewModel.serverResponse){
+			when(it){
+				is UiState.Error -> {
+					//if device not connected to internet, make a SnackBar and allow retry
+					//FIXME this is not the way to do it
+					progressIndicator.visibility = View.GONE
+					button.text = viewModel.buttonText.value
+					button.isEnabled = true
+					if (it.message == "Not connected to the internet")
+					//TODO add a swippable behaviour bcz this is annoying...
+						Snackbar.make(requireContext(), view, it.message, Snackbar.LENGTH_INDEFINITE)
+							.setAction("Retry"){
+								//FIXME Button quirks because constantly updated...
+								viewModel.checkIsBus2GoServer()
+							}
+							.show()
 
-							else {
-								textInput.error = "Invalid Server"
-								Toast.makeText(requireContext(), it.message, Toast.LENGTH_SHORT)
-									.show()
-							}
-						}
-						UiState.Loading -> {
-							button.isEnabled = false
-							button.text = ""
-							progressIndicator.visibility = View.VISIBLE
-						}
-						is UiState.Success<Boolean> -> {
-							progressIndicator.visibility = View.GONE
-							button.text = viewModel.buttonText.value
-							button.isEnabled = true
-							//if the response was valid, go to databases
-							if (it.data) {
-								viewModel.cancel()
-								sharedViewModel.setFragment(nextFrag)
-							}
-							//else show an error on the inputText, and display "Skip" on the button (or perhaps a retry)
-							else textInput.error = "Invalid server"
-						}
-						UiState.Init -> {
-							progressIndicator.visibility = View.GONE
-							button.text = viewModel.buttonText.value
-							button.isEnabled = true
-						}
+					else {
+						textInput.error = "Invalid Server"
+						Toast.makeText(requireContext(), it.message, Toast.LENGTH_SHORT)
+							.show()
 					}
+				}
+				UiState.Loading -> {
+					button.isEnabled = false
+					button.text = ""
+					progressIndicator.visibility = View.VISIBLE
+				}
+				is UiState.Success<Boolean> -> {
+					progressIndicator.visibility = View.GONE
+					button.text = viewModel.buttonText.value
+					button.isEnabled = true
+					//if the response was valid, go to databases
+					if (it.data) {
+						viewModel.cancel()
+						sharedViewModel.setFragment(nextFrag)
+					}
+					//else show an error on the inputText, and display "Skip" on the button (or perhaps a retry)
+					else textInput.error = "Invalid server"
+				}
+				UiState.Init -> {
+					progressIndicator.visibility = View.GONE
+					button.text = viewModel.buttonText.value
+					button.isEnabled = true
 				}
 			}
 		}
 
-		viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
-			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){
-				viewModel.textInputText.collect{
-					when (it) {
-						is UiState.Error -> textInput.error = "Invalid Url"
-						UiState.Init -> textInput.setText("")
-						UiState.Loading -> TODO("Wtf")
-						is UiState.Success<String> -> if (!textInput.hasFocus()) textInput.setText(it.data)
-					}
-				}
+		collectFlow(viewModel.textInputText){
+			when (it) {
+				is UiState.Error -> textInput.error = "Invalid Url"
+				UiState.Init -> textInput.setText("")
+				UiState.Loading -> TODO("Wtf")
+				is UiState.Success<String> -> if (!textInput.hasFocus()) textInput.setText(it.data)
 			}
 		}
 
@@ -153,13 +145,7 @@ class ConfigServerFragment: Fragment(R.layout.fragment_config_server) {
 				override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) { }
 		})
 
-		viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
-			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){
-				viewModel.buttonText.collect{
-					button.text = it
-				}
-			}
-		}
+		collectFlow(viewModel.buttonText){ button.text = it }
 
 		val mainBackPressCallBack = object: OnBackPressedCallback(true){
 			override fun handleOnBackPressed() {

@@ -1,9 +1,11 @@
 package dev.mainhq.bus2go.presentation.config
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dev.mainhq.bus2go.domain.use_case.SaveAllNotifSettings
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 class ConfigNotificationsFragmentViewModel(
 	private val saveAllNotifSettings: SaveAllNotifSettings
@@ -27,8 +29,11 @@ class ConfigNotificationsFragmentViewModel(
 		return _appUpdateNotifs.value || _dbUpdateNotifs.value
 	}
 
-	fun saveSettings(): Boolean {
+	fun saveSettings() {
 		//FIXME ignoring return value for now...
-		return saveAllNotifSettings.invoke(_appUpdateNotifs.value, _dbUpdateNotifs.value)
+		// perhaps notify when a result is given and do something with it
+		viewModelScope.launch {
+			saveAllNotifSettings.invoke(_appUpdateNotifs.value, _dbUpdateNotifs.value)
+		}
 	}
 }
