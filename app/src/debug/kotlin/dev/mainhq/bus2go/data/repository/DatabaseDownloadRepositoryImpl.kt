@@ -14,12 +14,14 @@ import dev.mainhq.bus2go.domain.repository.NotificationsRepository
 import io.ktor.client.call.body
 import io.ktor.client.network.sockets.ConnectTimeoutException
 import io.ktor.http.URLBuilder
+import io.ktor.http.Url
 import io.ktor.http.set
 import io.ktor.utils.io.ByteReadChannel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonPrimitive
 import java.io.File
 import java.io.FileInputStream
@@ -42,8 +44,8 @@ class DatabaseDownloadRepositoryImpl(
 	private val baseUrl: String = baseUrl ?: BuildConfig.LOCAL_HOST
 
 	companion object {
-		private const val DB_DEBUG_NAME_STM = "stm_info.db"
-		private const val DB_DEBUG_NAME_EXO = "exo_info.db"
+		private const val DB_DEBUG_NAME_STM = "stm_data"
+		private const val DB_DEBUG_NAME_EXO = "exo_data"
 		private const val COMPRESSION_EXT = "gz"
 
 		private const val TAG = "DATABASE_DOWNLOAD"
@@ -53,12 +55,8 @@ class DatabaseDownloadRepositoryImpl(
 	}
 
 	//TODO
-	override suspend fun testIsBus2Go(str: String): Result<Boolean> {
+	override suspend fun getIsBus2Go(str: String): Result<Boolean> {
 		//TODO eventually also set a header to send to prove perhaps identity from client
-		if (!networkMonitor.isConnected()) {
-			logger?.error(TAG, "Not connected")
-			return Result.Error(null, "Not connected to the internet")
-		}
 		val url = URLBuilder(
 			host = str,
 			//FIXME to port 443
@@ -69,19 +67,56 @@ class DatabaseDownloadRepositoryImpl(
 			}
 		}.build()
 
+		return call(
+			url,
+			onError = { Result.Success(false) },
+			onSuccess = { res ->
+				//before returning success, read the message and compare
+				val response = Json.decodeFromString<JsonObject>(res.data.readRemaining().readText())
+				logger?.debug(TAG, response.toString())
+				val message = response["message"]?.jsonPrimitive?.content
+				val version = response["version"]?.jsonPrimitive?.content
+				message == EXPECTED_MESSAGE && version == API_VERSION
+			}
+		)
+	}
+
+	override suspend fun getDbUpToDateVersion(dbToDownload: DbToDownload): Result<Int> {
+		val url = URLBuilder(
+			host = baseUrl,
+			port = BuildConfig.DEFAULT_PORT,
+		).apply {
+			set {
+				//FIXME needs to be replaced since "all" is not a valid endpoint
+				pathSegments = listOf("api", "download", "v1", dbToDownload.name.lowercase(), "version")
+			}
+		}.build()
+		return call(
+			url,
+			onError = { Result.Error(null, "Wrong call to api...?") },
+			onSuccess = { res ->
+				Json.decodeFromString<JsonObject>(res.data.readRemaining().readText())["version"]
+					?.jsonPrimitive?.int ?: -1
+			}
+		)
+	}
+
+	private suspend fun <T> call(
+		url: Url,
+		onError: () -> Result<T>,
+		onSuccess: suspend (Result.Success<ByteReadChannel>) -> T
+	): Result<T>{
+		if (!networkMonitor.isConnected()) {
+			logger?.error(TAG, "Not connected")
+			return Result.Error(null, "Not connected to the internet")
+		}
+
 		try{
 			//if we receive an Error, then the url is wrong
 			logger?.debug(TAG, url.toString())
 			return when(val res = NetworkClient.get(url)){
-				is Result.Error -> Result.Success(false)
-				is Result.Success<ByteReadChannel> -> {
-					//before returning success, read the message and compare
-					val response = Json.decodeFromString<JsonObject>(res.data.readRemaining().readText())
-					logger?.debug(TAG, response.toString())
-					val message = response["message"]?.jsonPrimitive?.content
-					val version = response["version"]?.jsonPrimitive?.content
-					Result.Success( message == EXPECTED_MESSAGE && version == API_VERSION)
-				}
+				is Result.Error -> onError()
+				is Result.Success<ByteReadChannel> -> Result.Success(onSuccess(res))
 			}
 		}
 		catch (iae: IllegalArgumentException){
@@ -106,7 +141,7 @@ class DatabaseDownloadRepositoryImpl(
 		}
 	}
 
-	override suspend fun download(dbToDownload: DbToDownload): Boolean {
+	override suspend fun getDb(dbToDownload: DbToDownload): Boolean {
 		val urlBuilder = URLBuilder(
 			host = baseUrl,
 			port = BuildConfig.DEFAULT_PORT,
@@ -133,16 +168,41 @@ class DatabaseDownloadRepositoryImpl(
 			DbToDownload.ALL -> TODO()
 		}
 
+		//TODO before downloading, check if file exists already with the correct version
+		logger?.debug(TAG, "Looking for already downloaded databases")
+		val mostUpToDateDownloadFileList = applicationContext.filesDir.listFiles()
+			?.filter { it.name.matches("${dbName}_[0-9]+.db.${COMPRESSION_EXT}".toRegex()) }
+		if (mostUpToDateDownloadFileList?.isNotEmpty() == true) {
+			val mostUpToDateDownloadFile = mostUpToDateDownloadFileList.reduce{ f1, f2 ->
+				val versionStr1 = f1.name.filter { it.isDigit() }.toInt()
+				val versionStr2 = f2.name.filter { it.isDigit() }.toInt()
+				if (versionStr1 > versionStr2) f1 else f2
+			}
+			//TODO if there are more than 1, delete the ones that have different version numbers
+			if (mostUpToDateDownloadFile != null) {
+				decompressing(
+					mostUpToDateDownloadFile,
+					"$dbName.db"
+				)
+				return true
+			}
+		}
 
-		logger?.debug(TAG, "Beginning Download")
+		logger?.debug(TAG, "No Db found. Beginning Download")
+		var fileName: String? = null
 		val downloadStatus = NetworkClient.getAndExecute(url){
+			var tmpCompressedFile: File? = null
 			try {
 				val contentLength = it.headers["content-length"]?.toInt()
 					?: throw NetworkException("Content-Length HTTP header not set by server...")
 				val channel = it.body<ByteReadChannel>()
-				val tmpCompressedFile = File(applicationContext.filesDir, "$dbName.$COMPRESSION_EXT.part")
+				//FIXME better parsing should happen here in case quotes and other garbage is added...
+				fileName = it.headers["content-disposition"]?.substringAfter("attachment; filename=")
+					?: throw NetworkException("Content-Disposition HTTP header needed for file name not set by server...")
+				logger?.debug(TAG, fileName!!)
+				tmpCompressedFile = File(applicationContext.filesDir, "$fileName.part")
 				var totalDownloaded = 0
-				notificationsRepository.notify(NotificationType.DbDownloading(0))
+				notificationsRepository.notify(NotificationType.DbDownloading(0, contentLength))
 				//download of compressed databases
 				FileOutputStream(tmpCompressedFile).use { outputStream ->
 					val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
@@ -152,40 +212,33 @@ class DatabaseDownloadRepositoryImpl(
 						outputStream.write(buffer, 0, bytesRead)
 						totalDownloaded += bytesRead
 						notificationsRepository.notify(
-							NotificationType.DbDownloading(totalDownloaded / contentLength)
+							NotificationType.DbDownloading(totalDownloaded, contentLength)
 						)
 					}
 				}
 				true
 			}
 			catch (ne: NetworkException){
-				//TODO SOME LOGGGING
 				logger?.error(TAG, "A network exception occured", ne)
-
-					false
-					//TODO("Not implemented")
-				}
-				catch (ioe: IOException){
-					logger?.error(TAG, "IOException...", ioe)
-					false
-				}
+				tmpCompressedFile?.delete()
+				false
+			}
+			catch (ioe: IOException){
+				logger?.error(TAG, "IOException...", ioe)
+				tmpCompressedFile?.delete()
+				false
+			}
 		}
 
 		if (downloadStatus){
 			logger?.debug(TAG, "Download Successful")
-			val compressedFile = File(applicationContext.filesDir, "$dbName.$COMPRESSION_EXT")
-			val tmpCompressedFile = File(applicationContext.filesDir, "$dbName.$COMPRESSION_EXT.part")
+			//FIXME how to find name if it is variable...
+			val compressedFile = File(applicationContext.filesDir, fileName!!)
+			val tmpCompressedFile = File(applicationContext.filesDir, "${fileName!!}.part")
 			if (!tmpCompressedFile.renameTo(compressedFile))
 				throw IOException("Failed to rename downloaded file to a compressed file")
 
-			val databasesDir = applicationContext.getDatabasePath(dbName).parentFile
-				?: throw IllegalStateException("Cannot access databases directory")
-
-			val destFile = File(databasesDir, dbName)
-			if (destFile.exists()) destFile.delete()
-
-			decompressing(compressedFile, destFile)
-
+			decompressing(compressedFile, "$dbName.db")
 			logger?.debug(TAG, "Decompressing Successful")
 			return true
 		}
@@ -193,7 +246,13 @@ class DatabaseDownloadRepositoryImpl(
 		return false
 	}
 
-	private suspend fun decompressing(compressedFile: File, destFile: File){
+	private suspend fun decompressing(compressedFile: File, dbName: String){
+		val databasesDir = applicationContext.getDatabasePath(dbName).parentFile
+			?: throw IllegalStateException("Cannot access databases directory")
+
+		val destFile = File(databasesDir, dbName)
+		if (destFile.exists()) destFile.delete()
+
 		logger?.debug(TAG, "Decompressing")
 		withContext(Dispatchers.IO) {
 			FileInputStream(compressedFile).use { fileIn ->

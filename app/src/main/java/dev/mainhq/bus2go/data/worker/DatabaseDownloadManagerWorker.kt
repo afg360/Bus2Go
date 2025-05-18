@@ -1,17 +1,12 @@
 package dev.mainhq.bus2go.data.worker
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.content.Context
 import android.util.Log
-import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import dev.mainhq.bus2go.Bus2GoApplication
-import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.domain.entity.DbToDownload
 import dev.mainhq.bus2go.domain.entity.NotificationType
-import dev.mainhq.bus2go.domain.repository.NotificationsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -20,17 +15,27 @@ import kotlinx.coroutines.withContext
 class DatabaseDownloadManagerWorker(
 	context: Context,
 	workerParams: WorkerParameters,
-	private val notificationsRepository: NotificationsRepository
 ) : CoroutineWorker(context, workerParams) {
 
 	companion object {
 		const val KEY = "DB_TO_DOWNLOAD"
 	}
 
+	private val dbDownloadRepository =
+		(applicationContext as Bus2GoApplication).appModule.dbDownloadRepository
+
+	private val notificationsRepository =
+		(applicationContext as Bus2GoApplication).commonModule.notificationsRepository
+
+	private val appStaterepository =
+		(applicationContext as Bus2GoApplication).commonModule.appStateRepository
+
 	override suspend fun doWork(): Result {
+		//before downloading whole database, check if database was already fully downloaded
+		//to verify if db is up to date, query backend server to check if the file name/version matches
 		//check which databases to download
-		val dbToDownload = inputData.getString(KEY) ?: throw IllegalStateException("Expected an input")
-		val dbDownloadRepository = (applicationContext as Bus2GoApplication).appModule.dbDownloadRepository
+		val dbToDownload =
+			inputData.getString(KEY) ?: throw IllegalStateException("Expected an input")
 
 		notificationsRepository.notify(NotificationType.DbUpdateAvailable(dbToDownload))
 		Log.d("DB WORKER", "Started db download work")
@@ -40,27 +45,29 @@ class DatabaseDownloadManagerWorker(
 		// finally notify with the priority high that Download Complete
 		// and in notifications, show a "tap to restart"
 
-		return withContext(Dispatchers.IO){
-			val status = when (dbToDownload) {
-				"STM" -> dbDownloadRepository.download(DbToDownload.STM)
-				"EXO" -> dbDownloadRepository.download(DbToDownload.EXO)
-				else -> throw IllegalStateException("You forgot to add the correct key")
-			}
-			if (!status) {
-				withContext(Dispatchers.Main) {
-					notificationsRepository.notify(NotificationType.DbUpdateError)
+		return withContext(Dispatchers.IO) {
+			try {
+				val status = when (dbToDownload) {
+					"STM" -> dbDownloadRepository.getDb(DbToDownload.STM)
+					"EXO" -> dbDownloadRepository.getDb(DbToDownload.EXO)
+					else -> throw IllegalStateException("You forgot to add the correct key")
 				}
-				Result.retry()
-			}
-			else {
 				withContext(Dispatchers.Main) {
-					Log.d("DB WORKER", "Downloaded succesfully")
-					notificationsRepository.notify(NotificationType.DbUpdateDone)
+					if (!status) {
+						notificationsRepository.notify(NotificationType.DbUpdateError)
+						Result.retry()
+					}
+					else {
+						Log.d("DB_WORKER", "Downloaded successfully")
+						notificationsRepository.notify(NotificationType.DbUpdateDone)
+						Result.success()
+					}
 				}
-				Result.success()
+			}
+			catch (e: Exception) {
+				Log.e("DB_WORKER", "An exception occurred...\n ${e.stackTrace}")
+				Result.failure()
 			}
 		}
 	}
-
-
 }

@@ -43,7 +43,7 @@ class CommonModule(applicationContext: Context) {
 		stmDatabase?.tripsDao()
 	)
 
-	private val appStateRepository = AppStateRepositoryImpl(
+	val appStateRepository = AppStateRepositoryImpl(
 		applicationContext.appStateDataStore,
 		applicationContext.dataDir
 	)

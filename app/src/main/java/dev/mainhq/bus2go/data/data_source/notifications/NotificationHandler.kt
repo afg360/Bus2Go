@@ -60,14 +60,14 @@ class NotificationHandler(private val appContext: Context) {
 	}
 
 	/** @param percentage A value between 0 to 100 indicating progress. */
-	fun notifyAppUpdating(percentage: Int){
+	fun notifyAppUpdating(current: Int, contentLength: Int){
 		createNotificationBuilder(
 			channelId = APP_UPDATES,
 			title = "Updating Bus2Go",
 			description = "Bus2Go is being updated...",
 			icon = R.drawable.baseline_update_24,
 			priority = NotificationCompat.PRIORITY_LOW
-		).setOngoing(true).setProgress(100, percentage, false)
+		).setOngoing(true).setProgress(contentLength, current, false)
 			.build()
 			.also { postNotif(appUpdateNotifId, it) }
 	}
@@ -116,14 +116,14 @@ class NotificationHandler(private val appContext: Context) {
 
 	}
 
-	fun notifyDbDownloading(percentage: Int){
+	fun notifyDbDownloading(current: Int, contentLength: Int){
 		createNotificationBuilder(
 			channelId = DB_UPDATES,
 			title = "Downloading Bus2Go database...",
 			description = "Downloading a new version of a Bus2Go database",
 			icon = R.drawable.baseline_update_24, //TODO change
-			priority = NotificationCompat.PRIORITY_LOW
-		).setOngoing(true).setProgress(100, percentage, false)
+			priority = NotificationCompat.PRIORITY_DEFAULT
+		).setOngoing(true).setProgress(contentLength, current, false)
 			.build()
 			.also { postNotif(appUpdateNotifId, it) }
 	}
@@ -134,7 +134,7 @@ class NotificationHandler(private val appContext: Context) {
 			title = "Extracting database...",
 			description = "",
 			icon = R.drawable.baseline_update_24, //TODO change
-			priority = NotificationCompat.PRIORITY_LOW
+			priority = NotificationCompat.PRIORITY_DEFAULT
 		).setOngoing(true).setProgress(0, 0, true)
 			.build()
 			.also { postNotif(appUpdateNotifId, it) }

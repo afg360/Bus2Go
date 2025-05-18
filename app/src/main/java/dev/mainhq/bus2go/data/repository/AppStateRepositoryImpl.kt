@@ -4,10 +4,12 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import dev.mainhq.bus2go.data.data_source.local.datastore.app_state.AppStateDataStoreKeys
+import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.repository.AppStateRepository
 import dev.mainhq.bus2go.domain.entity.Time
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.time.LocalDate
@@ -33,6 +35,22 @@ class AppStateRepositoryImpl(
 			appStateDataStore.edit { mutablePreferences ->
 				mutablePreferences[AppStateDataStoreKeys.DATABASES_STATE] = Time.toLocalDateString(localDate)
 			}
+		}
+	}
+
+	override suspend fun getStmDatabaseVersion(): Int {
+		return withContext(Dispatchers.IO){
+			 appStateDataStore.data.map { preferences ->
+				 preferences[AppStateDataStoreKeys.SQLITE_STM_VERSION] ?: -1
+			 }.first()
+		}
+	}
+
+	override suspend fun getExoDatabaseVersion(): Int {
+		return withContext(Dispatchers.IO){
+			appStateDataStore.data.map { preferences ->
+				preferences[AppStateDataStoreKeys.SQLITE_EXO_VERSION] ?: -1
+			}.first()
 		}
 	}
 

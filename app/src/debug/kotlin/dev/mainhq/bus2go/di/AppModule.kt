@@ -16,10 +16,6 @@ class AppModule(applicationContext: Context) {
 		WorkManager.getInstance(applicationContext)
 	)
 
-	val scheduleDownloadDatabaseTask = ScheduleDownloadDatabaseTask(
-		databaseDownloadScheduler
-	)
-
 	val dbDownloadRepository = DatabaseDownloadRepositoryImpl(
 		//may be defined during runtime (from settings in case it is customised)
 		BuildConfig.LOCAL_HOST,
@@ -30,4 +26,10 @@ class AppModule(applicationContext: Context) {
 	)
 
 	val checkIsBus2GoServer = CheckIsBus2GoServer(dbDownloadRepository)
+
+	val scheduleDownloadDatabaseTask = ScheduleDownloadDatabaseTask(
+		databaseDownloadScheduler,
+		(applicationContext as Bus2GoApplication).commonModule.appStateRepository,
+		dbDownloadRepository
+	)
 }

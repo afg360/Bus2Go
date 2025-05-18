@@ -23,9 +23,11 @@ import dev.mainhq.bus2go.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+//TODO display in the fragment: You are almost all set!
+
 class ConfigNotificationsFragment: Fragment(R.layout.fragment_config_notifications) {
 
-	private val prevFrag = FragmentUsed.DATABASES
+	//private val prevFrag = FragmentUsed.DATABASES
 
 	private val sharedViewModel: ConfigSharedViewModel by activityViewModels()
 	private val viewModel: ConfigNotificationsFragmentViewModel by activityViewModels{
@@ -102,13 +104,14 @@ class ConfigNotificationsFragment: Fragment(R.layout.fragment_config_notificatio
 			}
 		}
 
+		/*
 		requireActivity().onBackPressedDispatcher.addCallback(object: OnBackPressedCallback(true){
 			override fun handleOnBackPressed() {
 				sharedViewModel.setFragment(prevFrag)
 				isEnabled = false
 			}
-
 		})
+		 */
 	}
 
 }

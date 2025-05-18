@@ -44,7 +44,7 @@ abstract class AppDatabaseSTM : RoomDatabase() {
     abstract fun formsDao() : FormsDAO
 
     companion object {
-        const val DATABASE_NAME = "stm_info.db"
+        const val DATABASE_NAME = "stm_data.db"
         const val DATABASE_PATH = "database/$DATABASE_NAME"
         private var INSTANCE: AppDatabaseSTM? = null
 

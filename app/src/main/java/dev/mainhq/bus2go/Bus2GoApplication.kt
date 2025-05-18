@@ -9,17 +9,15 @@ import androidx.work.Configuration
 import dev.mainhq.bus2go.di.CommonModule
 import dev.mainhq.bus2go.data.worker.UpdateManagerWorker.Companion.FILE_NAME
 import dev.mainhq.bus2go.di.AppModule
-import dev.mainhq.bus2go.di.WorkerFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 
-open class Bus2GoApplication : Application(), Configuration.Provider {
+open class Bus2GoApplication : Application() {
 	lateinit var commonModule: CommonModule
 	lateinit var appModule: AppModule
-	private lateinit var workerFactory: WorkerFactory
 
 
 	override fun onCreate() {
@@ -27,17 +25,10 @@ open class Bus2GoApplication : Application(), Configuration.Provider {
 		//check if an apk exists, and delete it if useless
 		commonModule = CommonModule(applicationContext)
 		appModule = AppModule(applicationContext)
-		workerFactory = WorkerFactory()
 
 		MainScope().launch {
 			cleanUp()
 		}
-	}
-
-	override val workManagerConfiguration: Configuration get() {
-		return Configuration.Builder()
-			.setWorkerFactory(workerFactory)
-			.build()
 	}
 
 	//TODO refactor this shit

@@ -10,7 +10,7 @@ class CheckIsBus2GoServer(
 	private val databaseDownloadRepository: DatabaseDownloadRepository
 ) {
 	suspend operator fun invoke(str: String): Result<Boolean> {
-		return when(val res = databaseDownloadRepository.testIsBus2Go(str)){
+		return when(val res = databaseDownloadRepository.getIsBus2Go(str)){
 			is Result.Error -> when(res.throwable){
 				//not connected to the internet
 				null -> Result.Error(null, res.message)

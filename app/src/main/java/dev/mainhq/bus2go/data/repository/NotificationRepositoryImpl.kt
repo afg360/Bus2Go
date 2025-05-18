@@ -14,7 +14,10 @@ class NotificationRepositoryImpl(
 				notificationHandler.notifyDbUpdateAvailable(notificationType.version)
 
 			is NotificationType.AppUpdating ->
-				notificationHandler.notifyAppUpdating(notificationType.percentage)
+				notificationHandler.notifyAppUpdating(
+					notificationType.current,
+					notificationType.contentLength
+				)
 
 			NotificationType.AppUpdateDone -> notificationHandler.notifyAppUpdateDone()
 
@@ -24,7 +27,10 @@ class NotificationRepositoryImpl(
 				notificationHandler.notifyDbUpdateAvailable(notificationType.database)
 
 			is NotificationType.DbDownloading ->
-				notificationHandler.notifyDbDownloading(notificationType.progress)
+				notificationHandler.notifyDbDownloading(
+					notificationType.current,
+					notificationType.contentLength
+				)
 
 			is NotificationType.DbExtracting -> notificationHandler.notifyDbExtracting()
 
