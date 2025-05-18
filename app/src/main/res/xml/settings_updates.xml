@@ -27,7 +27,10 @@
     <PreferenceCategory
         app:title="Database Updates"
         >
-        <Preference app:title="Manual Download" />
+        <Preference
+            app:key="manual-download"
+            app:title="Manual Download"
+            />
         <SwitchPreferenceCompat
             app:key="db-update-notifications"
             app:title="@string/db_update_notifs"

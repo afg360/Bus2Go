@@ -6,6 +6,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
@@ -19,13 +20,10 @@ class NotificationHandler(private val appContext: Context) {
 		private const val appUpdateNotifId = 1
 		private const val DB_UPDATES = "db_updates"
 		private const val dbUpdateNotifId  = 2
-		private const val URGENT = "urgent"
-		private const val urgentNotifId  = 3
 
 		private val notifChannels = mapOf(
 			APP_UPDATES to "App Updates",
 			DB_UPDATES to "Database Updates",
-			URGENT to "Urgent Notifications"
 		)
 	}
 
@@ -45,17 +43,9 @@ class NotificationHandler(private val appContext: Context) {
 		.setShowBadge(false)
 		.build()
 
-	private val urgentNotifChannel = NotificationChannelCompat.Builder(
-		URGENT,
-		NotificationManagerCompat.IMPORTANCE_HIGH
-	).setName(notifChannels[URGENT])
-		.setShowBadge(false)
-		.build()
-
 	init {
 		notificationManager.createNotificationChannel(appNotifChannel)
 		notificationManager.createNotificationChannel(dbNotifChannel)
-		notificationManager.createNotificationChannel(urgentNotifChannel)
 	}
 
 	/* ---------------------- App Update Notifications ------------------------- */
@@ -108,6 +98,7 @@ class NotificationHandler(private val appContext: Context) {
 			)
 			.build()
 			.also { postNotif(appUpdateNotifId, it) }
+		Toast.makeText(appContext, "Update Successful. Go to notifs", Toast.LENGTH_SHORT).show()
 	}
 
 	fun notifyAppUpdateFailed(){
@@ -121,6 +112,7 @@ class NotificationHandler(private val appContext: Context) {
 		).setOngoing(false).setProgress(0, 0, false)
 			.build()
 			.also { postNotif(appUpdateNotifId, it) }
+		Toast.makeText(appContext, "App Update Error", Toast.LENGTH_SHORT).show()
 	}
 
 	/* ---------------------- Database Update Notifications ------------------------- */
@@ -175,7 +167,7 @@ class NotificationHandler(private val appContext: Context) {
 		)
 
 		createNotificationBuilder(
-			channelId = URGENT,
+			channelId = DB_UPDATES,
 			title = "Tap to Restart",
 			description = "Tap to restart bus2go to finish the updating of the database.",
 			icon = R.drawable.baseline_update_24,
@@ -183,7 +175,8 @@ class NotificationHandler(private val appContext: Context) {
 		).setOngoing(false).setProgress(0, 0, false)
 			.setContentIntent(pendingIntent)
 			.build()
-			.also { postNotif(urgentNotifId, it) }
+			.also { postNotif(dbUpdateNotifId, it) }
+		Toast.makeText(appContext, "Update Successful. Restart App", Toast.LENGTH_SHORT).show()
 	}
 
 	//TODO
@@ -197,6 +190,7 @@ class NotificationHandler(private val appContext: Context) {
 		).setOngoing(false).setProgress(0, 0, false)
 			.build()
 			.also { postNotif(dbUpdateNotifId, it) }
+		Toast.makeText(appContext, "Database Download Error", Toast.LENGTH_SHORT).show()
 	}
 
 	//TODO other possible notifications...?

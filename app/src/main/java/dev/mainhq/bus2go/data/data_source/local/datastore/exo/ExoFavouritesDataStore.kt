@@ -32,7 +32,7 @@ val Context.exoFavouritesDataStore by dataStore(
 					version = 1,
 					listExo = context.favouritesDataStore.data.first()
 						.listExo.map {
-							ExoFavouriteBusItemDto(it.stopName, it.routeId, it.direction, it.routeLongName, it.headsign)
+							ExoFavouriteBusItemDto(it.stopName, it.routeId, it.direction, it.routeLongName)
 						}.toPersistentList(),
 					listExoTrain = context.favouritesDataStore.data.first()
 						.listExoTrain.map {

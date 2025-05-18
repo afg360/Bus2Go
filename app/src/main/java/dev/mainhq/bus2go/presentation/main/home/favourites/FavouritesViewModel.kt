@@ -164,8 +164,6 @@ class FavouritesViewModel(
                             }
                         }
                     }
-
-
                 )
                 if ((_favouriteTransitData.value as UiState.Success<List<FavouritesDisplayModel>>)
                         .data.isEmpty()) running = false

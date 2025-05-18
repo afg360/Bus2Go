@@ -38,8 +38,7 @@ object PreferenceMapper {
 			exoBus.stopName,
 			exoBus.routeId,
 			exoBus.direction,
-			exoBus.routeLongName,
-			exoBus.headsign
+			exoBus.routeLongName
 		)
 	}
 
@@ -50,7 +49,6 @@ object PreferenceMapper {
 				it.stopName,
 				it.direction,
 				it.routeLongName,
-				it.headsign
 			)
 		}
 	}

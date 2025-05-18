@@ -24,12 +24,15 @@ data class StmBusItem(
 
 
 @Parcelize
+/**
+ * @param direction aka headsign
+ * */
 data class ExoBusItem(
 	override val routeId : String,
 	override val stopName : String,
 	override val direction: String,
 	val routeLongName: String,
-	val headsign: String
+	//val headsign: String
 ) : TransitData()
 
 @Parcelize

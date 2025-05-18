@@ -29,7 +29,5 @@ class AppModule(applicationContext: Context) {
 
 	val scheduleDownloadDatabaseTask = ScheduleDownloadDatabaseTask(
 		databaseDownloadScheduler,
-		(applicationContext as Bus2GoApplication).commonModule.appStateRepository,
-		dbDownloadRepository
 	)
 }

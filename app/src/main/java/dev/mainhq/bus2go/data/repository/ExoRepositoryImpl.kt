@@ -106,8 +106,8 @@ class ExoRepositoryImpl(
 							exoFavouriteBusItem.stopName,
 							curTime.getDayString(),
 							curTime.getTimeString(),
-							exoFavouriteBusItem.headsign,
-							curTime.getDayString()
+							exoFavouriteBusItem.direction,
+							curTime.getTodayString()
 						)
 					)
 				)

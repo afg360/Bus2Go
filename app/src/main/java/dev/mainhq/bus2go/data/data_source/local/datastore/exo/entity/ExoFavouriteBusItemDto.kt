@@ -20,7 +20,6 @@ data class ExoFavouriteBusItemDto(
 	override val routeId : String,
 	override val direction: String,
 	val routeLongName: String,
-	val headsign: String
 ) : TransitDataDto()
 
 class PersistentExoBusInfoListSerializer(private val serializer: KSerializer<ExoFavouriteBusItemDto>) :

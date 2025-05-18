@@ -46,11 +46,28 @@ class AppStateRepositoryImpl(
 		}
 	}
 
+	override suspend fun updateStmDatabaseVersion(version: Int) {
+		//TODO return a Result to indicate in case version is smaller...?
+		return withContext(Dispatchers.IO){
+			appStateDataStore.edit { mutablePreferences ->
+				mutablePreferences[AppStateDataStoreKeys.SQLITE_STM_VERSION] = version
+			}
+		}
+	}
+
 	override suspend fun getExoDatabaseVersion(): Int {
 		return withContext(Dispatchers.IO){
 			appStateDataStore.data.map { preferences ->
 				preferences[AppStateDataStoreKeys.SQLITE_EXO_VERSION] ?: -1
 			}.first()
+		}
+	}
+
+	override suspend fun updateExoDatabaseVersion(version: Int) {
+		return withContext(Dispatchers.IO){
+			appStateDataStore.edit { mutablePreferences ->
+				mutablePreferences[AppStateDataStoreKeys.SQLITE_EXO_VERSION] = version
+			}
 		}
 	}
 

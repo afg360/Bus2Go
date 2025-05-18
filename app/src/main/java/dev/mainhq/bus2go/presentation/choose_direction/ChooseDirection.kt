@@ -103,12 +103,12 @@ class ChooseDirection : BaseActivity() {
                             val rightDir = chooseDirectionViewModel.rightDirection.filterNotNull().first() as List<ExoBusItem>
                             assert(rightDir.isNotEmpty())
 
-                            findViewById<MaterialTextView>(R.id.description_route_0).text = leftDir.first().headsign
+                            findViewById<MaterialTextView>(R.id.description_route_0).text = leftDir.first().direction
                             buttonRoute0.setOnClickListener {
                                 intent.putExtra(ExtrasTagNames.TRANSIT_DATA, leftDir.toTypedArray())
                                 startActivity(intent)
                             }
-                            findViewById<MaterialTextView>(R.id.description_route_1).text = rightDir.first().headsign
+                            findViewById<MaterialTextView>(R.id.description_route_1).text = rightDir.first().direction
                             buttonRoute1.setOnClickListener {
                                 intent.putExtra(ExtrasTagNames.TRANSIT_DATA, rightDir.toTypedArray())
                                 startActivity(intent)

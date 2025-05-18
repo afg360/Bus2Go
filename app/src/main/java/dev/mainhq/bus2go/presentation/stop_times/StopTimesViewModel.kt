@@ -39,7 +39,7 @@ class StopTimesViewModel(
 				R.color.basic_purple,
 				if (transitData.routeId.length < 10) 35f else 24f,
 				transitData.routeId,
-				transitData.headsign,
+				transitData.direction,
 				transitData.stopName
 			)
 			is ExoTrainItem -> StopTimesHeaderDisplayModel(
@@ -63,7 +63,6 @@ class StopTimesViewModel(
 		}
 		viewModelScope.launch(Dispatchers.Default) {
 			while(true){
-
 				when(val transitTime = getTransitTime.invoke(Time.now(), transitData)){
 					is Result.Error -> {
 						TODO()

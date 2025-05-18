@@ -66,9 +66,8 @@ class ChooseDirectionViewModel(
 										ExoBusItem(
 											routeId = routeInfo.routeId,
 											stopName = it,
-											direction = stopNames.data.first.last(),
+											direction = headsigns.data.first().tripHeadSign,
 											routeLongName = routeInfo.routeName,
-											headsign = headsigns.data[0].tripHeadSign
 										)
 									}
 
@@ -77,9 +76,8 @@ class ChooseDirectionViewModel(
 											ExoBusItem(
 												routeId = routeInfo.routeId,
 												stopName = it,
-												direction = stopNames.data.second.last(),
+												direction = headsigns.data.last().tripHeadSign,
 												routeLongName = routeInfo.routeName,
-												headsign = headsigns.data[1].tripHeadSign
 											)
 										}
 										_isUnidirectional.value = false

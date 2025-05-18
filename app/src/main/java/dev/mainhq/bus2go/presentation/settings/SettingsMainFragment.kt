@@ -24,6 +24,7 @@ import androidx.work.WorkManager
 import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.data.worker.UpdateManagerWorker
+import dev.mainhq.bus2go.presentation.core.collectFlow
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
@@ -51,7 +52,7 @@ class SettingsMainFragment : PreferenceFragmentCompat(),
         //TODO perform a migration from sharedPreferences to DataStorePreferences if needed, by checking
         // some field existence...
 
-        //temporarily output the current software version
+        //output the current software version
         findPreference<Preference?>("info")?.let {
             val packageInfo: PackageInfo = requireContext().packageManager.getPackageInfo(requireContext().packageName, 0)
             val versionName = packageInfo.versionName ?: throw IllegalStateException("Cannot have a null value version name!")
@@ -124,19 +125,12 @@ class SettingsMainFragment : PreferenceFragmentCompat(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){
-                viewModel.toastText.collect{
-                    sharedViewModel.setLoading(false)
-                    Toast.makeText(requireContext(), it.string, Toast.LENGTH_SHORT).show()
-                    val editTextPreference = preferenceManager.findPreference<EditTextPreference>("server-choice")
-                    if (it.isValid){
-                        editTextPreference?.text = it.data
-                    }
-                    else editTextPreference?.text = ""
-                }
-            }
+        collectFlow(viewModel.toastText){
+            sharedViewModel.setLoading(false)
+            Toast.makeText(requireContext(), it.string, Toast.LENGTH_SHORT).show()
+            val editTextPreference = preferenceManager.findPreference<EditTextPreference>("server-choice")
+            if (it.isValid) editTextPreference?.text = it.data
+            else editTextPreference?.text = ""
         }
     }
 

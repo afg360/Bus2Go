@@ -141,7 +141,7 @@ class DatabaseDownloadRepositoryImpl(
 		}
 	}
 
-	override suspend fun getDb(dbToDownload: DbToDownload): Boolean {
+	override suspend fun getDb(dbToDownload: DbToDownload, versionNeeded: Int): Boolean {
 		val urlBuilder = URLBuilder(
 			host = baseUrl,
 			port = BuildConfig.DEFAULT_PORT,
@@ -170,22 +170,20 @@ class DatabaseDownloadRepositoryImpl(
 
 		//TODO before downloading, check if file exists already with the correct version
 		logger?.debug(TAG, "Looking for already downloaded databases")
-		val mostUpToDateDownloadFileList = applicationContext.filesDir.listFiles()
-			?.filter { it.name.matches("${dbName}_[0-9]+.db.${COMPRESSION_EXT}".toRegex()) }
-		if (mostUpToDateDownloadFileList?.isNotEmpty() == true) {
-			val mostUpToDateDownloadFile = mostUpToDateDownloadFileList.reduce{ f1, f2 ->
-				val versionStr1 = f1.name.filter { it.isDigit() }.toInt()
-				val versionStr2 = f2.name.filter { it.isDigit() }.toInt()
-				if (versionStr1 > versionStr2) f1 else f2
-			}
-			//TODO if there are more than 1, delete the ones that have different version numbers
-			if (mostUpToDateDownloadFile != null) {
-				decompressing(
-					mostUpToDateDownloadFile,
-					"$dbName.db"
-				)
-				return true
-			}
+		val mostUpToDateDownloadFile = applicationContext.filesDir.listFiles()
+			?.find { it.name.matches("${dbName}_${versionNeeded}.db.${COMPRESSION_EXT}".toRegex())}
+		//clean up old versions
+		applicationContext.filesDir.listFiles()
+			?.filter {
+				it.name != mostUpToDateDownloadFile?.name &&
+						it.name.matches("${dbName}_[0-9]+.db.${COMPRESSION_EXT}".toRegex())
+			}?.forEach { if (it.exists()) it.delete() }
+		if (mostUpToDateDownloadFile != null) {
+			decompressing(
+				mostUpToDateDownloadFile,
+				"$dbName.db"
+			)
+			return true
 		}
 
 		logger?.debug(TAG, "No Db found. Beginning Download")
@@ -270,14 +268,14 @@ class DatabaseDownloadRepositoryImpl(
 							while (zstdIn.read(buffer).also { bytesRead = it } != -1) {
 								fileOut.write(buffer, 0, bytesRead)
 							}
-							return@withContext true
+							true
 						}
 						catch (ioe: IOException){
 							logger?.error(TAG, ioe.message.toString())
 							//delete garbage/corrupted files
 							if (compressedFile.exists()) compressedFile.delete()
 							if (destFile.exists()) destFile.delete()
-							return@withContext false
+							false
 						}
 					}
 				}

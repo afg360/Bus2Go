@@ -15,5 +15,5 @@ interface DatabaseDownloadRepository {
 	 * Download an agency database from a bus2go server,
 	 * if no local up to date compressed file has been found.
 	 **/
-	suspend fun getDb(dbToDownload: DbToDownload): Boolean
+	suspend fun getDb(dbToDownload: DbToDownload, versionNeeded: Int): Boolean
 }
