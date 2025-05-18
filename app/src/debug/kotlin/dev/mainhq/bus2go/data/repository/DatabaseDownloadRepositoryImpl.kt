@@ -228,6 +228,11 @@ class DatabaseDownloadRepositoryImpl(
 				tmpCompressedFile?.delete()
 				false
 			}
+			catch (e: Exception){
+				logger?.error(TAG, "Exception...", e)
+				tmpCompressedFile?.delete()
+				false
+			}
 		}
 
 		if (downloadStatus){
@@ -238,15 +243,15 @@ class DatabaseDownloadRepositoryImpl(
 			if (!tmpCompressedFile.renameTo(compressedFile))
 				throw IOException("Failed to rename downloaded file to a compressed file")
 
-			decompressing(compressedFile, "$dbName.db")
-			logger?.debug(TAG, "Decompressing Successful")
-			return true
+			val decompressingStatus = decompressing(compressedFile, "$dbName.db")
+			if (decompressingStatus) logger?.debug(TAG, "Decompressing Successful")
+			return decompressingStatus
 		}
 
 		return false
 	}
 
-	private suspend fun decompressing(compressedFile: File, dbName: String){
+	private suspend fun decompressing(compressedFile: File, dbName: String): Boolean {
 		val databasesDir = applicationContext.getDatabasePath(dbName).parentFile
 			?: throw IllegalStateException("Cannot access databases directory")
 
@@ -254,15 +259,25 @@ class DatabaseDownloadRepositoryImpl(
 		if (destFile.exists()) destFile.delete()
 
 		logger?.debug(TAG, "Decompressing")
-		withContext(Dispatchers.IO) {
+		return withContext(Dispatchers.IO) {
 			FileInputStream(compressedFile).use { fileIn ->
 				GZIPInputStream(fileIn).use { zstdIn ->
 					FileOutputStream(destFile).use { fileOut ->
 						notificationsRepository.notify(NotificationType.DbExtracting)
 						val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
 						var bytesRead: Int
-						while (zstdIn.read(buffer).also { bytesRead = it } != -1) {
-							fileOut.write(buffer, 0, bytesRead)
+						try{
+							while (zstdIn.read(buffer).also { bytesRead = it } != -1) {
+								fileOut.write(buffer, 0, bytesRead)
+							}
+							return@withContext true
+						}
+						catch (ioe: IOException){
+							logger?.error(TAG, ioe.message.toString())
+							//delete garbage/corrupted files
+							if (compressedFile.exists()) compressedFile.delete()
+							if (destFile.exists()) destFile.delete()
+							return@withContext false
 						}
 					}
 				}

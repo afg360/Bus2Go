@@ -72,7 +72,6 @@ class MainActivity : BaseActivity() {
 
         //TODO check if need to start configuration activity here
         lifecycleScope.launch(Dispatchers.Main) {
-            //sets essentially an "observer" that notifies the ui when the state changes
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED){
                 mainActivityViewModel.activityType.collect{ activityType ->
                     when(activityType){
