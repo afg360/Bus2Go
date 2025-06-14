@@ -32,13 +32,14 @@ import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.domain.entity.RouteInfo
-import dev.mainhq.bus2go.presentation.choose_direction.ChooseDirection
+import dev.mainhq.bus2go.presentation.stop_direction.direction.DirectionFragment
 import dev.mainhq.bus2go.presentation.core.UiState
 import dev.mainhq.bus2go.presentation.core.collectFlow
 import dev.mainhq.bus2go.presentation.search_transit.SearchTransit
 import dev.mainhq.bus2go.presentation.settings.SettingsActivity
 import dev.mainhq.bus2go.presentation.main.home.favourites.FavouritesFragment
 import dev.mainhq.bus2go.presentation.main.home.favourites.FavouritesFragmentSharedViewModel
+import dev.mainhq.bus2go.presentation.stop_direction.StopDirectionActivity
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -71,7 +72,7 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
         val recyclerView = view.findViewById<RecyclerView>(R.id.search_recycle_view)
         val layoutManager = LinearLayoutManager(this@HomeFragment.context)
         val busListAdapter = BusListElemsAdapter(ArrayList()){ data ->
-            val intent = Intent(requireContext(), ChooseDirection::class.java)
+            val intent = Intent(requireContext(), StopDirectionActivity::class.java)
             intent.putExtra(ExtrasTagNames.ROUTE_INFO, data)
             requireContext().startActivity(intent)
         }

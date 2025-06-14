@@ -1,0 +1,102 @@
+package dev.mainhq.bus2go.presentation.stop_direction.stop
+
+import android.content.Intent
+import android.os.Bundle
+import android.view.View
+import android.widget.ImageView
+import androidx.activity.OnBackPressedCallback
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import dev.mainhq.bus2go.R
+import dev.mainhq.bus2go.Bus2GoApplication
+import dev.mainhq.bus2go.presentation.stop_direction.ActivityFragment
+import dev.mainhq.bus2go.presentation.stop_direction.StopDirectionSharedViewModel
+import dev.mainhq.bus2go.presentation.stop_direction.StopDirectionViewModel
+import dev.mainhq.bus2go.presentation.stop_times.StopTimesActivity
+import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+
+//todo
+//instead of doing a huge query on getting the time, we could first retrieve
+//all the possible stations (ordered by id, and prob based on localisation? -> not privacy friendly
+//and once the user clicks, either new activity OR new fragment? -> in the latter case need to implement onback
+//todo add possibility of searching amongst all the stops
+class StopFragment : Fragment(R.layout.fragment_choose_stop) {
+
+    private val viewModel : StopFragmentViewModel by activityViewModels {
+        object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return (this@StopFragment.requireActivity().application as Bus2GoApplication)
+                    .let {
+                        StopFragmentViewModel(
+                            addFavourite = it.commonModule.addFavourite,
+                            removeFavourite = it.commonModule.removeFavourite,
+                            getFavourites = it.commonModule.getFavourites,
+                        ) as T
+                    }
+            }
+        }
+    }
+
+    private val sharedActivityViewModel: StopDirectionViewModel by activityViewModels()
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+            val transitData = viewModel.stopNames.filterNotNull().first()
+            if (transitData.isNotEmpty()) {
+                val recyclerView = view.findViewById<RecyclerView>(R.id.stop_recycle_view)
+                recyclerView.layoutManager = LinearLayoutManager(requireContext())
+                recyclerView.adapter = StopListElemsAdapter(
+                    transitData,
+                    viewModel.favourites.filterNotNull().first(),
+                    //TODO update the little star
+                    toggleFavouritesClickListener = { view, innerTransitData ->
+                        if (viewModel.favourites.value!!.contains(innerTransitData)){
+                            viewModel.removeFavourite(innerTransitData)
+                            view.findViewById<ImageView>(R.id.favourite_star_selection)
+                                .setBackgroundResource(R.drawable.favourite_drawable_off)
+                        }
+                        else {
+                            viewModel.addFavourite(innerTransitData)
+                            view.findViewById<ImageView>(R.id.favourite_star_selection)
+                                .setBackgroundResource(R.drawable.favourite_drawable_on)
+                        }
+                    },
+                    onClickListener = {
+                        val intent = Intent(requireContext(), StopTimesActivity::class.java)
+                        //FIXME send another class model instead
+                        intent.putExtra(ExtrasTagNames.TRANSIT_DATA, it)
+                        startActivity(intent)
+                    }
+                )
+            }
+            else{
+                TODO("Display message saying no stops found")
+            }
+
+            requireActivity().onBackPressedDispatcher.addCallback(
+                viewLifecycleOwner,
+                object: OnBackPressedCallback(true) {
+                    override fun handleOnBackPressed() {
+                        sharedActivityViewModel.setActivityFragment(ActivityFragment.DIRECTION)
+                        isEnabled = false
+                    }
+                }
+            )
+        }
+    }
+}

@@ -1,38 +1,37 @@
-package dev.mainhq.bus2go.presentation.choose_stop
+package dev.mainhq.bus2go.presentation.stop_direction.stop
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dev.mainhq.bus2go.domain.entity.ExoBusItem
-import dev.mainhq.bus2go.domain.entity.ExoTrainItem
-import dev.mainhq.bus2go.domain.entity.StmBusItem
+import dev.mainhq.bus2go.domain.entity.RouteInfo
 import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.domain.use_case.favourites.AddFavourite
 import dev.mainhq.bus2go.domain.use_case.favourites.GetFavourites
 import dev.mainhq.bus2go.domain.use_case.favourites.RemoveFavourite
+import dev.mainhq.bus2go.presentation.core.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class ChooseStopViewModel(
-	transitData: List<TransitData>,
+class StopFragmentViewModel(
 	private val addFavourite: AddFavourite,
 	private val removeFavourite: RemoveFavourite,
 	private val getFavourites: GetFavourites
 ): ViewModel() {
 
-	private val _stopNames: MutableStateFlow<List<TransitData>> = MutableStateFlow(transitData)
+
+	private val _stopNames: MutableStateFlow<List<TransitData>?> = MutableStateFlow(null)
 	val stopNames = _stopNames.asStateFlow()
 
 	private val _favourites: MutableStateFlow<List<TransitData>?> = MutableStateFlow(null)
 	val favourites = _favourites.asStateFlow()
 
-	init {
+	fun setTransitData(transitData: List<TransitData>){
 		viewModelScope.launch {
+			_stopNames.value = transitData
 			_favourites.value = getFavourites().filter { transitData.contains(it) }
 		}
 	}
-
 
 	fun addFavourite(data : TransitData){
 		_favourites.value.also { favourites ->

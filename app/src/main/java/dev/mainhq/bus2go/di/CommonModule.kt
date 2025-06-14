@@ -64,7 +64,7 @@ class CommonModule(applicationContext: Context) {
 		applicationContext.exoFavouritesDataStore
 	)
 
-	private val settingsRepository = SettingsRepositoryImpl(
+	val settingsRepository = SettingsRepositoryImpl(
 		applicationContext
 	)
 

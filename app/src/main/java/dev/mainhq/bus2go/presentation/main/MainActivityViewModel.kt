@@ -3,9 +3,7 @@ package dev.mainhq.bus2go.presentation.main
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.mainhq.bus2go.domain.use_case.db_state.CheckDatabaseUpdateRequired
-import dev.mainhq.bus2go.domain.use_case.db_state.IsFirstTimeAppLaunched
 import dev.mainhq.bus2go.domain.use_case.db_state.SetDatabaseState
-import dev.mainhq.bus2go.presentation.utils.ActivityType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -16,8 +14,8 @@ class MainActivityViewModel(
 	private val setDatabaseState: SetDatabaseState,
 ): ViewModel() {
 
-	private val _activityType: MutableStateFlow<ActivityType> = MutableStateFlow(ActivityType.HOME)
-	val activityType: StateFlow<ActivityType> get() = _activityType
+	private val _activityFragment: MutableStateFlow<ActivityFragment> = MutableStateFlow(ActivityFragment.HOME)
+	val activityFragment: StateFlow<ActivityFragment> get() = _activityFragment
 
 	private val _updateDbState: MutableStateFlow<LocalDate?> = MutableStateFlow(null)
 	val updateDbState: StateFlow<LocalDate?> get() = _updateDbState
@@ -27,10 +25,10 @@ class MainActivityViewModel(
 
 
 
-	fun setActivityType(activityType: ActivityType){
+	fun setActivityType(activityFragment: ActivityFragment){
 		//prevents spamming and rerendering of the same fragment...
-		if (activityType != _activityType.value)
-			_activityType.value = activityType
+		if (activityFragment != _activityFragment.value)
+			_activityFragment.value = activityFragment
 	}
 
 	fun setUpdateDbState(day: Long){

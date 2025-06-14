@@ -15,7 +15,6 @@ import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.Bus2GoApplication
 //import dev.mainhq.bus2go.fragments.alarms.AlarmReceiver
 import dev.mainhq.bus2go.presentation.main.home.HomeFragment
-import dev.mainhq.bus2go.presentation.utils.ActivityType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -54,15 +53,15 @@ class MainActivity : BaseActivity() {
             //we change the state. Since the ui has an "observer", changes ui accordingly
             when(it.itemId) {
                 R.id.homeScreenButton -> {
-                    mainActivityViewModel.setActivityType(ActivityType.HOME)
+                    mainActivityViewModel.setActivityType(ActivityFragment.HOME)
                     true
                 }
                 R.id.mapButton -> {
-                    mainActivityViewModel.setActivityType(ActivityType.MAP)
+                    mainActivityViewModel.setActivityType(ActivityFragment.MAP)
                     true
                 }
                 R.id.alarmsButton -> {
-                    mainActivityViewModel.setActivityType(ActivityType.ALARMS)
+                    mainActivityViewModel.setActivityType(ActivityFragment.ALARMS)
                     true
                 }
                 else -> false
@@ -73,19 +72,19 @@ class MainActivity : BaseActivity() {
         //TODO check if need to start configuration activity here
         lifecycleScope.launch(Dispatchers.Main) {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED){
-                mainActivityViewModel.activityType.collect{ activityType ->
+                mainActivityViewModel.activityFragment.collect{ activityType ->
                     when(activityType){
-                        ActivityType.HOME -> {
+                        ActivityFragment.HOME -> {
                             supportFragmentManager.beginTransaction()
                                 .replace(R.id.mainFragmentContainer, HomeFragment())
                                 .commit()
                         }
-                        ActivityType.MAP -> {
+                        ActivityFragment.MAP -> {
                             supportFragmentManager.beginTransaction()
                                 .replace(R.id.mainFragmentContainer, ComingSoonFragment())
                                 .commit()
                         }
-                        ActivityType.ALARMS -> {
+                        ActivityFragment.ALARMS -> {
                             supportFragmentManager.beginTransaction()
                                 .replace(R.id.mainFragmentContainer, ComingSoonFragment())
                                 .commit()

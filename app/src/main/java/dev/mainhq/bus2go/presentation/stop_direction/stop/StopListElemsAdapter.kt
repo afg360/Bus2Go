@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go.presentation.choose_stop
+package dev.mainhq.bus2go.presentation.stop_direction.stop
 
 import android.view.LayoutInflater
 import android.view.View

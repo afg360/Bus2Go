@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go.presentation.choose_direction
+package dev.mainhq.bus2go.presentation.stop_direction.direction
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,34 +15,40 @@ import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.domain.entity.stm.DirectionInfo
 import dev.mainhq.bus2go.domain.use_case.transit.GetDirections
 import dev.mainhq.bus2go.domain.use_case.transit.GetStopNames
+import dev.mainhq.bus2go.presentation.core.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 
-class ChooseDirectionViewModel(
-	routeInfo: RouteInfo,
+class DirectionFragmentViewModel(
 	private val getDirections: GetDirections,
-	private val getStopNames: GetStopNames
+	private val getStopNames: GetStopNames,
 ): ViewModel() {
 
+	private val _routeInfo = MutableStateFlow<UiState<RouteInfo>>(UiState.Loading)
+	val routeInfo = _routeInfo.asStateFlow()
+
 	//TODO use UiState sealed class insted of nullable stateFlows to stay consistent
+	private val _topDirection: MutableStateFlow<List<TransitData>?> = MutableStateFlow(null)
+	val topDirection = _topDirection.asStateFlow()
 
-	private val _leftDirection: MutableStateFlow<List<TransitData>?> = MutableStateFlow(null)
-	val leftDirection = _leftDirection.asStateFlow()
-
-	private val _rightDirection: MutableStateFlow<List<TransitData>?> = MutableStateFlow(null)
-	val rightDirection = _rightDirection.asStateFlow()
+	private val _bottomDirection: MutableStateFlow<List<TransitData>?> = MutableStateFlow(null)
+	val bottomDirection = _bottomDirection.asStateFlow()
 
 	//FIXME could use inside of a class with the other data instead...
 	private val _textColour: MutableStateFlow<Int?> = MutableStateFlow(null)
 	val textColour = _textColour.asStateFlow()
 
+	//FIXME could use inside of a class with the other data instead...
+	private val _cardViewColour: MutableStateFlow<Int?> = MutableStateFlow(null)
+	val cardViewColour = _cardViewColour.asStateFlow()
+
 	//if becomes true, let the user know
 	private val _isUnidirectional: MutableStateFlow<Boolean?> = MutableStateFlow(null)
 	val isUnidirectional = _isUnidirectional.asStateFlow()
 
-	init {
+	fun setRouteInfo(routeInfo: RouteInfo) {
 		viewModelScope.launch {
 			//FIXME instead of creating 1 item with empty stopName (we are using it wrong),
 			// create a list of ExoBusItems
@@ -53,16 +59,18 @@ class ChooseDirectionViewModel(
 				}
 
 				is Result.Success<Pair<List<String>, List<String>>> -> {
+					_routeInfo.value = UiState.Success(routeInfo)
 					when(routeInfo){
 						is ExoBusRouteInfo -> {
 							_textColour.value = R.color.basic_purple
+							_cardViewColour.value = R.color.transparent_basic_purple
 							when(val headsigns = getDirections.invoke(routeInfo)){
 								is Result.Error -> {
 									TODO()
 								}
 
 								is Result.Success<List<DirectionInfo>> -> {
-									_leftDirection.value = stopNames.data.first.map {
+									_topDirection.value = stopNames.data.first.map {
 										ExoBusItem(
 											routeId = routeInfo.routeId,
 											stopName = it,
@@ -72,7 +80,7 @@ class ChooseDirectionViewModel(
 									}
 
 									if (headsigns.data.size > 1){
-										_rightDirection.value = stopNames.data.second.map {
+										_bottomDirection.value = stopNames.data.second.map {
 											ExoBusItem(
 												routeId = routeInfo.routeId,
 												stopName = it,
@@ -87,12 +95,12 @@ class ChooseDirectionViewModel(
 									}
 								}
 							}
-
 						}
 
 						is ExoTrainRouteInfo -> {
 							_textColour.value = R.color.orange
-							_leftDirection.value = stopNames.data.first.map {
+							_cardViewColour.value = R.color.transparent_orange
+							_topDirection.value = stopNames.data.first.map {
 								ExoTrainItem(
 									routeId = routeInfo.routeId,
 									//DO NOT SET IT YET SINCE WE ARE ONLY CHOOSING A DIR
@@ -104,7 +112,7 @@ class ChooseDirectionViewModel(
 								)
 							}
 
-							_rightDirection.value = stopNames.data.second.map {
+							_bottomDirection.value = stopNames.data.second.map {
 								ExoTrainItem(
 									routeId = routeInfo.routeId,
 									//DO NOT SET IT YET SINCE WE ARE ONLY CHOOSING A DIR
@@ -119,7 +127,8 @@ class ChooseDirectionViewModel(
 						}
 
 						is StmBusRouteInfo -> {
-							_textColour.value = R.color.basic_blue
+							_textColour.value = R.color.transparent_basic_blue
+							_cardViewColour.value = R.color.transparent_basic_blue
 							when(val directions = getDirections.invoke(routeInfo)){
 								is Result.Error -> {
 									TODO()
@@ -128,7 +137,7 @@ class ChooseDirectionViewModel(
 								is Result.Success<List<DirectionInfo>> -> {
 									//FIXME this is a mini hack...
 									directions.data as List<DirectionInfo.StmDirectionInfo>
-									_leftDirection.value = stopNames.data.first.map {
+									_topDirection.value = stopNames.data.first.map {
 										StmBusItem(
 											routeId = routeInfo.routeId,
 											stopName = it,
@@ -139,7 +148,7 @@ class ChooseDirectionViewModel(
 									}
 
 									if (directions.data.size > 1){
-										_rightDirection.value = stopNames.data.second.map {
+										_bottomDirection.value = stopNames.data.second.map {
 											StmBusItem(
 												routeId = routeInfo.routeId,
 												stopName = it,

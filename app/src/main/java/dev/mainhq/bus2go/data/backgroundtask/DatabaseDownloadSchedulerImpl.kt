@@ -9,7 +9,7 @@ import dev.mainhq.bus2go.domain.backgroundtask.DatabaseDownloadScheduler
 import dev.mainhq.bus2go.domain.entity.DbToDownload
 import java.util.concurrent.TimeUnit
 
-class DebugDatabaseDownloadSchedulerImpl(
+class DatabaseDownloadSchedulerImpl(
 	private val workManager: WorkManager
 ): DatabaseDownloadScheduler {
 

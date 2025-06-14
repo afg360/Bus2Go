@@ -1,8 +1,11 @@
 package dev.mainhq.bus2go.domain.repository
 
+import dev.mainhq.bus2go.domain.entity.SettingsData
+
 interface SettingsRepository {
 
-	fun isRealTimeEnabled(): Boolean
+	fun getSettings(): SettingsData
+
 	//TODO more there...
 
 	/** @return A boolean indicating success/failure */

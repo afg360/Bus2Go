@@ -8,23 +8,21 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="dark">#1B1B1B</color>
+    <color name="dark">#FF1B1B1B</color>
     <color name="light">#DDDDDDDD</color>
     <color name="light_grey">#AAAAAAAA</color>
     <color name="grey">#88888888</color>
-    <color name="red">#DCFF0072</color>
-    <color name="scarlet_red">#FF2400</color>
-    <color name="yellow">#F8DD25</color>
-    <color name="orange">#FFd45f09</color>
+    <color name="red">#FFFF0072</color>
+    <color name="scarlet_red">#FFFF2400</color>
+    <color name="yellow">#FFF8DD25</color>
+    <color name="orange">#FFD45F09</color>
+    <color name="transparent_orange">#BBD45F09</color>
     <color name="select_grey">#801B1B1B</color>
-    <style name="themeSwitch" parent="@style/Widget.AppCompat.CompoundButton.Switch">
-        <item name="colorControlActivated">#46bdbf</item>
-        <item name="colorSwitchThumbNormal">#f1f1f1</item>
-        <item name="android:colorForeground">#42221f</item>
-    </style>
     <color name="basic_blue">#FF129AFE</color>
+    <color name="transparent_basic_blue">#BB129AFE</color>
     <!--<color name="basic_blue">#FF0A5AF2</color> -->
     <color name="basic_purple">#FF8e46fe</color>
+    <color name="transparent_basic_purple">#BB8E46FE</color>
     <!--<color name="basic_purple">#FF8021cb</color>-->
 
 </resources>

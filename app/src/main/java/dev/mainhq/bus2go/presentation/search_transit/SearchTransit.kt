@@ -18,7 +18,7 @@ import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.domain.entity.RouteInfo
 import dev.mainhq.bus2go.presentation.base.BaseActivity
-import dev.mainhq.bus2go.presentation.choose_direction.ChooseDirection
+import dev.mainhq.bus2go.presentation.stop_direction.direction.DirectionFragment
 import dev.mainhq.bus2go.presentation.core.UiState
 import dev.mainhq.bus2go.presentation.main.home.BusListElemsAdapter
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
@@ -64,7 +64,7 @@ class SearchTransit : BaseActivity() {
 
             is UiState.Success<List<RouteInfo>> -> {
                 val adapter = BusListElemsAdapter(routeInfo.data) { data ->
-                    val intent = Intent(this, ChooseDirection::class.java)
+                    val intent = Intent(this, DirectionFragment::class.java)
                     intent.putExtra(ExtrasTagNames.ROUTE_INFO, data)
                     startActivity(intent)
                 }

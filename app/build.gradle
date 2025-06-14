@@ -55,9 +55,10 @@ android {
         }
         
         alpha {
-            minifyEnabled true
             applicationIdSuffix ".alpha"
             versionNameSuffix "-alpha"
+            //minifyEnabled true
+            //proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         
         release {

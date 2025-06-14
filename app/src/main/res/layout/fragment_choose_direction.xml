@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".presentation.stop_direction.direction.DirectionFragment">
+    
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="225dp"
+        android:layout_marginTop="45dp"
+        >
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/choose_bus_num"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="50sp"
+            android:text="hello"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            />
+        
+        <!-- Could instead make this activity swippable. title on top is the bus, and then down is all the stops. swipe left or right for wtv
+        they want -->
+        <!-- menu items -->
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/choose_bus_dir"
+            android:layout_width="wrap_content"
+            android:maxWidth="275dp"
+            android:layout_height="wrap_content"
+            android:textSize="30sp"
+            android:text="world"
+            app:layout_constraintTop_toBottomOf="@id/choose_bus_num"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/top_route_card_view"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginHorizontal="10dp"
+        app:cardElevation="1dp"
+        app:cardBackgroundColor="@color/transparent_basic_blue"
+        >
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingHorizontal="10dp"
+            >
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/top_route_direction"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/dark"
+                android:text="Top"
+                android:textSize="24sp"
+                app:layout_constraintTop_toTopOf="parent"
+                />
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/top_route_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/dark"
+                android:text="Description Top Route"
+                android:textSize="24sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
+    
+    <!-- Add images/icons, add colours, add some Agency color with transparency to background,
+        add onClickListeners, Nord/Sud/Est/Ouest (if they exist)
+        -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/bottom_route_card_view"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginHorizontal="10dp"
+        app:cardElevation="1dp"
+        app:cardBackgroundColor="@color/transparent_basic_blue"
+        >
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingHorizontal="10dp"
+            >
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/bottom_route_direction"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="24sp"
+                android:textColor="@color/dark"
+                android:text="Bottom"
+                app:layout_constraintTop_toTopOf="parent"
+                />
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/bottom_route_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="24sp"
+                android:textColor="@color/dark"
+                android:text="Description Bottom Route"
+                app:layout_constraintBottom_toBottomOf="parent"
+                />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+</LinearLayout>

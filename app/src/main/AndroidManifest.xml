@@ -34,7 +34,7 @@
             android:name=".presentation.config.ConfigActivity"
             android:exported="false"/>
         <activity
-            android:name=".presentation.choose_stop.ChooseStop"
+            android:name=".presentation.stop_direction.StopDirectionActivity"
             android:exported="false"
             >
 
@@ -68,7 +68,7 @@
             android:exported="false">
         </activity>
         <activity
-            android:name=".presentation.choose_direction.ChooseDirection"
+            android:name=".presentation.stop_direction.direction.DirectionFragment"
             android:exported="false">
         </activity>
     </application>

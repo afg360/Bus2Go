@@ -1,16 +1,7 @@
 package dev.mainhq.bus2go.data.repository
 
 import android.content.Context
-import dev.mainhq.bus2go.BuildConfig
 import dev.mainhq.bus2go.data.data_source.remote.NetworkClient
-import dev.mainhq.bus2go.data.data_source.remote.NetworkMonitor
-import dev.mainhq.bus2go.domain.core.Logger
-import dev.mainhq.bus2go.domain.entity.DbToDownload
-import dev.mainhq.bus2go.domain.exceptions.NetworkException
-import dev.mainhq.bus2go.domain.repository.DatabaseDownloadRepository
-import dev.mainhq.bus2go.domain.core.Result
-import dev.mainhq.bus2go.domain.entity.NotificationType
-import dev.mainhq.bus2go.domain.repository.NotificationsRepository
 import io.ktor.client.call.body
 import io.ktor.client.network.sockets.ConnectTimeoutException
 import io.ktor.http.URLBuilder
@@ -31,36 +22,42 @@ import java.net.ConnectException
 import java.net.UnknownHostException
 import java.util.zip.GZIPInputStream
 
+import dev.mainhq.bus2go.data.data_source.remote.NetworkMonitor
+import dev.mainhq.bus2go.domain.core.Result
+import dev.mainhq.bus2go.domain.entity.DbToDownload
+import dev.mainhq.bus2go.domain.entity.NotificationType
+import dev.mainhq.bus2go.domain.exceptions.NetworkException
+import dev.mainhq.bus2go.domain.repository.DatabaseDownloadRepository
+import dev.mainhq.bus2go.domain.repository.NotificationsRepository
+import dev.mainhq.bus2go.domain.repository.SettingsRepository
+
 class DatabaseDownloadRepositoryImpl(
-	//TODO...
-	baseUrl: String?,
 	private val applicationContext: Context,
 	private val networkMonitor: NetworkMonitor,
 	private val notificationsRepository: NotificationsRepository,
-	private val logger: Logger?
+	private val settingsRepository: SettingsRepository
 ): DatabaseDownloadRepository {
 
-	//FIXME BuildConfig won't exist in alpha version!
-	private val baseUrl: String = baseUrl ?: BuildConfig.LOCAL_HOST
-
 	companion object {
+		private const val DEFAULT_PORT = 443//8000
 		private const val DB_DEBUG_NAME_STM = "stm_data"
 		private const val DB_DEBUG_NAME_EXO = "exo_data"
 		private const val COMPRESSION_EXT = "gz"
-
-		private const val TAG = "DATABASE_DOWNLOAD"
 
 		private const val EXPECTED_MESSAGE = "This is a Bus2Go server... potentially"
 		private const val API_VERSION = "v1"
 	}
 
-	//TODO
+	//we must make this call every time instead of holding a reference to the server choice because
+	// it may change overtime
+	private val host get() = settingsRepository.getSettings().serverChoice
+
+
 	override suspend fun getIsBus2Go(str: String): Result<Boolean> {
 		//TODO eventually also set a header to send to prove perhaps identity from client
 		val url = URLBuilder(
 			host = str,
-			//FIXME to port 443
-			port = BuildConfig.DEFAULT_PORT
+			port = DEFAULT_PORT
 		).apply {
 			set{
 				pathSegments = listOf("api", "version")
@@ -73,7 +70,6 @@ class DatabaseDownloadRepositoryImpl(
 			onSuccess = { res ->
 				//before returning success, read the message and compare
 				val response = Json.decodeFromString<JsonObject>(res.data.readRemaining().readText())
-				logger?.debug(TAG, response.toString())
 				val message = response["message"]?.jsonPrimitive?.content
 				val version = response["version"]?.jsonPrimitive?.content
 				message == EXPECTED_MESSAGE && version == API_VERSION
@@ -83,8 +79,8 @@ class DatabaseDownloadRepositoryImpl(
 
 	override suspend fun getDbUpToDateVersion(dbToDownload: DbToDownload): Result<Int> {
 		val url = URLBuilder(
-			host = baseUrl,
-			port = BuildConfig.DEFAULT_PORT,
+			host = host,
+			port = DEFAULT_PORT,
 		).apply {
 			set {
 				//FIXME needs to be replaced since "all" is not a valid endpoint
@@ -107,49 +103,42 @@ class DatabaseDownloadRepositoryImpl(
 		onSuccess: suspend (Result.Success<ByteReadChannel>) -> T
 	): Result<T>{
 		if (!networkMonitor.isConnected()) {
-			logger?.error(TAG, "Not connected")
 			return Result.Error(null, "Not connected to the internet")
 		}
 
 		try{
 			//if we receive an Error, then the url is wrong
-			logger?.debug(TAG, url.toString())
 			return when(val res = NetworkClient.get(url)){
 				is Result.Error -> onError()
 				is Result.Success<ByteReadChannel> -> Result.Success(onSuccess(res))
 			}
 		}
 		catch (iae: IllegalArgumentException){
-			logger?.error(TAG, "Malformed URL", iae)
 			return Result.Error(null, "The URL was malformed")
 		}
 		catch (coe: ConnectTimeoutException){
-			logger?.error(TAG, "Connection timed out...", coe)
 			return Result.Error(null, "Connection has timed out")
 		}
 		catch (uho: UnknownHostException){
-			logger?.error(TAG, "Unknown host", uho)
 			return Result.Error(null, "The host does not exist")
 		}
 		catch (ce: ConnectException){
-			logger?.error(TAG, "Connection Exception", ce)
 			return Result.Error(null, "Cannot connect to the server")
 		}
 		catch (ioe: IOException){
-			logger?.error(TAG, "Unknown IOException occured", ioe)
 			return Result.Error(ioe, null)
 		}
 	}
 
 	override suspend fun getDb(dbToDownload: DbToDownload, versionNeeded: Int): Boolean {
 		val urlBuilder = URLBuilder(
-			host = baseUrl,
-			port = BuildConfig.DEFAULT_PORT,
+			host = host,
+			port = DEFAULT_PORT,
 		)
 		urlBuilder.set {
 			pathSegments = when(dbToDownload){
 				DbToDownload.ALL -> listOf("api", "debug", "sample_data", "stm")
-				DbToDownload.STM -> listOf("api", "download", "v1", "stm")//"debug", "sample_data", "stm")
+				DbToDownload.STM -> listOf("api", "download", "v1", "stm")
 				DbToDownload.EXO -> listOf("api", "download", "v1", "exo")
 			}
 		}
@@ -169,7 +158,6 @@ class DatabaseDownloadRepositoryImpl(
 		}
 
 		//TODO before downloading, check if file exists already with the correct version
-		logger?.debug(TAG, "Looking for already downloaded databases")
 		val mostUpToDateDownloadFile = applicationContext.filesDir.listFiles()
 			?.find { it.name.matches("${dbName}_${versionNeeded}.db.${COMPRESSION_EXT}".toRegex())}
 		//clean up old versions
@@ -186,7 +174,6 @@ class DatabaseDownloadRepositoryImpl(
 			return true
 		}
 
-		logger?.debug(TAG, "No Db found. Beginning Download")
 		var fileName: String? = null
 		val downloadStatus = NetworkClient.getAndExecute(url){
 			var tmpCompressedFile: File? = null
@@ -197,7 +184,6 @@ class DatabaseDownloadRepositoryImpl(
 				//FIXME better parsing should happen here in case quotes and other garbage is added...
 				fileName = it.headers["content-disposition"]?.substringAfter("attachment; filename=")
 					?: throw NetworkException("Content-Disposition HTTP header needed for file name not set by server...")
-				logger?.debug(TAG, fileName!!)
 				tmpCompressedFile = File(applicationContext.filesDir, "$fileName.part")
 				var totalDownloaded = 0
 				notificationsRepository.notify(NotificationType.DbDownloading(0, contentLength))
@@ -217,24 +203,20 @@ class DatabaseDownloadRepositoryImpl(
 				true
 			}
 			catch (ne: NetworkException){
-				logger?.error(TAG, "A network exception occured", ne)
 				tmpCompressedFile?.delete()
 				false
 			}
 			catch (ioe: IOException){
-				logger?.error(TAG, "IOException...", ioe)
 				tmpCompressedFile?.delete()
 				false
 			}
 			catch (e: Exception){
-				logger?.error(TAG, "Exception...", e)
 				tmpCompressedFile?.delete()
 				false
 			}
 		}
 
 		if (downloadStatus){
-			logger?.debug(TAG, "Download Successful")
 			//FIXME how to find name if it is variable...
 			val compressedFile = File(applicationContext.filesDir, fileName!!)
 			val tmpCompressedFile = File(applicationContext.filesDir, "${fileName!!}.part")
@@ -242,7 +224,6 @@ class DatabaseDownloadRepositoryImpl(
 				throw IOException("Failed to rename downloaded file to a compressed file")
 
 			val decompressingStatus = decompressing(compressedFile, "$dbName.db")
-			if (decompressingStatus) logger?.debug(TAG, "Decompressing Successful")
 			return decompressingStatus
 		}
 
@@ -256,7 +237,6 @@ class DatabaseDownloadRepositoryImpl(
 		val destFile = File(databasesDir, dbName)
 		if (destFile.exists()) destFile.delete()
 
-		logger?.debug(TAG, "Decompressing")
 		return withContext(Dispatchers.IO) {
 			FileInputStream(compressedFile).use { fileIn ->
 				GZIPInputStream(fileIn).use { zstdIn ->
@@ -271,7 +251,6 @@ class DatabaseDownloadRepositoryImpl(
 							true
 						}
 						catch (ioe: IOException){
-							logger?.error(TAG, ioe.message.toString())
 							//delete garbage/corrupted files
 							if (compressedFile.exists()) compressedFile.delete()
 							if (destFile.exists()) destFile.delete()
@@ -282,5 +261,4 @@ class DatabaseDownloadRepositoryImpl(
 			}
 		}
 	}
-
 }

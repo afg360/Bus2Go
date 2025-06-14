@@ -7,6 +7,6 @@ class IsRealTimeEnabled(
 ) {
 
 	operator fun invoke(): Boolean{
-		return settingsRepository.isRealTimeEnabled()
+		return settingsRepository.getSettings().isRealTime
 	}
 }
