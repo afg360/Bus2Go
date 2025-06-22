@@ -26,6 +26,7 @@ import dev.mainhq.bus2go.domain.entity.StmBusRouteInfo
 import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.presentation.core.UiState
 import dev.mainhq.bus2go.presentation.stop_direction.ActivityFragment
+import dev.mainhq.bus2go.presentation.stop_direction.AnimationDirection
 import dev.mainhq.bus2go.presentation.stop_direction.StopDirectionSharedViewModel
 import dev.mainhq.bus2go.presentation.stop_direction.StopDirectionViewModel
 import dev.mainhq.bus2go.presentation.stop_direction.stop.StopFragment
@@ -135,7 +136,9 @@ class DirectionFragment : Fragment(R.layout.fragment_choose_direction) {
                                         Toast.LENGTH_SHORT
                                     ).show()
                                     sharedStopViewModel.setTransitData(topDirData)
-                                    sharedActivityViewModel.setActivityFragment(ActivityFragment.STOPS)
+                                    sharedActivityViewModel.setActivityFragment(
+                                        ActivityFragment.Stops(AnimationDirection.TO_TOP)
+                                    )
                                 }
                                 else {
                                     val bottomDirData = viewModel.bottomDirection.filterNotNull()
@@ -157,11 +160,15 @@ class DirectionFragment : Fragment(R.layout.fragment_choose_direction) {
                                     )
                                     topRouteCardView.setOnClickListener {
                                         sharedStopViewModel.setTransitData(topDirData)
-                                        sharedActivityViewModel.setActivityFragment(ActivityFragment.STOPS)
+                                        sharedActivityViewModel.setActivityFragment(
+                                            ActivityFragment.Stops(AnimationDirection.TO_TOP)
+                                        )
                                     }
                                     bottomRouteCardView.setOnClickListener {
                                         sharedStopViewModel.setTransitData(bottomDirData)
-                                        sharedActivityViewModel.setActivityFragment(ActivityFragment.STOPS)
+                                        sharedActivityViewModel.setActivityFragment(
+                                            ActivityFragment.Stops(AnimationDirection.TO_BOTTOM)
+                                        )
                                     }
                                 }
                             }
@@ -179,7 +186,9 @@ class DirectionFragment : Fragment(R.layout.fragment_choose_direction) {
                                     )
                                     topRouteCardView.setOnClickListener {
                                         sharedStopViewModel.setTransitData(topDirData)
-                                        sharedActivityViewModel.setActivityFragment(ActivityFragment.STOPS)
+                                        sharedActivityViewModel.setActivityFragment(
+                                            ActivityFragment.Stops(AnimationDirection.TO_TOP)
+                                        )
                                     }
 
                                     bottomDir.visibility = View.GONE
@@ -190,7 +199,9 @@ class DirectionFragment : Fragment(R.layout.fragment_choose_direction) {
                                     )
                                     bottomRouteCardView.setOnClickListener {
                                         sharedStopViewModel.setTransitData(bottomDirData)
-                                        sharedActivityViewModel.setActivityFragment(ActivityFragment.STOPS)
+                                        sharedActivityViewModel.setActivityFragment(
+                                            ActivityFragment.Stops(AnimationDirection.TO_BOTTOM)
+                                        )
                                     }
                                 }
                                 else throw IllegalStateException("Unexpected data: ExoTrain being unidirectional...")
@@ -235,7 +246,9 @@ class DirectionFragment : Fragment(R.layout.fragment_choose_direction) {
                                     )
                                     topRouteCardView.setOnClickListener {
                                         sharedStopViewModel.setTransitData(topDirData)
-                                        sharedActivityViewModel.setActivityFragment(ActivityFragment.STOPS)
+                                        sharedActivityViewModel.setActivityFragment(
+                                            ActivityFragment.Stops(AnimationDirection.TO_TOP)
+                                        )
                                     }
 
                                     bottomDescr.text = getString(
@@ -245,7 +258,9 @@ class DirectionFragment : Fragment(R.layout.fragment_choose_direction) {
                                     )
                                     bottomRouteCardView.setOnClickListener {
                                         sharedStopViewModel.setTransitData(bottomDirData)
-                                        sharedActivityViewModel.setActivityFragment(ActivityFragment.STOPS)
+                                        sharedActivityViewModel.setActivityFragment(
+                                            ActivityFragment.Stops(AnimationDirection.TO_BOTTOM)
+                                        )
                                     }
                                 }
                                 else throw IllegalStateException("Unexpected data: StmBus being unidirectional...")

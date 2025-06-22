@@ -240,7 +240,7 @@ def stop_times_table(conn, path):
     # init the table
     query = """CREATE TABLE StopTimes (
     	id INTEGER PRIMARY KEY NOT NULL,
-    	trip_id INTEGER NOT NULL -- REFERENCES Trips(trip_id),
+    	trip_id INTEGER NOT NULL, -- REFERENCES Trips(trip_id),
     	arrival_time TEXT NOT NULL,
     	departure_time TEXT NOT NULL,
     	stop_id INTEGER NOT NULL REFERENCES Stops(stop_id),

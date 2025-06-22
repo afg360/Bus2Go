@@ -108,15 +108,15 @@ class DatabaseDownloadManagerWorker(
 		return if (!block()) {
 			withContext(Dispatchers.Main){
 				notificationsRepository.notify(NotificationType.DbUpdateError)
+				Result.retry()
 			}
-			Result.retry()
 		}
 		else {
 			Log.d("DB_WORKER", "Downloaded successfully")
 			withContext(Dispatchers.Main){
 				notificationsRepository.notify(NotificationType.DbUpdateDone)
+				Result.success()
 			}
-			Result.success()
 		}
 	}
 }

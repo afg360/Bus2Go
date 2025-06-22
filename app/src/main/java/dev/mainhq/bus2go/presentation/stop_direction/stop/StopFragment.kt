@@ -92,7 +92,7 @@ class StopFragment : Fragment(R.layout.fragment_choose_stop) {
                 viewLifecycleOwner,
                 object: OnBackPressedCallback(true) {
                     override fun handleOnBackPressed() {
-                        sharedActivityViewModel.setActivityFragment(ActivityFragment.DIRECTION)
+                        sharedActivityViewModel.setActivityFragment(ActivityFragment.Direction)
                         isEnabled = false
                     }
                 }

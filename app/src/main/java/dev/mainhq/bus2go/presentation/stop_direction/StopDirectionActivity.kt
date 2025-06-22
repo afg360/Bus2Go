@@ -47,7 +47,7 @@ class StopDirectionActivity: BaseActivity() {
 			repeatOnLifecycle(Lifecycle.State.STARTED){
 				viewModel.activityFragment.collect {
 					when(it){
-						ActivityFragment.DIRECTION -> {
+						ActivityFragment.Direction -> {
 							supportFragmentManager.beginTransaction()
 								.replace(
 									R.id.stop_direction_fragment_container_view,
@@ -55,8 +55,28 @@ class StopDirectionActivity: BaseActivity() {
 								)
 								.commit()
 						}
-						ActivityFragment.STOPS -> {
+						is ActivityFragment.Stops -> {
 							supportFragmentManager.beginTransaction()
+								.apply{
+									when(it.animationDirection){
+										AnimationDirection.TO_TOP -> {
+											setCustomAnimations(
+												R.anim.enter_from_bottom,
+												R.anim.exit_to_top,
+												R.anim.enter_from_top,
+												R.anim.exit_to_bottom
+											)
+										}
+										AnimationDirection.TO_BOTTOM -> {
+											setCustomAnimations(
+												R.anim.enter_from_top,
+												R.anim.exit_to_bottom,
+												R.anim.enter_from_bottom,
+												R.anim.exit_to_top
+											)
+										}
+									}
+								}
 								.replace(
 									R.id.stop_direction_fragment_container_view,
 									StopFragment()

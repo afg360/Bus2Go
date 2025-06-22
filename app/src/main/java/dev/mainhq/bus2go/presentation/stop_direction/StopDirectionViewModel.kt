@@ -6,7 +6,8 @@ import kotlinx.coroutines.flow.asStateFlow
 
 class StopDirectionViewModel: ViewModel() {
 
-	private val _activityFragment = MutableStateFlow(ActivityFragment.DIRECTION)
+	private val _activityFragment: MutableStateFlow<ActivityFragment> =
+		MutableStateFlow(ActivityFragment.Direction)
 	val activityFragment = _activityFragment.asStateFlow()
 
 
