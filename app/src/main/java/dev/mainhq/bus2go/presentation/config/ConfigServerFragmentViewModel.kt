@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -47,19 +48,19 @@ class ConfigServerFragmentViewModel(
 		//FIXME do some user input handling here
 		//TODO verify if the user added an "http[s]://" thingy and whatnot
 		job?.cancel()
-		_serverResponse.value = UiState.Init
+		_serverResponse.update { UiState.Init }
 		val config = UrlChecker.check(potentialUrl)
 		viewModelScope.launch(Dispatchers.Main) {
 			if (config == null) {
-				_buttonText.value = "Skip"
+				_buttonText.update { "Skip" }
 				_textInputText.emit(UiState.Error(""))
 			}
 			else if (config.data.isEmpty()) {
-				_buttonText.value = "Skip"
+				_buttonText.update { "Skip" }
 				_textInputText.emit(UiState.Success(""))
 			}
 			else {
-				_buttonText.value =  "Continue"
+				_buttonText.update {  "Continue" }
 				_textInputText.emit(UiState.Success(config.data))
 			}
 		}
@@ -69,12 +70,12 @@ class ConfigServerFragmentViewModel(
 	fun checkIsBus2GoServer() {
 		//before doing this shit, check if _serverResponse is already in success mode from the previous data...
 		//if it is, no need to check back
-		_serverResponse.value = UiState.Loading
+		_serverResponse.update { UiState.Loading }
 
 		job = viewModelScope.launch(Dispatchers.Main) {
 			//capture the textInputText
 			val value = _textInputText.first()
-			if (value.instanceOf(UiState.Error::class)) _serverResponse.value = UiState.Error("")
+			if (value.instanceOf(UiState.Error::class)) _serverResponse.update { UiState.Error("") }
 			val coroutineExceptionHandler = CoroutineExceptionHandler{_, throwable ->
 				throwable.printStackTrace()
 			}
@@ -84,7 +85,7 @@ class ConfigServerFragmentViewModel(
 				withContext(Dispatchers.Main) {
 					when (result) {
 						is Result.Error -> {
-							_buttonText.value = "Skip"
+							_buttonText.update { "Skip" }
 							_serverResponse.value =
 								if (result.message != null) UiState.Error(result.message)
 								else UiState.Error("")
@@ -92,12 +93,12 @@ class ConfigServerFragmentViewModel(
 
 						is Result.Success<Boolean> -> {
 							if (result.data){
-								_buttonText.value = "Continue"
+								_buttonText.update { "Continue" }
 								//FIXME for the moment ignore success/failure status
 								saveBus2GoServer.invoke(value.data)
 							}
-							 else _buttonText.value = "Skip"
-							_serverResponse.value = UiState.Success(result.data)
+							 else _buttonText.update { "Skip" }
+							_serverResponse.update { UiState.Success(result.data) }
 						}
 					}
 				}
@@ -107,6 +108,6 @@ class ConfigServerFragmentViewModel(
 
 	fun cancel(){
 		job?.cancel()
-		_serverResponse.value = UiState.Init
+		_serverResponse.update { UiState.Init }
 	}
 }

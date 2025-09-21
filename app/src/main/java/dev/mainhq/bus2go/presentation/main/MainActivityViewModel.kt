@@ -7,6 +7,7 @@ import dev.mainhq.bus2go.domain.use_case.db_state.SetDatabaseState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
@@ -28,7 +29,7 @@ class MainActivityViewModel(
 	fun setActivityType(activityFragment: ActivityFragment){
 		//prevents spamming and rerendering of the same fragment...
 		if (activityFragment != _activityFragment.value)
-			_activityFragment.value = activityFragment
+			_activityFragment.update { activityFragment }
 	}
 
 	fun setUpdateDbState(day: Long){

@@ -8,6 +8,7 @@ import dev.mainhq.bus2go.domain.use_case.transit.GetRouteInfo
 import dev.mainhq.bus2go.presentation.core.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class SearchTransitViewModel(
@@ -19,12 +20,15 @@ class SearchTransitViewModel(
 
 	fun queryRouteInfo(query: String){
 		viewModelScope.launch {
-			when(val routeInfo = getRouteInfo.invoke(query)){
-				is Result.Error -> {
-					UiState.Error("No db ma man")
-				}
-				is Result.Success<List<RouteInfo>> -> {
-					_routeInfo.value = UiState.Success(routeInfo.data)
+			val routeInfo = getRouteInfo.invoke(query)
+			_routeInfo.update {
+				when(routeInfo){
+					is Result.Error -> {
+						UiState.Error("No db ma man")
+					}
+					is Result.Success<List<RouteInfo>> -> {
+						UiState.Success(routeInfo.data)
+					}
 				}
 			}
 		}

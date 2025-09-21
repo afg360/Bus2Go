@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class HomeFragmentViewModel(
@@ -29,14 +30,20 @@ class HomeFragmentViewModel(
 
 	fun onSearchQueryChange(query: String){
 		if (query.isEmpty()){
-			_searchQuery.value = UiState.Success(listOf())
+			_searchQuery.update { UiState.Success(listOf()) }
 		}
 		else{
 			viewModelScope.launch {
-				when(val routeInfo = getRouteInfo.invoke(query)){
-					is Result.Error -> UiState.Error("no db ma man...")
-					is Result.Success<List<RouteInfo>> ->
-						_searchQuery.value = UiState.Success(routeInfo.data)
+				val routeInfo = getRouteInfo.invoke(query)
+				_searchQuery.update {
+					when(routeInfo){
+						is Result.Error -> {
+							UiState.Error("no db ma man...")
+						}
+						is Result.Success<List<RouteInfo>> -> {
+							UiState.Success(routeInfo.data)
+						}
+					}
 				}
 			}
 		}

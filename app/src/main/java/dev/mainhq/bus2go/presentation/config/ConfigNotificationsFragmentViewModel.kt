@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dev.mainhq.bus2go.domain.use_case.SaveAllNotifSettings
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ConfigNotificationsFragmentViewModel(
@@ -18,11 +19,11 @@ class ConfigNotificationsFragmentViewModel(
 	val dbUpdateNotifs = _dbUpdateNotifs.asStateFlow()
 
 	fun setAppUpdateNotifs(boolean: Boolean){
-		_appUpdateNotifs.value = boolean
+		_appUpdateNotifs.update { boolean }
 	}
 
 	fun setDbUpdateNotifs(boolean: Boolean){
-		_dbUpdateNotifs.value = boolean
+		_dbUpdateNotifs.update { boolean }
 	}
 
 	fun anyNotifSet(): Boolean{

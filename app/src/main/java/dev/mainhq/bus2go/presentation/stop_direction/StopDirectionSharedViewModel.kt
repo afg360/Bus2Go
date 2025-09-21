@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import dev.mainhq.bus2go.domain.entity.TransitData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 class StopDirectionSharedViewModel: ViewModel() {
 
@@ -12,7 +13,7 @@ class StopDirectionSharedViewModel: ViewModel() {
 	val transitDataUp = _transitData.asStateFlow()
 
 	fun setupTransitData(transitData: List<TransitData>) {
-		_transitData.value = transitData
+		_transitData.update { transitData }
 	}
 
 }

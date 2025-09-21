@@ -3,6 +3,7 @@ package dev.mainhq.bus2go.presentation.config
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 /** ViewModel that saves the state of the last fragment attached to the configurationActivity, and notifies
  * 	the activity when configuration is done */
@@ -16,10 +17,10 @@ class ConfigSharedViewModel : ViewModel() {
 
 	fun triggerEvent(startActivity: Boolean) {
 		_event.value = startActivity
-		_currentFragment.value = null
+		_currentFragment.update { null }
 	}
 
 	fun setFragment(fragment: FragmentUsed){
-		_currentFragment.value = fragment
+		_currentFragment.update { fragment }
 	}
 }

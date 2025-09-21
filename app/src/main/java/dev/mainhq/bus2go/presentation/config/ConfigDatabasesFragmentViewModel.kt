@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ConfigDatabasesFragmentViewModel(
@@ -19,20 +20,24 @@ class ConfigDatabasesFragmentViewModel(
 	val dbToDownload = _dbToDownload.asStateFlow()
 
 	fun toggleStm(){
-		_dbToDownload.value = when (_dbToDownload.value){
-			DbToDownload.ALL -> DbToDownload.EXO
-			DbToDownload.STM -> null
-			DbToDownload.EXO -> DbToDownload.ALL
-			null -> DbToDownload.STM
+		_dbToDownload.update {
+			when (_dbToDownload.value){
+				DbToDownload.ALL -> DbToDownload.EXO
+				DbToDownload.STM -> null
+				DbToDownload.EXO -> DbToDownload.ALL
+				null -> DbToDownload.STM
+			}
 		}
 	}
 
 	fun toggleExo(){
-		_dbToDownload.value = when (_dbToDownload.value){
-			DbToDownload.ALL -> DbToDownload.STM
-			DbToDownload.STM -> DbToDownload.ALL
-			DbToDownload.EXO -> null
-			null -> DbToDownload.EXO
+		_dbToDownload.update {
+			when (_dbToDownload.value){
+				DbToDownload.ALL -> DbToDownload.STM
+				DbToDownload.STM -> DbToDownload.ALL
+				DbToDownload.EXO -> null
+				null -> DbToDownload.EXO
+			}
 		}
 	}
 

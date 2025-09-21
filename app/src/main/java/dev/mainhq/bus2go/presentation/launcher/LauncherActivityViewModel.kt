@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dev.mainhq.bus2go.domain.use_case.db_state.IsFirstTimeAppLaunched
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class LauncherActivityViewModel(
@@ -17,7 +18,7 @@ class LauncherActivityViewModel(
 
 	init{
 		viewModelScope.launch {
-			_isFirstTime.value = isFirstTimeAppLaunchedUseCase()
+			_isFirstTime.update { isFirstTimeAppLaunchedUseCase() }
 		}
 	}
 }

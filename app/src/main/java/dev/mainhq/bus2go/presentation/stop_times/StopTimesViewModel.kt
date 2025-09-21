@@ -15,6 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalTime
 
@@ -34,31 +35,33 @@ class StopTimesViewModel(
 	val lastTime = _lastTime.asStateFlow()
 
 	init {
-		_stopTimesHeaderDisplayModel.value = when(transitData){
-			is ExoBusItem -> StopTimesHeaderDisplayModel(
-				R.color.basic_purple,
-				if (transitData.routeId.length < 10) 35f else 24f,
-				transitData.routeId,
-				transitData.direction,
-				transitData.stopName
-			)
-			is ExoTrainItem -> StopTimesHeaderDisplayModel(
-				R.color.orange,
-				if (transitData.routeName.length < 10) 35f else 24f,
-				//FIXME use a string resource here...
-				"Train ${transitData.routeName}",
-				transitData.direction,
-				transitData.stopName
-			)
-			is StmBusItem -> {
-				StopTimesHeaderDisplayModel(
-					R.color.basic_blue,
+		_stopTimesHeaderDisplayModel.update { 
+			when(transitData){
+				is ExoBusItem -> StopTimesHeaderDisplayModel(
+					R.color.basic_purple,
 					if (transitData.routeId.length < 10) 35f else 24f,
 					transitData.routeId,
-					//remove anything inside parenthesis to reduce text...
-					transitData.lastStop.replace(Regex("\\(.*\\)"), ""),
+					transitData.direction,
 					transitData.stopName
 				)
+				is ExoTrainItem -> StopTimesHeaderDisplayModel(
+					R.color.orange,
+					if (transitData.routeName.length < 10) 35f else 24f,
+					//FIXME use a string resource here...
+					"Train ${transitData.routeName}",
+					transitData.direction,
+					transitData.stopName
+				)
+				is StmBusItem -> {
+					StopTimesHeaderDisplayModel(
+						R.color.basic_blue,
+						if (transitData.routeId.length < 10) 35f else 24f,
+						transitData.routeId,
+						//remove anything inside parenthesis to reduce text...
+						transitData.lastStop.replace(Regex("\\(.*\\)"), ""),
+						transitData.stopName
+					)
+				}
 			}
 		}
 		viewModelScope.launch(Dispatchers.Default) {
@@ -69,22 +72,24 @@ class StopTimesViewModel(
 					}
 
 					is Result.Success<List<Time>> -> {
-						_arrivalTimes.value = transitTime.data.map{
-							val timeRemaining = it.timeRemaining()
-							val timeLeftTextDisplay = timeRemaining?.let {
-								//FIXMe instead of checking hour, check if smaller than an hour
-								if (timeRemaining.hour == 0) timeRemaining.minute.toString()
-								else "" //empty string that will be replaced by the resource value
-							} ?: "Passed bus???"
-							val urgency = if (timeRemaining == null || timeRemaining < LocalTime.of(0, 4, 0))
+						_arrivalTimes.update { 
+							transitTime.data.map{
+								val timeRemaining = it.timeRemaining()
+								val timeLeftTextDisplay = timeRemaining?.let {
+									//FIXMe instead of checking hour, check if smaller than an hour
+									if (timeRemaining.hour == 0) timeRemaining.minute.toString()
+									else "" //empty string that will be replaced by the resource value
+								} ?: "Passed bus???"
+								val urgency = if (timeRemaining == null || timeRemaining < LocalTime.of(0, 4, 0))
 								Urgency.IMMINENT
-							else if (timeRemaining < LocalTime.of(0, 15, 0)) Urgency.SOON
-							else Urgency.DISTANT
-							StopTimesDisplayModel(
-								arrivalTime = it,
-								timeLeftTextDisplay = timeLeftTextDisplay,
-								urgency = urgency
-							)
+								else if (timeRemaining < LocalTime.of(0, 15, 0)) Urgency.SOON
+								else Urgency.DISTANT
+								StopTimesDisplayModel(
+									arrivalTime = it,
+									timeLeftTextDisplay = timeLeftTextDisplay,
+									urgency = urgency
+								)
+							}
 						}
 					}
 				}
