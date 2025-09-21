@@ -13,6 +13,7 @@ import android.view.inputmethod.EditorInfo
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.viewModels
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.children
@@ -35,6 +36,7 @@ import dev.mainhq.bus2go.domain.entity.RouteInfo
 import dev.mainhq.bus2go.presentation.stop_direction.direction.DirectionFragment
 import dev.mainhq.bus2go.presentation.core.UiState
 import dev.mainhq.bus2go.presentation.core.collectFlow
+import dev.mainhq.bus2go.presentation.main.MainActivityViewModel
 import dev.mainhq.bus2go.presentation.search_transit.SearchTransit
 import dev.mainhq.bus2go.presentation.settings.SettingsActivity
 import dev.mainhq.bus2go.presentation.main.home.favourites.FavouritesFragment
@@ -164,7 +166,7 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
         searchView.addTransitionListener { _, previousState, newState ->
             if (previousState == TransitionState.HIDDEN && newState == TransitionState.SHOWING){
                 //can add an animation
-                activity?.findViewById<CoordinatorLayout>(R.id.bottomNavCoordLayout)?.visibility = INVISIBLE
+                activity?.findViewById<CoordinatorLayout>(R.id.bottomNavCoordLayout)?.visibility = GONE
                 onBackPressedCallback.isEnabled = true
             }
             else if (previousState == TransitionState.SHOWN && newState == TransitionState.HIDING){

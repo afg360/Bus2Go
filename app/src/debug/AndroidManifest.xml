@@ -4,7 +4,8 @@
     <application
         android:usesCleartextTraffic="true"
         android:icon="@mipmap/ic_launcher"
-        tools:replace="android:icon"
+        android:label="Bus2Go-Debug"
+        tools:replace="android:icon,android:label"
         >
         
     </application>

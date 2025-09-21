@@ -6,6 +6,7 @@ import dev.mainhq.bus2go.domain.use_case.db_state.CheckDatabaseUpdateRequired
 import dev.mainhq.bus2go.domain.use_case.db_state.SetDatabaseState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
@@ -14,15 +15,14 @@ class MainActivityViewModel(
 	private val setDatabaseState: SetDatabaseState,
 ): ViewModel() {
 
-	private val _activityFragment: MutableStateFlow<ActivityFragment> = MutableStateFlow(ActivityFragment.HOME)
+	private val _activityFragment = MutableStateFlow(ActivityFragment.HOME)
 	val activityFragment: StateFlow<ActivityFragment> get() = _activityFragment
 
-	private val _updateDbState: MutableStateFlow<LocalDate?> = MutableStateFlow(null)
+	private val _updateDbState = MutableStateFlow(null)
 	val updateDbState: StateFlow<LocalDate?> get() = _updateDbState
 
-	private val _showAlert: MutableStateFlow<Boolean> = MutableStateFlow(false)
+	private val _showAlert = MutableStateFlow(false)
 	val showAlert: StateFlow<Boolean> get() = _showAlert
-
 
 
 	fun setActivityType(activityFragment: ActivityFragment){

@@ -2,6 +2,7 @@ package dev.mainhq.bus2go.presentation.stop_direction
 
 import android.os.Build
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.lifecycle.Lifecycle
@@ -19,6 +20,7 @@ import dev.mainhq.bus2go.presentation.stop_direction.stop.StopFragment
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class StopDirectionActivity: BaseActivity() {
 
@@ -47,13 +49,22 @@ class StopDirectionActivity: BaseActivity() {
 			repeatOnLifecycle(Lifecycle.State.STARTED){
 				viewModel.activityFragment.collect {
 					when(it){
-						ActivityFragment.Direction -> {
-							supportFragmentManager.beginTransaction()
-								.replace(
-									R.id.stop_direction_fragment_container_view,
-									DirectionFragment()
-								)
-								.commit()
+						is ActivityFragment.Direction -> {
+							if (supportFragmentManager.backStackEntryCount == 1){
+								supportFragmentManager.popBackStack()
+							}
+							else if (supportFragmentManager.backStackEntryCount == 0) {
+								supportFragmentManager.beginTransaction()
+									.replace(
+										R.id.stop_direction_fragment_container_view,
+										DirectionFragment()
+									)
+									.commit()
+							}
+							else {
+								Toast.makeText(this@StopDirectionActivity, "Unexpected Error", Toast.LENGTH_SHORT).show()
+								throw IllegalStateException("Wtf")
+							}
 						}
 						is ActivityFragment.Stops -> {
 							supportFragmentManager.beginTransaction()
@@ -81,6 +92,7 @@ class StopDirectionActivity: BaseActivity() {
 									R.id.stop_direction_fragment_container_view,
 									StopFragment()
 								)
+								.addToBackStack(null)
 								.commit()
 						}
 					}
@@ -105,7 +117,6 @@ class StopDirectionActivity: BaseActivity() {
 			override fun handleOnBackPressed() {
 				TODO("Not yet implemented")
 			}
-
 		}
 	}
 }

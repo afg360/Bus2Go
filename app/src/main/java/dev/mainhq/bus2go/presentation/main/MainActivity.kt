@@ -39,7 +39,6 @@ class MainActivity : BaseActivity() {
     }
 
     //private val alarmViewModel: AlarmCreationViewModel by viewModels()
-    //private val roomViewModel: RoomViewModel by viewModels()
 
 
 	override fun onCreate(savedInstanceState: Bundle?) {
@@ -70,6 +69,7 @@ class MainActivity : BaseActivity() {
 
 
         //TODO check if need to start configuration activity here
+
         lifecycleScope.launch(Dispatchers.Main) {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED){
                 mainActivityViewModel.activityFragment.collect{ activityType ->

@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.presentation.stop_direction.ActivityFragment
+import dev.mainhq.bus2go.presentation.stop_direction.AnimationDirection
 import dev.mainhq.bus2go.presentation.stop_direction.StopDirectionSharedViewModel
 import dev.mainhq.bus2go.presentation.stop_direction.StopDirectionViewModel
 import dev.mainhq.bus2go.presentation.stop_times.StopTimesActivity
@@ -94,6 +95,7 @@ class StopFragment : Fragment(R.layout.fragment_choose_stop) {
                     override fun handleOnBackPressed() {
                         sharedActivityViewModel.setActivityFragment(ActivityFragment.Direction)
                         isEnabled = false
+
                     }
                 }
             )
