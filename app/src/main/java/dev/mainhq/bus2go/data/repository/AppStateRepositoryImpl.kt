@@ -22,18 +22,34 @@ class AppStateRepositoryImpl(
 
 	//FIXME use the result pattern for cleaner handling of IO errors
 
-	override suspend fun getDatabaseState(): LocalDate? {
+	override suspend fun getDatabaseExpirationDate(): Result<LocalDate> {
 		return withContext(Dispatchers.IO) {
-			appStateDataStore.data.first()[AppStateDataStoreKeys.DATABASES_STATE]?.let{
-				LocalDate.parse(it, DateTimeFormatter.BASIC_ISO_DATE)
+			appStateDataStore.data.first()[AppStateDataStoreKeys.DATABASES_EXPIRATION_DATE]?.let{
+				Result.Success(LocalDate.parse(it, DateTimeFormatter.BASIC_ISO_DATE))
+			} ?: Result.Error(null)
+		}
+	}
+
+	override suspend fun setDatabaseExpirationDate(localDate: LocalDate){
+		withContext(Dispatchers.IO) {
+			appStateDataStore.edit { mutablePreferences ->
+				mutablePreferences[AppStateDataStoreKeys.DATABASES_EXPIRATION_DATE] = Time.toLocalDateString(localDate)
 			}
 		}
 	}
 
-	override suspend fun setDatabaseState(localDate: LocalDate){
-		withContext(Dispatchers.IO) {
+	override suspend fun getDbUpdateDialogLastShownDate(): Result<LocalDate> {
+		return withContext(Dispatchers.IO){
+			appStateDataStore.data.first()[AppStateDataStoreKeys.DATABASES_DIALOG_LAST_SHOWN_DATE]?.let {
+				Result.Success(LocalDate.parse(it, DateTimeFormatter.BASIC_ISO_DATE))
+			} ?: Result.Error(null)
+		}
+	}
+
+	override suspend fun setUpdateDbDialogLastShownDate(date: LocalDate) {
+		withContext(Dispatchers.IO){
 			appStateDataStore.edit { mutablePreferences ->
-				mutablePreferences[AppStateDataStoreKeys.DATABASES_STATE] = Time.toLocalDateString(localDate)
+				mutablePreferences[AppStateDataStoreKeys.DATABASES_DIALOG_LAST_SHOWN_DATE] = Time.toLocalDateString(date)
 			}
 		}
 	}

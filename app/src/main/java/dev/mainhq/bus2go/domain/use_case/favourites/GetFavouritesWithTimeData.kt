@@ -12,7 +12,7 @@ import io.ktor.util.reflect.instanceOf
 //should not only take favourites but also the time
 //(and since the time is periodically calculated, perhaps it should be sent as a flow instead?
 class GetFavouritesWithTimeData(
-	private val exoFavouritesRepo: ExoFavouritesRepository,
+	private val exoFavouritesRepository: ExoFavouritesRepository,
 	private val exoRepository: ExoRepository,
 	private val stmFavouritesRepository: StmFavouritesRepository,
 	private val stmRepository: StmRepository,
@@ -28,12 +28,12 @@ class GetFavouritesWithTimeData(
 		}.filter { it.instanceOf(Result.Success::class) }
 			.map { (it as Result.Success).data }
 
-		val exoBusFavourites = exoFavouritesRepo.getExoBusFavourites().map {
+		val exoBusFavourites = exoFavouritesRepository.getExoBusFavourites().map {
 			exoRepository.getFavouriteBusStopTime(it, time)
 		}.filter { it.instanceOf(Result.Success::class) }
 			.map { (it as Result.Success).data }
 
-		val exoTrainFavourites = exoFavouritesRepo.getExoTrainFavourites().map {
+		val exoTrainFavourites = exoFavouritesRepository.getExoTrainFavourites().map {
 			exoRepository.getFavouriteTrainStopTime(it, time)
 		}.filter { it.instanceOf(Result.Success::class) }
 			.map { (it as Result.Success).data }

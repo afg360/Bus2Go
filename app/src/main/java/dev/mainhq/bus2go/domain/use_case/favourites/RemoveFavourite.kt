@@ -9,7 +9,7 @@ import dev.mainhq.bus2go.domain.repository.StmFavouritesRepository
 
 //FIXMe perhaps isntead make a removeFavourites (multiple ones)
 class RemoveFavourite(
-	private val exoFavouritesRepo: ExoFavouritesRepository,
+	private val exoFavouritesRepository: ExoFavouritesRepository,
 	private val stmFavouritesRepository: StmFavouritesRepository
 ) {
 
@@ -19,8 +19,8 @@ class RemoveFavourite(
 		//val exoTrainFavourites = favourites.filterIsInstance<ExoFavouriteTrainItem>()
 		when(favourite){
 			is StmBusItem -> stmFavouritesRepository.removeStmBusFavourite(favourite)
-			is ExoTrainItem -> exoFavouritesRepo.removeExoTrainFavourite(favourite)
-			is ExoBusItem -> exoFavouritesRepo.removeExoBusFavourite(favourite)
+			is ExoTrainItem -> exoFavouritesRepository.removeExoTrainFavourite(favourite)
+			is ExoBusItem -> exoFavouritesRepository.removeExoBusFavourite(favourite)
 		}
 	}
 }

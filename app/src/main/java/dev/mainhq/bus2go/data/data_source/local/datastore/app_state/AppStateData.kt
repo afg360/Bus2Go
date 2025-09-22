@@ -19,8 +19,9 @@ val Context.appStateDataStore: DataStore<Preferences> by preferencesDataStore(
 
 object AppStateDataStoreKeys{
 	//TODO perhaps be replaced with SQLITE thingy
-	val DATABASES_STATE = stringPreferencesKey("databases_state")
-	val IS_FIRST_TIME = booleanPreferencesKey("isFirstTime")
+	val DATABASES_EXPIRATION_DATE = stringPreferencesKey("db_expiration_date")
+	val DATABASES_DIALOG_LAST_SHOWN_DATE = stringPreferencesKey("db_dialog_last_shown_date")
+	val IS_FIRST_TIME = booleanPreferencesKey("is_first_time")
 	//stores the saved version of the databases (NOT THE DATABASE SCHEMA VERSIONS!)
 	val SQLITE_STM_VERSION = intPreferencesKey("sqlite_stm_version")
 	val SQLITE_EXO_VERSION = intPreferencesKey("sqlite_exo_version")

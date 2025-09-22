@@ -9,15 +9,16 @@ object AppThemeState {
 
     //FIXME if the app is not destroyed for a while but person set up the thing for a while, might
     //not work as expected...
-    private var _displayIsDbUpdatedDialog: Boolean = true
-
     /**
      * Caches whether or not need to update local databases to avoid constantly looking up file.
      * Always initialised at launch at true
      **/
-    val displayIsDbUpdatedDialog: Boolean get() = _displayIsDbUpdatedDialog
+    var displayIsDbUpdatedDialog = true
+        private set(shit) {
+            displayIsDbUpdatedDialog = shit
+        }
 
-    fun turnOffDbUpdateChecking(){ _displayIsDbUpdatedDialog = false }
+    fun turnOffDbUpdateChecking(){ displayIsDbUpdatedDialog = false }
 
     private var prevVal by Delegates.notNull<Boolean>()
 
@@ -29,11 +30,10 @@ object AppThemeState {
         else AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
     }
 
-    /** Called to see if the theme of the whole app changed
-     *  relative to the activity*/
-    fun hasThemeChanged(/** This variable serves as seeing the
-                            state of isDark changing */
-                        isDark: Boolean) : Boolean{
+    /**
+     * Called to see if the theme of the whole app changed relative to the activity
+     **/
+    fun hasThemeChanged(isDark: Boolean) : Boolean{
         return (prevVal || isDark) && !(prevVal && isDark)
     }
 }

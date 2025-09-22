@@ -20,7 +20,9 @@ import dev.mainhq.bus2go.domain.use_case.SaveAllNotifSettings
 import dev.mainhq.bus2go.domain.use_case.SaveBus2GoServer
 import dev.mainhq.bus2go.domain.use_case.db_state.CheckDatabaseUpdateRequired
 import dev.mainhq.bus2go.domain.use_case.db_state.IsFirstTimeAppLaunched
-import dev.mainhq.bus2go.domain.use_case.db_state.SetDatabaseState
+import dev.mainhq.bus2go.domain.use_case.db_state.SetDatabaseExpirationDate
+import dev.mainhq.bus2go.domain.use_case.db_state.SetUpdateDbDialogLastAsToday
+import dev.mainhq.bus2go.domain.use_case.db_state.WasUpdateDialogShownToday
 import dev.mainhq.bus2go.domain.use_case.favourites.AddFavourite
 import dev.mainhq.bus2go.domain.use_case.favourites.GetFavourites
 import dev.mainhq.bus2go.domain.use_case.favourites.GetFavouritesWithTimeData
@@ -35,37 +37,37 @@ class CommonModule(applicationContext: Context) {
 
 	private val stmDatabase = AppDatabaseSTM.getInstance(applicationContext)
 	private val stmRepository = StmRepositoryImpl(
-		stmDatabase?.calendarDao(),
-		stmDatabase?.calendarDatesDao(),
-		stmDatabase?.routesDao(),
-		stmDatabase?.stopDao(),
-		stmDatabase?.stopsInfoDao(),
-		stmDatabase?.tripsDao()
+		calendarDAO = stmDatabase?.calendarDao(),
+		calendarDatesDAO = stmDatabase?.calendarDatesDao(),
+		routesDAO = stmDatabase?.routesDao(),
+		stopsDAO = stmDatabase?.stopDao(),
+		stopsInfoDAO = stmDatabase?.stopsInfoDao(),
+		tripsDAO = stmDatabase?.tripsDao()
 	)
 
 	val appStateRepository = AppStateRepositoryImpl(
-		applicationContext.appStateDataStore,
-		applicationContext.dataDir
+		appStateDataStore = applicationContext.appStateDataStore,
+		dataDir = applicationContext.dataDir
 	)
 
 	private val stmFavouritesRepository = StmFavouritesRepositoryImpl(
-		applicationContext.stmFavouritesDataStore
+		stmFavouritesDataStore = applicationContext.stmFavouritesDataStore
 	)
 
 	private val exoDatabase = AppDatabaseExo.getInstance(applicationContext)
 	private val exoRepository = ExoRepositoryImpl(
-		exoDatabase?.calendarDao(),
-		exoDatabase?.routesDao(),
-		exoDatabase?.stopTimesDao(),
-		exoDatabase?.tripsDao()
+		calendarDAO = exoDatabase?.calendarDao(),
+		routesDAO = exoDatabase?.routesDao(),
+		stopTimesDAO = exoDatabase?.stopTimesDao(),
+		tripsDAO = exoDatabase?.tripsDao()
 	)
 
 	private val exoFavouritesRepository = ExoFavouritesRepositoryImpl(
-		applicationContext.exoFavouritesDataStore
+		exoFavouritesDataStore = applicationContext.exoFavouritesDataStore
 	)
 
 	val settingsRepository = SettingsRepositoryImpl(
-		applicationContext
+		appContext = applicationContext
 	)
 
 	private val notificationHandler = NotificationHandler(applicationContext)
@@ -100,11 +102,17 @@ class CommonModule(applicationContext: Context) {
 		stmFavouritesRepository
 	)
 
-	val setDatabaseState = SetDatabaseState(appStateRepository)
+	val setDatabaseExpirationDate = SetDatabaseExpirationDate(appStateRepository)
 	val checkDatabaseUpdateRequired = CheckDatabaseUpdateRequired(
 		appStateRepository,
-		setDatabaseState,
+		setDatabaseExpirationDate,
 		GetMinDateForUpdate(exoRepository, stmRepository)
+	)
+	val wasUpdateDialogShownToday = WasUpdateDialogShownToday(
+		appStateRepository
+	)
+	val setUpdateDbDialogLastAsToday = SetUpdateDbDialogLastAsToday(
+		appStateRepository
 	)
 
 	val isFirstTimeAppLaunched = IsFirstTimeAppLaunched(

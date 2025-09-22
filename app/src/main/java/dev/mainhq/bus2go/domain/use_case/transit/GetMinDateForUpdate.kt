@@ -12,7 +12,8 @@ class GetMinDateForUpdate(
 ) {
 
 	/**
-	 * @return The closest date before one of the databases gets out of date
+	 * @return The closest date before one of the databases gets out of date.
+	 * The result may be null if the time has already passed
 	 **/
 	suspend operator fun invoke(): Result<LocalDate?> {
 		val exo = exoRepository.getMaxEndDate()

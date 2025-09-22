@@ -8,15 +8,15 @@ import dev.mainhq.bus2go.domain.repository.ExoFavouritesRepository
 import dev.mainhq.bus2go.domain.repository.StmFavouritesRepository
 
 class AddFavourite(
-	private val exoFavouritesRepo: ExoFavouritesRepository,
+	private val exoFavouritesRepository: ExoFavouritesRepository,
 	private val stmFavouritesRepository: StmFavouritesRepository
 ) {
 
 	suspend operator fun invoke(favourite: TransitData){
 		when(favourite){
 			is StmBusItem -> stmFavouritesRepository.addStmBusFavourite(favourite)
-			is ExoTrainItem -> exoFavouritesRepo.addExoTrainFavourite(favourite)
-			is ExoBusItem -> exoFavouritesRepo.addExoBusFavourite(favourite)
+			is ExoTrainItem -> exoFavouritesRepository.addExoTrainFavourite(favourite)
+			is ExoBusItem -> exoFavouritesRepository.addExoBusFavourite(favourite)
 		}
 	}
 }
