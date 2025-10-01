@@ -67,10 +67,6 @@
             android:name=".presentation.settings.SettingsActivity"
             android:exported="false">
         </activity>
-        <activity
-            android:name=".presentation.stop_direction.direction.DirectionFragment"
-            android:exported="false">
-        </activity>
     </application>
 
 </manifest>

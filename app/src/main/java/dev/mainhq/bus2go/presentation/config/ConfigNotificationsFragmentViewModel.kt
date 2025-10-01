@@ -2,7 +2,7 @@ package dev.mainhq.bus2go.presentation.config
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dev.mainhq.bus2go.domain.use_case.SaveAllNotifSettings
+import dev.mainhq.bus2go.domain.use_case.settings.SaveAllNotifSettings
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update

@@ -6,7 +6,7 @@ import dev.mainhq.bus2go.BuildConfig
 import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.data.backgroundtask.DatabaseDownloadSchedulerImpl
 import dev.mainhq.bus2go.data.repository.DatabaseDownloadRepositoryImpl
-import dev.mainhq.bus2go.domain.use_case.CheckIsBus2GoServer
+import dev.mainhq.bus2go.domain.use_case.settings.CheckIsBus2GoServer
 import dev.mainhq.bus2go.domain.use_case.ScheduleDownloadDatabaseTask
 
 class AppModule(applicationContext: Context) {

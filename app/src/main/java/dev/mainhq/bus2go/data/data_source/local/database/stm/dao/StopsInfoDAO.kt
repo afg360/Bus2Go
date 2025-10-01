@@ -26,7 +26,8 @@ interface StopsInfoDAO {
             "AND arrival_time >= (:curTime) AND route_id = (:routeId) " +
             "AND trip_headsign LIKE (:headsign) || '%' " +
             "ORDER BY arrival_time")
-    suspend fun getStopTimes(stopName : String, day : String, curTime : String, /** i.e. DIRECTION string */ headsign: String, routeId: Int, curDate: String) : List<Time>
+    /** @param headsign i.e. DIRECTION string */
+    suspend fun getStopTimes(stopName : String, day : String, curTime : String, headsign: String, routeId: Int, curDate: String) : List<Time>
 
     @Query("SELECT DISTINCT arrival_time FROM StopsInfo JOIN " +
             "(SELECT service_id, days FROM Calendar " +

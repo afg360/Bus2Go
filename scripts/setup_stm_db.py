@@ -332,7 +332,7 @@ def trips_table(conn, path: str):
     # init the table
     query = """CREATE TABLE Trips (
     	id INTEGER PRIMARY KEY NOT NULL,
-    	trip_id INTEGER NOT NULL,
+    	trip_id TEXT NOT NULL,
     	route_id INTEGER NOT NULL REFERENCES Routes(route_id),
     	service_id TEXT NOT NULL REFERENCES Calendar(service_id),
     	trip_headsign TEXT NOT NULL,

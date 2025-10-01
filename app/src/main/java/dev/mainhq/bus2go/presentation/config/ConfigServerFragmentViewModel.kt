@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.entity.UrlChecker
-import dev.mainhq.bus2go.domain.use_case.CheckIsBus2GoServer
-import dev.mainhq.bus2go.domain.use_case.SaveBus2GoServer
+import dev.mainhq.bus2go.domain.use_case.settings.CheckIsBus2GoServer
+import dev.mainhq.bus2go.domain.use_case.settings.SaveBus2GoServer
 import dev.mainhq.bus2go.presentation.core.UiState
 import io.ktor.util.reflect.instanceOf
 import kotlinx.coroutines.CoroutineExceptionHandler

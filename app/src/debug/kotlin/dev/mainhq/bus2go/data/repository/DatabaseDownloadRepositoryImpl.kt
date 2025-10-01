@@ -9,6 +9,7 @@ import dev.mainhq.bus2go.domain.entity.DbToDownload
 import dev.mainhq.bus2go.domain.exceptions.NetworkException
 import dev.mainhq.bus2go.domain.repository.DatabaseDownloadRepository
 import dev.mainhq.bus2go.domain.core.Result
+import dev.mainhq.bus2go.domain.entity.AppVersions
 import dev.mainhq.bus2go.domain.entity.NotificationType
 import dev.mainhq.bus2go.domain.repository.NotificationsRepository
 import io.ktor.client.call.body
@@ -20,8 +21,11 @@ import io.ktor.utils.io.ByteReadChannel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.int
+import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import java.io.File
 import java.io.FileInputStream
@@ -40,7 +44,6 @@ class DatabaseDownloadRepositoryImpl(
 	private val logger: Logger?
 ): DatabaseDownloadRepository {
 
-	//FIXME BuildConfig won't exist in alpha version!
 	private val baseUrl: String = baseUrl ?: BuildConfig.LOCAL_HOST
 
 	companion object {
@@ -54,18 +57,14 @@ class DatabaseDownloadRepositoryImpl(
 		private const val API_VERSION = "v1"
 	}
 
-	//TODO
 	override suspend fun getIsBus2Go(str: String): Result<Boolean> {
 		//TODO eventually also set a header to send to prove perhaps identity from client
 		val url = URLBuilder(
 			host = str,
 			//FIXME to port 443
-			port = BuildConfig.DEFAULT_PORT
-		).apply {
-			set{
-				pathSegments = listOf("api", "version")
-			}
-		}.build()
+			port = BuildConfig.DEFAULT_PORT,
+			pathSegments = listOf("api", "version")
+		).build()
 
 		return call(
 			url,
@@ -82,15 +81,14 @@ class DatabaseDownloadRepositoryImpl(
 	}
 
 	override suspend fun getDbUpToDateVersion(dbToDownload: DbToDownload): Result<Int> {
+		if (dbToDownload == DbToDownload.ALL){
+			throw IllegalStateException("Please call the getAllDbUpDateVersion function instead")
+		}
 		val url = URLBuilder(
 			host = baseUrl,
 			port = BuildConfig.DEFAULT_PORT,
-		).apply {
-			set {
-				//FIXME needs to be replaced since "all" is not a valid endpoint
-				pathSegments = listOf("api", "download", "v1", dbToDownload.name.lowercase(), "version")
-			}
-		}.build()
+			pathSegments = listOf("api", "download", API_VERSION, dbToDownload.name.lowercase(), "version")
+		).build()
 		return call(
 			url,
 			onError = { Result.Error(null, "Wrong call to api...?") },
@@ -101,6 +99,52 @@ class DatabaseDownloadRepositoryImpl(
 		)
 	}
 
+	override suspend fun getAllDbUpToDateVersion(): Result<Map<DbToDownload, Int>> {
+		val url = URLBuilder(
+			host = baseUrl,
+			port = BuildConfig.DEFAULT_PORT,
+			//FIXME needs to be replaced since "all" is not a valid endpoint
+			pathSegments = listOf("api", "download", API_VERSION, "versions")
+		).build()
+		return call(
+			url,
+			onError = { Result.Error(null, "Wrong call to api...?") },
+			onSuccess = { res ->
+				Json.decodeFromString<JsonArray>(res.data.readRemaining().readText())
+					.flatMap {
+						when(it.jsonObject["database"]?.jsonPrimitive?.toString()) {
+							"stm" -> {
+								listOf(DbToDownload.STM to (it.jsonObject["version"]?.jsonPrimitive?.int ?: -1))
+							}
+							"exo" -> {
+								listOf(DbToDownload.EXO to (it.jsonObject["version"]?.jsonPrimitive?.int ?: -1))
+							}
+							else -> { listOf() }
+						}
+					}
+					.toMap()
+			}
+		)
+	}
+
+	override suspend fun getAppVersionCodeRequired(): Result<AppVersions> {
+		return call(
+			url = URLBuilder()
+				.apply {
+					host = BuildConfig.LOCAL_HOST
+					port = BuildConfig.DEFAULT_PORT
+					pathSegments = listOf("api", "download", API_VERSION, "app_version_code_required")
+				}
+				.build(),
+			onError = { Result.Error(null, "Wrong api call") },
+			onSuccess = {
+				Json.decodeFromString<AppVersions>(it.data.readRemaining().readText())
+			}
+		)
+	}
+
+
+	/** A helper function dealing with formatting correctly the network call and doing basic checks */
 	private suspend fun <T> call(
 		url: Url,
 		onError: () -> Result<T>,
@@ -145,19 +189,17 @@ class DatabaseDownloadRepositoryImpl(
 		val urlBuilder = URLBuilder(
 			host = baseUrl,
 			port = BuildConfig.DEFAULT_PORT,
-		)
-		urlBuilder.set {
 			pathSegments = when(dbToDownload){
 				DbToDownload.ALL -> listOf("api", "debug", "sample_data", "stm")
-				DbToDownload.STM -> listOf("api", "download", "v1", "stm")//"debug", "sample_data", "stm")
-				DbToDownload.EXO -> listOf("api", "download", "v1", "exo")
+				DbToDownload.STM -> listOf("api", "download", API_VERSION, "stm")//"debug", "sample_data", "stm")
+				DbToDownload.EXO -> listOf("api", "download", API_VERSION, "exo")
 			}
-		}
+		)
 		val url = urlBuilder.build()
 
 		//TODO make async calls
 		if (dbToDownload == DbToDownload.ALL){
-			urlBuilder.set { pathSegments = listOf("api", "download", "v1", "exo") }
+			urlBuilder.set { pathSegments = listOf("api", "download", API_VERSION, "exo") }
 			val newUrl = urlBuilder.build()
 		}
 
@@ -197,8 +239,9 @@ class DatabaseDownloadRepositoryImpl(
 				//FIXME better parsing should happen here in case quotes and other garbage is added...
 				fileName = it.headers["content-disposition"]?.substringAfter("attachment; filename=")
 					?: throw NetworkException("Content-Disposition HTTP header needed for file name not set by server...")
-				logger?.debug(TAG, fileName!!)
+				logger?.debug(TAG, fileName)
 				tmpCompressedFile = File(applicationContext.filesDir, "$fileName.part")
+				var lastNotifTime = System.currentTimeMillis()
 				var totalDownloaded = 0
 				notificationsRepository.notify(NotificationType.DbDownloading(0, contentLength))
 				//download of compressed databases
@@ -209,9 +252,16 @@ class DatabaseDownloadRepositoryImpl(
 						if (bytesRead <= 0) break
 						outputStream.write(buffer, 0, bytesRead)
 						totalDownloaded += bytesRead
-						notificationsRepository.notify(
-							NotificationType.DbDownloading(totalDownloaded, contentLength)
-						)
+
+						//show a new notification only every 1.5 secs...
+						val currentTime = System.currentTimeMillis()
+						if ((currentTime - lastNotifTime) > 1500L ) {
+							println("Notifying")
+							lastNotifTime = currentTime
+							notificationsRepository.notify(
+								NotificationType.DbDownloading(totalDownloaded, contentLength)
+							)
+						}
 					}
 				}
 				true

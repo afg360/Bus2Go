@@ -15,7 +15,7 @@ import androidx.room.PrimaryKey;
 )
 data class Trips(
     @PrimaryKey val id : Int,
-    @ColumnInfo(name="trip_id") val tripId : Int,
+    @ColumnInfo(name="trip_id") val tripId : String,
     @ColumnInfo(name="route_id") val routeId : Int,
     @ColumnInfo(name="service_id") val serviceId : String,
     @ColumnInfo(name="trip_headsign") val tripHeadsign : String,

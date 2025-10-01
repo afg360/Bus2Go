@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go.domain.use_case
+package dev.mainhq.bus2go.domain.use_case.settings
 
 import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.repository.DatabaseDownloadRepository

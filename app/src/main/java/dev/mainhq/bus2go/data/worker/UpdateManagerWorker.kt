@@ -38,7 +38,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import java.io.File
 
 
-/** Manages new updates download and installation */
+/** Manages new app update downloads and installations */
 class UpdateManagerWorker(context: Context, workerParams: WorkerParameters,
 						  /*private val notificationManager: NotificationManager */ //FIXME For testing purposes
 	) : CoroutineWorker(context, workerParams ) {

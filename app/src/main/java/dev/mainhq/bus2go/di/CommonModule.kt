@@ -16,8 +16,8 @@ import dev.mainhq.bus2go.data.repository.NotificationRepositoryImpl
 import dev.mainhq.bus2go.data.repository.SettingsRepositoryImpl
 import dev.mainhq.bus2go.data.repository.StmFavouritesRepositoryImpl
 import dev.mainhq.bus2go.data.repository.StmRepositoryImpl
-import dev.mainhq.bus2go.domain.use_case.SaveAllNotifSettings
-import dev.mainhq.bus2go.domain.use_case.SaveBus2GoServer
+import dev.mainhq.bus2go.domain.use_case.settings.SaveAllNotifSettings
+import dev.mainhq.bus2go.domain.use_case.settings.SaveBus2GoServer
 import dev.mainhq.bus2go.domain.use_case.db_state.CheckDatabaseUpdateRequired
 import dev.mainhq.bus2go.domain.use_case.db_state.IsFirstTimeAppLaunched
 import dev.mainhq.bus2go.domain.use_case.db_state.SetDatabaseExpirationDate
@@ -27,6 +27,8 @@ import dev.mainhq.bus2go.domain.use_case.favourites.AddFavourite
 import dev.mainhq.bus2go.domain.use_case.favourites.GetFavourites
 import dev.mainhq.bus2go.domain.use_case.favourites.GetFavouritesWithTimeData
 import dev.mainhq.bus2go.domain.use_case.favourites.RemoveFavourite
+import dev.mainhq.bus2go.domain.use_case.settings.CheckIsBus2GoServer
+import dev.mainhq.bus2go.domain.use_case.settings.GetSettings
 import dev.mainhq.bus2go.domain.use_case.transit.GetDirections
 import dev.mainhq.bus2go.domain.use_case.transit.GetMinDateForUpdate
 import dev.mainhq.bus2go.domain.use_case.transit.GetRouteInfo
@@ -113,6 +115,10 @@ class CommonModule(applicationContext: Context) {
 	)
 	val setUpdateDbDialogLastAsToday = SetUpdateDbDialogLastAsToday(
 		appStateRepository
+	)
+
+	val getSettings = GetSettings(
+		settingsRepository
 	)
 
 	val isFirstTimeAppLaunched = IsFirstTimeAppLaunched(

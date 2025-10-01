@@ -8,7 +8,9 @@ import android.util.Log
 import dev.mainhq.bus2go.di.CommonModule
 import dev.mainhq.bus2go.data.worker.UpdateManagerWorker.Companion.FILE_NAME
 import dev.mainhq.bus2go.di.AppModule
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -25,42 +27,37 @@ open class Bus2GoApplication : Application() {
 		commonModule = CommonModule(applicationContext)
 		appModule = AppModule(applicationContext)
 
-		MainScope().launch {
-			cleanUp()
-		}
-	}
+		CoroutineScope(Dispatchers.IO).launch {
+			val file = File(applicationContext.cacheDir, FILE_NAME)
 
-	//TODO refactor this shit
-	private suspend fun cleanUp(){
-		val file = withContext(Dispatchers.IO) {
-			File(applicationContext.cacheDir, FILE_NAME)
-		}
+			if (file.exists()) {
+				try{
+					val packageInfo = applicationContext.packageManager
+						.getPackageInfo(packageName, 0)
+					val versionCode = if (Build.VERSION.SDK_INT >= 28) packageInfo.longVersionCode
+						else packageInfo.versionCode.toLong()
 
-		if (file.exists()) {
-			try{
-				val packageInfo: PackageInfo = applicationContext.packageManager.getPackageInfo(packageName, 0)
-				val versionCode = if (Build.VERSION.SDK_INT >= 28) packageInfo.longVersionCode else packageInfo.versionCode.toLong()
-				val apkPackageInfo: PackageInfo? = applicationContext.packageManager.getPackageArchiveInfo("${applicationContext.cacheDir}/$FILE_NAME", PackageManager.GET_META_DATA)
-				if (apkPackageInfo == null){
-					Log.d("UPDATES", "File exists but package manager couldnt find it...?")
+					applicationContext.packageManager
+						.getPackageArchiveInfo(
+							"${applicationContext.cacheDir}/$FILE_NAME",
+							PackageManager.GET_META_DATA
+						)?.also {
+							val apkVersionCode = if (Build.VERSION.SDK_INT >= 28) it.longVersionCode
+								else it.versionCode.toLong()
+
+							if (versionCode >= apkVersionCode) {
+								Log.d("UPDATES", "Useless file detected. Deleting")
+								file.delete()
+							}
+						} ?: Log.d("UPDATES", "File exists but package manager couldnt find it...?")
 				}
-				else {
-					val apkVersionCode =
-						if (Build.VERSION.SDK_INT >= 28) apkPackageInfo.longVersionCode else apkPackageInfo.versionCode.toLong()
-					if (versionCode >= apkVersionCode) {
-						Log.d("UPDATES", "Useless file detected. Deleting")
-						file.delete()
-					}
+				catch (e: Exception){
+					e.printStackTrace()
 				}
 			}
-			catch (e: Exception){
-				e.printStackTrace()
+			else{
+				Log.d("UPDATES", "No garbage apk detected")
 			}
 		}
-		else{
-			Log.d("UPDATES", "No garbage apk detected")
-		}
 	}
-
-
 }

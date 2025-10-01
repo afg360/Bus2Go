@@ -1,6 +1,6 @@
 package dev.mainhq.bus2go.utils
 
-import com.google.android.material.datepicker.DateValidatorPointForward
+import android.view.View
 import java.time.LocalDate
 
 
@@ -11,4 +11,16 @@ fun Long.toEpochDay(): Long{
 
 fun LocalDate.toEpochMillis(): Long {
 	return this.toEpochDay() * 24 * 3600 * 1000
+}
+
+fun View.makeVisible(){
+	this.visibility = View.VISIBLE
+}
+
+fun View.makeInvisible(){
+	this.visibility = View.INVISIBLE
+}
+
+fun View.makeGone(){
+	this.visibility = View.GONE
 }

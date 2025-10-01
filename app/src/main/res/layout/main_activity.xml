@@ -7,12 +7,40 @@
     android:layout_height="match_parent"
     tools:context=".presentation.main.MainActivity"
     >
+    
+    <ImageView
+        android:id="@+id/mainDbNeedsUpdateImageView"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@mipmap/ic_launcher"
+        android:contentDescription="Update Database"
+        android:visibility="gone"
+        android:layout_marginHorizontal="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/mainFragmentContainer"
+        />
+    
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/mainDbNeedsUpdateTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:textAlignment="center"
+        android:maxLines="1"
+        android:visibility="gone"
+        android:text="Update Databases"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/mainFragmentContainer"
+        app:layout_constraintStart_toEndOf="@id/mainDbNeedsUpdateImageView"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/mainFragmentContainer"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/mainDbNeedsUpdateTextView"
         app:layout_constraintBottom_toTopOf="@id/bottomNavCoordLayout"
         />
 

@@ -201,7 +201,9 @@ class NotificationHandler(private val appContext: Context) {
 				appContext,
 				Manifest.permission.POST_NOTIFICATIONS
 			) == PackageManager.PERMISSION_GRANTED
-		) notificationManager.notify(id, notification)
+		) {
+			notificationManager.notify(id, notification)
+		}
 	}
 
 	/** Sets up a builder for setting up the content title, description, small icon and prio. */

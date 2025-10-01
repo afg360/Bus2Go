@@ -2,8 +2,15 @@ package dev.mainhq.bus2go.presentation.base
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.preference.PreferenceManager
 import dev.mainhq.bus2go.presentation.core.state.AppThemeState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
 import kotlin.properties.Delegates
 
 //FIXME garbage code not supposed to be inside activities...
@@ -27,5 +34,11 @@ open class BaseActivity : AppCompatActivity() {
         //if the theme changed, must destroy the activity and recreate it, which is already done with AppDelegate thing
         if (AppThemeState.hasThemeChanged(isDark))
 			AppThemeState.setTheme(isDark)
+    }
+
+    protected fun launchViewModelCollect(context: CoroutineContext = Dispatchers.Main, block: suspend CoroutineScope.() -> Unit){
+        lifecycleScope.launch(context) {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED, block)
+        }
     }
 }

@@ -3,8 +3,8 @@ package dev.mainhq.bus2go.presentation.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.mainhq.bus2go.domain.core.Result
-import dev.mainhq.bus2go.domain.use_case.CheckIsBus2GoServer
-import dev.mainhq.bus2go.domain.use_case.SaveBus2GoServer
+import dev.mainhq.bus2go.domain.use_case.settings.CheckIsBus2GoServer
+import dev.mainhq.bus2go.domain.use_case.settings.SaveBus2GoServer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
