@@ -18,8 +18,11 @@ import dev.mainhq.bus2go.domain.use_case.transit.GetStopNames
 import dev.mainhq.bus2go.presentation.core.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+//FIXME we are using the same class as the one used for favourites, meaning that we are storing an
+// empty list of tags for nothing... eventually change this shit
 
 class DirectionFragmentViewModel(
 	private val getDirections: GetDirections,
@@ -70,13 +73,18 @@ class DirectionFragmentViewModel(
 								}
 
 								is Result.Success<List<DirectionInfo>> -> {
-									_topDirection.value = stopNames.data.first.map {
-										ExoBusItem(
-											routeId = routeInfo.routeId,
-											stopName = it,
-											direction = headsigns.data.first().tripHeadSign,
-											routeLongName = routeInfo.routeName,
-										)
+									_topDirection.update {
+										stopNames.data.first.map {
+											//FIXME normally, we should use a separate class, but for
+											// simplicity, it works for now
+											ExoBusItem(
+												routeId = routeInfo.routeId,
+												stopName = it,
+												direction = headsigns.data.first().tripHeadSign,
+												routeLongName = routeInfo.routeName,
+												tags = listOf()
+											)
+										}
 									}
 
 									if (headsigns.data.size > 1){
@@ -86,6 +94,7 @@ class DirectionFragmentViewModel(
 												stopName = it,
 												direction = headsigns.data.last().tripHeadSign,
 												routeLongName = routeInfo.routeName,
+												tags = listOf()
 											)
 										}
 										_isUnidirectional.value = false
@@ -109,6 +118,7 @@ class DirectionFragmentViewModel(
 									trainNum = routeInfo.trainNum,
 									routeName = routeInfo.routeName,
 									directionId = 0,
+									tags = listOf()
 								)
 							}
 
@@ -121,6 +131,7 @@ class DirectionFragmentViewModel(
 									trainNum = routeInfo.trainNum,
 									routeName = routeInfo.routeName,
 									directionId = 1,
+									tags = listOf()
 								)
 							}
 							_isUnidirectional.value = false
@@ -143,7 +154,8 @@ class DirectionFragmentViewModel(
 											stopName = it,
 											direction = directions.data[0].tripHeadSign,
 											directionId = directions.data[0].directionId,
-											lastStop = stopNames.data.first.last()
+											lastStop = stopNames.data.first.last(),
+											tags = listOf()
 										)
 									}
 
@@ -154,7 +166,8 @@ class DirectionFragmentViewModel(
 												stopName = it,
 												direction = directions.data[1].tripHeadSign,
 												directionId = directions.data[1].directionId,
-												lastStop = stopNames.data.second.last()
+												lastStop = stopNames.data.second.last(),
+												tags = listOf()
 											)
 										}
 										_isUnidirectional.value = false

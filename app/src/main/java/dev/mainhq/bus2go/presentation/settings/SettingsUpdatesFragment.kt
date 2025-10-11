@@ -1,11 +1,7 @@
 package dev.mainhq.bus2go.presentation.settings
 
 import android.os.Bundle
-import android.view.View
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.view.ContextThemeWrapper
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
@@ -15,7 +11,6 @@ import androidx.preference.PreferenceFragmentCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.presentation.core.collectFlow
 
 class SettingsUpdatesFragment: PreferenceFragmentCompat() {
 

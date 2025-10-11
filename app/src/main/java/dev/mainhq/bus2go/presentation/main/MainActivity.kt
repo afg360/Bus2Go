@@ -19,8 +19,10 @@ import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.presentation.base.BaseActivity
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.Bus2GoApplication
+import dev.mainhq.bus2go.databinding.MainActivityBinding
 //import dev.mainhq.bus2go.fragments.alarms.AlarmReceiver
 import dev.mainhq.bus2go.presentation.main.home.HomeFragment
+import dev.mainhq.bus2go.utils.launchViewModelCollect
 import dev.mainhq.bus2go.utils.makeGone
 import dev.mainhq.bus2go.utils.makeVisible
 import dev.mainhq.bus2go.utils.toEpochDay
@@ -57,62 +59,61 @@ class MainActivity : BaseActivity() {
     }
 
     //private val alarmViewModel: AlarmCreationViewModel by viewModels()
+    private lateinit var binding: MainActivityBinding
+
 	override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.main_activity)
+        binding = MainActivityBinding.inflate(layoutInflater)
+
+        setContentView(binding.root)
 
         //TODO check if need to start configuration activity here
         checkAndUpdateDatabases()
         showDbNeedsUpdateTopView()
 
-        launchViewModelCollect {
-            mainActivityViewModel.updateDbState.collect {
-                when(it){
-					is UpdateDbState.Error -> {
-                        Toast.makeText(this@MainActivity, "Some shitty error", Toast.LENGTH_SHORT)
+        launchViewModelCollect(mainActivityViewModel.updateDbState) {
+            when(it){
+                is UpdateDbState.Error -> {
+                    Toast.makeText(this@MainActivity, "Some shitty error", Toast.LENGTH_SHORT)
+                        .show()
+                }
+                UpdateDbState.NoShow -> {}
+                UpdateDbState.NotConnectedToInternet -> {
+                    withContext(Dispatchers.Main){
+                        Toast.makeText(this@MainActivity, "Please connect to the internet", Toast.LENGTH_SHORT)
                             .show()
                     }
-					UpdateDbState.NoShow -> {}
-					UpdateDbState.NotConnectedToInternet -> {
-                        withContext(Dispatchers.Main){
-                            Toast.makeText(this@MainActivity, "Please connect to the internet", Toast.LENGTH_SHORT)
-                                .show()
-                        }
-                    }
-					is UpdateDbState.Show -> {
-                        MaterialAlertDialogBuilder(this@MainActivity)
-                            .setTitle("Downloading shit...")
-
-                    }
-				}
-            }
-        }
-
-        launchViewModelCollect {
-            mainActivityViewModel.activityFragment.collect { activityType ->
-                when (activityType) {
-                    ActivityFragment.HOME -> {
-                        supportFragmentManager.beginTransaction()
-                            .replace(R.id.mainFragmentContainer, HomeFragment())
-                            .commit()
-                    }
-
-                    ActivityFragment.MAP -> {
-                        supportFragmentManager.beginTransaction()
-                            .replace(R.id.mainFragmentContainer, ComingSoonFragment())
-                            .commit()
-                    }
-
-                    ActivityFragment.ALARMS -> {
-                        supportFragmentManager.beginTransaction()
-                            .replace(R.id.mainFragmentContainer, ComingSoonFragment())
-                            .commit()
-                    }
+                }
+                is UpdateDbState.Show -> {
+                    MaterialAlertDialogBuilder(this@MainActivity)
+                        .setTitle("Downloading shit...")
                 }
             }
         }
 
-        findViewById<NavigationBarView>(R.id.bottomNavBarView).setOnItemSelectedListener {
+        launchViewModelCollect(mainActivityViewModel.activityFragment) { activityType ->
+            when (activityType) {
+                ActivityFragment.HOME -> {
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.mainFragmentContainer, HomeFragment())
+                        .commit()
+                }
+
+                ActivityFragment.MAP -> {
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.mainFragmentContainer, ComingSoonFragment())
+                        .commit()
+                }
+
+                ActivityFragment.ALARMS -> {
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.mainFragmentContainer, ComingSoonFragment())
+                        .commit()
+                }
+            }
+        }
+
+        binding.bottomNavBarView.setOnItemSelectedListener {
             //we change the state. Since the ui has an "observer", changes ui accordingly
             when(it.itemId) {
                 R.id.homeScreenButton -> {
@@ -134,92 +135,88 @@ class MainActivity : BaseActivity() {
 
     //TODO add some classes in data/domain layer handling this
     private fun checkAndUpdateDatabases() {
-        launchViewModelCollect {
-            mainActivityViewModel.showUpdateDbDialog.collect { showUpdateDbDialog ->
-                if (showUpdateDbDialog) {
-                    // Displays a dialog for the user to choose to update now or to get reminded later.
-                    withContext(Dispatchers.Main) {
-                        //Notes: .cancel is the same as .dismiss, but also calls the cancelListener
-                        MaterialAlertDialogBuilder(this@MainActivity)
-                            .setTitle("Update your databases")
-                            .setMessage(
-                                "Local Bus2Go databases are out of date. " +
-                                        "Update them now to enjoy accurate schedules."
-                            )
-                            .setPositiveButton("Update now") { dialogInterface, _ ->
-                                //TODO setup download jobs and shit, no server prepared yet so display a coming soon for now
-                                mainActivityViewModel.updateDatabase()
-                                MaterialAlertDialogBuilder(this@MainActivity)
-                                    .setTitle("Coming Soon")
-                                    .setMessage(
-                                        "Unfortunately, we are not hosting the dbs at the moment. " +
-                                                "Please update the app when an update will be available."
-                                    )
-                                    //.show()
-                                //dialogInterface.dismiss()
-                                //mainActivityViewModel.setUpdateDbExpirationDate(30)
-                            }
-                            .setNeutralButton("Remind me later") { dialogInterface, _ ->
-                                //TODO save the value in the application_state file (create a new dialog for choosing time before a reminder)
-                                val datePicker = MaterialDatePicker.Builder.datePicker()
-                                    .setTitleText("Remind me in...")
-                                    .setCalendarConstraints(
-                                        CalendarConstraints.Builder()
-                                            .setValidator(
-                                                CompositeDateValidator.allOf(
-                                                    listOf(
-                                                        DateValidatorPointForward.from(
-                                                            LocalDate.now()
-                                                                //TODO For debugging, set it to today
-                                                                // on release, + 1
-                                                                //.plusDays(1)
-                                                                .toEpochMillis()
-                                                        ),
-                                                        DateValidatorPointBackward.before(
-                                                            LocalDate.now()
-                                                                .plusDays(60L)
-                                                                .toEpochMillis()
-                                                        )
+        launchViewModelCollect(mainActivityViewModel.showUpdateDbDialog) { showUpdateDbDialog ->
+            if (showUpdateDbDialog) {
+                // Displays a dialog for the user to choose to update now or to get reminded later.
+                withContext(Dispatchers.Main) {
+                    //Notes: .cancel is the same as .dismiss, but also calls the cancelListener
+                    MaterialAlertDialogBuilder(this@MainActivity)
+                        .setTitle("Update your databases")
+                        .setMessage(
+                            "Local Bus2Go databases are out of date. " +
+                                    "Update them now to enjoy accurate schedules."
+                        )
+                        .setPositiveButton("Update now") { dialogInterface, _ ->
+                            //TODO setup download jobs and shit, no server prepared yet so display a coming soon for now
+                            mainActivityViewModel.updateDatabase()
+                            MaterialAlertDialogBuilder(this@MainActivity)
+                                .setTitle("Coming Soon")
+                                .setMessage(
+                                    "Unfortunately, we are not hosting the dbs at the moment. " +
+                                            "Please update the app when an update will be available."
+                                )
+                            //.show()
+                            //dialogInterface.dismiss()
+                            //mainActivityViewModel.setUpdateDbExpirationDate(30)
+                        }
+                        .setNeutralButton("Remind me later") { dialogInterface, _ ->
+                            //TODO save the value in the application_state file (create a new dialog for choosing time before a reminder)
+                            val datePicker = MaterialDatePicker.Builder.datePicker()
+                                .setTitleText("Remind me in...")
+                                .setCalendarConstraints(
+                                    CalendarConstraints.Builder()
+                                        .setValidator(
+                                            CompositeDateValidator.allOf(
+                                                listOf(
+                                                    DateValidatorPointForward.from(
+                                                        LocalDate.now()
+                                                            //TODO For debugging, set it to today
+                                                            // on release, + 1
+                                                            //.plusDays(1)
+                                                            .toEpochMillis()
+                                                    ),
+                                                    DateValidatorPointBackward.before(
+                                                        LocalDate.now()
+                                                            .plusDays(60L)
+                                                            .toEpochMillis()
                                                     )
                                                 )
                                             )
-                                            .build()
-                                    )
-                                    .setPositiveButtonText("Confirm")
-                                    .setNegativeButtonText("Cancel")
-                                    .build()
-                                datePicker.addOnPositiveButtonClickListener {
-                                    mainActivityViewModel.setUpdateDbExpirationDate(it.toEpochDay())
-                                    dialogInterface.dismiss()
-                                }
-                                datePicker.addOnNegativeButtonClickListener {
-                                    dialogInterface.dismiss()
-                                }
-                                datePicker.show(this@MainActivity.supportFragmentManager, null)
+                                        )
+                                        .build()
+                                )
+                                .setPositiveButtonText("Confirm")
+                                .setNegativeButtonText("Cancel")
+                                .build()
+                            datePicker.addOnPositiveButtonClickListener {
+                                mainActivityViewModel.setUpdateDbExpirationDate(it.toEpochDay())
+                                dialogInterface.dismiss()
                             }
-                            .setNegativeButton("Don't remind me") { dialogInterface, _ ->
-                                mainActivityViewModel.setUpdateDbExpirationDate(30)
-                                dialogInterface.cancel()
+                            datePicker.addOnNegativeButtonClickListener {
+                                dialogInterface.dismiss()
                             }
-                            .create()
-                            .show()
-                    }
+                            datePicker.show(this@MainActivity.supportFragmentManager, null)
+                        }
+                        .setNegativeButton("Don't remind me") { dialogInterface, _ ->
+                            mainActivityViewModel.setUpdateDbExpirationDate(30)
+                            dialogInterface.cancel()
+                        }
+                        .create()
+                        .show()
                 }
             }
         }
     }
 
     private fun showDbNeedsUpdateTopView(){
-        launchViewModelCollect {
-            mainActivityViewModel.showUpdateTextView.collect {
-                if (it){
-                    findViewById<MaterialTextView>(R.id.mainDbNeedsUpdateTextView).makeVisible()
-                    findViewById<ImageView>(R.id.mainDbNeedsUpdateImageView).makeVisible()
-                }
-                else {
-                    findViewById<MaterialTextView>(R.id.mainDbNeedsUpdateTextView).makeGone()
-                    findViewById<ImageView>(R.id.mainDbNeedsUpdateImageView).makeGone()
-                }
+        launchViewModelCollect(mainActivityViewModel.showUpdateTextView) {
+            if (it){
+                binding.mainDbNeedsUpdateTextView.makeVisible()
+                binding.mainDbNeedsUpdateImageView.makeVisible()
+            }
+            else {
+                binding.mainDbNeedsUpdateTextView.makeGone()
+                binding.mainDbNeedsUpdateImageView.makeGone()
             }
         }
     }

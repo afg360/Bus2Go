@@ -1,9 +1,10 @@
-package dev.mainhq.bus2go.data.data_source.local.datastore
+package dev.mainhq.bus2go.data.data_source.local.datastore.deprecated
 
 import android.content.Context
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -13,18 +14,19 @@ import java.io.File
  * An observer that makes sure that Stm and Exo dataStores are initialised and have migrated before
  * deleting old files.
  **/
+@Deprecated("Garbage utility object to avoid data corruption during early migration")
 object MigrationObserver {
 	private var shouldCleanUpStm = MutableStateFlow(false)
 	private var shouldCleanUpExo = MutableStateFlow(false)
 	private val mutex = Mutex()
 
 	fun notifyStmCleanUpReady(context: Context){
-		shouldCleanUpStm.value = true
+		shouldCleanUpStm.update { true }
 		if (shouldCleanUpExo.value) cleanUp(context)
 	}
 
 	fun notifyExoCleanUpReady(context: Context){
-		shouldCleanUpExo.value = true
+		shouldCleanUpExo.update { true }
 		if (shouldCleanUpStm.value) cleanUp(context)
 	}
 

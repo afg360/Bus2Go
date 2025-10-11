@@ -12,12 +12,14 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.R
+import dev.mainhq.bus2go.databinding.StopDirectionActivityBinding
 import dev.mainhq.bus2go.domain.entity.RouteInfo
 import dev.mainhq.bus2go.presentation.base.BaseActivity
 import dev.mainhq.bus2go.presentation.stop_direction.direction.DirectionFragment
 import dev.mainhq.bus2go.presentation.stop_direction.direction.DirectionFragmentViewModel
 import dev.mainhq.bus2go.presentation.stop_direction.stop.StopFragment
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
+import dev.mainhq.bus2go.utils.launchViewModelCollect
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -45,78 +47,63 @@ class StopDirectionActivity: BaseActivity() {
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.stop_direction_activity)
 
-		lifecycleScope.launch(Dispatchers.Main) {
-			repeatOnLifecycle(Lifecycle.State.STARTED){
-				viewModel.activityFragment.collect {
-					when(it){
-						is ActivityFragment.Direction -> {
-							if (supportFragmentManager.backStackEntryCount == 1){
-								supportFragmentManager.popBackStack()
-							}
-							else if (supportFragmentManager.backStackEntryCount == 0) {
-								supportFragmentManager.beginTransaction()
-									.replace(
-										R.id.stop_direction_fragment_container_view,
-										DirectionFragment()
-									)
-									.commit()
-							}
-							else {
-								Toast.makeText(this@StopDirectionActivity, "Unexpected Error", Toast.LENGTH_SHORT).show()
-								throw IllegalStateException("Wtf")
-							}
-						}
-						is ActivityFragment.Stops -> {
-							supportFragmentManager.beginTransaction()
-								.apply{
-									when(it.animationDirection){
-										AnimationDirection.TO_TOP -> {
-											setCustomAnimations(
-												R.anim.enter_from_bottom,
-												R.anim.exit_to_top,
-												R.anim.enter_from_top,
-												R.anim.exit_to_bottom
-											)
-										}
-										AnimationDirection.TO_BOTTOM -> {
-											setCustomAnimations(
-												R.anim.enter_from_top,
-												R.anim.exit_to_bottom,
-												R.anim.enter_from_bottom,
-												R.anim.exit_to_top
-											)
-										}
-									}
-								}
-								.replace(
-									R.id.stop_direction_fragment_container_view,
-									StopFragment()
-								)
-								.addToBackStack(null)
-								.commit()
-						}
+		val routeInfo = (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
+			intent.extras?.getParcelable(ExtrasTagNames.ROUTE_INFO, RouteInfo::class.java)
+		} else {
+			intent.extras?.getParcelable(ExtrasTagNames.ROUTE_INFO)
+		}) ?: throw IllegalStateException("Expected a non null RouteInfo passed")
+		directionSharedViewModel.setRouteInfo(routeInfo)
+
+		launchViewModelCollect(viewModel.activityFragment) {
+			when(it){
+				is ActivityFragment.Direction -> {
+					if (supportFragmentManager.backStackEntryCount == 1){
+						supportFragmentManager.popBackStack()
 					}
+					else if (supportFragmentManager.backStackEntryCount == 0) {
+						supportFragmentManager.beginTransaction()
+							.replace(
+								R.id.stop_direction_fragment_container_view,
+								DirectionFragment()
+							)
+							.commit()
+					}
+					else {
+						Toast.makeText(this@StopDirectionActivity, "Unexpected Error", Toast.LENGTH_SHORT).show()
+						throw IllegalStateException("Wtf")
+					}
+				}
+				is ActivityFragment.Stops -> {
+					supportFragmentManager.beginTransaction()
+						.apply{
+							when(it.animationDirection){
+								AnimationDirection.TO_TOP -> {
+									setCustomAnimations(
+										R.anim.enter_from_bottom,
+										R.anim.exit_to_top,
+										R.anim.enter_from_top,
+										R.anim.exit_to_bottom
+									)
+								}
+								AnimationDirection.TO_BOTTOM -> {
+									setCustomAnimations(
+										R.anim.enter_from_top,
+										R.anim.exit_to_bottom,
+										R.anim.enter_from_bottom,
+										R.anim.exit_to_top
+									)
+								}
+							}
+						}
+						.replace(
+							R.id.stop_direction_fragment_container_view,
+							StopFragment()
+						)
+						.addToBackStack(null)
+						.commit()
 				}
 			}
 		}
 
-		lifecycleScope.launch(Dispatchers.Main) {
-			//terminus (i.e. to destination) = data.last(), needed for exo because some of the headsigns are the same
-
-			val routeInfo = (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-				intent.extras?.getParcelable(ExtrasTagNames.ROUTE_INFO, RouteInfo::class.java)
-			else {
-				@Suppress("DEPRECATION")
-				intent.extras?.getParcelable(ExtrasTagNames.ROUTE_INFO)
-			}) ?: throw IllegalStateException("Expected a non null RouteInfo passed")
-
-			directionSharedViewModel.setRouteInfo(routeInfo)
-		}
-
-		val backDispatch = object: OnBackPressedCallback(true) {
-			override fun handleOnBackPressed() {
-				TODO("Not yet implemented")
-			}
-		}
 	}
 }

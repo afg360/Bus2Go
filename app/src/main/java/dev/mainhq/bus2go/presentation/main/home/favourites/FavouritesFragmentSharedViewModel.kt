@@ -3,6 +3,7 @@ package dev.mainhq.bus2go.presentation.main.home.favourites
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 /** ViewModel shared between FavouritesFragment and HomeFragment (its parent) */
 class FavouritesFragmentSharedViewModel: ViewModel() {
@@ -20,43 +21,43 @@ class FavouritesFragmentSharedViewModel: ViewModel() {
 	val numberFavouritesSelected = _numberFavouritesSelected.asStateFlow()
 
 	fun activateSelectionMode(){
-		_selectionMode.value = true
+		_selectionMode.update { true }
 	}
 
 	fun deactivateSelectionMode(){
-		_selectionMode.value = false
-		_numberFavouritesSelected.value = 0
+		_selectionMode.update { false }
+		_numberFavouritesSelected.update { 0 }
 	}
 
 	/** Only toggles the all checkbox, doesn't deselect anything else */
 	fun toggleSelectAllFavourites(){
-		_selectAllFavourites.value = _selectAllFavourites.value?.not() ?: true
+		_selectAllFavourites.update { _selectAllFavourites.value?.not() ?: true }
 	}
 
 	fun toggleIsAllSelected(checked: Boolean){
 		when (_selectAllFavourites.value) {
-			true -> _selectAllFavourites.value = null
-			false -> _selectAllFavourites.value = null
+			true -> _selectAllFavourites.update { null }
+			false -> _selectAllFavourites.update { null }
 			else -> {
-				_selectAllFavourites.value = if (checked) true else null
+				_selectAllFavourites.update { if (checked) true else null }
 			}
 		}
 	}
 
 	fun incrementNumFavouritesSelected(){
-		_numberFavouritesSelected.value++
+		_numberFavouritesSelected.update { it + 1 }
 	}
 
 	fun decrementNumFavouritesSelected(){
-		_numberFavouritesSelected.value--
+		_numberFavouritesSelected.update { it - 1 }
 	}
 
 	fun setAllFavouritesSelected(num: Int){
-		_numberFavouritesSelected.value = num
+		_numberFavouritesSelected.update { num }
 	}
 
 	fun resetNumFavouritesSelected(){
-		_numberFavouritesSelected.value = 0
+		_numberFavouritesSelected.update { 0 }
 	}
 
 }

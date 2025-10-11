@@ -1,12 +1,12 @@
-package dev.mainhq.bus2go.data.data_source.local.datastore
+package dev.mainhq.bus2go.data.data_source.local.datastore.deprecated
 
 import android.os.Parcelable
 import kotlinx.serialization.Serializable
 
 @Serializable
-abstract class TransitDataDto: Parcelable {
+@Deprecated("User v3")
+abstract class TransitDataDto_v2: Parcelable {
 	abstract val routeId : String
 	abstract val stopName : String
 	abstract val direction : String
-	abstract val tags: List<String>
 }

@@ -1,8 +1,6 @@
-package dev.mainhq.bus2go.data.data_source.local.datastore.stm.entity
+package dev.mainhq.bus2go.data.data_source.local.datastore.deprecated
 
 import android.annotation.SuppressLint
-import dev.mainhq.bus2go.data.data_source.local.datastore.TransitDataDto
-import dev.mainhq.bus2go.data.data_source.local.datastore.deprecated.TransitDataDto_v2
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.parcelize.Parcelize
@@ -18,37 +16,31 @@ import kotlinx.serialization.encoding.Encoder
 @SuppressLint("UnsafeOptInUsageError")
 @Parcelize
 @Serializable
-/**
- * @param routeId aka busNum.
- **/
-data class StmFavouriteBusItemDto(
-	override val stopName: String,
+@Deprecated("Use v2")
+data class ExoFavouriteBusItemDto_v1(
+	override val stopName : String,
 	override val routeId : String,
-	override val direction : String,
-	override val tags: List<String>,
-	val directionId: Int,
-	val lastStop : String,
-) : TransitDataDto()
+	override val direction: String,
+	val routeLongName: String,
+) : TransitDataDto_v2()
 
-
-
-class PersistentStmBusInfoListSerializer(private val serializer: KSerializer<StmFavouriteBusItemDto>) :
-	KSerializer<PersistentList<StmFavouriteBusItemDto>> {
+@Deprecated("Use v2")
+class PersistentExoBusInfoListSerializer_v1(private val serializer: KSerializer<ExoFavouriteBusItemDto_v1>) :
+	KSerializer<PersistentList<ExoFavouriteBusItemDto_v1>> {
 
 	private class PersistentListDescriptor :
-		SerialDescriptor by serialDescriptor<List<StmFavouriteBusItemDto>>() {
+		SerialDescriptor by serialDescriptor<List<ExoFavouriteBusItemDto_v1>>() {
 		@ExperimentalSerializationApi
 		override val serialName: String = "kotlinx.serialization.immutable.persistentList"
 	}
 
 	override val descriptor: SerialDescriptor = PersistentListDescriptor()
 
-	override fun serialize(encoder: Encoder, value: PersistentList<StmFavouriteBusItemDto>) {
+	override fun serialize(encoder: Encoder, value: PersistentList<ExoFavouriteBusItemDto_v1>) {
 		return ListSerializer(serializer).serialize(encoder, value)
 	}
 
-	override fun deserialize(decoder: Decoder): PersistentList<StmFavouriteBusItemDto> {
+	override fun deserialize(decoder: Decoder): PersistentList<ExoFavouriteBusItemDto_v1> {
 		return ListSerializer(serializer).deserialize(decoder).toPersistentList()
 	}
 }
-

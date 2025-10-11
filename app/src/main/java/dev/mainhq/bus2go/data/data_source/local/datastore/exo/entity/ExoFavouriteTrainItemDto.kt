@@ -1,6 +1,8 @@
 package dev.mainhq.bus2go.data.data_source.local.datastore.exo.entity
 
+import android.annotation.SuppressLint
 import dev.mainhq.bus2go.data.data_source.local.datastore.TransitDataDto
+import dev.mainhq.bus2go.data.data_source.local.datastore.deprecated.TransitDataDto_v2
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.parcelize.Parcelize
@@ -13,15 +15,17 @@ import kotlinx.serialization.descriptors.serialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
+@SuppressLint("UnsafeOptInUsageError")
 @Parcelize
 @Serializable
 data class ExoFavouriteTrainItemDto(
 	override val stopName : String,
 	override val routeId : String,
+	override val direction : String,
+	override val tags : List<String>,
 	val trainNum : Int,
 	val routeName : String,
 	val directionId: Int,
-	override val direction : String
 ) : TransitDataDto()
 
 

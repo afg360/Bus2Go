@@ -1,6 +1,9 @@
 package dev.mainhq.bus2go.data.data_source.local.datastore.stm.entity
 
+import android.annotation.SuppressLint
 import androidx.datastore.core.Serializer
+import dev.mainhq.bus2go.data.data_source.local.datastore.deprecated.PersistentStmBusInfoListSerializer_v1
+import dev.mainhq.bus2go.data.data_source.local.datastore.deprecated.StmFavouriteBusItemDto_v1
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.Dispatchers
@@ -12,6 +15,9 @@ import java.io.OutputStream
 
 
 //TODO eventually encrypt all the data to make it safe from other apps in case unwanted access happens
+
+
+@SuppressLint("UnsafeOptInUsageError")
 @Serializable
 data class StmFavouritesDataDto(
 	val version: Int,
@@ -19,10 +25,9 @@ data class StmFavouritesDataDto(
 	val listSTM : PersistentList<StmFavouriteBusItemDto> = persistentListOf()
 )
 
-
 object StmFavouritesDataSerializer : Serializer<StmFavouritesDataDto> {
 	override val defaultValue: StmFavouritesDataDto
-		get() = StmFavouritesDataDto(1)
+		get() = StmFavouritesDataDto(2)
 
 	override suspend fun readFrom(input: InputStream): StmFavouritesDataDto {
 		return try{
@@ -44,4 +49,3 @@ object StmFavouritesDataSerializer : Serializer<StmFavouritesDataDto> {
 		}
 	}
 }
-

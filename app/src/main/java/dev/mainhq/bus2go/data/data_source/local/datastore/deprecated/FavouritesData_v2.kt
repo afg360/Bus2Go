@@ -1,14 +1,14 @@
 package dev.mainhq.bus2go.data.data_source.local.datastore.deprecated
 
-import android.os.Parcel
+import android.annotation.SuppressLint
 import android.os.Parcelable
 import androidx.datastore.core.Serializer
-import dev.mainhq.bus2go.data.data_source.local.datastore.TransitDataDto
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -22,6 +22,7 @@ import java.io.InputStream
 import java.io.OutputStream
 
 //TODO eventually encrypt all the data to make it safe from other apps in case unwanted access happens
+@SuppressLint("UnsafeOptInUsageError")
 @Serializable
 @Deprecated(
     message = "This version mixes up STM data and Exo data, which is not ideal for app architecture",
@@ -30,48 +31,23 @@ import java.io.OutputStream
 data class FavouritesData(
     @Serializable(with = PersistentStmBusInfoListSerializer::class)
     val listSTM : PersistentList<StmBusData> = persistentListOf(),
-    @Serializable(with = PersistentExoBusInfoListSerializer::class)
+    @Serializable(with = PersistentExoBusInfoListSerializer_v1::class)
     val listExo : PersistentList<ExoBusData> = persistentListOf(),
-    @Serializable(with = PersistentTrainInfoListSerializer::class)
+    @Serializable(with = PersistentTrainInfoListSerializer_v1::class)
     val listExoTrain : PersistentList<ExoTrainData> = persistentListOf()
 )
 
+@SuppressLint("UnsafeOptInUsageError")
+@Parcelize
 @Serializable
-data class ExoTrainData(override val stopName : String, override val routeId : String, val trainNum : Int, val routeName : String,
-                        val directionId: Int, override val direction : String)
-    : TransitDataDto() {
-    constructor(parcel: Parcel) : this(
-        parcel.readString()!!,
-        parcel.readString()!!,
-        parcel.readInt(),
-        parcel.readString()!!,
-        parcel.readInt(),
-        parcel.readString()!!
-    )
-
-    override fun describeContents(): Int {
-        return 0
-    }
-
-    override fun writeToParcel(dest: Parcel, flags: Int) {
-        dest.writeString(stopName)
-        dest.writeString(routeId)
-        dest.writeInt(trainNum)
-        dest.writeString(routeName)
-        dest.writeInt(directionId)
-        dest.writeString(direction)
-    }
-
-    companion object CREATOR : Parcelable.Creator<ExoTrainData> {
-        override fun createFromParcel(parcel: Parcel): ExoTrainData {
-            return ExoTrainData(parcel)
-        }
-
-        override fun newArray(size: Int): Array<ExoTrainData?> {
-            return arrayOfNulls(size)
-        }
-    }
-}
+data class ExoTrainData(
+    override val stopName: String,
+    override val routeId: String,
+    val trainNum: Int,
+    val routeName: String,
+    val directionId: Int,
+    override val direction: String,
+) : TransitDataDto_v2()
 
 class PersistentTrainInfoListSerializer(private val serializer: KSerializer<ExoTrainData>) : KSerializer<PersistentList<ExoTrainData>> {
 
@@ -92,41 +68,18 @@ class PersistentTrainInfoListSerializer(private val serializer: KSerializer<ExoT
     }
 }
 
+@SuppressLint("UnsafeOptInUsageError")
+@Parcelize
 @Serializable
 @Deprecated("Deprecated since V3", replaceWith = ReplaceWith("StmFavouriteBusItemDto"))
-data class StmBusData(override val stopName: String,/** aka busNum */override val routeId : String,
-                      val directionId: Int, override val direction : String, val lastStop : String)
-    : TransitDataDto() {
-    constructor(parcel: Parcel) : this(
-        parcel.readString()!!,
-        parcel.readString()!!,
-        parcel.readInt(),
-        parcel.readString()!!,
-        parcel.readString()!!
-    )
-
-    override fun describeContents(): Int {
-        return 0
-    }
-
-    override fun writeToParcel(dest: Parcel, flags: Int) {
-        dest.writeString(stopName)
-        dest.writeString(routeId)
-        dest.writeInt(directionId)
-        dest.writeString(direction)
-        dest.writeString(lastStop)
-    }
-
-    companion object CREATOR : Parcelable.Creator<StmBusData> {
-        override fun createFromParcel(parcel: Parcel): StmBusData {
-            return StmBusData(parcel)
-        }
-
-        override fun newArray(size: Int): Array<StmBusData?> {
-            return arrayOfNulls(size)
-        }
-    }
-}
+/** @param routeId aka busNum */
+data class StmBusData(
+    override val stopName: String,
+    override val routeId: String,
+    val directionId: Int,
+    override val direction: String,
+    val lastStop: String,
+) : TransitDataDto_v2()
 
 class PersistentStmBusInfoListSerializer(private val serializer: KSerializer<StmBusData>) : KSerializer<PersistentList<StmBusData>> {
 
@@ -148,40 +101,16 @@ class PersistentStmBusInfoListSerializer(private val serializer: KSerializer<Stm
 }
 
 
+@SuppressLint("UnsafeOptInUsageError")
+@Parcelize
 @Serializable
-data class ExoBusData(override val stopName : String, override val routeId : String,
-                      override val direction: String, val routeLongName: String, val headsign: String)
-    : Parcelable, TransitDataDto() {
-    constructor(parcel: Parcel) : this(
-        parcel.readString()!!,
-        parcel.readString()!!,
-        parcel.readString()!!,
-        parcel.readString()!!,
-        parcel.readString()!!
-    )
-
-    override fun describeContents(): Int {
-        return 0
-    }
-
-    override fun writeToParcel(dest: Parcel, flags: Int) {
-        dest.writeString(stopName)
-        dest.writeString(routeId)
-        dest.writeString(direction)
-        dest.writeString(routeLongName)
-        dest.writeString(headsign)
-    }
-
-    companion object CREATOR : Parcelable.Creator<ExoBusData> {
-        override fun createFromParcel(parcel: Parcel): ExoBusData {
-            return ExoBusData(parcel)
-        }
-
-        override fun newArray(size: Int): Array<ExoBusData?> {
-            return arrayOfNulls(size)
-        }
-    }
-}
+data class ExoBusData(
+    override val stopName: String,
+    override val routeId: String,
+    override val direction: String,
+    val routeLongName: String,
+    val headsign: String,
+) : Parcelable, TransitDataDto_v2()
 
 class PersistentExoBusInfoListSerializer(private val serializer: KSerializer<ExoBusData>) : KSerializer<PersistentList<ExoBusData>> {
 

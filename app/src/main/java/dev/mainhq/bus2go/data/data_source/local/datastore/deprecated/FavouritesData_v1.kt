@@ -1,14 +1,13 @@
 package dev.mainhq.bus2go.data.data_source.local.datastore.deprecated
 
-import android.os.Parcel
-import android.os.Parcelable
+import android.annotation.SuppressLint
 import androidx.datastore.core.Serializer
-import dev.mainhq.bus2go.data.data_source.local.datastore.TransitDataDto
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -21,6 +20,7 @@ import kotlinx.serialization.json.Json
 import java.io.InputStream
 import java.io.OutputStream
 
+@SuppressLint("UnsafeOptInUsageError")
 @Deprecated(
 	message = "Version 1 of the data. Lacked some important data.",
 	replaceWith = ReplaceWith("FavouritesData")
@@ -31,45 +31,20 @@ data class FavouritesDataOld(
 	val listSTM : PersistentList<StmBusData> = persistentListOf(),
 	@Serializable(with = PersistentExoBusInfoOldListSerializer::class)
 	val listExo : PersistentList<ExoBusDataOld> = persistentListOf(),
-	@Serializable(with = PersistentTrainInfoListSerializer::class)
+	@Serializable(with = PersistentTrainInfoListSerializer_v1::class)
 	val listExoTrain : PersistentList<ExoTrainData> = persistentListOf()
 )
 
+@SuppressLint("UnsafeOptInUsageError")
 @Serializable
+@Parcelize
 @Deprecated(
 	message = "Migrated from version 1 to version 2",
 	replaceWith = ReplaceWith("FavouritesData.kt #ExoBusData")
 )
 data class ExoBusDataOld(override val stopName : String,/** aka tripheadSign */ override val routeId : String, override val direction: String)
-	: TransitDataDto() {
-	constructor(parcel: Parcel) : this(
-		parcel.readString()!!,
-		parcel.readString()!!,
-		parcel.readString()!!,
-	)
+	: TransitDataDto_v2()
 
-	override fun describeContents(): Int {
-		return 0
-	}
-
-	override fun writeToParcel(dest: Parcel, flags: Int) {
-		dest.writeString(stopName)
-		dest.writeString(routeId)
-		dest.writeString(direction)
-	}
-
-	companion object CREATOR : Parcelable.Creator<ExoBusData> {
-		override fun createFromParcel(parcel: Parcel): ExoBusData {
-			return ExoBusData(parcel)
-		}
-
-		override fun newArray(size: Int): Array<ExoBusData?> {
-			return arrayOfNulls(size)
-		}
-	}
-}
-
-@OptIn(ExperimentalSerializationApi::class)
 class PersistentExoBusInfoOldListSerializer(private val serializer: KSerializer<ExoBusDataOld>) :
 	KSerializer<PersistentList<ExoBusDataOld>> {
 

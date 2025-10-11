@@ -5,16 +5,10 @@ import android.view.View
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.materialswitch.MaterialSwitch
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.presentation.core.collectFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
+import dev.mainhq.bus2go.utils.launchViewModelCollect
 
 class ConfigThemeFragment: Fragment(R.layout.fragment_config_theme) {
 
@@ -34,7 +28,7 @@ class ConfigThemeFragment: Fragment(R.layout.fragment_config_theme) {
 			viewModel.setDarkMode(boolean)
 		}
 
-		collectFlow(viewModel.darkMode){
+		launchViewModelCollect(viewModel.darkMode){
 			switch.isChecked = it
 			if (it) switch.text = "Dark"
 			else switch.text = "Light"

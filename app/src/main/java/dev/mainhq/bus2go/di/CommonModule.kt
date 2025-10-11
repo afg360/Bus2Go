@@ -7,6 +7,7 @@ import dev.mainhq.bus2go.data.data_source.local.database.stm.AppDatabaseSTM
 import dev.mainhq.bus2go.data.data_source.local.datastore.app_state.appStateDataStore
 import dev.mainhq.bus2go.data.data_source.local.datastore.exo.exoFavouritesDataStore
 import dev.mainhq.bus2go.data.data_source.local.datastore.stm.stmFavouritesDataStore
+import dev.mainhq.bus2go.data.data_source.local.datastore.tags.Tags
 import dev.mainhq.bus2go.data.data_source.notifications.NotificationHandler
 import dev.mainhq.bus2go.data.data_source.remote.NetworkMonitor
 import dev.mainhq.bus2go.data.repository.AppStateRepositoryImpl
@@ -27,7 +28,6 @@ import dev.mainhq.bus2go.domain.use_case.favourites.AddFavourite
 import dev.mainhq.bus2go.domain.use_case.favourites.GetFavourites
 import dev.mainhq.bus2go.domain.use_case.favourites.GetFavouritesWithTimeData
 import dev.mainhq.bus2go.domain.use_case.favourites.RemoveFavourite
-import dev.mainhq.bus2go.domain.use_case.settings.CheckIsBus2GoServer
 import dev.mainhq.bus2go.domain.use_case.settings.GetSettings
 import dev.mainhq.bus2go.domain.use_case.transit.GetDirections
 import dev.mainhq.bus2go.domain.use_case.transit.GetMinDateForUpdate
@@ -52,7 +52,10 @@ class CommonModule(applicationContext: Context) {
 		dataDir = applicationContext.dataDir
 	)
 
+	private val tags = Tags(applicationContext)
+
 	private val stmFavouritesRepository = StmFavouritesRepositoryImpl(
+		tags = tags,
 		stmFavouritesDataStore = applicationContext.stmFavouritesDataStore
 	)
 
@@ -65,6 +68,7 @@ class CommonModule(applicationContext: Context) {
 	)
 
 	private val exoFavouritesRepository = ExoFavouritesRepositoryImpl(
+		tags = tags,
 		exoFavouritesDataStore = applicationContext.exoFavouritesDataStore
 	)
 

@@ -36,9 +36,4 @@ open class BaseActivity : AppCompatActivity() {
 			AppThemeState.setTheme(isDark)
     }
 
-    protected fun launchViewModelCollect(context: CoroutineContext = Dispatchers.Main, block: suspend CoroutineScope.() -> Unit){
-        lifecycleScope.launch(context) {
-            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED, block)
-        }
-    }
 }

@@ -2,26 +2,25 @@ package dev.mainhq.bus2go.presentation.config
 
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dev.mainhq.bus2go.presentation.core.state.AppThemeState
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.Bus2GoApplication
-import dev.mainhq.bus2go.domain.core.Result
-import dev.mainhq.bus2go.presentation.core.UiState
-import dev.mainhq.bus2go.presentation.core.collectFlow
+import dev.mainhq.bus2go.databinding.FragmentConfigDatabaseBinding
+import dev.mainhq.bus2go.databinding.FragmentConfigWelcomeBinding
+import dev.mainhq.bus2go.utils.launchViewModelCollect
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
@@ -43,20 +42,36 @@ class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
 		}
 	}
 
+	private var _binding: FragmentConfigDatabaseBinding? = null
+	private val binding get() = _binding!!
+
+	override fun onCreateView(
+		inflater: LayoutInflater,
+		container: ViewGroup?,
+		savedInstanceState: Bundle?
+	): View? {
+		_binding = FragmentConfigDatabaseBinding.inflate(inflater)
+		return binding.root
+	}
+
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 		super.onViewCreated(view, savedInstanceState)
 
-		val continueButton =  view.findViewById<MaterialButton>(R.id.configDownloadDatabaseContinueButton)
-		val stmCheckbox = view.findViewById<MaterialCheckBox>(R.id.configStmDatabaseCheckBox)
-		val exoCheckBox = view.findViewById<MaterialCheckBox>(R.id.configExoDatabaseCheckBox)
 
-		stmCheckbox.isChecked = viewModel.isStmChecked()
-		exoCheckBox.isChecked = viewModel.isExoChecked()
+		binding.configStmDatabaseCheckBox.also {
+			it.isChecked = viewModel.isStmChecked()
+			it.setOnCheckedChangeListener { _, _ -> viewModel.toggleStm() }
+		}
 
-		stmCheckbox.setOnCheckedChangeListener { _, _ -> viewModel.toggleStm() }
-		exoCheckBox.setOnCheckedChangeListener { _, _ -> viewModel.toggleExo() }
+		binding.configExoDatabaseCheckBox.also {
+			it.isChecked = viewModel.isExoChecked()
+			it.setOnCheckedChangeListener { _, _ -> viewModel.toggleExo() }
+		}
 
-		collectFlow(viewModel.dbToDownload){ continueButton.text = if (it == null) "Skip" else "Continue" }
+
+		launchViewModelCollect(viewModel.dbToDownload){
+			binding.configDownloadDatabaseContinueButton.text = if (it == null) "Skip" else "Continue"
+		}
 		requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object: OnBackPressedCallback(true){
 			override fun handleOnBackPressed() {
 				sharedViewModel.setFragment(prevFrag)
@@ -64,9 +79,9 @@ class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
 			}
 		})
 
-		continueButton.setOnClickListener {
+		binding.configDownloadDatabaseContinueButton.setOnClickListener {
 			//if none checked, display the skip, and create a dialog for a skip
-			if (continueButton.text == "Continue") {
+			if (binding.configDownloadDatabaseContinueButton.text == "Continue") {
 				//TODO let the user know how much data it may take...
 				MaterialAlertDialogBuilder(requireContext())
 					.setTitle("Confirm")
@@ -98,5 +113,10 @@ class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
 					.show()
 			}
 		}
+	}
+
+	override fun onDestroyView() {
+		super.onDestroyView()
+		_binding = null
 	}
 }

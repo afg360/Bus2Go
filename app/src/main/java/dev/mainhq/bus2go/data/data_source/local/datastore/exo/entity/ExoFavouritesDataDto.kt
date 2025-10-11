@@ -1,5 +1,6 @@
 package dev.mainhq.bus2go.data.data_source.local.datastore.exo.entity
 
+import android.annotation.SuppressLint
 import androidx.datastore.core.Serializer
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
@@ -12,6 +13,7 @@ import java.io.OutputStream
 
 
 //TODO eventually encrypt all the data to make it safe from other apps in case unwanted access happens
+@SuppressLint("UnsafeOptInUsageError")
 @Serializable
 data class ExoFavouritesDataDto(
 	val version: Int,
@@ -23,7 +25,7 @@ data class ExoFavouritesDataDto(
 
 object ExoFavouritesDataSerializer : Serializer<ExoFavouritesDataDto> {
 	override val defaultValue: ExoFavouritesDataDto
-		get() = ExoFavouritesDataDto(1)
+		get() = ExoFavouritesDataDto(2)
 
 	override suspend fun readFrom(input: InputStream): ExoFavouritesDataDto {
 		return try{

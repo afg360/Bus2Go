@@ -3,15 +3,21 @@ package dev.mainhq.bus2go.data.repository
 import androidx.datastore.core.DataStore
 import dev.mainhq.bus2go.data.data_source.local.datastore.PreferenceMapper
 import dev.mainhq.bus2go.data.data_source.local.datastore.exo.entity.ExoFavouritesDataDto
+import dev.mainhq.bus2go.data.data_source.local.datastore.tags.Tags
+import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.entity.ExoBusItem
 import dev.mainhq.bus2go.domain.entity.ExoTrainItem
+import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.domain.repository.ExoFavouritesRepository
 import kotlinx.collections.immutable.mutate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 
-class ExoFavouritesRepositoryImpl(private val exoFavouritesDataStore: DataStore<ExoFavouritesDataDto>): ExoFavouritesRepository {
+class ExoFavouritesRepositoryImpl(
+	private val tags: Tags,
+	private val exoFavouritesDataStore: DataStore<ExoFavouritesDataDto>
+): ExoFavouritesRepository {
 	override suspend fun getExoBusFavourites(): List<ExoBusItem> {
 		return withContext(Dispatchers.IO) {
 			PreferenceMapper.mapExoBus(exoFavouritesDataStore.data.first())
@@ -64,6 +70,17 @@ class ExoFavouritesRepositoryImpl(private val exoFavouritesDataStore: DataStore<
 				})
 			}
 		}
+	}
+
+	override suspend fun setTag(
+		tag: String,
+		items: List<TransitData>,
+	) {
+		TODO("Not yet implemented")
+	}
+
+	override suspend fun getFavouritesFromTag(tag: String): Result<List<TransitData>> {
+		TODO("Not yet implemented")
 	}
 
 }

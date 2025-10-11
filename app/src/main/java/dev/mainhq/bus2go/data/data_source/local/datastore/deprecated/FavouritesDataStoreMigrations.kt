@@ -1,8 +1,6 @@
-package dev.mainhq.bus2go.data.data_source.local.datastore
+package dev.mainhq.bus2go.data.data_source.local.datastore.deprecated
 
 import android.app.Application
-import dev.mainhq.bus2go.data.data_source.local.datastore.deprecated.ExoBusData
-import dev.mainhq.bus2go.data.data_source.local.datastore.deprecated.favouritesDataStore
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.first
 

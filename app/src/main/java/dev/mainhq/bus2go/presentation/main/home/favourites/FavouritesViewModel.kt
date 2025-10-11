@@ -57,114 +57,116 @@ class FavouritesViewModel(
                 //FIXME code seems inefficient by going so many times to the repo... perhaps only
                 // useless when no favourites made...
                 //do it when some time is less than some other time
-                _favouriteTransitData.value = UiState.Success(
-                    when (val favouritesWithTimeData = getFavouritesWithTimeData.invoke()){
-                        is Result.Error -> {
-                            TODO()
-                        }
+                _favouriteTransitData.update {
+                    UiState.Success(
+                        when (val favouritesWithTimeData = getFavouritesWithTimeData.invoke()){
+                            is Result.Error -> {
+                                TODO()
+                            }
 
-                        is Result.Success<List<TransitDataWithTime>> -> {
-                            favouritesWithTimeData.data.map{
-                                if (it.arrivalTime != null) {
-                                    val timeRemaining = it.arrivalTime.timeRemaining()
-                                    val isUrgent = if (timeRemaining == null || timeRemaining < LocalTime.of(0, 4, 0))
-                                        Urgency.IMMINENT
-                                    else if (timeRemaining < LocalTime.of(0, 11, 0))
-                                        Urgency.SOON
-                                    else Urgency.DISTANT
+                            is Result.Success<List<TransitDataWithTime>> -> {
+                                favouritesWithTimeData.data.map{
+                                    if (it.arrivalTime != null) {
+                                        val timeRemaining = it.arrivalTime.timeRemaining()
+                                        val isUrgent = if (timeRemaining == null || timeRemaining < LocalTime.of(0, 4, 0))
+                                            Urgency.IMMINENT
+                                        else if (timeRemaining < LocalTime.of(0, 11, 0))
+                                            Urgency.SOON
+                                        else Urgency.DISTANT
 
-                                    when(it.favouriteTransitData){
-                                        is ExoBusItem -> {
-                                            FavouritesDisplayModel(
-                                                favouriteTransitData = it.favouriteTransitData,
-                                                directionText = "To ${it.favouriteTransitData.direction}",
-                                                toTruncate = it.favouriteTransitData.direction.length > FavouritesDisplayModel.DIRECTION_STR_LIMIT,
-                                                tripHeadsignText = it.favouriteTransitData.routeId,
-                                                stopNameText = it.favouriteTransitData.stopName,
-                                                arrivalTimeText = it.arrivalTime.getTimeString(),
-                                                timeRemainingText = getTimeRemaining(timeRemaining),
-                                                dataDisplayColor = R.color.basic_purple,
-                                                urgency = isUrgent
-                                            )
-                                        }
-                                        is ExoTrainItem -> {
-                                            FavouritesDisplayModel(
-                                                favouriteTransitData = it.favouriteTransitData,
-                                                directionText = "To ${it.favouriteTransitData.direction}",
-                                                toTruncate = it.favouriteTransitData.direction.length > FavouritesDisplayModel.DIRECTION_STR_LIMIT,
-                                                tripHeadsignText = it.favouriteTransitData.routeName,
-                                                stopNameText = it.favouriteTransitData.stopName,
-                                                arrivalTimeText = it.arrivalTime.getTimeString(),
-                                                timeRemainingText = getTimeRemaining(timeRemaining),
-                                                dataDisplayColor = R.color.orange,
-                                                urgency = isUrgent
-                                            )
-                                        }
-                                        is StmBusItem -> {
-                                            FavouritesDisplayModel(
-                                                favouriteTransitData = it.favouriteTransitData,
-                                                directionText = "To ${it.favouriteTransitData.lastStop}",
-                                                toTruncate = it.favouriteTransitData.lastStop.length > FavouritesDisplayModel.DIRECTION_STR_LIMIT,
-                                                tripHeadsignText = it.favouriteTransitData.routeId,
-                                                stopNameText = it.favouriteTransitData.stopName,
-                                                arrivalTimeText = it.arrivalTime.getTimeString(),
-                                                timeRemainingText = getTimeRemaining(timeRemaining),
-                                                dataDisplayColor = R.color.basic_blue,
-                                                urgency = isUrgent
-                                            )
+                                        when(it.favouriteTransitData){
+                                            is ExoBusItem -> {
+                                                FavouritesDisplayModel(
+                                                    favouriteTransitData = it.favouriteTransitData,
+                                                    directionText = "To ${it.favouriteTransitData.direction}",
+                                                    toTruncate = it.favouriteTransitData.direction.length > FavouritesDisplayModel.DIRECTION_STR_LIMIT,
+                                                    tripHeadsignText = it.favouriteTransitData.routeId,
+                                                    stopNameText = it.favouriteTransitData.stopName,
+                                                    arrivalTimeText = it.arrivalTime.getTimeString(),
+                                                    timeRemainingText = getTimeRemaining(timeRemaining),
+                                                    dataDisplayColor = R.color.basic_purple,
+                                                    urgency = isUrgent
+                                                )
+                                            }
+                                            is ExoTrainItem -> {
+                                                FavouritesDisplayModel(
+                                                    favouriteTransitData = it.favouriteTransitData,
+                                                    directionText = "To ${it.favouriteTransitData.direction}",
+                                                    toTruncate = it.favouriteTransitData.direction.length > FavouritesDisplayModel.DIRECTION_STR_LIMIT,
+                                                    tripHeadsignText = it.favouriteTransitData.routeName,
+                                                    stopNameText = it.favouriteTransitData.stopName,
+                                                    arrivalTimeText = it.arrivalTime.getTimeString(),
+                                                    timeRemainingText = getTimeRemaining(timeRemaining),
+                                                    dataDisplayColor = R.color.orange,
+                                                    urgency = isUrgent
+                                                )
+                                            }
+                                            is StmBusItem -> {
+                                                FavouritesDisplayModel(
+                                                    favouriteTransitData = it.favouriteTransitData,
+                                                    directionText = "To ${it.favouriteTransitData.lastStop}",
+                                                    toTruncate = it.favouriteTransitData.lastStop.length > FavouritesDisplayModel.DIRECTION_STR_LIMIT,
+                                                    tripHeadsignText = it.favouriteTransitData.routeId,
+                                                    stopNameText = it.favouriteTransitData.stopName,
+                                                    arrivalTimeText = it.arrivalTime.getTimeString(),
+                                                    timeRemainingText = getTimeRemaining(timeRemaining),
+                                                    dataDisplayColor = R.color.basic_blue,
+                                                    urgency = isUrgent
+                                                )
+                                            }
                                         }
                                     }
-                                }
-                                else {
-                                    when(it.favouriteTransitData){
-                                        is ExoBusItem -> {
-                                            FavouritesDisplayModel(
-                                                favouriteTransitData = it.favouriteTransitData,
-                                                directionText = it.favouriteTransitData.direction,
-                                                toTruncate = it.favouriteTransitData.direction.length > FavouritesDisplayModel.DIRECTION_STR_LIMIT,
-                                                tripHeadsignText = it.favouriteTransitData.routeId,
-                                                stopNameText = it.favouriteTransitData.stopName,
-                                                arrivalTimeText = null,
-                                                timeRemainingText = "None left",
-                                                dataDisplayColor = R.color.basic_purple,
-                                                urgency = Urgency.DISTANT
-                                            )
-                                        }
-                                        is ExoTrainItem -> {
-                                            FavouritesDisplayModel(
-                                                favouriteTransitData = it.favouriteTransitData,
-                                                directionText = "To ${it.favouriteTransitData.direction}",
-                                                toTruncate = it.favouriteTransitData.direction.length
-                                                        > FavouritesDisplayModel.DIRECTION_STR_LIMIT,
-                                                tripHeadsignText = it.favouriteTransitData.routeName,
-                                                stopNameText = it.favouriteTransitData.stopName,
-                                                arrivalTimeText = null,
-                                                //FIXME use a ressource string that is injected into the class...
-                                                timeRemainingText = "None left",
-                                                dataDisplayColor = R.color.orange,
-                                                urgency = Urgency.DISTANT
-                                            )
-                                        }
-                                        is StmBusItem -> {
-                                            FavouritesDisplayModel(
-                                                favouriteTransitData = it.favouriteTransitData,
-                                                directionText = it.favouriteTransitData.lastStop,
-                                                toTruncate = it.favouriteTransitData.lastStop.length
-                                                        > FavouritesDisplayModel.DIRECTION_STR_LIMIT,
-                                                tripHeadsignText = it.favouriteTransitData.routeId,
-                                                stopNameText = it.favouriteTransitData.stopName,
-                                                arrivalTimeText = null,
-                                                timeRemainingText = "None left",
-                                                dataDisplayColor = R.color.basic_blue,
-                                                urgency = Urgency.DISTANT
-                                            )
+                                    else {
+                                        when(it.favouriteTransitData){
+                                            is ExoBusItem -> {
+                                                FavouritesDisplayModel(
+                                                    favouriteTransitData = it.favouriteTransitData,
+                                                    directionText = it.favouriteTransitData.direction,
+                                                    toTruncate = it.favouriteTransitData.direction.length > FavouritesDisplayModel.DIRECTION_STR_LIMIT,
+                                                    tripHeadsignText = it.favouriteTransitData.routeId,
+                                                    stopNameText = it.favouriteTransitData.stopName,
+                                                    arrivalTimeText = null,
+                                                    timeRemainingText = "None left",
+                                                    dataDisplayColor = R.color.basic_purple,
+                                                    urgency = Urgency.DISTANT
+                                                )
+                                            }
+                                            is ExoTrainItem -> {
+                                                FavouritesDisplayModel(
+                                                    favouriteTransitData = it.favouriteTransitData,
+                                                    directionText = "To ${it.favouriteTransitData.direction}",
+                                                    toTruncate = it.favouriteTransitData.direction.length
+                                                            > FavouritesDisplayModel.DIRECTION_STR_LIMIT,
+                                                    tripHeadsignText = it.favouriteTransitData.routeName,
+                                                    stopNameText = it.favouriteTransitData.stopName,
+                                                    arrivalTimeText = null,
+                                                    //FIXME use a ressource string that is injected into the class...
+                                                    timeRemainingText = "None left",
+                                                    dataDisplayColor = R.color.orange,
+                                                    urgency = Urgency.DISTANT
+                                                )
+                                            }
+                                            is StmBusItem -> {
+                                                FavouritesDisplayModel(
+                                                    favouriteTransitData = it.favouriteTransitData,
+                                                    directionText = it.favouriteTransitData.lastStop,
+                                                    toTruncate = it.favouriteTransitData.lastStop.length
+                                                            > FavouritesDisplayModel.DIRECTION_STR_LIMIT,
+                                                    tripHeadsignText = it.favouriteTransitData.routeId,
+                                                    stopNameText = it.favouriteTransitData.stopName,
+                                                    arrivalTimeText = null,
+                                                    timeRemainingText = "None left",
+                                                    dataDisplayColor = R.color.basic_blue,
+                                                    urgency = Urgency.DISTANT
+                                                )
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
-                    }
-                )
+                    )
+                }
                 if ((_favouriteTransitData.value as UiState.Success<List<FavouritesDisplayModel>>)
                         .data.isEmpty()) running = false
                 delay(1000)
@@ -182,12 +184,12 @@ class FavouritesViewModel(
     }
 
     fun activateSelectionMode(){
-        _selectionMode.value = true
+        _selectionMode.update { true }
     }
 
     fun deactivateSelectionMode(){
         deselectAllForRemoval()
-        _selectionMode.value = false
+        _selectionMode.update { false }
     }
 
     //FIXME needs an argument to know which favourite we selected
@@ -239,16 +241,19 @@ class FavouritesViewModel(
                     }
                 }.awaitAll()
 
-            _favouriteTransitData.value = when (val state =_favouriteTransitData.value){
-                is UiState.Success<List<FavouritesDisplayModel>> -> {
-                    UiState.Success(state.data.filterNot { data ->
-                        _favouritesToRemove.value.contains(data.favouriteTransitData)
-                    })
+            _favouriteTransitData.update {
+                when (val state =_favouriteTransitData.value){
+                    is UiState.Success<List<FavouritesDisplayModel>> -> {
+                        UiState.Success(state.data.filterNot { data ->
+                            _favouritesToRemove.value.contains(data.favouriteTransitData)
+                        })
+                    }
+                    else -> throw  IllegalStateException("Expected UI to be in the success state")
                 }
-                else -> throw  IllegalStateException("Expected UI to be in the success state")
             }
+
             if (_favouritesToRemove.value.isEmpty()){
-                _selectionMode.value = false
+                _selectionMode.update { false }
             }
             _favouritesToRemove.update { emptyList() }
         }

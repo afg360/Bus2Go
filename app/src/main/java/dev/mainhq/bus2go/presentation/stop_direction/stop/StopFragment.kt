@@ -2,7 +2,9 @@ package dev.mainhq.bus2go.presentation.stop_direction.stop
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
@@ -17,6 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.Bus2GoApplication
+import dev.mainhq.bus2go.databinding.FragmentChooseStopBinding
 import dev.mainhq.bus2go.presentation.stop_direction.ActivityFragment
 import dev.mainhq.bus2go.presentation.stop_direction.AnimationDirection
 import dev.mainhq.bus2go.presentation.stop_direction.StopDirectionSharedViewModel
@@ -53,13 +56,25 @@ class StopFragment : Fragment(R.layout.fragment_choose_stop) {
 
     private val sharedActivityViewModel: StopDirectionViewModel by activityViewModels()
 
+    private var _binding: FragmentChooseStopBinding? = null
+    private val binding get() = _binding!!
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        _binding = FragmentChooseStopBinding.inflate(inflater)
+        return binding.root
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
             val transitData = viewModel.stopNames.filterNotNull().first()
             if (transitData.isNotEmpty()) {
-                val recyclerView = view.findViewById<RecyclerView>(R.id.stop_recycle_view)
+                val recyclerView = binding.stopRecycleView
                 recyclerView.layoutManager = LinearLayoutManager(requireContext())
                 recyclerView.adapter = StopListElemsAdapter(
                     transitData,
@@ -95,10 +110,14 @@ class StopFragment : Fragment(R.layout.fragment_choose_stop) {
                     override fun handleOnBackPressed() {
                         sharedActivityViewModel.setActivityFragment(ActivityFragment.Direction)
                         isEnabled = false
-
                     }
                 }
             )
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

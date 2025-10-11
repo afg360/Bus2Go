@@ -12,6 +12,7 @@ import dev.mainhq.bus2go.presentation.base.BaseActivity
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.data.data_source.local.datastore.app_state.appStateDataStore
 import dev.mainhq.bus2go.presentation.main.MainActivity
+import dev.mainhq.bus2go.utils.launchViewModelCollect
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
@@ -29,43 +30,27 @@ class ConfigActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.config_activity)
 
-        lifecycleScope.launch(Dispatchers.Main) {
-            repeatOnLifecycle(Lifecycle.State.STARTED){
-                viewModel.currentFragment.collect{ fragmentToUse ->
-                    if (fragmentToUse != null) {
-                        val fragment = when (fragmentToUse) {
-                            FragmentUsed.WELCOME -> ConfigWelcomeFragment()
-                            FragmentUsed.THEME -> ConfigThemeFragment()
-                            FragmentUsed.SERVER -> ConfigServerFragment()
-                            FragmentUsed.DATABASES -> ConfigDatabasesFragment()
-                            FragmentUsed.NOTIFICATIONS -> ConfigNotificationsFragment()
-                        }
-
-                        supportFragmentManager.beginTransaction()
-                            .replace(R.id.configActivityFragmentContainer, fragment)
-                            .commit()
-                    }
+        launchViewModelCollect(viewModel.currentFragment) { fragmentToUse ->
+            if (fragmentToUse != null) {
+                val fragment = when (fragmentToUse) {
+                    FragmentUsed.WELCOME -> ConfigWelcomeFragment()
+                    FragmentUsed.THEME -> ConfigThemeFragment()
+                    FragmentUsed.SERVER -> ConfigServerFragment()
+                    FragmentUsed.DATABASES -> ConfigDatabasesFragment()
+                    FragmentUsed.NOTIFICATIONS -> ConfigNotificationsFragment()
                 }
+
+                supportFragmentManager.beginTransaction()
+                    .replace(R.id.configActivityFragmentContainer, fragment)
+                    .commit()
             }
         }
 
-        lifecycleScope.launch(Dispatchers.Main) {
-            repeatOnLifecycle(Lifecycle.State.STARTED){
-                viewModel.event.collect{ eventMessage ->
-                    if (eventMessage){
-                        startActivity(Intent(applicationContext, MainActivity::class.java))
-                        finish()
-                    }
-                }
+        launchViewModelCollect(viewModel.event){ eventMessage ->
+            if (eventMessage){
+                startActivity(Intent(applicationContext, MainActivity::class.java))
+                finish()
             }
         }
     }
-
-    //TODO
-    private suspend fun setApplicationState(){
-        appStateDataStore.edit { settings ->
-            settings[booleanPreferencesKey("isFirstTime")] = false
-        }
-    }
-
 }

@@ -6,15 +6,10 @@ import android.text.TextWatcher
 import android.view.View
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.progressindicator.CircularProgressIndicator
@@ -23,12 +18,7 @@ import com.google.android.material.textfield.TextInputEditText
 import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.presentation.core.UiState
-import dev.mainhq.bus2go.presentation.core.collectFlow
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
+import dev.mainhq.bus2go.utils.launchViewModelCollect
 
 //TODO eventually there will either be a special ip address, or a list of available domain names...
 
@@ -79,7 +69,7 @@ class ConfigServerFragment: Fragment(R.layout.fragment_config_server) {
 			else viewModel.checkIsBus2GoServer()
 		}
 
-		collectFlow(viewModel.serverResponse){
+		launchViewModelCollect(viewModel.serverResponse){
 			when(it){
 				is UiState.Error -> {
 					//if device not connected to internet, make a SnackBar and allow retry
@@ -127,7 +117,7 @@ class ConfigServerFragment: Fragment(R.layout.fragment_config_server) {
 			}
 		}
 
-		collectFlow(viewModel.textInputText){
+		launchViewModelCollect(viewModel.textInputText){
 			when (it) {
 				is UiState.Error -> textInput.error = "Invalid Url"
 				UiState.Init -> textInput.setText("")
@@ -145,7 +135,7 @@ class ConfigServerFragment: Fragment(R.layout.fragment_config_server) {
 				override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) { }
 		})
 
-		collectFlow(viewModel.buttonText){ button.text = it }
+		launchViewModelCollect(viewModel.buttonText){ button.text = it }
 
 		val mainBackPressCallBack = object: OnBackPressedCallback(true){
 			override fun handleOnBackPressed() {

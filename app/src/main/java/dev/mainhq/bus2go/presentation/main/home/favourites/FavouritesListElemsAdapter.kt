@@ -83,6 +83,7 @@ class FavouritesListElemsAdapter(
         holder.checkBoxView.isChecked = toRemoveList.contains(info.favouriteTransitData)
 
         holder.itemView.setOnClickListener { onClickListener(it, info.favouriteTransitData) }
+        //holder.checkBoxView.setOnClickListener { onClickListener(holder.itemView, info.favouriteTransitData) }
 
         holder.itemView.setOnLongClickListener{
             onLongClickListener(it, info.favouriteTransitData)

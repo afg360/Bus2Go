@@ -24,8 +24,7 @@ import androidx.work.WorkManager
 import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.data.worker.UpdateManagerWorker
-import dev.mainhq.bus2go.presentation.core.collectFlow
-import kotlinx.coroutines.launch
+import dev.mainhq.bus2go.utils.launchViewModelCollect
 import java.util.concurrent.TimeUnit
 
 class SettingsMainFragment : PreferenceFragmentCompat(),
@@ -125,7 +124,7 @@ class SettingsMainFragment : PreferenceFragmentCompat(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        collectFlow(viewModel.toastText){
+        launchViewModelCollect(viewModel.toastText){
             sharedViewModel.setLoading(false)
             Toast.makeText(requireContext(), it.string, Toast.LENGTH_SHORT).show()
             val editTextPreference = preferenceManager.findPreference<EditTextPreference>("server-choice")
