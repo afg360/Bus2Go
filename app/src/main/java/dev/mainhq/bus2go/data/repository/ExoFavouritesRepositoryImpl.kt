@@ -3,10 +3,10 @@ package dev.mainhq.bus2go.data.repository
 import androidx.datastore.core.DataStore
 import dev.mainhq.bus2go.data.data_source.local.datastore.PreferenceMapper
 import dev.mainhq.bus2go.data.data_source.local.datastore.exo.entity.ExoFavouritesDataDto
-import dev.mainhq.bus2go.data.data_source.local.datastore.tags.Tags
-import dev.mainhq.bus2go.domain.core.Result
+import dev.mainhq.bus2go.data.data_source.local.datastore.tags.TagsHandler
 import dev.mainhq.bus2go.domain.entity.ExoBusItem
 import dev.mainhq.bus2go.domain.entity.ExoTrainItem
+import dev.mainhq.bus2go.domain.entity.Tag
 import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.domain.repository.ExoFavouritesRepository
 import kotlinx.collections.immutable.mutate
@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 
 class ExoFavouritesRepositoryImpl(
-	private val tags: Tags,
+	private val tagsHandler: TagsHandler,
 	private val exoFavouritesDataStore: DataStore<ExoFavouritesDataDto>
 ): ExoFavouritesRepository {
 	override suspend fun getExoBusFavourites(): List<ExoBusItem> {
@@ -73,14 +73,33 @@ class ExoFavouritesRepositoryImpl(
 	}
 
 	override suspend fun setTag(
-		tag: String,
+		tag: Tag,
 		items: List<TransitData>,
 	) {
-		TODO("Not yet implemented")
+		val tagDto = PreferenceMapper.mapTagToDto(tag)
+		tagsHandler.addTag(tagDto)
+		exoFavouritesDataStore.updateData { favourites ->
+			favourites.copy(
+				listExo = favourites.listExo.mutate { mutableList ->
+					val inputItems = items.filter { it is ExoBusItem }
+						.map { PreferenceMapper.mapExoBusToDto(it as ExoBusItem) }
+
+					mutableList.filter { inputItems.contains(it) && !it.tags.contains(tagDto) }
+						.forEach { it.tags.mutate { mutableTags -> mutableTags.add(tagDto) } }
+				},
+				listExoTrain = favourites.listExoTrain.mutate { mutableList ->
+					val inputItems = items.filter { it is ExoTrainItem }
+						.map { PreferenceMapper.mapExoTrainToDto(it as ExoTrainItem) }
+
+					mutableList.filter { inputItems.contains(it) && !it.tags.contains(tagDto) }
+						.forEach { it.tags.mutate { mutableTags -> mutableTags.add(tagDto) } }
+				}
+			)
+		}
 	}
 
-	override suspend fun getFavouritesFromTag(tag: String): Result<List<TransitData>> {
-		TODO("Not yet implemented")
+	//perhaps should not be defined in this interface...
+	override suspend fun getTags(): List<Tag> {
+		return tagsHandler.readTags().map { PreferenceMapper.mapTag(it) }
 	}
-
 }

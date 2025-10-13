@@ -9,25 +9,18 @@ import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.databinding.FragmentChooseStopBinding
 import dev.mainhq.bus2go.presentation.stop_direction.ActivityFragment
-import dev.mainhq.bus2go.presentation.stop_direction.AnimationDirection
-import dev.mainhq.bus2go.presentation.stop_direction.StopDirectionSharedViewModel
 import dev.mainhq.bus2go.presentation.stop_direction.StopDirectionViewModel
 import dev.mainhq.bus2go.presentation.stop_times.StopTimesActivity
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -93,6 +86,7 @@ class StopFragment : Fragment(R.layout.fragment_choose_stop) {
                         }
                     },
                     onClickListener = {
+                        sharedActivityViewModel.toTimesActivity()
                         val intent = Intent(requireContext(), StopTimesActivity::class.java)
                         //FIXME send another class model instead
                         intent.putExtra(ExtrasTagNames.TRANSIT_DATA, it)

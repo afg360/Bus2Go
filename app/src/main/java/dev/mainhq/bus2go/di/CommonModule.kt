@@ -7,7 +7,7 @@ import dev.mainhq.bus2go.data.data_source.local.database.stm.AppDatabaseSTM
 import dev.mainhq.bus2go.data.data_source.local.datastore.app_state.appStateDataStore
 import dev.mainhq.bus2go.data.data_source.local.datastore.exo.exoFavouritesDataStore
 import dev.mainhq.bus2go.data.data_source.local.datastore.stm.stmFavouritesDataStore
-import dev.mainhq.bus2go.data.data_source.local.datastore.tags.Tags
+import dev.mainhq.bus2go.data.data_source.local.datastore.tags.TagsHandler
 import dev.mainhq.bus2go.data.data_source.notifications.NotificationHandler
 import dev.mainhq.bus2go.data.data_source.remote.NetworkMonitor
 import dev.mainhq.bus2go.data.repository.AppStateRepositoryImpl
@@ -25,6 +25,8 @@ import dev.mainhq.bus2go.domain.use_case.db_state.SetDatabaseExpirationDate
 import dev.mainhq.bus2go.domain.use_case.db_state.SetUpdateDbDialogLastAsToday
 import dev.mainhq.bus2go.domain.use_case.db_state.WasUpdateDialogShownToday
 import dev.mainhq.bus2go.domain.use_case.favourites.AddFavourite
+import dev.mainhq.bus2go.domain.use_case.favourites.AddTag
+import dev.mainhq.bus2go.domain.use_case.favourites.GetAllTags
 import dev.mainhq.bus2go.domain.use_case.favourites.GetFavourites
 import dev.mainhq.bus2go.domain.use_case.favourites.GetFavouritesWithTimeData
 import dev.mainhq.bus2go.domain.use_case.favourites.RemoveFavourite
@@ -52,10 +54,10 @@ class CommonModule(applicationContext: Context) {
 		dataDir = applicationContext.dataDir
 	)
 
-	private val tags = Tags(applicationContext)
+	private val tagsHandler = TagsHandler(applicationContext)
 
 	private val stmFavouritesRepository = StmFavouritesRepositoryImpl(
-		tags = tags,
+		tagsHandler = tagsHandler,
 		stmFavouritesDataStore = applicationContext.stmFavouritesDataStore
 	)
 
@@ -68,8 +70,17 @@ class CommonModule(applicationContext: Context) {
 	)
 
 	private val exoFavouritesRepository = ExoFavouritesRepositoryImpl(
-		tags = tags,
+		tagsHandler = tagsHandler,
 		exoFavouritesDataStore = applicationContext.exoFavouritesDataStore
+	)
+
+	val getAllTags = GetAllTags(
+		stmFavouritesRepository
+	)
+
+	val addTag = AddTag(
+		stmFavouritesRepository,
+		exoFavouritesRepository
 	)
 
 	val settingsRepository = SettingsRepositoryImpl(

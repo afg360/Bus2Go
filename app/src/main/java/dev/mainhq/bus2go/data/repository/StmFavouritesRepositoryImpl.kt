@@ -3,11 +3,10 @@ package dev.mainhq.bus2go.data.repository
 import androidx.datastore.core.DataStore
 import dev.mainhq.bus2go.data.data_source.local.datastore.PreferenceMapper
 import dev.mainhq.bus2go.domain.repository.StmFavouritesRepository
-import dev.mainhq.bus2go.data.data_source.local.datastore.deprecated.StmFavouritesDataDto1
 import dev.mainhq.bus2go.data.data_source.local.datastore.stm.entity.StmFavouritesDataDto
-import dev.mainhq.bus2go.data.data_source.local.datastore.tags.Tags
-import dev.mainhq.bus2go.domain.core.Result
+import dev.mainhq.bus2go.data.data_source.local.datastore.tags.TagsHandler
 import dev.mainhq.bus2go.domain.entity.StmBusItem
+import dev.mainhq.bus2go.domain.entity.Tag
 import dev.mainhq.bus2go.domain.entity.TransitData
 import kotlinx.collections.immutable.mutate
 import kotlinx.coroutines.Dispatchers
@@ -15,7 +14,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 
 class StmFavouritesRepositoryImpl(
-	private val tags: Tags,
+	private val tagsHandler: TagsHandler,
 	private val stmFavouritesDataStore: DataStore<StmFavouritesDataDto>
 ) : StmFavouritesRepository {
 
@@ -46,16 +45,23 @@ class StmFavouritesRepositoryImpl(
 		}
 	}
 
-	override suspend fun setTag(
-		tag: String,
-		items: List<TransitData>,
-	) {
-		tags.addTag(tag)
-		TODO("Not yet implemented")
+	override suspend fun setTag(tag: Tag, items: List<TransitData>) {
+		val tagDto = PreferenceMapper.mapTagToDto(tag)
+		tagsHandler.addTag(tagDto)
+		stmFavouritesDataStore.updateData { favourites ->
+			favourites.copy(
+				listSTM = favourites.listSTM.mutate { mutableList ->
+					val inputItems = items.filter { it is StmBusItem }
+						.map { PreferenceMapper.mapStmBusToDto(it as StmBusItem) }
+
+					mutableList.filter { inputItems.contains(it) && !it.tags.contains(tagDto) }
+						.forEach { it.tags.mutate { mutableTags -> mutableTags.add(tagDto) } }
+				}
+			)
+		}
 	}
 
-	override suspend fun getFavouritesFromTag(tag: String): Result<List<TransitData>> {
-		TODO("Not yet implemented")
+	override suspend fun getTags(): List<Tag> {
+		return tagsHandler.readTags().map { PreferenceMapper.mapTag(it) }
 	}
-
 }

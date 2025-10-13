@@ -4,14 +4,14 @@
     <item
         android:id="@+id/homeScreenButton"
         android:title="@string/home"
-        android:icon="@drawable/outline_home_24"
+        android:icon="@drawable/home"
         />
     <item android:id="@+id/mapButton"
         android:title="@string/map"
-        android:icon="@drawable/outline_map_24"
+        android:icon="@drawable/map"
         />
     <item android:id="@+id/alarmsButton"
         android:title="@string/alarms"
-        android:icon="@drawable/outline_alarm_24"
+        android:icon="@drawable/alarm"
         />
 </menu>

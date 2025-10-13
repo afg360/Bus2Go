@@ -7,9 +7,12 @@ import dev.mainhq.bus2go.data.data_source.local.datastore.deprecated.StmFavourit
 import dev.mainhq.bus2go.data.data_source.local.datastore.deprecated.StmFavouritesDataDto1
 import dev.mainhq.bus2go.data.data_source.local.datastore.stm.entity.StmFavouriteBusItemDto
 import dev.mainhq.bus2go.data.data_source.local.datastore.stm.entity.StmFavouritesDataDto
+import dev.mainhq.bus2go.data.data_source.local.datastore.tags.TagDto
 import dev.mainhq.bus2go.domain.entity.ExoBusItem
 import dev.mainhq.bus2go.domain.entity.ExoTrainItem
 import dev.mainhq.bus2go.domain.entity.StmBusItem
+import dev.mainhq.bus2go.domain.entity.Tag
+import kotlinx.collections.immutable.toPersistentList
 
 object PreferenceMapper {
 
@@ -18,7 +21,9 @@ object PreferenceMapper {
 			stopName = stmBus.stopName,
 			routeId = stmBus.routeId,
 			direction = stmBus.direction,
-			tags = stmBus.tags,
+			tags = stmBus.tags.filter { it.label != "Stm" }
+				.map { mapTagToDto(it) }
+				.toPersistentList(),
 			directionId = stmBus.directionId,
 			lastStop = stmBus.lastStop,
 		)
@@ -30,7 +35,7 @@ object PreferenceMapper {
 				routeId = it.routeId,
 				stopName = it.stopName,
 				direction = it.direction,
-				tags =it.tags,
+				tags = it.tags.map { mapTag(it) }.toMutableList().apply { add(Tag("Stm", 0xffffff)) },
 				directionId = it.directionId,
 				lastStop = it.lastStop,
 			)
@@ -42,7 +47,9 @@ object PreferenceMapper {
 			stopName = exoBus.stopName,
 			routeId = exoBus.routeId,
 			direction = exoBus.direction,
-			tags = exoBus.tags,
+			tags = exoBus.tags.filter { it.label != "Exo" }
+				.map { mapTagToDto(it) }
+				.toPersistentList(),
 			routeLongName = exoBus.routeLongName
 		)
 	}
@@ -53,7 +60,7 @@ object PreferenceMapper {
 				routeId = it.routeId,
 				stopName = it.stopName,
 				direction = it.direction,
-				tags = it.tags,
+				tags = it.tags.map { mapTag(it) }.toMutableList().apply { add(Tag("Exo", 0xffffff)) },
 				routeLongName = it.routeLongName,
 			)
 		}
@@ -64,7 +71,9 @@ object PreferenceMapper {
 			stopName = exoTrain.stopName,
 			routeId = exoTrain.routeId,
 			direction = exoTrain.direction,
-			tags = exoTrain.tags,
+			tags = exoTrain.tags.filter { it.label != "Train" }
+				.map { mapTagToDto(it) }
+				.toPersistentList(),
 			trainNum = exoTrain.trainNum,
 			routeName = exoTrain.routeName,
 			directionId = exoTrain.directionId,
@@ -77,11 +86,25 @@ object PreferenceMapper {
 				routeId = it.routeId,
 				stopName = it.stopName,
 				direction = it.direction,
-				tags = it.tags,
+				tags = it.tags.map { mapTag(it) }.toMutableList().apply { add(Tag("Train", 0xffffff)) },
 				trainNum = it.trainNum,
 				routeName = it.routeName,
 				directionId = it.directionId,
 			)
 		}
+	}
+
+	fun mapTag(tagDto: TagDto): Tag {
+		return Tag(
+			label = tagDto.label,
+			color = tagDto.color
+		)
+	}
+
+	fun mapTagToDto(tag: Tag): TagDto {
+		return TagDto(
+			label = tag.label,
+			color = tag.color
+		)
 	}
 }

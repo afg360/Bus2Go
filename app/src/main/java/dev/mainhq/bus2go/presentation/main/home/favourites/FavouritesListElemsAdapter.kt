@@ -110,9 +110,17 @@ class FavouritesListElemsAdapter(
         }
     }
 
-    fun updateTime(list: List<FavouritesDisplayModel>){
-        this.list = list
-        notifyItemRangeChanged(0, this.list.size, TIME_PAYLOAD)
+    fun updateAdapter(list: List<FavouritesDisplayModel>){
+        //if the size is different, we are filtering
+        if (list.size != this.list.size){
+            this.list = list
+            notifyDataSetChanged()
+        }
+        //else we simply want to update the time displayed
+        else {
+            this.list = list
+            notifyItemRangeChanged(0, this.list.size, TIME_PAYLOAD)
+        }
     }
 
     fun toggleForRemoval(items: List<TransitData>){

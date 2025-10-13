@@ -1,19 +1,16 @@
 package dev.mainhq.bus2go
 
 import android.app.Application
-import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
+import dev.mainhq.bus2go.data.data_source.local.datastore.tags.TagsHandler
 import dev.mainhq.bus2go.di.CommonModule
 import dev.mainhq.bus2go.data.worker.UpdateManagerWorker.Companion.FILE_NAME
 import dev.mainhq.bus2go.di.AppModule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.File
 
 open class Bus2GoApplication : Application() {
@@ -27,6 +24,10 @@ open class Bus2GoApplication : Application() {
 		commonModule = CommonModule(applicationContext)
 		appModule = AppModule(applicationContext)
 
+		//FIXME move this shit to the data layer...
+		CoroutineScope(Dispatchers.IO).launch {
+			TagsHandler.initFile(this@Bus2GoApplication)
+		}
 		CoroutineScope(Dispatchers.IO).launch {
 			val file = File(applicationContext.cacheDir, FILE_NAME)
 
@@ -50,6 +51,10 @@ open class Bus2GoApplication : Application() {
 								file.delete()
 							}
 						} ?: Log.d("UPDATES", "File exists but package manager couldnt find it...?")
+
+					//TODO At Launch, check if junk files exist (e.g. database compressed archives)
+					// if they do, check if the database version is up to date (i.e. superior or equal
+					// to the one stored. If yes, then delete the piece of junk
 				}
 				catch (e: Exception){
 					e.printStackTrace()

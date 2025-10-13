@@ -2,6 +2,7 @@ package dev.mainhq.bus2go.presentation.stop_direction
 
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
@@ -21,6 +22,7 @@ import dev.mainhq.bus2go.presentation.stop_direction.stop.StopFragment
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
 import dev.mainhq.bus2go.utils.launchViewModelCollect
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -43,21 +45,25 @@ class StopDirectionActivity: BaseActivity() {
 		}
 	}
 
+	private val BACKSTACK = "BACKSTACK"
+
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.stop_direction_activity)
 
-		val routeInfo = (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
+		val routeInfo = (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
 			intent.extras?.getParcelable(ExtrasTagNames.ROUTE_INFO, RouteInfo::class.java)
 		} else {
 			intent.extras?.getParcelable(ExtrasTagNames.ROUTE_INFO)
 		}) ?: throw IllegalStateException("Expected a non null RouteInfo passed")
 		directionSharedViewModel.setRouteInfo(routeInfo)
 
-		launchViewModelCollect(viewModel.activityFragment) {
-			when(it){
+		//supportFragmentManager.restoreBackStack(BACKSTACK)
+		//FIXME get rid of the animation once we come back to this activity from the StopTimes activity
+		launchViewModelCollect(viewModel.activityFragment){
+			when (it) {
 				is ActivityFragment.Direction -> {
-					if (supportFragmentManager.backStackEntryCount == 1){
+					if (supportFragmentManager.backStackEntryCount == 1) {
 						supportFragmentManager.popBackStack()
 					}
 					else if (supportFragmentManager.backStackEntryCount == 0) {
@@ -69,41 +75,55 @@ class StopDirectionActivity: BaseActivity() {
 							.commit()
 					}
 					else {
-						Toast.makeText(this@StopDirectionActivity, "Unexpected Error", Toast.LENGTH_SHORT).show()
+						Toast.makeText(
+							this@StopDirectionActivity,
+							"Unexpected Error",
+							Toast.LENGTH_SHORT
+						).show()
+						Log.e("STACK COUNT", supportFragmentManager.backStackEntryCount.toString())
 						throw IllegalStateException("Wtf")
 					}
 				}
+
 				is ActivityFragment.Stops -> {
-					supportFragmentManager.beginTransaction()
-						.apply{
-							when(it.animationDirection){
-								AnimationDirection.TO_TOP -> {
-									setCustomAnimations(
-										R.anim.enter_from_bottom,
-										R.anim.exit_to_top,
-										R.anim.enter_from_top,
-										R.anim.exit_to_bottom
-									)
-								}
-								AnimationDirection.TO_BOTTOM -> {
-									setCustomAnimations(
-										R.anim.enter_from_top,
-										R.anim.exit_to_bottom,
-										R.anim.enter_from_bottom,
-										R.anim.exit_to_top
-									)
-								}
+					supportFragmentManager.beginTransaction().apply {
+						when (it.animationDirection) {
+							AnimationDirection.TO_TOP -> {
+								setCustomAnimations(
+									R.anim.enter_from_bottom,
+									R.anim.exit_to_top,
+									R.anim.enter_from_top,
+									R.anim.exit_to_bottom
+								)
+							}
+
+							AnimationDirection.TO_BOTTOM -> {
+								setCustomAnimations(
+									R.anim.enter_from_top,
+									R.anim.exit_to_bottom,
+									R.anim.enter_from_bottom,
+									R.anim.exit_to_top
+								)
 							}
 						}
+					}
 						.replace(
 							R.id.stop_direction_fragment_container_view,
 							StopFragment()
 						)
-						.addToBackStack(null)
 						.commit()
 				}
 			}
 		}
 
+		/*
+		launchViewModelCollect(viewModel.fromTimesActivity){
+			if (it){
+				//TODO
+				//val backStackEntry = supportFragmentManager.getBackStackEntryAt(supportFragmentManager.backStackEntryCount - 1)
+				//supportFragmentManager.saveBackStack(BACKSTACK)
+			}
+		}
+		 */
 	}
 }

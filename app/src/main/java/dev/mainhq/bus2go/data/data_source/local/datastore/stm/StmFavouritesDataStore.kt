@@ -7,6 +7,7 @@ import dev.mainhq.bus2go.data.data_source.local.datastore.deprecated.StmFavourit
 import dev.mainhq.bus2go.data.data_source.local.datastore.stm.entity.StmFavouriteBusItemDto
 import dev.mainhq.bus2go.data.data_source.local.datastore.stm.entity.StmFavouritesDataDto
 import dev.mainhq.bus2go.data.data_source.local.datastore.stm.entity.StmFavouritesDataSerializer
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import java.io.File
 
@@ -51,7 +52,7 @@ val Context.stmFavouritesDataStore by dataStore(
 							it.stopName,
 							it.routeId,
 							it.direction,
-							listOf(),
+							persistentListOf(),
 							it.directionId,
 							it.lastStop,
 						)

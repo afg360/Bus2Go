@@ -21,6 +21,9 @@ import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
+import dev.mainhq.bus2go.utils.makeGone
+import dev.mainhq.bus2go.utils.makeInvisible
+import dev.mainhq.bus2go.utils.makeVisible
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -83,13 +86,13 @@ class StopTimesActivity : BaseActivity() {
                     val noTransitLeftTextView = findViewById<MaterialTextView>(R.id.no_available_transit_left_text_view)
                     if (arrivalTimes.isEmpty()){
                         adapter.update(listOf())
-                        recyclerView.visibility = View.GONE
-                        noTransitLeftTextView.visibility = VISIBLE
+                        recyclerView.makeGone()
+                        noTransitLeftTextView.makeVisible()
                     }
                     else{
                         adapter.update(arrivalTimes)
-                        recyclerView.visibility = VISIBLE
-                        noTransitLeftTextView.visibility = INVISIBLE
+                        recyclerView.makeVisible()
+                        noTransitLeftTextView.makeInvisible()
                     }
                 }
             }

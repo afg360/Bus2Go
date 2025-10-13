@@ -9,7 +9,7 @@ sealed class TransitData: Parcelable {
 	abstract val routeId : String
 	abstract val stopName : String
 	abstract val direction : String
-	abstract val tags: List<String>
+	abstract val tags: List<Tag>
 }
 
 @Parcelize
@@ -20,7 +20,7 @@ data class StmBusItem(
 	override val routeId : String,
 	override val stopName: String,
 	override val direction : String,
-	override val tags: List<String>,
+	override val tags: List<Tag>,
 	val directionId: Int,
 	val lastStop : String,
 ) : TransitData()
@@ -34,7 +34,7 @@ data class ExoBusItem(
 	override val routeId : String,
 	override val stopName : String,
 	override val direction: String,
-	override val tags: List<String>,
+	override val tags: List<Tag>,
 	val routeLongName: String,
 	//val headsign: String
 ) : TransitData()
@@ -44,7 +44,7 @@ data class ExoTrainItem(
 	override val routeId : String,
 	override val stopName : String,
 	override val direction : String,
-	override val tags: List<String>,
+	override val tags: List<Tag>,
 	val trainNum : Int,
 	val routeName : String,
 	val directionId: Int

@@ -8,6 +8,7 @@ import dev.mainhq.bus2go.data.data_source.local.datastore.exo.entity.ExoFavourit
 import dev.mainhq.bus2go.data.data_source.local.datastore.exo.entity.ExoFavouriteTrainItemDto
 import dev.mainhq.bus2go.data.data_source.local.datastore.exo.entity.ExoFavouritesDataDto
 import dev.mainhq.bus2go.data.data_source.local.datastore.exo.entity.ExoFavouritesDataSerializer
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import java.io.File
 
@@ -48,7 +49,7 @@ val Context.exoFavouritesDataStore by dataStore(
 							stopName = it.stopName,
 							routeId = it.routeId,
 							direction = it.direction,
-							tags = listOf(),
+							tags = persistentListOf(),
 							routeLongName = it.routeLongName
 						)
 					}.toPersistentList(),
@@ -57,7 +58,7 @@ val Context.exoFavouritesDataStore by dataStore(
 							stopName = it.stopName,
 							routeId = it.routeId,
 							direction = it.direction,
-							tags = listOf(),
+							tags = persistentListOf(),
 							trainNum = it.trainNum,
 							routeName = it.routeName,
 							directionId = it.directionId

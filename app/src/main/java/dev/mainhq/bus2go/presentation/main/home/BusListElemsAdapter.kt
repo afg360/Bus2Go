@@ -33,20 +33,21 @@ class BusListElemsAdapter(
         holder.busDirView.text = data.routeName
         holder.itemView.setOnClickListener{ onClickListener(data) }
 
-        when(data){
-            is ExoBusRouteInfo -> {
-                holder.busNumView.setTextColor(holder.itemView.resources.getColor(R.color.basic_purple, null))
-                holder.busDirView.setTextColor(holder.itemView.resources.getColor(R.color.basic_purple, null))
-            }
-            is ExoTrainRouteInfo -> {
-                holder.busNumView.setTextColor(holder.itemView.resources.getColor(R.color.orange, null))
-                holder.busDirView.setTextColor(holder.itemView.resources.getColor(R.color.orange, null))
-            }
+        val color = when(data){
+            is ExoBusRouteInfo -> R.color.basic_purple
+            is ExoTrainRouteInfo -> R.color.orange
             is StmBusRouteInfo -> {
-                holder.busNumView.setTextColor(holder.itemView.resources.getColor(R.color.basic_blue, null))
-                holder.busDirView.setTextColor(holder.itemView.resources.getColor(R.color.basic_blue, null))
+                if (data.routeId.toInt() in 400..499){
+                    R.color.basic_green
+                }
+                else {
+                    R.color.basic_blue
+                }
             }
         }
+
+        holder.busNumView.setTextColor(holder.itemView.resources.getColor(color, null))
+        holder.busDirView.setTextColor(holder.itemView.resources.getColor(color,  null))
     }
 
 	fun updateData(busData: List<RouteInfo>){

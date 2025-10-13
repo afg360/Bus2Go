@@ -1,8 +1,9 @@
 package dev.mainhq.bus2go.data.data_source.local.datastore.stm.entity
 
 import android.annotation.SuppressLint
+import dev.mainhq.bus2go.data.data_source.local.datastore.PersistentTagListSerializer
 import dev.mainhq.bus2go.data.data_source.local.datastore.TransitDataDto
-import dev.mainhq.bus2go.data.data_source.local.datastore.deprecated.TransitDataDto_v2
+import dev.mainhq.bus2go.data.data_source.local.datastore.tags.TagDto
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.parcelize.Parcelize
@@ -25,18 +26,18 @@ data class StmFavouriteBusItemDto(
 	override val stopName: String,
 	override val routeId : String,
 	override val direction : String,
-	override val tags: List<String>,
+	@Serializable(with = PersistentTagListSerializer::class)
+	override val tags: PersistentList<TagDto>,
 	val directionId: Int,
 	val lastStop : String,
 ) : TransitDataDto()
-
 
 
 class PersistentStmBusInfoListSerializer(private val serializer: KSerializer<StmFavouriteBusItemDto>) :
 	KSerializer<PersistentList<StmFavouriteBusItemDto>> {
 
 	private class PersistentListDescriptor :
-		SerialDescriptor by serialDescriptor<List<StmFavouriteBusItemDto>>() {
+		SerialDescriptor by serialDescriptor<PersistentList<StmFavouriteBusItemDto>>() {
 		@ExperimentalSerializationApi
 		override val serialName: String = "kotlinx.serialization.immutable.persistentList"
 	}
