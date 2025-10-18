@@ -55,7 +55,7 @@ class NotificationHandler(private val appContext: Context) {
 			channelId = APP_UPDATES,
 			title = "New Release",
 			description = "A new version of Bus2Go is available!",
-			icon = R.drawable.baseline_update_24,
+			icon = R.drawable.baseline_update,
 			priority = NotificationCompat.PRIORITY_DEFAULT
 		).setOngoing(false)
 			.build()
@@ -68,7 +68,7 @@ class NotificationHandler(private val appContext: Context) {
 			channelId = APP_UPDATES,
 			title = "Updating Bus2Go",
 			description = "Bus2Go is being updated...",
-			icon = R.drawable.baseline_update_24,
+			icon = R.drawable.baseline_update,
 			priority = NotificationCompat.PRIORITY_LOW
 		).setOngoing(true).setProgress(contentLength, current, false)
 			.build()
@@ -90,7 +90,7 @@ class NotificationHandler(private val appContext: Context) {
 			channelId = APP_UPDATES,
 			title = "Tap to Install",
 			description = "Install the new app version",
-			icon = R.drawable.baseline_update_24,
+			icon = R.drawable.baseline_update,
 			priority = NotificationCompat.PRIORITY_HIGH
 		).setOngoing(true).setProgress(0, 0, false)
 			.setContentIntent(
@@ -123,7 +123,7 @@ class NotificationHandler(private val appContext: Context) {
 			channelId = DB_UPDATES,
 			title = "New Database Available",
 			description = "A new version of a $database database is available.",
-			icon = R.drawable.baseline_update_24,
+			icon = R.drawable.baseline_update,
 			priority = NotificationCompat.PRIORITY_DEFAULT
 		).setOngoing(false)
 			.build()
@@ -136,7 +136,7 @@ class NotificationHandler(private val appContext: Context) {
 			channelId = DB_UPDATES,
 			title = "Downloading Bus2Go database...",
 			description = "Downloading a new version of a Bus2Go database",
-			icon = R.drawable.baseline_update_24, //TODO change
+			icon = R.drawable.baseline_update, //TODO change
 			priority = NotificationCompat.PRIORITY_LOW
 		).setOngoing(true).setProgress(contentLength, current, false)
 			.build()
@@ -148,7 +148,7 @@ class NotificationHandler(private val appContext: Context) {
 			channelId = DB_UPDATES,
 			title = "Extracting database...",
 			description = "",
-			icon = R.drawable.baseline_update_24, //TODO change
+			icon = R.drawable.baseline_update, //TODO change
 			priority = NotificationCompat.PRIORITY_DEFAULT
 		).setOngoing(true).setProgress(0, 0, true)
 			.build()
@@ -170,7 +170,7 @@ class NotificationHandler(private val appContext: Context) {
 			channelId = DB_UPDATES,
 			title = "Tap to Restart",
 			description = "Tap to restart bus2go to finish the updating of the database.",
-			icon = R.drawable.baseline_update_24,
+			icon = R.drawable.baseline_update,
 			priority = NotificationCompat.PRIORITY_HIGH
 		).setOngoing(false).setProgress(0, 0, false)
 			.setContentIntent(pendingIntent)

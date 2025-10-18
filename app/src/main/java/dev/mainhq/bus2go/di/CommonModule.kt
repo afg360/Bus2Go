@@ -54,7 +54,7 @@ class CommonModule(applicationContext: Context) {
 		dataDir = applicationContext.dataDir
 	)
 
-	private val tagsHandler = TagsHandler(applicationContext)
+	private val tagsHandler = TagsHandler.getInstance(applicationContext)
 
 	private val stmFavouritesRepository = StmFavouritesRepositoryImpl(
 		tagsHandler = tagsHandler,

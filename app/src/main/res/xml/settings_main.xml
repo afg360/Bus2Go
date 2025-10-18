@@ -7,7 +7,7 @@
         <ListPreference
             app:key="language"
             app:title="@string/language"
-            app:icon="@drawable/baseline_language_24"
+            app:icon="@drawable/language"
             app:entries="@array/langs"
             app:entryValues="@array/langs"
             app:defaultValue="@string/system"
@@ -16,7 +16,7 @@
         <SwitchPreferenceCompat
             app:key="dark-mode"
             app:title="@string/theme"
-            app:icon="@drawable/baseline_theme_24"
+            app:icon="@drawable/theme"
             app:defaultValue="true"
             >
         </SwitchPreferenceCompat>
@@ -54,13 +54,13 @@
         <Preference
             app:key="donate"
             app:title="Donate"
-            app:icon="@drawable/baseline_heart_border_24"
+            app:icon="@drawable/heart"
             app:summary="Donate to support the contributors of the app"
             />
         <Preference
             app:key="feedback"
             app:title="Send feedback"
-            app:icon="@drawable/baseline_feedback_24"
+            app:icon="@drawable/feedback"
             app:summary="Report technical issues or suggest new features"/>
     </PreferenceCategory>
     
@@ -70,7 +70,7 @@
         <Preference
             app:key="info"
             app:title="App Info"
-            app:icon="@drawable/baseline_info_outline_24"
+            app:icon="@drawable/info"
             />
     </PreferenceCategory>
 

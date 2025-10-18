@@ -52,7 +52,7 @@
                     android:text="Choose days"
                     android:textAlignment="center"
                     android:textSize="30sp"
-                    android:drawableStart="@drawable/baseline_date_range_24"
+                    android:drawableStart="@drawable/date_range"
                     />
                 <include layout="@layout/day_of_the_week_layout"/>
                 <com.google.android.material.divider.MaterialDivider
@@ -67,7 +67,7 @@
                     android:text="Choose a time"
                     android:textAlignment="center"
                     android:textSize="30sp"
-                    android:drawableStart="@drawable/baseline_access_time_24"
+                    android:drawableStart="@drawable/access_time"
                     />
             </LinearLayout>
 

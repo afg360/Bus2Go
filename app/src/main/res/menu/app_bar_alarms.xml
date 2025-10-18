@@ -4,12 +4,12 @@
 
     <item android:id="@+id/addAlarmButton"
         android:title="Add alarm"
-        android:icon="@drawable/baseline_add_alarm_24"
+        android:icon="@drawable/add_alarm"
         android:visible="true"
         app:showAsAction="always"
         />
     <item android:id="@+id/settingsIcon"
-        android:icon="@drawable/baseline_settings_24"
+        android:icon="@drawable/settings"
         android:title="@string/settings"
         app:showAsAction="ifRoom"
         />

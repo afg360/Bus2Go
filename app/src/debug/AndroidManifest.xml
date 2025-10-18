@@ -7,7 +7,5 @@
         android:label="Bus2Go-Debug"
         tools:replace="android:icon,android:label"
         >
-        
     </application>
-
 </manifest>

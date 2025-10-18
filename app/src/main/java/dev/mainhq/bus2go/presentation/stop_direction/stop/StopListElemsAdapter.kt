@@ -11,11 +11,12 @@ import dev.mainhq.bus2go.domain.entity.ExoBusItem
 import dev.mainhq.bus2go.domain.entity.ExoTrainItem
 import dev.mainhq.bus2go.domain.entity.StmBusItem
 import dev.mainhq.bus2go.domain.entity.TransitData
+import dev.mainhq.bus2go.domain.entity.compareTransitData
 
 
 class StopListElemsAdapter (
     private var transitData: List<TransitData>,
-    private val favourites: List<TransitData>,
+    private var favourites: List<TransitData>,
     private val toggleFavouritesClickListener: (View, TransitData) -> Unit,
     private val onClickListener: (TransitData) -> Unit
 ) : RecyclerView.Adapter<StopListElemsAdapter.ViewHolder>() {
@@ -44,13 +45,39 @@ class StopListElemsAdapter (
             toggleFavouritesClickListener(it, data)
         }
         holder.stopNameTextView.setOnClickListener { onClickListener(data) }
-        if (favourites.contains(data))
-            holder.favouriteSelectedView.setBackgroundResource(R.drawable.favourite_drawable_on)
+        setFavouriteButton(holder, position)
     }
 
-    fun update(transitData: List<TransitData>){
+    companion object {
+        private const val FAVOURITES_PAYLOAD = "FAVOURITES"
+    }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: List<Any?>) {
+        if (payloads.isEmpty()){
+            onBindViewHolder(holder, position)
+        }
+        else if (payloads[0] == FAVOURITES_PAYLOAD){
+            setFavouriteButton(holder, position)
+        }
+    }
+
+    fun setFavouriteButton(holder: ViewHolder, position: Int) {
+        if (favourites.compareTransitData(transitData[position])) {
+            holder.favouriteSelectedView.setBackgroundResource(R.drawable.favourite_drawable_on)
+        }
+        else {
+            holder.favouriteSelectedView.setBackgroundResource(R.drawable.favourite_drawable_off)
+        }
+    }
+
+    fun updateTransitData(transitData: List<TransitData>){
         this.transitData = transitData
         notifyItemRangeChanged(0, itemCount)
+    }
+
+    fun updateFavourites(favourites: List<TransitData>){
+        this.favourites = favourites
+        notifyItemRangeChanged(0, itemCount, FAVOURITES_PAYLOAD)
     }
 
     override fun getItemCount(): Int {

@@ -3,6 +3,7 @@ package dev.mainhq.bus2go.presentation.settings
 import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.lifecycleScope
@@ -21,6 +22,7 @@ class SettingsActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContentView(R.layout.settings_activity)
 
         val menuBar = findViewById<MaterialToolbar>(R.id.settingsToolBar)
@@ -66,9 +68,10 @@ class SettingsActivity : BaseActivity() {
 
     }
 
-    fun changeTheme(){
-        finish()
-        startActivity(intent)
+    fun changeTheme(isDarkMode: Boolean){
+        if (isDarkMode) AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+        else AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+        recreate()
     }
 
 }

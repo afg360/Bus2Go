@@ -10,6 +10,19 @@ sealed class TransitData: Parcelable {
 	abstract val stopName : String
 	abstract val direction : String
 	abstract val tags: List<Tag>
+
+	fun compareMainAttr(other: TransitData): Boolean {
+		return routeId == other.routeId && stopName == other.stopName && direction == other.direction
+	}
+}
+
+fun <T: TransitData> Iterable<T>.compareTransitData(other: T): Boolean {
+	this.forEach {
+		if (it.compareMainAttr(other)){
+			return true
+		}
+	}
+	return false
 }
 
 @Parcelize

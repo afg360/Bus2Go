@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/settingsBackButton"
-        android:icon="@drawable/baseline_arrow_back_24"
+        android:icon="@drawable/arrow_back"
         android:title="Back"
         app:showAsAction="always"
         />

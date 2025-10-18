@@ -81,6 +81,7 @@ class SettingsMainFragment : PreferenceFragmentCompat(),
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         sharedPreferences?.also{
+            //move logic to viewModel...
             when (key){
                 "real-time-data" -> {
                     Log.d("REALTIME", "feedback clicked")
@@ -114,7 +115,7 @@ class SettingsMainFragment : PreferenceFragmentCompat(),
                 }
                 "dark-mode" -> {
                     Log.d("Preferences", "Switched dark-mode state")
-                    (host as SettingsActivity).changeTheme()
+                    (host as SettingsActivity).changeTheme(sharedPreferences.getBoolean("dark-mode", true))
                 }
             }
         }

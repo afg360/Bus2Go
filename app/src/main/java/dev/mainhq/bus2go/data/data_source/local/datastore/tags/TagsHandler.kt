@@ -1,6 +1,7 @@
 package dev.mainhq.bus2go.data.data_source.local.datastore.tags
 
 import android.content.Context
+import dev.mainhq.bus2go.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -12,11 +13,16 @@ import java.io.IOException
  * Class that manages a list of tags used by favourites. Using a separate file to store these so that
  * it is easier to see which tags are used
  **/
-class TagsHandler(private val applicationContext: Context) {
+class TagsHandler private constructor(private val applicationContext: Context) {
 
 	companion object {
 		private const val filename = "tags.csv"
 		private val mutex = Mutex()
+		private var INSTANCE: TagsHandler? = null
+
+		fun getInstance(applicationContext: Context): TagsHandler {
+			return INSTANCE ?: TagsHandler(applicationContext).also { INSTANCE = it }
+		}
 
 		/**
 		 * Only called by the application on launch when needed.
@@ -29,7 +35,10 @@ class TagsHandler(private val applicationContext: Context) {
 					try {
 						if (!file.exists()) {
 							file.createNewFile()
-							file.writeText("Stm,0xFFFFFFFF\nExo,0xFFFFFFFF\nTrain,0xFFFFFFFF\n")
+							file.writeText(
+								"Stm,${applicationContext.resources.getColor(R.color.basic_blue, null).toString(16)}\n" +
+										"Exo,${applicationContext.resources.getColor(R.color.basic_purple, null).toString(16)}\n" +
+										"Train,${applicationContext.resources.getColor(R.color.orange, null).toString(16)}\n")
 						}
 						true
 					}
@@ -52,8 +61,7 @@ class TagsHandler(private val applicationContext: Context) {
 						lines.filter { it.isNotEmpty() }.toList().map { line ->
 							line.split(",").let {
 								//TODO: parse the color saved in hexa format
-								//TagDto(it[0], it[1].toInt())
-								TagDto(it[0], 0xFFFFFFF)
+								TagDto(it[0], it[1].toInt(16))
 							}
 						}
 					}

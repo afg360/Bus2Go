@@ -11,6 +11,7 @@ import com.google.android.material.color.MaterialColors
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.domain.entity.TransitData
+import kotlin.math.min
 
 //FIXME could make the list thing a bit more efficient and simply change all the times instead
 /**
@@ -111,16 +112,17 @@ class FavouritesListElemsAdapter(
     }
 
     fun updateAdapter(list: List<FavouritesDisplayModel>){
-        //if the size is different, we are filtering
-        if (list.size != this.list.size){
-            this.list = list
+        val oldList = this.list
+        this.list = list
+
+        //FIXME improve by using itemrange with payloads instead of this
+        //if (oldList.size != this.list.size || !oldList.all { oldItem -> this.list.any { newItem -> oldItem.isMainDataEqual(newItem) } } ){
             notifyDataSetChanged()
-        }
+        //}
         //else we simply want to update the time displayed
-        else {
-            this.list = list
-            notifyItemRangeChanged(0, this.list.size, TIME_PAYLOAD)
-        }
+        //else {
+        //    notifyItemRangeChanged(0, oldList.size, TIME_PAYLOAD)
+        //}
     }
 
     fun toggleForRemoval(items: List<TransitData>){

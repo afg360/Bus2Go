@@ -19,21 +19,4 @@ object AppThemeState {
         }
 
     fun turnOffDbUpdateChecking(){ displayIsDbUpdatedDialog = false }
-
-    private var prevVal by Delegates.notNull<Boolean>()
-
-    /** Basic init function to be called when setting up a theme
-     *  on the oncreate of an activity */
-    fun setTheme(isDark : Boolean){
-        prevVal = isDark
-        if (prevVal) AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-        else AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-    }
-
-    /**
-     * Called to see if the theme of the whole app changed relative to the activity
-     **/
-    fun hasThemeChanged(isDark: Boolean) : Boolean{
-        return (prevVal || isDark) && !(prevVal && isDark)
-    }
 }

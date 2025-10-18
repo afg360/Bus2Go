@@ -10,10 +10,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -40,7 +40,7 @@ import dev.mainhq.bus2go.utils.makeGone
 
 class HomeFragment: Fragment(R.layout.fragment_home) {
 
-    private val homeFragmentViewModel: HomeFragmentViewModel by viewModels{
+    private val homeFragmentViewModel: HomeFragmentViewModel by viewModels {
         object: ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return HomeFragmentViewModel(
@@ -49,7 +49,7 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
             }
         }
     }
-    private val favouritesSharedViewModel: FavouritesFragmentSharedViewModel by viewModels {
+    private val favouritesSharedViewModel: FavouritesFragmentSharedViewModel by activityViewModels {
         object: ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return FavouritesFragmentSharedViewModel(
@@ -80,26 +80,6 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
             .commit()
 
         setSearchBar()
-
-        //during selection mode, listen to click on select all
-        launchViewModelCollect(favouritesSharedViewModel.selectAllFavourites){ isChecked ->
-            binding.selectAllCheckbox.isChecked = isChecked ?: false
-        }
-
-        launchViewModelCollect(favouritesSharedViewModel.numberFavouritesSelected){ numSelected ->
-            //change the appBar number displayed
-            binding.selectedNumsOfFavourites.text = if (numSelected > 0) {
-                binding.removeItemsWidget.makeVisible()
-                binding.addTag.makeVisible()
-                numSelected.toString()
-            }
-            else {
-                binding.removeItemsWidget.makeGone()
-                binding.addTag.makeGone()
-                requireContext().getString(R.string.select_favourites_to_remove)
-            }
-        }
-
         setRemoveSelectionMode()
 
         binding.mainSearchBar.setOnMenuItemClickListener { menuItem ->
@@ -134,10 +114,9 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
         }
 
         binding.mainTagsRecyclerview.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-        val adapter = TagsListElemAdapter(favouritesSharedViewModel.tags.value) {
+        val adapter = TagsListElemAdapter(favouritesSharedViewModel.tags.value, null) {
             val button = it as MaterialButton
             favouritesSharedViewModel.triggerFilterTagToFavouritesEvent(button.text.toString())
-            button.toggle()
         }
         binding.mainTagsRecyclerview.adapter = adapter
 
@@ -152,7 +131,7 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
         }
 
         launchViewModelCollect(favouritesSharedViewModel.tagSelected){ tagSelected ->
-            //TODO("Update the adapter's list of buttons...")
+            adapter.updateSelectedTag(tagSelected)
         }
 
     }
@@ -234,6 +213,25 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
     }
 
     private fun setRemoveSelectionMode(){
+        //during selection mode, listen to click on select all
+        launchViewModelCollect(favouritesSharedViewModel.selectAllFavourites){ isChecked ->
+            binding.selectAllCheckbox.isChecked = isChecked ?: false
+        }
+
+        launchViewModelCollect(favouritesSharedViewModel.numberFavouritesSelected){ numSelected ->
+            //change the appBar number displayed
+            binding.selectedNumsOfFavourites.text = if (numSelected > 0) {
+                binding.removeItemsWidget.makeVisible()
+                binding.addTag.makeVisible()
+                numSelected.toString()
+            }
+            else {
+                binding.removeItemsWidget.makeGone()
+                binding.addTag.makeGone()
+                requireContext().getString(R.string.select_favourites_to_remove)
+            }
+        }
+
         //handling remove selection mode, coming from favourites fragment
         launchViewModelCollect(favouritesSharedViewModel.selectionMode){ removeFavouritesMode ->
             if (removeFavouritesMode){

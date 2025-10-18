@@ -9,7 +9,7 @@ import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -26,6 +26,7 @@ import dev.mainhq.bus2go.presentation.stop_times.StopTimesActivity
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
 import dev.mainhq.bus2go.utils.launchViewModelCollect
 import dev.mainhq.bus2go.utils.makeGone
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.filterNotNull
 
 
@@ -33,29 +34,30 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
 
     private lateinit var onBackPressedCallback: OnBackPressedCallback
 
+    //FIXME a sort of hack used to remove the bug of crashing because of flow collection after
+    // onViewDestroyed because of theme changing
+    private val jobs: MutableList<Job> = mutableListOf()
+
     //FIXME move this var to the viewModel...
     private var wasSelectionMode = false
 
     //FIXME use some sort of global state holder to cache the number of favourites currently saved
     // so that "No favourites made yet" doesn't get displayed unnecessarily...
 
-    //FIXME to follow strict clean architecture, event posting should be done outside of UI...
-
-    private val favouritesViewModel: FavouritesViewModel by viewModels{
+    //uses more memory when outside of the fragment, but necessary if we want to keep the state
+    // even outside of this specific fragment
+    private val favouritesViewModel: FavouritesViewModel by activityViewModels {
         object: ViewModelProvider.Factory{
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return FavouritesViewModel(
                     (this@FavouritesFragment.requireActivity().application as Bus2GoApplication).commonModule.getFavouritesWithTimeData,
                     (this@FavouritesFragment.requireActivity().application as Bus2GoApplication).commonModule.removeFavourite,
-                    //(this@FavouritesFragment.requireActivity().application as Bus2GoApplication).commonModule.getAllTags,
                     (this@FavouritesFragment.requireActivity().application as Bus2GoApplication).commonModule.addTag,
                 ) as T
             }
         }
     }
-    private val favouritesSharedViewModel: FavouritesFragmentSharedViewModel by viewModels(
-        ownerProducer = { requireParentFragment() }
-    )
+    private val favouritesSharedViewModel: FavouritesFragmentSharedViewModel by activityViewModels()
 
     private var _binding: FragmentFavouritesBinding? = null
     private val binding get() = _binding!!
@@ -92,7 +94,6 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
                 if (!favouritesViewModel.selectionMode.value) {
                     favouritesViewModel.activateSelectionMode()
                     selectFavourite(itemView, favouriteTransitData)
-                    onBackPressedCallback.isEnabled = true
                     true
                 }
                 else false
@@ -114,13 +115,12 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
                 }
                 favouritesViewModel.deactivateSelectionMode()
                 favouritesSharedViewModel.deactivateSelectionMode()
-                //essentially this.isEnabled...?
-                onBackPressedCallback.isEnabled = false
+                isEnabled = false
             }
         }
 
         //sets up top Favourites text and time remaining for each favourites
-        launchViewModelCollect(favouritesViewModel.favouriteDisplayTransitData) { uiState ->
+        jobs.add(launchViewModelCollect(favouritesViewModel.favouriteDisplayTransitData) { uiState ->
             when(uiState){
                 is UiState.Success<List<FavouritesDisplayModel>> -> {
                     if (uiState.data.isEmpty()) {
@@ -133,27 +133,36 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
                     }
                 }
                 UiState.Loading -> {}
-                is UiState.Error -> throw object: Bus2GoBaseException("Wtf"){}
-                UiState.Init -> Toast.makeText(context, "Some Error Occurred: TODO", Toast.LENGTH_SHORT).show()
+                is UiState.Error -> Toast.makeText(context, "Some Unknown Error Occurred...", Toast.LENGTH_SHORT).show()
+                UiState.Init -> Toast.makeText(context, "Some Error Occurred: Not Implemented", Toast.LENGTH_SHORT).show()
             }
-        }
+        })
 
+        jobs.add(
         launchViewModelCollect(favouritesViewModel.favouritesToRemove.filterNotNull()) {
             favouritesToRemove -> adapter.toggleForRemoval(favouritesToRemove)
-        }
+        })
+
 
         //updates recycler view adapter and top bar (search into selection mode and vice versa)
+        jobs.add(
         launchViewModelCollect(favouritesViewModel.selectionMode) { selectedMode ->
             if (wasSelectionMode != selectedMode){
                 adapter.updateSelectionMode()
                 wasSelectionMode = selectedMode
-                if (selectedMode)
+                if (selectedMode) {
                     favouritesSharedViewModel.activateSelectionMode()
+                    onBackPressedCallback.isEnabled = true
+                }
+                else {
+                    onBackPressedCallback.isEnabled = false
+                }
             }
             //TODO more shit
-        }
+        })
 
         //(de)select all favourites for removal
+        jobs.add(
         launchViewModelCollect(favouritesSharedViewModel.selectAllFavourites) { isAllSelected ->
             if (favouritesViewModel.selectionMode.value){
                 when (isAllSelected) {
@@ -164,8 +173,8 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
                                 favouritesSharedViewModel.setAllFavouritesSelected(uiState.data.size)
                             }
                             UiState.Loading -> {}
-                            is UiState.Error -> throw  object : Bus2GoBaseException("Wtf"){}
-                            UiState.Init -> TODO()
+                            is UiState.Error -> throw object : Bus2GoBaseException("Wtf"){}
+                            UiState.Init -> Toast.makeText(context, "Some Error Occurred: Not Implemented", Toast.LENGTH_SHORT).show()
                         }
                     }
                     false -> {
@@ -175,8 +184,9 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
                     null -> {}
                 }
             }
-        }
+        })
 
+        jobs.add(
         launchViewModelCollect(favouritesSharedViewModel.tagEvent){ event ->
             when(event) {
 				is TagEvent.AddTagEvent -> TODO()
@@ -188,7 +198,7 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
                     favouritesViewModel.unselectTag()
                 }
 			}
-        }
+        })
 
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, onBackPressedCallback)
 
@@ -238,5 +248,13 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
             UiState.Init -> TODO()
         }
 
+    }
+
+    override fun onDestroyView() {
+        onBackPressedCallback.remove()
+        jobs.forEach { it.cancel() }
+        jobs.clear()
+        super.onDestroyView()
+        _binding = null
     }
 }

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.mainhq.bus2go.domain.entity.RouteInfo
 import dev.mainhq.bus2go.domain.entity.TransitData
+import dev.mainhq.bus2go.domain.entity.compareTransitData
 import dev.mainhq.bus2go.domain.use_case.favourites.AddFavourite
 import dev.mainhq.bus2go.domain.use_case.favourites.GetFavourites
 import dev.mainhq.bus2go.domain.use_case.favourites.RemoveFavourite
@@ -20,27 +21,33 @@ class StopFragmentViewModel(
 ): ViewModel() {
 
 
-	private val _stopNames: MutableStateFlow<List<TransitData>?> = MutableStateFlow(null)
+	private val _stopNames: MutableStateFlow<List<TransitData>> = MutableStateFlow(listOf())
 	val stopNames = _stopNames.asStateFlow()
 
-	private val _favourites: MutableStateFlow<List<TransitData>?> = MutableStateFlow(null)
+	private val _favourites: MutableStateFlow<List<TransitData>> = MutableStateFlow(listOf())
 	val favourites = _favourites.asStateFlow()
+
+	init {
+		viewModelScope.launch {
+			_favourites.update { getFavourites.invoke() }
+		}
+	}
 
 	fun setTransitData(transitData: List<TransitData>){
 		viewModelScope.launch {
-			_stopNames.value = transitData
-			_favourites.value = getFavourites().filter { transitData.contains(it) }
+			_stopNames.update { transitData }
+			_favourites.update { getFavourites.invoke().filter { transitData.compareTransitData(it) } }
 		}
 	}
 
 	fun addFavourite(data : TransitData){
 		_favourites.value.also { favourites ->
-			if (favourites?.contains(data) == false){
+			if (!favourites.compareTransitData(data)){
 				viewModelScope.launch {
 					addFavourite.invoke(data)
 					_favourites.update {
-						val list = it?.toMutableList()
-						list?.add(data)
+						val list = it.toMutableList()
+						list.add(data)
 						list
 					}
 				}
@@ -53,13 +60,13 @@ class StopFragmentViewModel(
 
 	fun removeFavourite(data : TransitData){
 		favourites.value.also { favourites ->
-			if (favourites?.contains(data) == true){
+			if (favourites.compareTransitData(data)){
 				viewModelScope.launch {
 					removeFavourite.invoke(data)
 					_favourites.update {
-						val list = it?.toMutableList()
-						list?.remove(data)
-						return@update list
+						val list = it.toMutableList()
+						list.remove(data)
+						list
 					}
 					//TODO
 				}

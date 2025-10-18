@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
+import androidx.appcompat.app.AppCompatDelegate
 import dev.mainhq.bus2go.data.data_source.local.datastore.tags.TagsHandler
 import dev.mainhq.bus2go.di.CommonModule
 import dev.mainhq.bus2go.data.worker.UpdateManagerWorker.Companion.FILE_NAME
@@ -20,6 +21,7 @@ open class Bus2GoApplication : Application() {
 
 	override fun onCreate() {
 		super.onCreate()
+
 		//check if an apk exists, and delete it if useless
 		commonModule = CommonModule(applicationContext)
 		appModule = AppModule(applicationContext)

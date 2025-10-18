@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -36,12 +37,12 @@ class FavouritesViewModel(
     private val addTag: AddTag
 ) : ViewModel(){
 
+    private val _running = MutableStateFlow(true)
     //3) eventually some sort of sorting/categorisation of favourites
     //The whole data set to be displayed initially
     //What is actually displayed on the screen
     private val _favouriteTransitData = flow {
-        var running = true
-        while (running) {
+        while (_running.value) {
             //FIXME code seems inefficient by going so many times to the repo... perhaps only
             // useless when no favourites made...
             // do it when some time is less than some other time
@@ -53,17 +54,16 @@ class FavouritesViewModel(
                     }
                     else {
                         emit(emptyList())
-                        running = false
+                        //_running.update { false }
                     }
                 }
             }
             delay(1000)
         }
-    }.stateIn(viewModelScope, started = SharingStarted.WhileSubscribed(5000), initialValue = emptyList())
+    }.shareIn(viewModelScope, started = SharingStarted.WhileSubscribed(5000), replay = 1)
 
     //null if none selected
     private val _selectedTag: MutableStateFlow<String?> = MutableStateFlow(null)
-    val selectedTag = _selectedTag.asStateFlow()
 
     //could also use a combine flow operation...?
     val favouriteDisplayTransitData = combine(
@@ -288,6 +288,11 @@ class FavouritesViewModel(
             val tagToAdd = Tag(tag, 0xFFFFFF)
             addTag.invoke(tagToAdd, transitData)
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        _running.update { false }
     }
 
 }

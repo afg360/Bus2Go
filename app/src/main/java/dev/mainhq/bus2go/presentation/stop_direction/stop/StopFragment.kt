@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -16,10 +17,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.databinding.FragmentChooseStopBinding
+import dev.mainhq.bus2go.domain.entity.compareTransitData
 import dev.mainhq.bus2go.presentation.stop_direction.ActivityFragment
 import dev.mainhq.bus2go.presentation.stop_direction.StopDirectionViewModel
 import dev.mainhq.bus2go.presentation.stop_times.StopTimesActivity
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
+import dev.mainhq.bus2go.utils.launchViewModelCollect
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -64,50 +67,52 @@ class StopFragment : Fragment(R.layout.fragment_choose_stop) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
-            val transitData = viewModel.stopNames.filterNotNull().first()
-            if (transitData.isNotEmpty()) {
-                val recyclerView = binding.stopRecycleView
-                recyclerView.layoutManager = LinearLayoutManager(requireContext())
-                recyclerView.adapter = StopListElemsAdapter(
-                    transitData,
-                    viewModel.favourites.filterNotNull().first(),
-                    //TODO update the little star
-                    toggleFavouritesClickListener = { view, innerTransitData ->
-                        if (viewModel.favourites.value!!.contains(innerTransitData)){
-                            viewModel.removeFavourite(innerTransitData)
-                            view.findViewById<ImageView>(R.id.favourite_star_selection)
-                                .setBackgroundResource(R.drawable.favourite_drawable_off)
-                        }
-                        else {
-                            viewModel.addFavourite(innerTransitData)
-                            view.findViewById<ImageView>(R.id.favourite_star_selection)
-                                .setBackgroundResource(R.drawable.favourite_drawable_on)
-                        }
-                    },
-                    onClickListener = {
-                        sharedActivityViewModel.toTimesActivity()
-                        val intent = Intent(requireContext(), StopTimesActivity::class.java)
-                        //FIXME send another class model instead
-                        intent.putExtra(ExtrasTagNames.TRANSIT_DATA, it)
-                        startActivity(intent)
-                    }
-                )
-            }
-            else{
-                TODO("Display message saying no stops found")
-            }
-
-            requireActivity().onBackPressedDispatcher.addCallback(
-                viewLifecycleOwner,
-                object: OnBackPressedCallback(true) {
-                    override fun handleOnBackPressed() {
-                        sharedActivityViewModel.setActivityFragment(ActivityFragment.Direction)
-                        isEnabled = false
-                    }
+        val adapter = StopListElemsAdapter(
+            listOf(),
+            listOf(),
+            //TODO update the little star
+            toggleFavouritesClickListener = { view, innerTransitData ->
+                if (viewModel.favourites.value.compareTransitData(innerTransitData)){
+                    viewModel.removeFavourite(innerTransitData)
+                    view.findViewById<ImageView>(R.id.favourite_star_selection)
+                        .setBackgroundResource(R.drawable.favourite_drawable_off)
                 }
-            )
+                else {
+                    viewModel.addFavourite(innerTransitData)
+                    view.findViewById<ImageView>(R.id.favourite_star_selection)
+                        .setBackgroundResource(R.drawable.favourite_drawable_on)
+                }
+            },
+            onClickListener = {
+                sharedActivityViewModel.toTimesActivity()
+                val intent = Intent(requireContext(), StopTimesActivity::class.java)
+                //FIXME send another class model instead
+                intent.putExtra(ExtrasTagNames.TRANSIT_DATA, it)
+                startActivity(intent)
+            }
+        )
+        binding.stopRecycleView.layoutManager = LinearLayoutManager(requireContext())
+        binding.stopRecycleView.adapter = adapter
+
+        launchViewModelCollect(viewModel.stopNames){
+            adapter.updateTransitData(it)
+            if (it.isEmpty()) {
+                Toast.makeText(requireContext(), "No stops found...", Toast.LENGTH_SHORT).show()
+            }
         }
+        launchViewModelCollect(viewModel.favourites){
+            adapter.updateFavourites(it)
+        }
+
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner,
+            object: OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    sharedActivityViewModel.setActivityFragment(ActivityFragment.Direction)
+                    isEnabled = false
+                }
+            }
+        )
     }
 
     override fun onDestroyView() {

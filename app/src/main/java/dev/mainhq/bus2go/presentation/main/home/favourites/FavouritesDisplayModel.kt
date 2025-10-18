@@ -22,6 +22,15 @@ data class FavouritesDisplayModel(
 		const val DIRECTION_STR_LIMIT = 16
 	}
 
+	/**
+	 * Returns true if the basic data is the same. Used to determine whether the time has changed only
+	 * or the whole data */
+	fun isMainDataEqual(other: FavouritesDisplayModel): Boolean {
+		return favouriteTransitData == other.favouriteTransitData &&
+				directionText == other.directionText && tripHeadsignText == other.tripHeadsignText &&
+				stopNameText == other.stopNameText
+	}
+
 	fun isToRemove(toRemove: List<TransitData>): Boolean{
 		return toRemove.contains(favouriteTransitData)
 	}

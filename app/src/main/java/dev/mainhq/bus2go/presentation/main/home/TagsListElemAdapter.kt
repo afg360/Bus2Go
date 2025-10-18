@@ -1,5 +1,6 @@
 package dev.mainhq.bus2go.presentation.main.home
 
+import android.content.res.ColorStateList
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +11,8 @@ import dev.mainhq.bus2go.domain.entity.Tag
 
 class TagsListElemAdapter(
 	private var tags: List<Tag>,
+	//private var selectedTag: Tag?,
+	private var selectedTag: String?,
 	private val onTagClick: (View) -> Unit
 ): RecyclerView.Adapter<TagsListElemAdapter.ViewHolder>() {
 
@@ -24,8 +27,21 @@ class TagsListElemAdapter(
 		holder: ViewHolder,
 		position: Int,
 	) {
-		holder.button.text = tags[position].label
-		holder.button.setOnClickListener(onTagClick)
+		holder.button.apply {
+			text = tags[position].label
+			setOnClickListener(onTagClick)
+			if (text == selectedTag){
+				setBackgroundColor(tags[position].color)
+				setTextColor(holder.itemView.resources.getColor(R.color.dark, null))
+				strokeColor = ColorStateList.valueOf(holder.itemView.resources.getColor(R.color.dark, null))
+			}
+			else {
+				setBackgroundColor(holder.itemView.resources.getColor(R.color.dark, null))
+				setTextColor(tags[position].color)
+				strokeColor = ColorStateList.valueOf(tags[position].color)
+			}
+		}
+
 	}
 
 	override fun getItemCount(): Int {
@@ -36,6 +52,20 @@ class TagsListElemAdapter(
 	fun updateTags(newTags: List<Tag>) {
 		tags = newTags
 		notifyDataSetChanged()
+	}
+
+	//fun updateSelectedTag(newTag: Tag?){
+	fun updateSelectedTag(newTag: String?){
+		val indexOldSelected = tags.map { it.label }.indexOf(selectedTag)
+		selectedTag = newTag
+		if (indexOldSelected >= 0) {
+			notifyItemChanged(indexOldSelected)
+		}
+		tags.map { it.label }.indexOf(selectedTag).also {
+			if (it >= 0){
+				notifyItemChanged(it)
+			}
+		}
 	}
 
 	/*
