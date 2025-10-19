@@ -1,5 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Can customise the action bar, etc.-->
+    <!-- TODO These colors suck for day mode -->
     <style name="MaterialTheme.Bus2Go" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorPrimary">@color/dark_blue</item>
         <item name="editTextColor">@color/dark</item>

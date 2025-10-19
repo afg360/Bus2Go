@@ -44,6 +44,14 @@ fun <T> AppCompatActivity.launchViewModelCollect(flow: Flow<T>, context: Corouti
 	}
 }
 
+fun <T> AppCompatActivity.launchViewModelCollect(flow: Flow<T>, context: CoroutineContext = Dispatchers.Main, lifecycleState: Lifecycle.State = Lifecycle.State.STARTED, block: suspend (T) -> Unit): Job {
+	return lifecycleScope.launch(context) {
+		lifecycle.repeatOnLifecycle(lifecycleState){
+			flow.collect(block)
+		}
+	}
+}
+
 fun <T> Fragment.launchViewModelCollect(flow: Flow<T>, context: CoroutineContext = Dispatchers.Main, block: suspend (T) -> Unit): Job {
 	return viewLifecycleOwner.lifecycleScope.launch(context) {
 		viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){

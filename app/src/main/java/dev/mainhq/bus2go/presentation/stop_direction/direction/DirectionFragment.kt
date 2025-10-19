@@ -31,6 +31,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.IllegalStateException
 import dev.mainhq.bus2go.utils.launchViewModelCollect
+import dev.mainhq.bus2go.utils.makeGone
 import dev.mainhq.bus2go.utils.makeVisible
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -130,8 +131,9 @@ class DirectionFragment : Fragment() {
                                         Toast.LENGTH_SHORT
                                     ).show()
                                     sharedStopViewModel.setTransitData(topDirData)
-                                    sharedActivityViewModel.setActivityFragment(
-                                        ActivityFragment.Stops(AnimationDirection.TO_TOP)
+                                    sharedActivityViewModel.setAnimationDirection(
+                                        //ActivityFragment.Stops(AnimationDirection.TO_TOP)
+                                        AnimationDirection.TO_TOP
                                     )
                                 }
                                 else {
@@ -154,14 +156,16 @@ class DirectionFragment : Fragment() {
                                     )
                                     binding.topRouteCardView.setOnClickListener {
                                         sharedStopViewModel.setTransitData(topDirData)
-                                        sharedActivityViewModel.setActivityFragment(
-                                            ActivityFragment.Stops(AnimationDirection.TO_TOP)
+                                        sharedActivityViewModel.setAnimationDirection(
+                                            //ActivityFragment.Stops(AnimationDirection.TO_TOP)
+                                            AnimationDirection.TO_TOP
                                         )
                                     }
                                     binding.bottomRouteCardView.setOnClickListener {
                                         sharedStopViewModel.setTransitData(bottomDirData)
-                                        sharedActivityViewModel.setActivityFragment(
-                                            ActivityFragment.Stops(AnimationDirection.TO_BOTTOM)
+                                        sharedActivityViewModel.setAnimationDirection(
+                                            //ActivityFragment.Stops(AnimationDirection.TO_BOTTOM)
+                                            AnimationDirection.TO_BOTTOM
                                         )
                                     }
                                 }
@@ -172,7 +176,7 @@ class DirectionFragment : Fragment() {
                                     val bottomDirData = viewModel.bottomDirection.filterNotNull()
                                         .first() as List<ExoTrainItem>
 
-                                    binding.topRouteDirection.visibility = View.GONE
+                                    binding.topRouteDirection.makeGone()
                                     binding.topRouteDescription.text = getString(
                                         R.string.from_to,
                                         topDirData.first().stopName,
@@ -180,12 +184,13 @@ class DirectionFragment : Fragment() {
                                     )
                                     binding.topRouteCardView.setOnClickListener {
                                         sharedStopViewModel.setTransitData(topDirData)
-                                        sharedActivityViewModel.setActivityFragment(
-                                            ActivityFragment.Stops(AnimationDirection.TO_TOP)
+                                        sharedActivityViewModel.setAnimationDirection(
+                                            //ActivityFragment.Stops(AnimationDirection.TO_TOP)
+                                            AnimationDirection.TO_TOP
                                         )
                                     }
 
-                                    binding.bottomRouteDirection.visibility = View.GONE
+                                    binding.bottomRouteDirection.makeGone()
                                     binding.bottomRouteDescription.text = getString(
                                         R.string.from_to,
                                         bottomDirData.first().stopName,
@@ -193,8 +198,8 @@ class DirectionFragment : Fragment() {
                                     )
                                     binding.bottomRouteCardView.setOnClickListener {
                                         sharedStopViewModel.setTransitData(bottomDirData)
-                                        sharedActivityViewModel.setActivityFragment(
-                                            ActivityFragment.Stops(AnimationDirection.TO_BOTTOM)
+                                        sharedActivityViewModel.setAnimationDirection(
+                                            AnimationDirection.TO_BOTTOM
                                         )
                                     }
                                 }
@@ -240,8 +245,9 @@ class DirectionFragment : Fragment() {
                                     )
                                     binding.topRouteCardView.setOnClickListener {
                                         sharedStopViewModel.setTransitData(topDirData)
-                                        sharedActivityViewModel.setActivityFragment(
-                                            ActivityFragment.Stops(AnimationDirection.TO_TOP)
+                                        sharedActivityViewModel.setAnimationDirection(
+                                            //ActivityFragment.Stops(AnimationDirection.TO_TOP)
+                                            AnimationDirection.TO_TOP
                                         )
                                     }
 
@@ -252,8 +258,9 @@ class DirectionFragment : Fragment() {
                                     )
                                     binding.bottomRouteCardView.setOnClickListener {
                                         sharedStopViewModel.setTransitData(bottomDirData)
-                                        sharedActivityViewModel.setActivityFragment(
-                                            ActivityFragment.Stops(AnimationDirection.TO_BOTTOM)
+                                        sharedActivityViewModel.setAnimationDirection(
+                                            //ActivityFragment.Stops(AnimationDirection.TO_BOTTOM)
+                                            AnimationDirection.TO_BOTTOM
                                         )
                                     }
                                 }

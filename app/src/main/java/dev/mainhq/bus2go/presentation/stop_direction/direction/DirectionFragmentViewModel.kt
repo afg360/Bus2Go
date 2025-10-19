@@ -66,7 +66,8 @@ class DirectionFragmentViewModel(
 					when(routeInfo){
 						is ExoBusRouteInfo -> {
 							_textColour.value = R.color.basic_purple
-							_cardViewColour.value = R.color.transparent_basic_purple
+							_cardViewColour.value = R.color.basic_purple
+							//_cardViewColour.value = R.color.transparent_basic_purple
 							when(val headsigns = getDirections.invoke(routeInfo)){
 								is Result.Error -> {
 									TODO()
@@ -88,19 +89,21 @@ class DirectionFragmentViewModel(
 									}
 
 									if (headsigns.data.size > 1){
-										_bottomDirection.value = stopNames.data.second.map {
-											ExoBusItem(
-												routeId = routeInfo.routeId,
-												stopName = it,
-												direction = headsigns.data.last().tripHeadSign,
-												routeLongName = routeInfo.routeName,
-												tags = listOf()
-											)
+										_bottomDirection.update {
+											stopNames.data.second.map {
+												ExoBusItem(
+													routeId = routeInfo.routeId,
+													stopName = it,
+													direction = headsigns.data.last().tripHeadSign,
+													routeLongName = routeInfo.routeName,
+													tags = listOf()
+												)
+											}
 										}
-										_isUnidirectional.value = false
+										_isUnidirectional.update { false }
 									}
 									else {
-										_isUnidirectional.value = true
+										_isUnidirectional.update { true }
 									}
 								}
 							}
@@ -108,7 +111,8 @@ class DirectionFragmentViewModel(
 
 						is ExoTrainRouteInfo -> {
 							_textColour.value = R.color.orange
-							_cardViewColour.value = R.color.transparent_orange
+							_cardViewColour.value = R.color.orange
+							//_cardViewColour.value = R.color.transparent_orange
 							_topDirection.value = stopNames.data.first.map {
 								ExoTrainItem(
 									routeId = routeInfo.routeId,
@@ -138,8 +142,9 @@ class DirectionFragmentViewModel(
 						}
 
 						is StmBusRouteInfo -> {
-							_textColour.value = R.color.transparent_basic_blue
-							_cardViewColour.value = R.color.transparent_basic_blue
+							_textColour.value = R.color.basic_blue
+							_cardViewColour.value = R.color.basic_blue
+							//_cardViewColour.value = R.color.transparent_basic_blue
 							when(val directions = getDirections.invoke(routeInfo)){
 								is Result.Error -> {
 									TODO()

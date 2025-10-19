@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.Animation
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -12,21 +13,17 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.Bus2GoApplication
+import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.databinding.FragmentChooseStopBinding
 import dev.mainhq.bus2go.domain.entity.compareTransitData
 import dev.mainhq.bus2go.presentation.stop_direction.ActivityFragment
+import dev.mainhq.bus2go.presentation.stop_direction.AnimationDirection
 import dev.mainhq.bus2go.presentation.stop_direction.StopDirectionViewModel
 import dev.mainhq.bus2go.presentation.stop_times.StopTimesActivity
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
 import dev.mainhq.bus2go.utils.launchViewModelCollect
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 
 //todo
 //instead of doing a huge query on getting the time, we could first retrieve
@@ -58,7 +55,7 @@ class StopFragment : Fragment(R.layout.fragment_choose_stop) {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View? {
         _binding = FragmentChooseStopBinding.inflate(inflater)
         return binding.root
@@ -68,8 +65,8 @@ class StopFragment : Fragment(R.layout.fragment_choose_stop) {
         super.onCreate(savedInstanceState)
 
         val adapter = StopListElemsAdapter(
-            listOf(),
-            listOf(),
+            viewModel.stopNames.value,
+            viewModel.favourites.value,
             //TODO update the little star
             toggleFavouritesClickListener = { view, innerTransitData ->
                 if (viewModel.favourites.value.compareTransitData(innerTransitData)){
@@ -108,7 +105,33 @@ class StopFragment : Fragment(R.layout.fragment_choose_stop) {
             viewLifecycleOwner,
             object: OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
-                    sharedActivityViewModel.setActivityFragment(ActivityFragment.Direction)
+                    if (sharedActivityViewModel.previousAnimationDirection.value != null){
+                        val cachedValue = sharedActivityViewModel.previousAnimationDirection.value
+                        sharedActivityViewModel.resetCache()
+                        when(cachedValue){
+                            AnimationDirection.TO_TOP -> sharedActivityViewModel.setAnimationDirection(AnimationDirection.FROM_TOP)
+                            AnimationDirection.TO_BOTTOM -> sharedActivityViewModel.setAnimationDirection(AnimationDirection.FROM_BOTTOM)
+                            else -> {
+                                Toast.makeText(requireContext(), "Wtf...", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                    else {
+                        when (sharedActivityViewModel.animationDirection.value) {
+                            AnimationDirection.TO_TOP -> sharedActivityViewModel.setAnimationDirection(
+                                AnimationDirection.FROM_TOP
+                            )
+
+                            AnimationDirection.TO_BOTTOM -> sharedActivityViewModel.setAnimationDirection(
+                                AnimationDirection.FROM_BOTTOM
+                            )
+
+                            else -> {
+                                Toast.makeText(requireContext(), "Wtf...", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
+                        }
+                    }
                     isEnabled = false
                 }
             }

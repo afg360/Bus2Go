@@ -19,6 +19,7 @@ class TagsHandler private constructor(private val applicationContext: Context) {
 		private const val filename = "tags.csv"
 		private val mutex = Mutex()
 		private var INSTANCE: TagsHandler? = null
+		private const val MAX_CHAR_SIZE = 30
 
 		fun getInstance(applicationContext: Context): TagsHandler {
 			return INSTANCE ?: TagsHandler(applicationContext).also { INSTANCE = it }
@@ -73,7 +74,6 @@ class TagsHandler private constructor(private val applicationContext: Context) {
 		}
 	}
 
-	private val MAX_CHAR_SIZE = 30
 	@Throws(IllegalStateException::class, IllegalArgumentException::class)
 	/** Adds a new tag to the file. If it already exists, simply ignored */
 	suspend fun addTag(tag: TagDto) {

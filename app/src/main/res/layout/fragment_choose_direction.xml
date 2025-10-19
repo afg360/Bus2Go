@@ -47,7 +47,7 @@
         android:layout_marginTop="10dp"
         android:layout_marginHorizontal="10dp"
         app:cardElevation="1dp"
-        app:cardBackgroundColor="@color/transparent_basic_blue"
+        app:cardBackgroundColor="@color/basic_blue"
         >
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -70,6 +70,7 @@
                 android:textColor="@color/dark"
                 android:text="Description Top Route"
                 android:textSize="24sp"
+                app:layout_constraintTop_toBottomOf="@id/top_route_direction"
                 app:layout_constraintBottom_toBottomOf="parent"
                 />
         </androidx.constraintlayout.widget.ConstraintLayout>
@@ -85,7 +86,7 @@
         android:layout_marginTop="10dp"
         android:layout_marginHorizontal="10dp"
         app:cardElevation="1dp"
-        app:cardBackgroundColor="@color/transparent_basic_blue"
+        app:cardBackgroundColor="@color/basic_blue"
         >
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -108,6 +109,7 @@
                 android:textSize="24sp"
                 android:textColor="@color/dark"
                 android:text="Description Bottom Route"
+                app:layout_constraintTop_toBottomOf="@id/bottom_route_direction"
                 app:layout_constraintBottom_toBottomOf="parent"
                 />
         </androidx.constraintlayout.widget.ConstraintLayout>
