@@ -29,7 +29,8 @@ class StmRepositoryImpl(
 	private val routesDAO: RoutesDAO?,
 	private val stopsDAO: StopsDAO?,
 	private val stopsInfoDAO: StopsInfoDAO?,
-	private val tripsDAO: TripsDAO?
+	private val tripsDAO: TripsDAO?,
+	override val dbName: String = "Stm",
 ): StmRepository {
 
 	override suspend fun getMaxEndDate(): Result<LocalDate> {
@@ -141,9 +142,9 @@ class StmRepositoryImpl(
 	}
 
 	override suspend fun getDirectionInfo(routeId: Int): Result<List<DirectionInfo>> {
-		return tripsDAO?.let {
+		return tripsDAO?.let { tripsDAO ->
 			withContext(Dispatchers.IO) {
-				Result.Success(it.getDirectionInfo(routeId)
+				Result.Success(tripsDAO.getDirectionInfo(routeId)
 					.map { DirectionInfo.StmDirectionInfo(it.tripHeadSign, it.directionId) }
 				)
 			}

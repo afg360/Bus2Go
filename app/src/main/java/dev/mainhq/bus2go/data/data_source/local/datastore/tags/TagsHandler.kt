@@ -9,12 +9,12 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
 
-/**
- * Class that manages a list of tags used by favourites. Using a separate file to store these so that
- * it is easier to see which tags are used
- **/
 class TagsHandler private constructor(private val applicationContext: Context) {
 
+	/**
+	 * Class that manages a list of tags used by favourites. Using a separate file to store these so that
+	 * it is easier to see which tags are used
+	 **/
 	companion object {
 		private const val filename = "tags.csv"
 		private val mutex = Mutex()

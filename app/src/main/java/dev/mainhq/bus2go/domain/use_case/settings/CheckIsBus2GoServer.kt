@@ -9,6 +9,10 @@ import java.net.UnknownHostException
 class CheckIsBus2GoServer(
 	private val databaseDownloadRepository: DatabaseDownloadRepository
 ) {
+	/**
+	 * @return If any network failure, returns an error. If there are none,
+	 * if the server queried is a valid bus2go server, returns true, else false.
+	 * */
 	suspend operator fun invoke(str: String): Result<Boolean> {
 		return when(val res = databaseDownloadRepository.getIsBus2Go(str)){
 			is Result.Error -> when(res.throwable){

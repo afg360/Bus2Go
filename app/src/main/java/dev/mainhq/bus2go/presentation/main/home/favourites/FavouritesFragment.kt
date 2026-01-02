@@ -139,66 +139,66 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
         })
 
         jobs.add(
-        launchViewModelCollect(favouritesViewModel.favouritesToRemove.filterNotNull()) {
-            favouritesToRemove -> adapter.toggleForRemoval(favouritesToRemove)
-        })
+            launchViewModelCollect(favouritesViewModel.favouritesToRemove.filterNotNull()) {
+                    favouritesToRemove -> adapter.toggleForRemoval(favouritesToRemove)
+            })
 
 
         //updates recycler view adapter and top bar (search into selection mode and vice versa)
         jobs.add(
-        launchViewModelCollect(favouritesViewModel.selectionMode) { selectedMode ->
-            if (wasSelectionMode != selectedMode){
-                adapter.updateSelectionMode()
-                wasSelectionMode = selectedMode
-                if (selectedMode) {
-                    favouritesSharedViewModel.activateSelectionMode()
-                    onBackPressedCallback.isEnabled = true
+            launchViewModelCollect(favouritesViewModel.selectionMode) { selectedMode ->
+                if (wasSelectionMode != selectedMode){
+                    adapter.updateSelectionMode()
+                    wasSelectionMode = selectedMode
+                    if (selectedMode) {
+                        favouritesSharedViewModel.activateSelectionMode()
+                        onBackPressedCallback.isEnabled = true
+                    }
+                    else {
+                        onBackPressedCallback.isEnabled = false
+                    }
                 }
-                else {
-                    onBackPressedCallback.isEnabled = false
-                }
-            }
-            //TODO more shit
-        })
+                //TODO more shit
+            })
 
         //(de)select all favourites for removal
         jobs.add(
-        launchViewModelCollect(favouritesSharedViewModel.selectAllFavourites) { isAllSelected ->
-            if (favouritesViewModel.selectionMode.value){
-                when (isAllSelected) {
-                    true -> {
-                        favouritesViewModel.selectAllForRemoval()
-                        when(val uiState = favouritesViewModel.favouriteDisplayTransitData.value){
-                            is UiState.Success<List<FavouritesDisplayModel>> -> {
-                                favouritesSharedViewModel.setAllFavouritesSelected(uiState.data.size)
+            launchViewModelCollect(favouritesSharedViewModel.selectAllFavourites) { isAllSelected ->
+                if (favouritesViewModel.selectionMode.value){
+                    when (isAllSelected) {
+                        true -> {
+                            favouritesViewModel.selectAllForRemoval()
+                            when(val uiState = favouritesViewModel.favouriteDisplayTransitData.value){
+                                is UiState.Success<List<FavouritesDisplayModel>> -> {
+                                    favouritesSharedViewModel.setAllFavouritesSelected(uiState.data.size)
+                                }
+                                UiState.Loading -> {}
+                                is UiState.Error -> throw object : Bus2GoBaseException("Wtf"){}
+                                UiState.Init -> Toast.makeText(context, "Some Error Occurred: Not Implemented", Toast.LENGTH_SHORT).show()
                             }
-                            UiState.Loading -> {}
-                            is UiState.Error -> throw object : Bus2GoBaseException("Wtf"){}
-                            UiState.Init -> Toast.makeText(context, "Some Error Occurred: Not Implemented", Toast.LENGTH_SHORT).show()
                         }
+                        false -> {
+                            favouritesViewModel.deselectAllForRemoval()
+                            favouritesSharedViewModel.resetNumFavouritesSelected()
+                        }
+                        null -> {}
                     }
-                    false -> {
-                        favouritesViewModel.deselectAllForRemoval()
-                        favouritesSharedViewModel.resetNumFavouritesSelected()
-                    }
-                    null -> {}
                 }
-            }
-        })
+            })
 
         jobs.add(
-        launchViewModelCollect(favouritesSharedViewModel.tagEvent){ event ->
-            when(event) {
-				is TagEvent.AddTagEvent -> TODO()
-				is TagEvent.FilterFavouritesWithTagEvent -> {
-                    favouritesViewModel.selectTag(event.tag)
+            launchViewModelCollect(favouritesSharedViewModel.tagEvent){ event ->
+                when(event) {
+                    is TagEvent.AddTagEvent -> TODO()
+                    is TagEvent.FilterFavouritesWithTagEvent -> {
+                        favouritesViewModel.selectTag(event.tag)
+                    }
+                    is TagEvent.RemoveTagEvent -> TODO()
+                    TagEvent.RemoveTagFilter -> {
+                        favouritesViewModel.unselectTag()
+                    }
                 }
-				is TagEvent.RemoveTagEvent -> TODO()
-				TagEvent.RemoveTagFilter -> {
-                    favouritesViewModel.unselectTag()
-                }
-			}
-        })
+            })
 
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, onBackPressedCallback)
 
@@ -206,9 +206,9 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
             ?.setOnClickListener { _ ->
                 this.context?.also { context ->
                     MaterialAlertDialogBuilder(context)
-                        //.setTitle(resources.getString(R.string.title))
+                        .setTitle("Remove Selected Favourites?")
                         .setMessage(resources.getString(R.string.remove_confirmation_dialog_text))
-                        .setNegativeButton(resources.getString(R.string.remove_confirmation_dialog_decline)) { dialog, _ ->
+                        .setNegativeButton(resources.getString(R.string.cancel)) { dialog, _ ->
                             dialog.cancel()
                         }
                         .setPositiveButton(resources.getString(R.string.remove_confirmation_dialog_accept)) { dialog, _ ->

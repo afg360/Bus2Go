@@ -15,10 +15,8 @@
     <string name="system">Système</string>
     <string name="favourites">Lignes de bus favories</string>
     <string name="no_favourites">Aucun favori pour l\'instant</string>
-    <string name="select_favourites_to_remove">Choisissez les favoris à enlever</string>
     <string name="remove_confirmation_dialog_text">Êtes-vous sûr de vouloir supprimer ces favoris de votre écran principal?</string>
-    <string name="remove_confirmation_dialog_decline">Non</string>
-    <string name="remove_confirmation_dialog_accept">Oui</string>
+    <string name="remove_confirmation_dialog_accept">Supprimer</string>
     <string name="general_settings">Paramètres Générales</string>
     <string name="data_sync_settings">Données et synchronisation</string>
     <string name="real_time_data_updates">Mise à jour des données en temps réel</string>

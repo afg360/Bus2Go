@@ -41,11 +41,15 @@ class LauncherActivity: BaseActivity() {
 			launcherActivityViewModel.themeSet()
 		}
 		launchViewModelCollect(launcherActivityViewModel.isFirstTime.filterNotNull()) {
-			startActivity(Intent(
-				applicationContext,
-				if (it) ConfigActivity::class.java
-						else MainActivity::class.java
-			))
+			if (it) {
+				startActivity(Intent(applicationContext, ConfigActivity::class.java))
+			}
+			else {
+				//before starting activity, make sure to do necessary checks for dbs that may be downloaded but not extracted
+				//while doing that, verify another background task is not trying to download a more updated version
+
+				startActivity(Intent(applicationContext, MainActivity::class.java))
+			}
 			launcherActivityViewModel.firstThemeSet()
 		}
 		launchViewModelCollect(launcherActivityViewModel.readyToFinish){

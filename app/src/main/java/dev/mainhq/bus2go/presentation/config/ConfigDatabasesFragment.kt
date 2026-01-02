@@ -70,7 +70,7 @@ class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
 
 
 		launchViewModelCollect(viewModel.dbToDownload){
-			binding.configDownloadDatabaseContinueButton.text = if (it == null) "Skip" else "Continue"
+			binding.configDownloadDatabaseContinueButton.text = if (it.isEmpty()) "Skip" else "Continue"
 		}
 		requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object: OnBackPressedCallback(true){
 			override fun handleOnBackPressed() {
@@ -91,7 +91,7 @@ class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
 						Log.d("DATABASE-CONFIG", "Initiating download of data")
 						viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
 							dialogInterface.dismiss()
-							AppThemeState.turnOffDbUpdateChecking()
+							//AppThemeState.turnOffDbUpdateChecking()
 							viewModel.scheduleDownloadWork()
 							sharedViewModel.setFragment(nextFrag)
 						}

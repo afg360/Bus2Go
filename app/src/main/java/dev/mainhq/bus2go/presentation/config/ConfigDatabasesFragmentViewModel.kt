@@ -16,43 +16,42 @@ class ConfigDatabasesFragmentViewModel(
 	private val scheduleDownloadDatabaseTask: ScheduleDownloadDatabaseTask
 ): ViewModel() {
 
-	private val _dbToDownload: MutableStateFlow<DbToDownload?> = MutableStateFlow(DbToDownload.STM)
+	private val _dbToDownload: MutableStateFlow<MutableSet<DbToDownload>> = MutableStateFlow(mutableSetOf())
 	val dbToDownload = _dbToDownload.asStateFlow()
 
 	fun toggleStm(){
 		_dbToDownload.update {
-			when (_dbToDownload.value){
-				DbToDownload.ALL -> DbToDownload.EXO
-				DbToDownload.STM -> null
-				DbToDownload.EXO -> DbToDownload.ALL
-				null -> DbToDownload.STM
+			if (it.contains(DbToDownload.STM)){
+				it.remove(DbToDownload.STM)
 			}
+			else it.add(DbToDownload.STM)
+			it
 		}
 	}
 
 	fun toggleExo(){
 		_dbToDownload.update {
-			when (_dbToDownload.value){
-				DbToDownload.ALL -> DbToDownload.STM
-				DbToDownload.STM -> DbToDownload.ALL
-				DbToDownload.EXO -> null
-				null -> DbToDownload.EXO
+			if (it.contains(DbToDownload.EXO)){
+				it.remove(DbToDownload.EXO)
 			}
+			else it.add(DbToDownload.EXO)
+			it
 		}
 	}
 
 	fun isStmChecked(): Boolean{
-		return _dbToDownload.value == DbToDownload.ALL || _dbToDownload.value == DbToDownload.STM
+		return _dbToDownload.value.contains(DbToDownload.STM)
 	}
 
 	fun isExoChecked(): Boolean{
-		return _dbToDownload.value == DbToDownload.ALL || _dbToDownload.value == DbToDownload.EXO
+		return _dbToDownload.value.contains(DbToDownload.EXO)
 	}
 
 	fun scheduleDownloadWork(){
-		if (_dbToDownload.value == null) TODO("Wtf...")
-		viewModelScope.launch {
-			scheduleDownloadDatabaseTask.invoke(_dbToDownload.value!!)
+		if (_dbToDownload.value.isNotEmpty()) {
+			viewModelScope.launch {
+				scheduleDownloadDatabaseTask.invoke(_dbToDownload.value.toList())
+			}
 		}
 	}
 }

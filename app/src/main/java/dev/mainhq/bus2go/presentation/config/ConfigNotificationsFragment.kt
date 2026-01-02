@@ -4,15 +4,16 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.google.android.material.button.MaterialButton
-import com.google.android.material.materialswitch.MaterialSwitch
 import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.databinding.FragmentConfigNotificationsBinding
@@ -48,13 +49,24 @@ class ConfigNotificationsFragment: Fragment(R.layout.fragment_config_notificatio
 		}
 	}
 
+	private var _binding: FragmentConfigNotificationsBinding? = null
+	private val binding get() = _binding!!
+
+	override fun onCreateView(
+		inflater: LayoutInflater,
+		container: ViewGroup?,
+		savedInstanceState: Bundle?
+	): View? {
+		_binding = FragmentConfigNotificationsBinding.inflate(layoutInflater)
+		return binding.root
+		//return super.onCreateView(inflater, container, savedInstanceState)
+	}
 
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 		super.onViewCreated(view, savedInstanceState)
-		val binding = FragmentConfigNotificationsBinding.inflate(layoutInflater)
 
 		launchViewModelCollect(viewModel.appUpdateNotifs){
-			binding.configNotificationSwitchAppUpdates .isChecked = it
+			binding.configNotificationSwitchAppUpdates.isChecked = it
 		}
 
 		launchViewModelCollect(viewModel.dbUpdateNotifs){
@@ -62,7 +74,8 @@ class ConfigNotificationsFragment: Fragment(R.layout.fragment_config_notificatio
 		}
 
 		binding.configNotificationConfirmButton.setOnClickListener {
-			if (viewModel.anyNotifSet()){
+			if (viewModel.isAnyNotifSet()){
+				//must be sure app has post notification permissions
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
 					if (ContextCompat.checkSelfPermission(
 							requireContext(),
@@ -72,14 +85,8 @@ class ConfigNotificationsFragment: Fragment(R.layout.fragment_config_notificatio
 						requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
 					}
 				}
-				viewModel.saveSettings()
-				/*
-				if (!viewModel.saveSettings()){
-					Toast.makeText(requireContext(), "Something went wrong...", Toast.LENGTH_SHORT)
-						.show()
-				}
-				 */
 			}
+			viewModel.saveSettings()
 			sharedViewModel.triggerEvent(true)
 		}
 
@@ -92,15 +99,12 @@ class ConfigNotificationsFragment: Fragment(R.layout.fragment_config_notificatio
 			viewModel.setDbUpdateNotifs(boolean)
 		}
 
-
-		/*
-		requireActivity().onBackPressedDispatcher.addCallback(object: OnBackPressedCallback(true){
+		requireActivity().onBackPressedDispatcher.addCallback(object: OnBackPressedCallback(true) {
 			override fun handleOnBackPressed() {
-				sharedViewModel.setFragment(prevFrag)
-				isEnabled = false
+				//sharedViewModel.setFragment(prevFrag)
+				//isEnabled = false
 			}
 		})
-		 */
 	}
 
 }

@@ -20,6 +20,7 @@ import java.io.OutputStream
 @SuppressLint("UnsafeOptInUsageError")
 @Serializable
 data class StmFavouritesDataDto(
+	//perhaps instead store the server version...?
 	val version: Int,
 	@Serializable(with = PersistentStmBusInfoListSerializer::class)
 	val listSTM : PersistentList<StmFavouriteBusItemDto> = persistentListOf()

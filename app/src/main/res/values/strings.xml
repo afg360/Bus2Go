@@ -19,9 +19,8 @@
     <string name="no_favourites">No favourites made yet</string>
     <string name="large_text" translatable="false">THIS IS LARGE TEXT WRITTEN FOR LARGE TEXT</string>
     <string name="select_favourites_to_remove">Select favourites to remove</string>
-    <string name="remove_confirmation_dialog_text">Are you sure you want to remove these favourites from your main page?</string>
-    <string name="remove_confirmation_dialog_decline">No</string>
-    <string name="remove_confirmation_dialog_accept">Yes</string>
+    <string name="remove_confirmation_dialog_text">Are you sure you want to remove these selected favourites?</string>
+    <string name="remove_confirmation_dialog_accept">Remove</string>
     <string name="general_settings">General Settings</string>
     <string name="data_sync_settings">Data and Syncing</string>
     <string name="real_time_data_updates">Real time data updates</string>

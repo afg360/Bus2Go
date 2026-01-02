@@ -45,8 +45,9 @@ abstract class AppDatabaseExo : RoomDatabase() {
     abstract fun formsDao() : FormsDAO
 
     companion object {
-        const val DATABASE_NAME = "exo_data.db"
-        const val DATABASE_PATH = "database/$DATABASE_NAME"
+        const val FILENAME_PREFIX = "exo_data"
+        private const val DATABASE_NAME = "$FILENAME_PREFIX.db"
+        private const val DATABASE_PATH = "databases/$DATABASE_NAME"
 
         private var INSTANCE: AppDatabaseExo? = null
 

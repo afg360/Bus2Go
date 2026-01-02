@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.entity.UrlChecker
 import dev.mainhq.bus2go.domain.use_case.settings.CheckIsBus2GoServer
+import dev.mainhq.bus2go.domain.use_case.settings.SaveAllNotifSettings
 import dev.mainhq.bus2go.domain.use_case.settings.SaveBus2GoServer
 import dev.mainhq.bus2go.presentation.core.UiState
 import io.ktor.util.reflect.instanceOf
@@ -24,8 +25,9 @@ import kotlinx.coroutines.withContext
 
 class ConfigServerFragmentViewModel(
 	private val checkIsBus2GoServer: CheckIsBus2GoServer,
-	private val saveBus2GoServer: SaveBus2GoServer
-): ViewModel() {
+	private val saveBus2GoServer: SaveBus2GoServer,
+	private val saveAllNotifSettings: SaveAllNotifSettings
+): ViewModel(), SettingsSavableViewModel {
 
 
 	private val _buttonText = MutableStateFlow("Skip")
@@ -103,6 +105,12 @@ class ConfigServerFragmentViewModel(
 					}
 				}
 			}
+		}
+	}
+
+	override fun saveSettings() {
+		viewModelScope.launch(Dispatchers.Main) {
+			saveAllNotifSettings.invoke()
 		}
 	}
 

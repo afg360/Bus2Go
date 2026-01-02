@@ -11,13 +11,20 @@ import dev.mainhq.bus2go.data.worker.UpdateManagerWorker.Companion.FILE_NAME
 import dev.mainhq.bus2go.di.AppModule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 open class Bus2GoApplication : Application() {
 	lateinit var commonModule: CommonModule
 	lateinit var appModule: AppModule
 
+	//Supervisor job allows the coroutineScope to not cancel all of its child coroutines when one fails
+	//Using a single one to minimise memory and be able to terminate it when needed
+	private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
 	override fun onCreate() {
 		super.onCreate()
@@ -26,11 +33,29 @@ open class Bus2GoApplication : Application() {
 		commonModule = CommonModule(applicationContext)
 		appModule = AppModule(applicationContext)
 
-		//FIXME move this shit to the data layer...
-		CoroutineScope(Dispatchers.IO).launch {
+		//TODO move logic to use case classes
+		initTagsFiles()
+		manageApkFiles()
+
+		coroutineScope.launch {
+			//TODO cleanup garbage files
+			applicationContext.filesDir.list()?.filter {
+				it.matches(".*\\.db\\.gz\\.part$".toRegex())
+			}?.forEach { File(applicationContext.filesDir, it).delete() }
+		}
+	}
+
+
+	//FIXME move this shit to the data layer...
+	private fun initTagsFiles(){
+		coroutineScope.launch {
 			TagsHandler.initFile(this@Bus2GoApplication)
 		}
-		CoroutineScope(Dispatchers.IO).launch {
+	}
+
+	private fun manageApkFiles(){
+		//check if an apk of the app exists in the cache. if it does and current version is newer, delete older version
+		coroutineScope.launch {
 			val file = File(applicationContext.cacheDir, FILE_NAME)
 
 			if (file.exists()) {
@@ -38,7 +63,7 @@ open class Bus2GoApplication : Application() {
 					val packageInfo = applicationContext.packageManager
 						.getPackageInfo(packageName, 0)
 					val versionCode = if (Build.VERSION.SDK_INT >= 28) packageInfo.longVersionCode
-						else packageInfo.versionCode.toLong()
+					else packageInfo.versionCode.toLong()
 
 					applicationContext.packageManager
 						.getPackageArchiveInfo(
@@ -46,7 +71,7 @@ open class Bus2GoApplication : Application() {
 							PackageManager.GET_META_DATA
 						)?.also {
 							val apkVersionCode = if (Build.VERSION.SDK_INT >= 28) it.longVersionCode
-								else it.versionCode.toLong()
+							else it.versionCode.toLong()
 
 							if (versionCode >= apkVersionCode) {
 								Log.d("UPDATES", "Useless file detected. Deleting")
@@ -66,5 +91,15 @@ open class Bus2GoApplication : Application() {
 				Log.d("UPDATES", "No garbage apk detected")
 			}
 		}
+	}
+
+	override fun onLowMemory() {
+		coroutineScope.cancel("Low Memory")
+		super.onLowMemory()
+	}
+
+	override fun onTerminate() {
+		coroutineScope.cancel("App terminated")
+		super.onTerminate()
 	}
 }

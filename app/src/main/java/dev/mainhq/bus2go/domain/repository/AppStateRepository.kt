@@ -1,6 +1,7 @@
 package dev.mainhq.bus2go.domain.repository
 
 import dev.mainhq.bus2go.domain.core.Result
+import dev.mainhq.bus2go.domain.entity.DbToDownload
 import java.time.LocalDate
 
 //TODO output a result object (in case of failure, we will retry...), or maybe a boolean...
@@ -12,6 +13,21 @@ interface AppStateRepository {
 	 **/
 	suspend fun getDatabaseExpirationDate(): Result<LocalDate>
 	suspend fun setDatabaseExpirationDate(localDate: LocalDate)
+
+	/** Gives a list of garbage files downloaded by the application (old databases, part files, etc.) */
+	suspend fun getGarbageFiles(): List<String>
+
+	//FIXME change from DbToDownload to some other enum name
+	/**
+	 * @return Whether the version of the database file of the given data exists.
+	 * @throws IllegalArgumentException When giving ALL instead of a single db type.
+	 * */
+	@Throws(IllegalArgumentException::class)
+	suspend fun doesUpToDateCompressedDbExist(db: DbToDownload, version: Int): String?
+
+	/** @throws IllegalArgumentException When the given file does not exist */
+	@Throws(IllegalArgumentException ::class)
+	suspend fun deleteFile(filename: String)
 
 	/**
 	 * Gets whether or not the dialog for updating databases was shown today
@@ -30,6 +46,6 @@ interface AppStateRepository {
 	/** Checks if it is the first time that the app has been launched. **/
 	suspend fun getIsFirstTime(): Boolean
 
-	/** Initialises the isFirstTime flag. */
-	suspend fun setIsFirstTime()
+	/** Initialises the isFirstTime flag to be set to false. */
+	suspend fun setIsNotFirstTime()
 }

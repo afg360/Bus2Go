@@ -32,7 +32,6 @@ import dev.mainhq.bus2go.domain.use_case.favourites.GetFavouritesWithTimeData
 import dev.mainhq.bus2go.domain.use_case.favourites.RemoveFavourite
 import dev.mainhq.bus2go.domain.use_case.settings.GetSettings
 import dev.mainhq.bus2go.domain.use_case.transit.GetDirections
-import dev.mainhq.bus2go.domain.use_case.transit.GetMinDateForUpdate
 import dev.mainhq.bus2go.domain.use_case.transit.GetRouteInfo
 import dev.mainhq.bus2go.domain.use_case.transit.GetStopNames
 import dev.mainhq.bus2go.domain.use_case.transit.GetTransitTime
@@ -51,7 +50,8 @@ class CommonModule(applicationContext: Context) {
 
 	val appStateRepository = AppStateRepositoryImpl(
 		appStateDataStore = applicationContext.appStateDataStore,
-		dataDir = applicationContext.dataDir
+		dataDir = applicationContext.dataDir,
+		filesDir = applicationContext.filesDir
 	)
 
 	private val tagsHandler = TagsHandler.getInstance(applicationContext)
@@ -123,7 +123,7 @@ class CommonModule(applicationContext: Context) {
 	val checkDatabaseUpdateRequired = CheckDatabaseUpdateRequired(
 		appStateRepository,
 		setDatabaseExpirationDate,
-		GetMinDateForUpdate(exoRepository, stmRepository)
+		listOf(exoRepository, stmRepository)
 	)
 	val wasUpdateDialogShownToday = WasUpdateDialogShownToday(
 		appStateRepository

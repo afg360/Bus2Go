@@ -216,7 +216,7 @@ class Time(localDateTime: LocalDateTime) : Parcelable, Comparable<Time> {
         /**
          * Formats correctly a localDate to a string.
          **/
-        fun toLocalDateString(localDate: LocalDate): String{
+        fun toLocalDateString(localDate: LocalDate): String {
             return localDate.format(DateTimeFormatter.BASIC_ISO_DATE)
         }
     }

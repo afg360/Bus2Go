@@ -9,11 +9,9 @@ import dev.mainhq.bus2go.domain.entity.FuzzyQuery
 import dev.mainhq.bus2go.domain.entity.Time
 import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.entity.stm.DirectionInfo
-import java.time.LocalDate
 
-interface ExoRepository {
+interface ExoRepository: TransitRepository {
 
-	suspend fun getMaxEndDate() : Result<LocalDate>
 
 	//suspend fun getBusDir(routeId: String) : String
 	/** Queries for buses and trains with a name matching with the query. */

@@ -25,6 +25,8 @@ import dev.mainhq.bus2go.data.data_source.local.database.stm.entity.Shapes
 import dev.mainhq.bus2go.data.data_source.local.database.stm.entity.Stops
 import dev.mainhq.bus2go.data.data_source.local.database.stm.entity.StopsInfo
 import dev.mainhq.bus2go.data.data_source.local.database.stm.entity.Trips
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.sql.SQLException
 
@@ -45,8 +47,10 @@ abstract class AppDatabaseSTM : RoomDatabase() {
     abstract fun formsDao() : FormsDAO
 
     companion object {
-        const val DATABASE_NAME = "stm_data.db"
-        const val DATABASE_PATH = "database/$DATABASE_NAME"
+        //TODO eventually write the version name on filename, not in config file
+        const val FILENAME_PREFIX = "stm_data"
+        private const val DATABASE_NAME = "$FILENAME_PREFIX.db"
+        private const val DATABASE_PATH = "databases/$DATABASE_NAME"
         private var INSTANCE: AppDatabaseSTM? = null
 
         @Synchronized
@@ -76,7 +80,7 @@ abstract class AppDatabaseSTM : RoomDatabase() {
                         .build()
                 else null
             }
-            catch (ioe: IOException){
+            catch (_: IOException){
                 //FIXME shouldnt have that logcat here but is convenient @ the moment...
                 Log.e("DATABASES", "STM Database not found...")
                 return null

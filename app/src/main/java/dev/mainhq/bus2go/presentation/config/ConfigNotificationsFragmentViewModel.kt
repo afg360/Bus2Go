@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 
 class ConfigNotificationsFragmentViewModel(
 	private val saveAllNotifSettings: SaveAllNotifSettings
-): ViewModel() {
+): ViewModel(), SettingsSavableViewModel {
 
 	private val _appUpdateNotifs = MutableStateFlow(false)
 	val appUpdateNotifs = _appUpdateNotifs.asStateFlow()
@@ -26,11 +26,11 @@ class ConfigNotificationsFragmentViewModel(
 		_dbUpdateNotifs.update { boolean }
 	}
 
-	fun anyNotifSet(): Boolean{
+	fun isAnyNotifSet(): Boolean {
 		return _appUpdateNotifs.value || _dbUpdateNotifs.value
 	}
 
-	fun saveSettings() {
+	override fun saveSettings() {
 		//FIXME ignoring return value for now...
 		// perhaps notify when a result is given and do something with it
 		viewModelScope.launch {

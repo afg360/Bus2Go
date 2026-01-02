@@ -105,7 +105,8 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
             //TODO
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Add a tag")
-                .setView(editText)
+                .setMessage("Coming Soon...")
+                //.setView(editText)
                 .setPositiveButton(""){ dialog, _ ->
                 }
                 .setNegativeButton("") { dialog, _ ->
@@ -149,8 +150,7 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
 
         launchViewModelCollect(homeFragmentViewModel.searchQuery){ results ->
             when(results){
-                is UiState.Error ->
-                    Log.d("DATABASE", "You have jack shit: ${results.message}")
+                is UiState.Error -> Log.e("DATABASE", "You have jack shit: ${results.message}")
                 UiState.Loading -> throw IllegalStateException("Wtf")
                 is UiState.Success<List<RouteInfo>> ->
                     busListAdapter.updateData(results.data)

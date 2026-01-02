@@ -9,17 +9,11 @@ import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.domain.entity.TransitDataWithTime
 import dev.mainhq.bus2go.domain.entity.FuzzyQuery
 import dev.mainhq.bus2go.domain.entity.Time
-import java.time.LocalDate
 
 //TODO use the Result pattern to indicate if something worked properly or not...
 
 /* Create an interface making testing much easier, since we can mock data */
-interface StmRepository {
-
-	//FIXME use Time objects instead of multiple strings
-
-	/** @return Latest calendar date before data not being up to date. **/
-	suspend fun getMaxEndDate() : Result<LocalDate>
+interface StmRepository: TransitRepository {
 
 	suspend fun getAllCalendarDates(): Result<List<CalendarDates>>
 

@@ -17,7 +17,7 @@ val Context.appStateDataStore: DataStore<Preferences> by preferencesDataStore(
 	}
 )
 
-object AppStateDataStoreKeys{
+object AppStateDataStoreKeys {
 	//TODO perhaps be replaced with SQLITE thingy
 	val DATABASES_EXPIRATION_DATE = stringPreferencesKey("db_expiration_date")
 	val DATABASES_DIALOG_LAST_SHOWN_DATE = stringPreferencesKey("db_dialog_last_shown_date")

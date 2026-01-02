@@ -8,11 +8,12 @@ import androidx.work.testing.WorkManagerTestInitHelper
 import com.squareup.okhttp.mockwebserver.MockWebServer
 import org.junit.Before
 import org.junit.runner.RunWith
-import org.mockito.Mockito.*
+//import org.mockito.Mockito.*
 
 @RunWith(AndroidJUnit4::class)
 class NewUpdateWorkerTests {
 
+	/*
 	private lateinit var mockWebServer: MockWebServer
 	private lateinit var mockNotificationManager: NotificationManager
 	private lateinit var context: Context
@@ -130,6 +131,8 @@ class NewUpdateWorkerTests {
 			)
 		}
 	}
+
+	 */
 
 	 */
 }

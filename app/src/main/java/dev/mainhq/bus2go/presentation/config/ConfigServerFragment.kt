@@ -36,7 +36,8 @@ class ConfigServerFragment: Fragment(R.layout.fragment_config_server) {
 				return (requireActivity().application as Bus2GoApplication).let{
 					ConfigServerFragmentViewModel(
 						it.appModule.checkIsBus2GoServer,
-						it.commonModule.saveBus2GoServer
+						it.commonModule.saveBus2GoServer,
+						it.commonModule.saveAllNotifSettings
 					) as T
 				}
 			}
@@ -58,8 +59,10 @@ class ConfigServerFragment: Fragment(R.layout.fragment_config_server) {
 					.setTitle("Skip?")
 					.setMessage("Are you sure you want to skip? (You may configure this later).")
 					.setPositiveButton("Yes"){ dialogInterface, _ ->
+						viewModel.saveSettings()
 						sharedViewModel.triggerEvent(true)
 						dialogInterface.dismiss()
+
 					}
 					.setNegativeButton("Cancel"){ dialogInterface, _ ->
 						dialogInterface.dismiss()

@@ -1,5 +1,6 @@
 package dev.mainhq.bus2go.data.repository
 
+import android.annotation.SuppressLint
 import android.content.Context
 import androidx.preference.PreferenceManager
 import dev.mainhq.bus2go.R
@@ -15,7 +16,7 @@ class SettingsRepositoryImpl(
 		private const val DARK_MODE = "dark-mode"
 		private const val SERVER_CHOICE = "server-choice"
 		private const val REAL_TIME_DATA = "real-time-data"
-		private const val UPDATE_NOTIF = "update-notification"
+		private const val UPDATE_NOTIF = "update-notifications"
 		private const val DB_UPDATE_NOTIF = "db-update-notifications"
 	}
 
@@ -29,18 +30,21 @@ class SettingsRepositoryImpl(
 		)
 	}
 
+	@SuppressLint("UseKtx")
 	override fun saveBus2GoServer(url: String): Boolean {
 		return PreferenceManager.getDefaultSharedPreferences(appContext).edit()
 			.putString(SERVER_CHOICE, url)
 			.commit()
 	}
 
+	@SuppressLint("UseKtx")
 	override fun saveAppUpdateNotifSetting(appUpdateNotif: Boolean): Boolean {
 		return PreferenceManager.getDefaultSharedPreferences(appContext).edit()
 			.putBoolean(UPDATE_NOTIF, appUpdateNotif)
 			.commit()
 	}
 
+	@SuppressLint("UseKtx")
 	override fun saveDbUpdateNotifSetting(dbUpdateNotif: Boolean): Boolean {
 		return PreferenceManager.getDefaultSharedPreferences(appContext).edit()
 			.putBoolean(DB_UPDATE_NOTIF, dbUpdateNotif)

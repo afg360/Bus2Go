@@ -33,7 +33,6 @@ val Context.exoFavouritesDataStore by dataStore(
 			}
 
 			override suspend fun migrate(currentData: ExoFavouritesDataDto): ExoFavouritesDataDto {
-				val oldSerializer = ExoFavouritesDataSerializer_v1
 				val oldFile = File(context.filesDir.resolve("datastore"), "favourites_exo.json")
 				if (!oldFile.exists()) {
 					return currentData

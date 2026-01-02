@@ -12,36 +12,43 @@ import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import dev.mainhq.bus2go.R
+import dev.mainhq.bus2go.domain.entity.DbToDownload
 
 class NotificationHandler(private val appContext: Context) {
 
 	companion object{
 		private const val APP_UPDATES = "app_updates"
 		private const val appUpdateNotifId = 1
+		//Db updates share the same notification channel, but not necessarily the same notif id
+		// (depends on the db type)
 		private const val DB_UPDATES = "db_updates"
-		private const val dbUpdateNotifId  = 2
+		private const val baseDbUpdateNotifId = 2
 
 		private val notifChannels = mapOf(
 			APP_UPDATES to "App Updates",
 			DB_UPDATES to "Database Updates",
 		)
+
+		private val appNotifChannel = NotificationChannelCompat.Builder(
+			APP_UPDATES,
+			NotificationManagerCompat.IMPORTANCE_DEFAULT
+		).setName(notifChannels[APP_UPDATES])
+			.setShowBadge(false)
+			.build()
+
+		val dbNotifChannel = NotificationChannelCompat.Builder(
+			DB_UPDATES,
+			NotificationManagerCompat.IMPORTANCE_DEFAULT
+		).setName(notifChannels[DB_UPDATES])
+			.setShowBadge(false)
+			.build()
+
+		fun getDbNotificationId(dbToDownload: DbToDownload): Int {
+			return dbToDownload.ordinal + baseDbUpdateNotifId
+		}
 	}
 
 	private val notificationManager = NotificationManagerCompat.from(appContext)
-
-	private val appNotifChannel = NotificationChannelCompat.Builder(
-		APP_UPDATES,
-		NotificationManagerCompat.IMPORTANCE_DEFAULT
-	).setName(notifChannels[APP_UPDATES])
-		.setShowBadge(false)
-		.build()
-
-	private val dbNotifChannel = NotificationChannelCompat.Builder(
-		DB_UPDATES,
-		NotificationManagerCompat.IMPORTANCE_DEFAULT
-	).setName(notifChannels[DB_UPDATES])
-		.setShowBadge(false)
-		.build()
 
 	init {
 		notificationManager.createNotificationChannel(appNotifChannel)
@@ -54,7 +61,7 @@ class NotificationHandler(private val appContext: Context) {
 		createNotificationBuilder(
 			channelId = APP_UPDATES,
 			title = "New Release",
-			description = "A new version of Bus2Go is available!",
+			description = "A new version of Bus2Go version is available ($version)!",
 			icon = R.drawable.baseline_update,
 			priority = NotificationCompat.PRIORITY_DEFAULT
 		).setOngoing(false)
@@ -116,9 +123,8 @@ class NotificationHandler(private val appContext: Context) {
 	}
 
 	/* ---------------------- Database Update Notifications ------------------------- */
-
 	/** @param database Is it a bus2go or exo db, or something else */
-	fun notifyDbUpdateAvailable(database: String){
+	fun notifyDbUpdateAvailable(database: DbToDownload){
 		createNotificationBuilder(
 			channelId = DB_UPDATES,
 			title = "New Database Available",
@@ -127,11 +133,10 @@ class NotificationHandler(private val appContext: Context) {
 			priority = NotificationCompat.PRIORITY_DEFAULT
 		).setOngoing(false)
 			.build()
-			.also { postNotif(dbUpdateNotifId, it) }
-
+			.also { postNotif(database.ordinal + baseDbUpdateNotifId, it) }
 	}
 
-	fun notifyDbDownloading(current: Int, contentLength: Int){
+	fun notifyDbDownloading(database: DbToDownload, current: Int, contentLength: Int){
 		createNotificationBuilder(
 			channelId = DB_UPDATES,
 			title = "Downloading Bus2Go database...",
@@ -140,10 +145,10 @@ class NotificationHandler(private val appContext: Context) {
 			priority = NotificationCompat.PRIORITY_LOW
 		).setOngoing(true).setProgress(contentLength, current, false)
 			.build()
-			.also { postNotif(dbUpdateNotifId, it) }
+			.also { postNotif(database.ordinal + baseDbUpdateNotifId, it) }
 	}
 
-	fun notifyDbExtracting(){
+	fun notifyDbExtracting(database: DbToDownload){
 		createNotificationBuilder(
 			channelId = DB_UPDATES,
 			title = "Extracting database...",
@@ -152,10 +157,10 @@ class NotificationHandler(private val appContext: Context) {
 			priority = NotificationCompat.PRIORITY_DEFAULT
 		).setOngoing(true).setProgress(0, 0, true)
 			.build()
-			.also { postNotif(dbUpdateNotifId, it) }
+			.also { postNotif(database.ordinal + baseDbUpdateNotifId, it) }
 	}
 
-	fun notifyDbUpdateDone(){
+	fun notifyDbUpdateDone(database: DbToDownload){
 		//FIXME for it to work, need to schedule a restart using alarm manager and broadcast receivers,
 		// and then completely shutdown the app using android.os.killProcess()
 		val intent = appContext.packageManager.getLaunchIntentForPackage(appContext.packageName)
@@ -175,12 +180,12 @@ class NotificationHandler(private val appContext: Context) {
 		).setOngoing(false).setProgress(0, 0, false)
 			.setContentIntent(pendingIntent)
 			.build()
-			.also { postNotif(dbUpdateNotifId, it) }
+			.also { postNotif(database.ordinal + baseDbUpdateNotifId, it) }
 		Toast.makeText(appContext, "Update Successful. Restart App", Toast.LENGTH_SHORT).show()
 	}
 
 	//TODO
-	fun notifyDbDownloadFailed(){
+	fun notifyDbDownloadFailed(database: DbToDownload){
 		createNotificationBuilder(
 			channelId = DB_UPDATES,
 			title = "Error trying to download database",
@@ -189,7 +194,7 @@ class NotificationHandler(private val appContext: Context) {
 			priority = NotificationCompat.PRIORITY_HIGH
 		).setOngoing(false).setProgress(0, 0, false)
 			.build()
-			.also { postNotif(dbUpdateNotifId, it) }
+			.also { postNotif(database.ordinal + baseDbUpdateNotifId, it) }
 		Toast.makeText(appContext, "Database Download Error", Toast.LENGTH_SHORT).show()
 	}
 

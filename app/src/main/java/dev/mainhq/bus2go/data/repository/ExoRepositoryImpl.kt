@@ -24,7 +24,8 @@ class ExoRepositoryImpl(
 	private val calendarDAO: CalendarDAO?,
 	private val routesDAO: RoutesDAO?,
 	private val stopTimesDAO: StopTimesDAO?,
-	private val tripsDAO: TripsDAO?
+	private val tripsDAO: TripsDAO?,
+	override val dbName: String = "Exo"
 ): ExoRepository {
 
 	override suspend fun getMaxEndDate(): Result<LocalDate> {

@@ -12,13 +12,13 @@ class SettingsUpdateFragmentViewModel(
 
 	fun downloadStm(){
 		viewModelScope.launch {
-			downloadDatabaseTask.invoke(DbToDownload.STM)
+			downloadDatabaseTask.invoke(listOf(DbToDownload.STM))
 		}
 	}
 
 	fun downloadExo(){
 		viewModelScope.launch {
-			downloadDatabaseTask.invoke(DbToDownload.EXO)
+			downloadDatabaseTask.invoke(listOf(DbToDownload.EXO))
 		}
 	}
 }

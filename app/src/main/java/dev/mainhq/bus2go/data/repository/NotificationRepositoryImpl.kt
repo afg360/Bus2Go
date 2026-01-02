@@ -1,6 +1,7 @@
 package dev.mainhq.bus2go.data.repository
 
 import dev.mainhq.bus2go.data.data_source.notifications.NotificationHandler
+import dev.mainhq.bus2go.domain.entity.DbToDownload
 import dev.mainhq.bus2go.domain.entity.NotificationType
 import dev.mainhq.bus2go.domain.repository.NotificationsRepository
 
@@ -8,10 +9,12 @@ class NotificationRepositoryImpl(
 	private val notificationHandler: NotificationHandler
 ): NotificationsRepository {
 
+	@Throws(IllegalArgumentException::class)
+	/** @throws IllegalArgumentException When giving a DbToDownload.ALL notif type */
 	override fun notify(notificationType: NotificationType) {
 		when(notificationType){
 			is NotificationType.AppUpdateAvailable ->
-				notificationHandler.notifyDbUpdateAvailable(notificationType.version)
+				notificationHandler.notifyAppUpdateAvailable(notificationType.version)
 
 			is NotificationType.AppUpdating ->
 				notificationHandler.notifyAppUpdating(
@@ -28,15 +31,16 @@ class NotificationRepositoryImpl(
 
 			is NotificationType.DbDownloading ->
 				notificationHandler.notifyDbDownloading(
+					notificationType.database,
 					notificationType.current,
 					notificationType.contentLength
 				)
 
-			is NotificationType.DbExtracting -> notificationHandler.notifyDbExtracting()
+			is NotificationType.DbExtracting -> notificationHandler.notifyDbExtracting(notificationType.database)
 
-			NotificationType.DbUpdateDone -> notificationHandler.notifyDbUpdateDone()
+			is NotificationType.DbUpdateDone -> notificationHandler.notifyDbUpdateDone(notificationType.database)
 
-			NotificationType.DbUpdateError -> notificationHandler.notifyDbDownloadFailed()
+			is NotificationType.DbUpdateError -> notificationHandler.notifyDbDownloadFailed(notificationType.database)
 		}
 	}
 
