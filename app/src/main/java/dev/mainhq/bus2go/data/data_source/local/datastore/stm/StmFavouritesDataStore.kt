@@ -17,8 +17,7 @@ val Context.stmFavouritesDataStore by dataStore(
 	produceMigrations = { context -> listOf(
 		object : DataMigration<StmFavouritesDataDto> {
 			override suspend fun cleanUp() {
-				File(context.filesDir
-					.resolve("datastore"), "favourites_stm.json")
+				File(context.filesDir.resolve("datastore"), "favourites_stm.json")
 					.apply {
 						if (exists()) {
 							delete()
@@ -47,14 +46,15 @@ val Context.stmFavouritesDataStore by dataStore(
 
 				return StmFavouritesDataDto(
 					version = 2,
-					listSTM = dataV1.listSTM.map {
+					listSTM = dataV1.listSTM.mapIndexed { index, item  ->
 						StmFavouriteBusItemDto(
-							it.stopName,
-							it.routeId,
-							it.direction,
+							index,
+							item.stopName,
+							item.routeId,
+							item.direction,
 							persistentListOf(),
-							it.directionId,
-							it.lastStop,
+							item.directionId,
+							item.lastStop,
 						)
 					}.toPersistentList()
 				)

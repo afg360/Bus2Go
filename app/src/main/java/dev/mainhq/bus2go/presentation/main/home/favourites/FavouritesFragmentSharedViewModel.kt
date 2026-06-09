@@ -77,6 +77,7 @@ class FavouritesFragmentSharedViewModel(
 		}
 	}
 
+
 	/**
 	 * Trigger adding a tag to a favourite. If the tag doesn't exist, also add it to the list of tags
 	 * */

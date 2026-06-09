@@ -10,70 +10,41 @@ import dev.mainhq.bus2go.domain.use_case.favourites.GetFavourites
 import dev.mainhq.bus2go.domain.use_case.favourites.RemoveFavourite
 import dev.mainhq.bus2go.presentation.core.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class StopFragmentViewModel(
 	private val addFavourite: AddFavourite,
 	private val removeFavourite: RemoveFavourite,
-	private val getFavourites: GetFavourites
+	getFavourites: GetFavourites
 ): ViewModel() {
 
 
 	private val _stopNames: MutableStateFlow<List<TransitData>> = MutableStateFlow(listOf())
 	val stopNames = _stopNames.asStateFlow()
 
-	private val _favourites: MutableStateFlow<List<TransitData>> = MutableStateFlow(listOf())
-	val favourites = _favourites.asStateFlow()
-
-	init {
-		viewModelScope.launch {
-			_favourites.update { getFavourites.invoke() }
-		}
-	}
+	val favourites = getFavourites.invoke()
+		.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), hashMapOf())
 
 	fun setTransitData(transitData: List<TransitData>){
 		viewModelScope.launch {
 			_stopNames.update { transitData }
-			_favourites.update { getFavourites.invoke().filter { transitData.compareTransitData(it) } }
 		}
 	}
 
 	fun addFavourite(data : TransitData){
-		_favourites.value.also { favourites ->
-			if (!favourites.compareTransitData(data)){
-				viewModelScope.launch {
-					addFavourite.invoke(data)
-					_favourites.update {
-						val list = it.toMutableList()
-						list.add(data)
-						list
-					}
-				}
-			}
-			else {
-				throw IllegalStateException("You cannot call addFavourite when you already added the same favourite (you must toggle between adding and removing)")
-			}
+		viewModelScope.launch {
+			addFavourite.invoke(data)
 		}
 	}
 
 	fun removeFavourite(data : TransitData){
-		favourites.value.also { favourites ->
-			if (favourites.compareTransitData(data)){
-				viewModelScope.launch {
-					removeFavourite.invoke(data)
-					_favourites.update {
-						val list = it.toMutableList()
-						list.remove(data)
-						list
-					}
-					//TODO
-				}
-			}
-			else {
-				throw IllegalStateException("You cannot call removeFavourite when you never had this favourite (you must toggle between adding and removing)")
-			}
+		viewModelScope.launch {
+			removeFavourite.invoke(data)
 		}
 	}
 }

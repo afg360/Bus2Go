@@ -8,11 +8,8 @@ import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
@@ -24,7 +21,7 @@ import androidx.work.WorkManager
 import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.data.worker.UpdateManagerWorker
-import dev.mainhq.bus2go.utils.launchViewModelCollect
+import dev.mainhq.bus2go.utils.launchViewModelCollectLatest
 import java.util.concurrent.TimeUnit
 
 class SettingsMainFragment : PreferenceFragmentCompat(),
@@ -125,7 +122,7 @@ class SettingsMainFragment : PreferenceFragmentCompat(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        launchViewModelCollect(viewModel.toastText){
+        launchViewModelCollectLatest(viewModel.toastText){
             sharedViewModel.setLoading(false)
             Toast.makeText(requireContext(), it.string, Toast.LENGTH_SHORT).show()
             val editTextPreference = preferenceManager.findPreference<EditTextPreference>("server-choice")

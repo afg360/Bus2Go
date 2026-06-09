@@ -43,24 +43,26 @@ val Context.exoFavouritesDataStore by dataStore(
 				}
 				return ExoFavouritesDataDto(
 					version = 2,
-					listExo = oldData.listExo.map {
+					listExo = oldData.listExo.mapIndexed { index, item ->
 						ExoFavouriteBusItemDto(
-							stopName = it.stopName,
-							routeId = it.routeId,
-							direction = it.direction,
+							position = index,
+							stopName = item.stopName,
+							routeId = item.routeId,
+							direction = item.direction,
 							tags = persistentListOf(),
-							routeLongName = it.routeLongName
+							routeLongName = item.routeLongName
 						)
 					}.toPersistentList(),
-					listExoTrain = oldData.listExoTrain.map {
+					listExoTrain = oldData.listExoTrain.mapIndexed { index, item ->
 						ExoFavouriteTrainItemDto(
-							stopName = it.stopName,
-							routeId = it.routeId,
-							direction = it.direction,
+							position = index,
+							stopName = item.stopName,
+							routeId = item.routeId,
+							direction = item.direction,
 							tags = persistentListOf(),
-							trainNum = it.trainNum,
-							routeName = it.routeName,
-							directionId = it.directionId
+							trainNum = item.trainNum,
+							routeName = item.routeName,
+							directionId = item.directionId
 						)
 					}.toPersistentList()
 				)

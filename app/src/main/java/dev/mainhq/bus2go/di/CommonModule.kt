@@ -101,12 +101,6 @@ class CommonModule(applicationContext: Context) {
 		stmRepository
 	)
 
-	val getFavouritesWithTimeData = GetFavouritesWithTimeData(
-		exoFavouritesRepository,
-		exoRepository,
-		stmFavouritesRepository,
-		stmRepository
-	)
 
 	//FIXME not ideal to make them like this...
 	val addFavourite = AddFavourite(
@@ -143,6 +137,12 @@ class CommonModule(applicationContext: Context) {
 	val getFavourites = GetFavourites(
 		exoFavouritesRepository,
 		stmFavouritesRepository
+	)
+
+	val getFavouritesWithTimeData = GetFavouritesWithTimeData(
+		getFavourites,
+		exoRepository,
+		stmRepository
 	)
 
 	val getTransitTime = GetTransitTime(

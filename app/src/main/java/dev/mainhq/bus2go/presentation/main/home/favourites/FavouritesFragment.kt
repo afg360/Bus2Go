@@ -8,11 +8,14 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.core.view.forEach
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dev.mainhq.bus2go.R
@@ -24,7 +27,7 @@ import dev.mainhq.bus2go.presentation.core.UiState
 import dev.mainhq.bus2go.presentation.main.home.TagEvent
 import dev.mainhq.bus2go.presentation.stop_times.StopTimesActivity
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
-import dev.mainhq.bus2go.utils.launchViewModelCollect
+import dev.mainhq.bus2go.utils.launchViewModelCollectLatest
 import dev.mainhq.bus2go.utils.makeGone
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.filterNotNull
@@ -103,15 +106,35 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
         binding.favouritesRecyclerView.layoutManager = layoutManager
         binding.favouritesRecyclerView.adapter = adapter
 
+       val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(
+           ItemTouchHelper.UP or ItemTouchHelper.DOWN,
+           0
+       ) {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                dragged: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder,
+            ): Boolean {
+                (recyclerView.adapter as FavouritesListElemsAdapter?)
+                    ?.moveItem(dragged.adapterPosition, target.adapterPosition)
+                return true
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) { }
+        })
+        itemTouchHelper.attachToRecyclerView(binding.favouritesRecyclerView)
+
         //This part allows us to press the back button when in selection mode of favourites to get out of it
         //we set the callback to false to prioritise it only when selection mode is activated
         onBackPressedCallback = object : OnBackPressedCallback(false) {
             /** Hides all the checkboxes of the items in the recyclerview, deselects them, and puts back the searchbar as the nav bar */
             override fun handleOnBackPressed() {
+                //TODO better way to do this/iterate through every item
                 (0 until binding.favouritesRecyclerView.childCount).forEach { i ->
-                    layoutManager.getChildAt(i)?.let { view ->
-                        view.findViewById<MaterialCheckBox>(R.id.favourites_check_box).makeGone()
-                    }
+
+					layoutManager.getChildAt(i)
+                        ?.findViewById<MaterialCheckBox>(R.id.favourites_check_box)
+						?.makeGone()
                 }
                 favouritesViewModel.deactivateSelectionMode()
                 favouritesSharedViewModel.deactivateSelectionMode()
@@ -120,7 +143,7 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
         }
 
         //sets up top Favourites text and time remaining for each favourites
-        jobs.add(launchViewModelCollect(favouritesViewModel.favouriteDisplayTransitData) { uiState ->
+        jobs.add(launchViewModelCollectLatest(favouritesViewModel.favouriteDisplayTransitData) { uiState ->
             when(uiState){
                 is UiState.Success<List<FavouritesDisplayModel>> -> {
                     if (uiState.data.isEmpty()) {
@@ -139,14 +162,14 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
         })
 
         jobs.add(
-            launchViewModelCollect(favouritesViewModel.favouritesToRemove.filterNotNull()) {
+            launchViewModelCollectLatest(favouritesViewModel.favouritesToRemove.filterNotNull()) {
                     favouritesToRemove -> adapter.toggleForRemoval(favouritesToRemove)
             })
 
 
         //updates recycler view adapter and top bar (search into selection mode and vice versa)
         jobs.add(
-            launchViewModelCollect(favouritesViewModel.selectionMode) { selectedMode ->
+            launchViewModelCollectLatest(favouritesViewModel.selectionMode) { selectedMode ->
                 if (wasSelectionMode != selectedMode){
                     adapter.updateSelectionMode()
                     wasSelectionMode = selectedMode
@@ -163,7 +186,7 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
 
         //(de)select all favourites for removal
         jobs.add(
-            launchViewModelCollect(favouritesSharedViewModel.selectAllFavourites) { isAllSelected ->
+            launchViewModelCollectLatest(favouritesSharedViewModel.selectAllFavourites) { isAllSelected ->
                 if (favouritesViewModel.selectionMode.value){
                     when (isAllSelected) {
                         true -> {
@@ -187,7 +210,7 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
             })
 
         jobs.add(
-            launchViewModelCollect(favouritesSharedViewModel.tagEvent){ event ->
+            launchViewModelCollectLatest(favouritesSharedViewModel.tagEvent){ event ->
                 when(event) {
                     is TagEvent.AddTagEvent -> TODO()
                     is TagEvent.FilterFavouritesWithTagEvent -> {

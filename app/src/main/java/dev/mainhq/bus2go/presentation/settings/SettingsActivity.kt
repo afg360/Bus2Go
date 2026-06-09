@@ -13,6 +13,8 @@ import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import dev.mainhq.bus2go.presentation.base.BaseActivity
 import dev.mainhq.bus2go.R
+import dev.mainhq.bus2go.utils.makeGone
+import dev.mainhq.bus2go.utils.makeVisible
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -60,8 +62,12 @@ class SettingsActivity : BaseActivity() {
             repeatOnLifecycle(Lifecycle.State.STARTED){
                 val loadingBar = findViewById<CircularProgressIndicator>(R.id.preferences_loading_bar)
                 viewModel.isLoading.collect{
-                    if (it) loadingBar.visibility = View.VISIBLE
-                    else loadingBar.visibility = View.GONE
+                    if (it) {
+                        loadingBar.makeVisible()
+                    }
+                    else {
+                        loadingBar.makeGone()
+                    }
                 }
             }
         }

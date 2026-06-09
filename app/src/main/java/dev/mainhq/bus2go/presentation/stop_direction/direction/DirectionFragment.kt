@@ -23,14 +23,13 @@ import dev.mainhq.bus2go.domain.entity.StmBusRouteInfo
 import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.databinding.FragmentChooseDirectionBinding
 import dev.mainhq.bus2go.presentation.core.UiState
-import dev.mainhq.bus2go.presentation.stop_direction.ActivityFragment
 import dev.mainhq.bus2go.presentation.stop_direction.AnimationDirection
 import dev.mainhq.bus2go.presentation.stop_direction.StopDirectionViewModel
 import dev.mainhq.bus2go.presentation.stop_direction.stop.StopFragmentViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.IllegalStateException
-import dev.mainhq.bus2go.utils.launchViewModelCollect
+import dev.mainhq.bus2go.utils.launchViewModelCollectLatest
 import dev.mainhq.bus2go.utils.makeGone
 import dev.mainhq.bus2go.utils.makeVisible
 import kotlinx.coroutines.flow.filterNotNull
@@ -98,7 +97,7 @@ class DirectionFragment : Fragment() {
             }
         }
 
-        launchViewModelCollect(viewModel.routeInfo){
+        launchViewModelCollectLatest(viewModel.routeInfo){
             when(it){
                 is UiState.Error -> TODO()
                 UiState.Init -> TODO()

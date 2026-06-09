@@ -11,15 +11,11 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.google.android.material.button.MaterialButton
-import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import dev.mainhq.bus2go.presentation.core.state.AppThemeState
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.databinding.FragmentConfigDatabaseBinding
-import dev.mainhq.bus2go.databinding.FragmentConfigWelcomeBinding
-import dev.mainhq.bus2go.utils.launchViewModelCollect
+import dev.mainhq.bus2go.utils.launchViewModelCollectLatest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -69,7 +65,7 @@ class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
 		}
 
 
-		launchViewModelCollect(viewModel.dbToDownload){
+		launchViewModelCollectLatest(viewModel.dbToDownload){
 			binding.configDownloadDatabaseContinueButton.text = if (it.isEmpty()) "Skip" else "Continue"
 		}
 		requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object: OnBackPressedCallback(true){

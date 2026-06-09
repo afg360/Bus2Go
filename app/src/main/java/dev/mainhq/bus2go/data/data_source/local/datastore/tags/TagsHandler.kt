@@ -9,6 +9,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
 
+//TODO perhaps switch to a datastore
 class TagsHandler private constructor(private val applicationContext: Context) {
 
 	/**

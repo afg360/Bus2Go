@@ -18,6 +18,7 @@ object PreferenceMapper {
 
 	fun mapStmBusToDto(stmBus: StmBusItem): StmFavouriteBusItemDto {
 		return StmFavouriteBusItemDto(
+			position = stmBus.position,
 			stopName = stmBus.stopName,
 			routeId = stmBus.routeId,
 			direction = stmBus.direction,
@@ -32,6 +33,7 @@ object PreferenceMapper {
 	fun mapStmBus(stmDto: StmFavouritesDataDto): List<StmBusItem>{
 		return stmDto.listSTM.map {
 			StmBusItem(
+				position = it.position,
 				routeId = it.routeId,
 				stopName = it.stopName,
 				direction = it.direction,
@@ -44,6 +46,7 @@ object PreferenceMapper {
 
 	fun mapExoBusToDto(exoBus: ExoBusItem): ExoFavouriteBusItemDto {
 		return ExoFavouriteBusItemDto(
+			position = exoBus.position,
 			stopName = exoBus.stopName,
 			routeId = exoBus.routeId,
 			direction = exoBus.direction,
@@ -57,6 +60,7 @@ object PreferenceMapper {
 	fun mapExoBus(exoDto: ExoFavouritesDataDto): List<ExoBusItem>{
 		return exoDto.listExo.map {
 			ExoBusItem(
+				position = it.position,
 				routeId = it.routeId,
 				stopName = it.stopName,
 				direction = it.direction,
@@ -68,6 +72,7 @@ object PreferenceMapper {
 
 	fun mapExoTrainToDto(exoTrain: ExoTrainItem): ExoFavouriteTrainItemDto {
 		return ExoFavouriteTrainItemDto(
+			position = exoTrain.position,
 			stopName = exoTrain.stopName,
 			routeId = exoTrain.routeId,
 			direction = exoTrain.direction,
@@ -83,6 +88,7 @@ object PreferenceMapper {
 	fun mapExoTrain(exoDto: ExoFavouritesDataDto): List<ExoTrainItem>{
 		return exoDto.listExoTrain.map {
 			ExoTrainItem(
+				position = it.position,
 				routeId = it.routeId,
 				stopName = it.stopName,
 				direction = it.direction,

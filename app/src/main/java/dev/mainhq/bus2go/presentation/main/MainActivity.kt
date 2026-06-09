@@ -18,7 +18,7 @@ import dev.mainhq.bus2go.databinding.MainActivityBinding
 import dev.mainhq.bus2go.presentation.core.UiState
 //import dev.mainhq.bus2go.fragments.alarms.AlarmReceiver
 import dev.mainhq.bus2go.presentation.main.home.HomeFragment
-import dev.mainhq.bus2go.utils.launchViewModelCollect
+import dev.mainhq.bus2go.utils.launchViewModelCollectLatest
 import dev.mainhq.bus2go.utils.makeGone
 import dev.mainhq.bus2go.utils.makeVisible
 import dev.mainhq.bus2go.utils.toEpochDay
@@ -68,7 +68,7 @@ class MainActivity : BaseActivity() {
         checkAndUpdateDatabases()
         showDbNeedsUpdateTopView()
 
-        launchViewModelCollect(mainActivityViewModel.updateDbState) {
+        launchViewModelCollectLatest(mainActivityViewModel.updateDbState) {
             when(it){
                 is UpdateDbState.Error -> {
                     Toast.makeText(this@MainActivity, "Some shitty error", Toast.LENGTH_SHORT)
@@ -88,7 +88,7 @@ class MainActivity : BaseActivity() {
             }
         }
 
-        launchViewModelCollect(mainActivityViewModel.activityFragment) { activityType ->
+        launchViewModelCollectLatest(mainActivityViewModel.activityFragment) { activityType ->
             when (activityType) {
                 ActivityFragment.HOME -> {
                     supportFragmentManager.beginTransaction()
@@ -136,7 +136,7 @@ class MainActivity : BaseActivity() {
                 .show()
         }
 
-        launchViewModelCollect(mainActivityViewModel.notification){
+        launchViewModelCollectLatest(mainActivityViewModel.notification){
             when(it){
                 is UiState.Success<String> -> {
                     withContext(Dispatchers.Main) {
@@ -150,7 +150,7 @@ class MainActivity : BaseActivity() {
 
     //TODO add some classes in data/domain layer handling this
     private fun checkAndUpdateDatabases() {
-        launchViewModelCollect(mainActivityViewModel.showUpdateDbDialog) { showUpdateDbDialog ->
+        launchViewModelCollectLatest(mainActivityViewModel.showUpdateDbDialog) { showUpdateDbDialog ->
             if (showUpdateDbDialog) {
                 // Displays a dialog for the user to choose to update now or to get reminded later.
                 //Notes: .cancel is the same as .dismiss, but also calls the cancelListener
@@ -222,7 +222,7 @@ class MainActivity : BaseActivity() {
     }
 
     private fun showDbNeedsUpdateTopView(){
-        launchViewModelCollect(mainActivityViewModel.updateTextViewString) {
+        launchViewModelCollectLatest(mainActivityViewModel.updateTextViewString) {
             if (it != ""){
                 binding.mainDbNeedsUpdateTextView.text = it
                 binding.mainTopUpdateNeededNotifConstraintLayout.makeVisible()

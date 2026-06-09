@@ -18,7 +18,7 @@ import com.google.android.material.textfield.TextInputEditText
 import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.presentation.core.UiState
-import dev.mainhq.bus2go.utils.launchViewModelCollect
+import dev.mainhq.bus2go.utils.launchViewModelCollectLatest
 
 //TODO eventually there will either be a special ip address, or a list of available domain names...
 
@@ -72,7 +72,7 @@ class ConfigServerFragment: Fragment(R.layout.fragment_config_server) {
 			else viewModel.checkIsBus2GoServer()
 		}
 
-		launchViewModelCollect(viewModel.serverResponse){
+		launchViewModelCollectLatest(viewModel.serverResponse){
 			when(it){
 				is UiState.Error -> {
 					//if device not connected to internet, make a SnackBar and allow retry
@@ -120,7 +120,7 @@ class ConfigServerFragment: Fragment(R.layout.fragment_config_server) {
 			}
 		}
 
-		launchViewModelCollect(viewModel.textInputText){
+		launchViewModelCollectLatest(viewModel.textInputText){
 			when (it) {
 				is UiState.Error -> textInput.error = "Invalid Url"
 				UiState.Init -> textInput.setText("")
@@ -138,7 +138,7 @@ class ConfigServerFragment: Fragment(R.layout.fragment_config_server) {
 				override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) { }
 		})
 
-		launchViewModelCollect(viewModel.buttonText){ button.text = it }
+		launchViewModelCollectLatest(viewModel.buttonText){ button.text = it }
 
 		val mainBackPressCallBack = object: OnBackPressedCallback(true){
 			override fun handleOnBackPressed() {

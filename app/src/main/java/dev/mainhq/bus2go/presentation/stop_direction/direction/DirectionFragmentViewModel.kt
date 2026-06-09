@@ -75,12 +75,13 @@ class DirectionFragmentViewModel(
 
 								is Result.Success<List<DirectionInfo>> -> {
 									_topDirection.update {
-										stopNames.data.first.map {
+										stopNames.data.first.mapIndexed { index, item ->
 											//FIXME normally, we should use a separate class, but for
 											// simplicity, it works for now
 											ExoBusItem(
+												position = index,
 												routeId = routeInfo.routeId,
-												stopName = it,
+												stopName = item,
 												direction = headsigns.data.first().tripHeadSign,
 												routeLongName = routeInfo.routeName,
 												tags = listOf()
@@ -90,10 +91,11 @@ class DirectionFragmentViewModel(
 
 									if (headsigns.data.size > 1){
 										_bottomDirection.update {
-											stopNames.data.second.map {
+											stopNames.data.second.mapIndexed { index, item ->
 												ExoBusItem(
+													position = index,
 													routeId = routeInfo.routeId,
-													stopName = it,
+													stopName = item,
 													direction = headsigns.data.last().tripHeadSign,
 													routeLongName = routeInfo.routeName,
 													tags = listOf()
@@ -113,11 +115,12 @@ class DirectionFragmentViewModel(
 							_textColour.value = R.color.orange
 							_cardViewColour.value = R.color.orange
 							//_cardViewColour.value = R.color.transparent_orange
-							_topDirection.value = stopNames.data.first.map {
+							_topDirection.value = stopNames.data.first.mapIndexed { index, item ->
 								ExoTrainItem(
+									position = index,
 									routeId = routeInfo.routeId,
 									//DO NOT SET IT YET SINCE WE ARE ONLY CHOOSING A DIR
-									stopName = it,
+									stopName = item,
 									direction = stopNames.data.first.last(),
 									trainNum = routeInfo.trainNum,
 									routeName = routeInfo.routeName,
@@ -126,11 +129,12 @@ class DirectionFragmentViewModel(
 								)
 							}
 
-							_bottomDirection.value = stopNames.data.second.map {
+							_bottomDirection.value = stopNames.data.second.mapIndexed { index, item ->
 								ExoTrainItem(
+									position = index,
 									routeId = routeInfo.routeId,
 									//DO NOT SET IT YET SINCE WE ARE ONLY CHOOSING A DIR
-									stopName = it,
+									stopName = item,
 									direction = stopNames.data.second.last(),
 									trainNum = routeInfo.trainNum,
 									routeName = routeInfo.routeName,
@@ -153,10 +157,11 @@ class DirectionFragmentViewModel(
 								is Result.Success<List<DirectionInfo>> -> {
 									//FIXME this is a mini hack...
 									directions.data as List<DirectionInfo.StmDirectionInfo>
-									_topDirection.value = stopNames.data.first.map {
+									_topDirection.value = stopNames.data.first.mapIndexed { index, item ->
 										StmBusItem(
+											position = index,
 											routeId = routeInfo.routeId,
-											stopName = it,
+											stopName = item,
 											direction = directions.data[0].tripHeadSign,
 											directionId = directions.data[0].directionId,
 											lastStop = stopNames.data.first.last(),
@@ -165,10 +170,11 @@ class DirectionFragmentViewModel(
 									}
 
 									if (directions.data.size > 1){
-										_bottomDirection.value = stopNames.data.second.map {
+										_bottomDirection.value = stopNames.data.second.mapIndexed { index, item ->
 											StmBusItem(
+												position = index,
 												routeId = routeInfo.routeId,
-												stopName = it,
+												stopName = item,
 												direction = directions.data[1].tripHeadSign,
 												directionId = directions.data[1].directionId,
 												lastStop = stopNames.data.second.last(),

@@ -20,6 +20,7 @@ import kotlinx.serialization.encoding.Encoder
 @Parcelize
 @Serializable
 data class ExoFavouriteTrainItemDto(
+	override val position: Int,
 	override val stopName : String,
 	override val routeId : String,
 	override val direction : String,

@@ -10,18 +10,17 @@ import dev.mainhq.bus2go.domain.entity.Tag
 import dev.mainhq.bus2go.domain.entity.TransitData
 import kotlinx.collections.immutable.mutate
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
 class StmFavouritesRepositoryImpl(
-	private val tagsHandler: TagsHandler,
+	private val tagsHandler: TagsHandler, //TODO make as a Datastore instead
 	private val stmFavouritesDataStore: DataStore<StmFavouritesDataDto>
 ) : StmFavouritesRepository {
 
-	override suspend fun getStmBusFavourites(): List<StmBusItem> {
-		return withContext(Dispatchers.IO) {
-			PreferenceMapper.mapStmBus(stmFavouritesDataStore.data.first())
-		}
+	override fun getStmBusFavourites(): Flow<List<StmBusItem>> {
+		return stmFavouritesDataStore.data.map { PreferenceMapper.mapStmBus(it) }
 	}
 
 	override suspend fun removeStmBusFavourite(data: StmBusItem) {

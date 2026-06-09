@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.Animation
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -18,12 +17,11 @@ import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.databinding.FragmentChooseStopBinding
 import dev.mainhq.bus2go.domain.entity.compareTransitData
-import dev.mainhq.bus2go.presentation.stop_direction.ActivityFragment
 import dev.mainhq.bus2go.presentation.stop_direction.AnimationDirection
 import dev.mainhq.bus2go.presentation.stop_direction.StopDirectionViewModel
 import dev.mainhq.bus2go.presentation.stop_times.StopTimesActivity
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
-import dev.mainhq.bus2go.utils.launchViewModelCollect
+import dev.mainhq.bus2go.utils.launchViewModelCollectLatest
 
 //todo
 //instead of doing a huge query on getting the time, we could first retrieve
@@ -66,10 +64,10 @@ class StopFragment : Fragment(R.layout.fragment_choose_stop) {
 
         val adapter = StopListElemsAdapter(
             viewModel.stopNames.value,
-            viewModel.favourites.value,
+            viewModel.favourites.value.flatMap { it.value },
             //TODO update the little star
             toggleFavouritesClickListener = { view, innerTransitData ->
-                if (viewModel.favourites.value.compareTransitData(innerTransitData)){
+                if (viewModel.favourites.value.flatMap { it.value}.compareTransitData(innerTransitData)){
                     viewModel.removeFavourite(innerTransitData)
                     view.findViewById<ImageView>(R.id.favourite_star_selection)
                         .setBackgroundResource(R.drawable.favourite_drawable_off)
@@ -91,14 +89,14 @@ class StopFragment : Fragment(R.layout.fragment_choose_stop) {
         binding.stopRecycleView.layoutManager = LinearLayoutManager(requireContext())
         binding.stopRecycleView.adapter = adapter
 
-        launchViewModelCollect(viewModel.stopNames){
+        launchViewModelCollectLatest(viewModel.stopNames){
             adapter.updateTransitData(it)
             if (it.isEmpty()) {
                 Toast.makeText(requireContext(), "No stops found...", Toast.LENGTH_SHORT).show()
             }
         }
-        launchViewModelCollect(viewModel.favourites){
-            adapter.updateFavourites(it)
+        launchViewModelCollectLatest(viewModel.favourites){
+            adapter.updateFavourites(it.flatMap { it.value })
         }
 
         requireActivity().onBackPressedDispatcher.addCallback(

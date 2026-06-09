@@ -20,7 +20,7 @@
             android:id="@+id/mainDbNeedsUpdateImageView"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:src="@mipmap/ic_launcher"
+            android:src="@drawable/android_icon"
             android:contentDescription="Update Database"
             android:layout_marginHorizontal="10dp"
             app:layout_constraintStart_toStartOf="parent"

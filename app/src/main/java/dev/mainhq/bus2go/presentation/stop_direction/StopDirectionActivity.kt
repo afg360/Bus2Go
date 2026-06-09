@@ -2,10 +2,7 @@ package dev.mainhq.bus2go.presentation.stop_direction
 
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
-import android.widget.Toast
 import androidx.activity.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import dev.mainhq.bus2go.Bus2GoApplication
@@ -16,7 +13,7 @@ import dev.mainhq.bus2go.presentation.stop_direction.direction.DirectionFragment
 import dev.mainhq.bus2go.presentation.stop_direction.direction.DirectionFragmentViewModel
 import dev.mainhq.bus2go.presentation.stop_direction.stop.StopFragment
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
-import dev.mainhq.bus2go.utils.launchViewModelCollect
+import dev.mainhq.bus2go.utils.launchViewModelCollectLatest
 
 class StopDirectionActivity: BaseActivity() {
 
@@ -48,7 +45,7 @@ class StopDirectionActivity: BaseActivity() {
 		}) ?: throw IllegalStateException("Expected a non null RouteInfo passed")
 		directionSharedViewModel.setRouteInfo(routeInfo)
 
-		launchViewModelCollect(viewModel.animationDirection) {
+		launchViewModelCollectLatest(viewModel.animationDirection) {
 			supportFragmentManager.beginTransaction().apply {
 				when (it) {
 					AnimationDirection.TO_TOP -> {

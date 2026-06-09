@@ -11,23 +11,20 @@ import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.domain.repository.ExoFavouritesRepository
 import kotlinx.collections.immutable.mutate
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
 class ExoFavouritesRepositoryImpl(
 	private val tagsHandler: TagsHandler,
 	private val exoFavouritesDataStore: DataStore<ExoFavouritesDataDto>
 ): ExoFavouritesRepository {
-	override suspend fun getExoBusFavourites(): List<ExoBusItem> {
-		return withContext(Dispatchers.IO) {
-			PreferenceMapper.mapExoBus(exoFavouritesDataStore.data.first())
-		}
+	override fun getExoBusFavourites(): Flow<List<ExoBusItem>> {
+		return exoFavouritesDataStore.data.map { PreferenceMapper.mapExoBus(it) }
 	}
 
-	override suspend fun getExoTrainFavourites(): List<ExoTrainItem> {
-		return withContext(Dispatchers.IO) {
-			PreferenceMapper.mapExoTrain(exoFavouritesDataStore.data.first())
-		}
+	override fun getExoTrainFavourites(): Flow<List<ExoTrainItem>> {
+		return exoFavouritesDataStore.data.map { PreferenceMapper.mapExoTrain(it) }
 	}
 
 	override suspend fun removeExoBusFavourite(data: ExoBusItem) {

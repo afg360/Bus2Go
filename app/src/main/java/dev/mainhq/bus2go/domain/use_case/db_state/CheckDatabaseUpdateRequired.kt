@@ -27,8 +27,8 @@ class CheckDatabaseUpdateRequired(
 			.filter { (it.second as Result.Success<LocalDate>).data <= LocalDate.now() }
 			.map {
 				when(it.first.lowercase()) {
-					"stm" -> DbToDownload.STM
-					"exo" -> DbToDownload.EXO
+					DbToDownload.STM.name.lowercase() -> DbToDownload.STM
+					DbToDownload.EXO.name.lowercase() -> DbToDownload.EXO
 					else -> throw IllegalStateException("Invalid data")
 				}
 			}

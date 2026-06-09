@@ -35,7 +35,7 @@ import dev.mainhq.bus2go.presentation.main.home.favourites.FavouritesFragmentSha
 import dev.mainhq.bus2go.presentation.stop_direction.StopDirectionActivity
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
 import dev.mainhq.bus2go.utils.makeVisible
-import dev.mainhq.bus2go.utils.launchViewModelCollect
+import dev.mainhq.bus2go.utils.launchViewModelCollectLatest
 import dev.mainhq.bus2go.utils.makeGone
 
 class HomeFragment: Fragment(R.layout.fragment_home) {
@@ -121,7 +121,7 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
         }
         binding.mainTagsRecyclerview.adapter = adapter
 
-        launchViewModelCollect(favouritesSharedViewModel.tags){ tags ->
+        launchViewModelCollectLatest(favouritesSharedViewModel.tags){ tags ->
             adapter.updateTags(tags)
             if (tags.isEmpty()) {
                 binding.mainTagsRecyclerview.makeGone()
@@ -131,7 +131,7 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
             }
         }
 
-        launchViewModelCollect(favouritesSharedViewModel.tagSelected){ tagSelected ->
+        launchViewModelCollectLatest(favouritesSharedViewModel.tagSelected){ tagSelected ->
             adapter.updateSelectedTag(tagSelected)
         }
 
@@ -148,7 +148,7 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
         binding.searchRecycleView.adapter = busListAdapter
         binding.searchRecycleView.layoutManager = layoutManager
 
-        launchViewModelCollect(homeFragmentViewModel.searchQuery){ results ->
+        launchViewModelCollectLatest(homeFragmentViewModel.searchQuery){ results ->
             when(results){
                 is UiState.Error -> Log.e("DATABASE", "You have jack shit: ${results.message}")
                 UiState.Loading -> throw IllegalStateException("Wtf")
@@ -182,7 +182,7 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
             onBackPressedCallback
         )
 
-        launchViewModelCollect(homeFragmentViewModel.isBackPressed){
+        launchViewModelCollectLatest(homeFragmentViewModel.isBackPressed){
             if (binding.mainSearchView.currentTransitionState == TransitionState.SHOWN) {
                 binding.mainSearchView.hide()
                 onBackPressedCallback.isEnabled = false
@@ -214,11 +214,11 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
 
     private fun setRemoveSelectionMode(){
         //during selection mode, listen to click on select all
-        launchViewModelCollect(favouritesSharedViewModel.selectAllFavourites){ isChecked ->
+        launchViewModelCollectLatest(favouritesSharedViewModel.selectAllFavourites){ isChecked ->
             binding.selectAllCheckbox.isChecked = isChecked ?: false
         }
 
-        launchViewModelCollect(favouritesSharedViewModel.numberFavouritesSelected){ numSelected ->
+        launchViewModelCollectLatest(favouritesSharedViewModel.numberFavouritesSelected){ numSelected ->
             //change the appBar number displayed
             binding.selectedNumsOfFavourites.text = if (numSelected > 0) {
                 binding.removeItemsWidget.makeVisible()
@@ -233,7 +233,7 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
         }
 
         //handling remove selection mode, coming from favourites fragment
-        launchViewModelCollect(favouritesSharedViewModel.selectionMode){ removeFavouritesMode ->
+        launchViewModelCollectLatest(favouritesSharedViewModel.selectionMode){ removeFavouritesMode ->
             if (removeFavouritesMode){
                 /* This is the search bar that will disappear in the appBar */
                 binding.mainSearchBar.makeGone()

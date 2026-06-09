@@ -8,7 +8,7 @@ import androidx.fragment.app.activityViewModels
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.materialswitch.MaterialSwitch
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.utils.launchViewModelCollect
+import dev.mainhq.bus2go.utils.launchViewModelCollectLatest
 
 class ConfigThemeFragment: Fragment(R.layout.fragment_config_theme) {
 
@@ -28,7 +28,7 @@ class ConfigThemeFragment: Fragment(R.layout.fragment_config_theme) {
 			viewModel.setDarkMode(boolean)
 		}
 
-		launchViewModelCollect(viewModel.darkMode){
+		launchViewModelCollectLatest(viewModel.darkMode){
 			switch.isChecked = it
 			if (it) switch.text = "Dark"
 			else switch.text = "Light"

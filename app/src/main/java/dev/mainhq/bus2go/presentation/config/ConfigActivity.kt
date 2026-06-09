@@ -3,19 +3,10 @@ package dev.mainhq.bus2go.presentation.config;
 import android.content.Intent
 import android.os.Bundle;
 import androidx.activity.viewModels
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.edit
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import dev.mainhq.bus2go.presentation.base.BaseActivity
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.data.data_source.local.datastore.app_state.appStateDataStore
 import dev.mainhq.bus2go.presentation.main.MainActivity
-import dev.mainhq.bus2go.utils.launchViewModelCollect
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.launch
+import dev.mainhq.bus2go.utils.launchViewModelCollectLatest
 
 //todo set lang
 //todo set color theme and or icon
@@ -30,7 +21,7 @@ class ConfigActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.config_activity)
 
-        launchViewModelCollect(viewModel.currentFragment) { fragmentToUse ->
+        launchViewModelCollectLatest(viewModel.currentFragment) { fragmentToUse ->
             if (fragmentToUse != null) {
                 val fragment = when (fragmentToUse) {
                     FragmentUsed.WELCOME -> ConfigWelcomeFragment()
@@ -46,7 +37,7 @@ class ConfigActivity : BaseActivity() {
             }
         }
 
-        launchViewModelCollect(viewModel.event){ eventMessage ->
+        launchViewModelCollectLatest(viewModel.event){ eventMessage ->
             if (eventMessage){
                 startActivity(Intent(applicationContext, MainActivity::class.java))
                 finish()

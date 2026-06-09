@@ -17,7 +17,7 @@ import androidx.lifecycle.ViewModelProvider
 import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.databinding.FragmentConfigNotificationsBinding
-import dev.mainhq.bus2go.utils.launchViewModelCollect
+import dev.mainhq.bus2go.utils.launchViewModelCollectLatest
 
 //TODO display in the fragment: You are almost all set!
 
@@ -65,11 +65,11 @@ class ConfigNotificationsFragment: Fragment(R.layout.fragment_config_notificatio
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 		super.onViewCreated(view, savedInstanceState)
 
-		launchViewModelCollect(viewModel.appUpdateNotifs){
+		launchViewModelCollectLatest(viewModel.appUpdateNotifs){
 			binding.configNotificationSwitchAppUpdates.isChecked = it
 		}
 
-		launchViewModelCollect(viewModel.dbUpdateNotifs){
+		launchViewModelCollectLatest(viewModel.dbUpdateNotifs){
 			binding.configNotificationSwitchDbUpdates.isChecked = it
 		}
 

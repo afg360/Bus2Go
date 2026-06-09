@@ -5,13 +5,17 @@ import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
+import android.widget.ImageView
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.domain.entity.TransitData
-import kotlin.math.min
+import dev.mainhq.bus2go.utils.makeGone
+import dev.mainhq.bus2go.utils.makeVisible
+import dev.mainhq.bus2go.utils.swap
 
 //FIXME could make the list thing a bit more efficient and simply change all the times instead
 /**
@@ -28,7 +32,7 @@ class FavouritesListElemsAdapter(
 )
     : RecyclerView.Adapter<FavouritesListElemsAdapter.ViewHolder>(){
 
-    companion object {
+    private companion object {
         private const val CHECKBOXES_PAYLOAD = "CHECKBOXES"
         private const val TIME_PAYLOAD = "TIME"
     }
@@ -37,7 +41,7 @@ class FavouritesListElemsAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(LayoutInflater.from(parent.context)
-            .inflate(R.layout.favourites_list_elem, parent, false)
+            .inflate(R.layout.elem_favourites_list, parent, false)
         )
     }
 
@@ -47,8 +51,9 @@ class FavouritesListElemsAdapter(
 
     //allows us to not refresh the whole recyclerView...
     override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: MutableList<Any>) {
-        if (payloads.isEmpty())
+        if (payloads.isEmpty()) {
             onBindViewHolder(holder, position)
+        }
         else if (payloads[0] == CHECKBOXES_PAYLOAD) {
             holder.checkBoxView.isChecked = list[position].isToRemove(toRemoveList)
         }
@@ -65,12 +70,17 @@ class FavouritesListElemsAdapter(
         if (info.toTruncate){
             holder.directionTextView.text = "${info.directionText.substring(0, FavouritesDisplayModel.DIRECTION_STR_LIMIT)}..."
             holder.directionTextView.setOnClickListener {
-                if (holder.directionTextView.text.contains("..."))
+                if (holder.directionTextView.text.contains("...")) {
                     holder.directionTextView.text = info.directionText
-                else holder.directionTextView.text = "${info.directionText.substring(0, FavouritesDisplayModel.DIRECTION_STR_LIMIT)}..."
+                }
+                else {
+                    holder.directionTextView.text = "${info.directionText.substring(0, FavouritesDisplayModel.DIRECTION_STR_LIMIT)}..."
+                }
             }
         }
-        else holder.directionTextView.text = info.directionText
+        else {
+            holder.directionTextView.text = info.directionText
+        }
         holder.tripHeadsignTextView.text = info.tripHeadsignText
 
         //val drawable = holder.itemView.resources.getDrawable(R.drawable.favourites_tripheadsign_background, null)
@@ -78,10 +88,19 @@ class FavouritesListElemsAdapter(
         //holder.tripHeadsignTextView.setBackgroundDrawable(drawable)
         holder.tripHeadsignTextView.setTextColor(holder.itemView.resources.getColor(info.dataDisplayColor, null))
 
-        if (selectedMode) holder.checkBoxView.visibility = VISIBLE
-        else holder.checkBoxView.visibility = GONE
+        if (selectedMode) {
+            holder.checkBoxView.makeVisible()
+        }
+        else {
+            holder.checkBoxView.makeGone()
+        }
 
         holder.checkBoxView.isChecked = toRemoveList.contains(info.favouriteTransitData)
+
+        //TODO send the movement event to deal with the ItemTouchHelper
+        holder.dragAndDropIcon.setOnLongClickListener {
+            false
+        }
 
         holder.itemView.setOnClickListener { onClickListener(it, info.favouriteTransitData) }
         //holder.checkBoxView.setOnClickListener { onClickListener(holder.itemView, info.favouriteTransitData) }
@@ -97,12 +116,12 @@ class FavouritesListElemsAdapter(
         if (info.arrivalTimeText == null) {
             holder.timeRemainingTextView.textSize = 20F
             holder.timeRemainingTextView.setTextColor(holder.itemView.resources.getColor(R.color.light_grey, null))
-            holder.arrivalTimeTextView.visibility = GONE
+            holder.arrivalTimeTextView.makeGone()
         }
         else {
             holder.timeRemainingTextView.textSize = 30F
             holder.arrivalTimeTextView.text = info.arrivalTimeText
-            holder.arrivalTimeTextView.visibility = VISIBLE
+            holder.arrivalTimeTextView.makeVisible()
             when (info.urgency){
                 Urgency.IMMINENT -> holder.timeRemainingTextView.setTextColor(holder.itemView.resources.getColor(R.color.red, null))
                 Urgency.SOON -> holder.timeRemainingTextView.setTextColor(holder.itemView.resources.getColor(R.color.yellow, null))
@@ -142,6 +161,21 @@ class FavouritesListElemsAdapter(
         notifyItemRangeChanged(0, this.list.size)
     }
 
+    fun moveItem(currPosition: Int, newPosition: Int) {
+        val newList = list.toMutableList()
+        if (currPosition < newPosition) {
+            for (i in currPosition until newPosition) {
+                newList.swap(i, i + 1)
+            }
+        }
+        else {
+            for (i in newPosition downTo currPosition) {
+                newList.swap(i, i - 1)
+            }
+        }
+        list = newList
+        notifyItemMoved(currPosition, newPosition)
+    }
 
     class ViewHolder(view : View) : RecyclerView.ViewHolder(view){
         var checkBoxView : MaterialCheckBox = view.findViewById(R.id.favourites_check_box)
@@ -153,5 +187,6 @@ class FavouritesListElemsAdapter(
         val directionTextView : MaterialTextView = view.findViewById(R.id.favouritesDirectionTextView)
         /** Invisible for all except exo buses */
         //val routeLongNameTextView: MaterialTextView = view.findViewById(R.id.favouritesExoRouteLongNameTextView)
+        val dragAndDropIcon: ImageView = view.findViewById(R.id.favouritesDragAndDropIcon)
     }
 }

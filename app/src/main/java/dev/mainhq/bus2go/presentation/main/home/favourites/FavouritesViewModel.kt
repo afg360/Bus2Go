@@ -12,17 +12,14 @@ import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.domain.entity.TransitDataWithTime
 import dev.mainhq.bus2go.domain.use_case.favourites.AddTag
 import dev.mainhq.bus2go.domain.use_case.favourites.GetFavouritesWithTimeData
-import dev.mainhq.bus2go.domain.use_case.favourites.GetAllTags
 import dev.mainhq.bus2go.domain.use_case.favourites.RemoveFavourite
 import dev.mainhq.bus2go.presentation.core.UiState
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
@@ -32,40 +29,28 @@ import java.time.LocalTime
 
 
 class FavouritesViewModel(
-    private val getFavouritesWithTimeData: GetFavouritesWithTimeData,
+    getFavouritesWithTimeData: GetFavouritesWithTimeData,
     private val removeFavourite: RemoveFavourite,
     private val addTag: AddTag
 ) : ViewModel(){
 
-    private val _running = MutableStateFlow(true)
     //3) eventually some sort of sorting/categorisation of favourites
     //The whole data set to be displayed initially
     //What is actually displayed on the screen
-    private val _favouriteTransitData = flow {
-        while (_running.value) {
-            //FIXME code seems inefficient by going so many times to the repo... perhaps only
-            // useless when no favourites made...
-            // do it when some time is less than some other time
-            when (val favouritesWithTimeData = getFavouritesWithTimeData.invoke()) {
-                is Result.Error -> TODO()
-                is Result.Success<List<TransitDataWithTime>> -> {
-                    if (favouritesWithTimeData.data.isNotEmpty()) {
-                        emit(favouritesWithTimeData.data)
+
+    //should be using stateFlow, but I hate that goes through an empty list first and that gets displayed...
+	private val _favouriteTransitData = getFavouritesWithTimeData.invoke().map { favouritesTimeWithData ->
+                when(favouritesTimeWithData) {
+                    is Result.Error -> TODO()
+                    is Result.Success<List<TransitDataWithTime>> -> {
+						favouritesTimeWithData.data.ifEmpty { emptyList() }
                     }
-                    else {
-                        emit(emptyList())
-                        //_running.update { false }
-                    }
-                }
-            }
-            delay(1000)
         }
-    }.shareIn(viewModelScope, started = SharingStarted.WhileSubscribed(5000), replay = 1)
+    }
 
     //null if none selected
     private val _selectedTag: MutableStateFlow<String?> = MutableStateFlow(null)
 
-    //could also use a combine flow operation...?
     val favouriteDisplayTransitData = combine(
         _favouriteTransitData,
         _selectedTag
@@ -77,19 +62,12 @@ class FavouritesViewModel(
                     if (it.arrivalTime != null) {
                         val timeRemaining = it.arrivalTime.timeRemaining()
                         val isUrgent =
-                            if (timeRemaining == null || timeRemaining < LocalTime.of(
-                                    0,
-                                    4,
-                                    0
-                                )
-                            ) Urgency.IMMINENT
-                            else if (timeRemaining < LocalTime.of(
-                                    0,
-                                    11,
-                                    0
-                                )
-                            ) Urgency.SOON
-                            else Urgency.DISTANT
+                            if (timeRemaining == null || timeRemaining < LocalTime.of(0, 4, 0))
+                                Urgency.IMMINENT
+                            else if (timeRemaining < LocalTime.of(0, 11, 0))
+                                Urgency.SOON
+                            else
+                                Urgency.DISTANT
                         when (it.favouriteTransitData) {
                             is ExoBusItem -> {
                                 FavouritesDisplayModel(
@@ -183,8 +161,7 @@ class FavouritesViewModel(
                         }
                     }
                 }
-        )}
-        .stateIn(viewModelScope, started = SharingStarted.WhileSubscribed(5000), initialValue = UiState.Loading)
+        )}.stateIn(viewModelScope, started = SharingStarted.WhileSubscribed(5000), initialValue = UiState.Loading)
 
     private val _favouritesToRemove: MutableStateFlow<List<TransitData>> = MutableStateFlow(listOf())
     val favouritesToRemove = _favouritesToRemove.asStateFlow()
@@ -193,7 +170,6 @@ class FavouritesViewModel(
     private val _selectionMode: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val selectionMode = _selectionMode.asStateFlow()
     private val _wasSelectionMode: MutableStateFlow<Boolean> = MutableStateFlow(false)
-
 
 
     fun selectTag(tag: String){
@@ -270,9 +246,7 @@ class FavouritesViewModel(
         viewModelScope.launch {
             _favouritesToRemove.value
                 .map { favouriteTransitData ->
-                    async {
-                        removeFavourite.invoke(favouriteTransitData)
-                    }
+                    async { removeFavourite.invoke(favouriteTransitData) }
                 }.awaitAll()
 
             if (_favouritesToRemove.value.isEmpty()){
@@ -289,10 +263,4 @@ class FavouritesViewModel(
             addTag.invoke(tagToAdd, transitData)
         }
     }
-
-    override fun onCleared() {
-        super.onCleared()
-        _running.update { false }
-    }
-
 }

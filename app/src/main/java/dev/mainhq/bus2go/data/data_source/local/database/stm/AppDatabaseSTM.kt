@@ -11,6 +11,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import dev.mainhq.bus2go.data.data_source.local.Converters
 import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.CalendarDAO
 import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.CalendarDatesDAO
+import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.ConfigDAO
 import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.FormsDAO
 import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.RoutesDAO
 import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.ShapesDAO
@@ -45,6 +46,7 @@ abstract class AppDatabaseSTM : RoomDatabase() {
     abstract fun calendarDatesDao() : CalendarDatesDAO
     abstract fun shapesDao() : ShapesDAO
     abstract fun formsDao() : FormsDAO
+//    abstract fun configDao(): ConfigDAO
 
     companion object {
         //TODO eventually write the version name on filename, not in config file

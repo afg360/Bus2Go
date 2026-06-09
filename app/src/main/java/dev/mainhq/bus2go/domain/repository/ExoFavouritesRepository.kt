@@ -2,12 +2,13 @@ package dev.mainhq.bus2go.domain.repository
 
 import dev.mainhq.bus2go.domain.entity.ExoBusItem
 import dev.mainhq.bus2go.domain.entity.ExoTrainItem
+import kotlinx.coroutines.flow.Flow
 
 //TODO output a result object (in case of failure, we will retry...), or maybe a boolean...
 interface ExoFavouritesRepository: FavouritesRepository {
 
-	suspend fun getExoBusFavourites(): List<ExoBusItem>
-	suspend fun getExoTrainFavourites(): List<ExoTrainItem>
+	fun getExoBusFavourites(): Flow<List<ExoBusItem>>
+	fun getExoTrainFavourites(): Flow<List<ExoTrainItem>>
 
 	suspend fun removeExoBusFavourite(data : ExoBusItem)
 	suspend fun removeExoTrainFavourite(data : ExoTrainItem)
