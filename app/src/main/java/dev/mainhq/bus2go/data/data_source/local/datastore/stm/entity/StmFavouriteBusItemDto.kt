@@ -23,7 +23,7 @@ import kotlinx.serialization.encoding.Encoder
  * @param routeId aka busNum.
  **/
 data class StmFavouriteBusItemDto(
-	override val position: Int,
+	override val id: String,
 	override val stopName: String,
 	override val routeId : String,
 	override val direction : String,
@@ -53,4 +53,3 @@ class PersistentStmBusInfoListSerializer(private val serializer: KSerializer<Stm
 		return ListSerializer(serializer).deserialize(decoder).toPersistentList()
 	}
 }
-

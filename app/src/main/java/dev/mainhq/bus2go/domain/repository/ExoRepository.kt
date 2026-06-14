@@ -2,16 +2,17 @@ package dev.mainhq.bus2go.domain.repository
 
 import dev.mainhq.bus2go.domain.entity.RouteInfo
 import dev.mainhq.bus2go.domain.entity.TransitData
-import dev.mainhq.bus2go.domain.entity.TransitDataWithTime
 import dev.mainhq.bus2go.domain.entity.ExoBusItem
 import dev.mainhq.bus2go.domain.entity.ExoTrainItem
 import dev.mainhq.bus2go.domain.entity.FuzzyQuery
 import dev.mainhq.bus2go.domain.entity.Time
 import dev.mainhq.bus2go.domain.core.Result
+import dev.mainhq.bus2go.domain.entity.FavouriteTransitData.ExoBusFavouriteItem
+import dev.mainhq.bus2go.domain.entity.FavouriteTransitData.ExoTrainFavouriteItem
+import dev.mainhq.bus2go.domain.entity.FavouriteTransitDataWithTime
 import dev.mainhq.bus2go.domain.entity.stm.DirectionInfo
 
 interface ExoRepository: TransitRepository {
-
 
 	//suspend fun getBusDir(routeId: String) : String
 	/** Queries for buses and trains with a name matching with the query. */
@@ -28,9 +29,9 @@ interface ExoRepository: TransitRepository {
 	suspend fun getBusStopTimes(exoBusItem: ExoBusItem, curTime: Time) : Result<List<Time>>
 	//TODO? renaming of the method to getBusOldStopTimes and for trains...?
 	suspend fun getOldStopTimes(exoTransitData: TransitData, curTime: Time) : Result<List<Time>>
-	suspend fun getFavouriteBusStopTime(exoFavouriteBusItem: ExoBusItem, curTime: Time) : Result<TransitDataWithTime>
+	suspend fun getFavouriteBusStopTime(exoFavouriteBusItem: ExoBusFavouriteItem, curTime: Time) : Result<FavouriteTransitDataWithTime>
 	suspend fun getTrainStopTimes(exoTrainItem: ExoTrainItem, curTime: Time) : Result<List<Time>>
-	suspend fun getFavouriteTrainStopTime(exoFavouriteTrainItem: ExoTrainItem, curTime: Time) : Result<TransitDataWithTime>
+	suspend fun getFavouriteTrainStopTime(exoFavouriteTrainItem: ExoTrainFavouriteItem, curTime: Time) : Result<FavouriteTransitDataWithTime>
 
 	suspend fun getBusTripHeadsigns(routeId : String) : Result<List<DirectionInfo>>
 

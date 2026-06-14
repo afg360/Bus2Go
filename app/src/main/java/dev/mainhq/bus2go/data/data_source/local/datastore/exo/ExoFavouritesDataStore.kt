@@ -11,15 +11,14 @@ import dev.mainhq.bus2go.data.data_source.local.datastore.exo.entity.ExoFavourit
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import java.io.File
+import java.util.UUID
 
-//TODO
 val Context.exoFavouritesDataStore by dataStore(
 	fileName = "favourites_exo_v2.json",
 	serializer = ExoFavouritesDataSerializer,
 	produceMigrations = { context -> listOf(
 		object : DataMigration<ExoFavouritesDataDto> {
 			override suspend fun cleanUp() {
-				//MigrationObserver.notifyExoCleanUpReady(context)
 				File(context.filesDir.resolve("datastore"), "favourites_exo.json")
 					.apply {
 						if (exists()){
@@ -43,9 +42,9 @@ val Context.exoFavouritesDataStore by dataStore(
 				}
 				return ExoFavouritesDataDto(
 					version = 2,
-					listExo = oldData.listExo.mapIndexed { index, item ->
+					listExo = oldData.listExo.map { item ->
 						ExoFavouriteBusItemDto(
-							position = index,
+							id = UUID.randomUUID().toString(),
 							stopName = item.stopName,
 							routeId = item.routeId,
 							direction = item.direction,
@@ -55,7 +54,7 @@ val Context.exoFavouritesDataStore by dataStore(
 					}.toPersistentList(),
 					listExoTrain = oldData.listExoTrain.mapIndexed { index, item ->
 						ExoFavouriteTrainItemDto(
-							position = index,
+							id = UUID.randomUUID().toString(),
 							stopName = item.stopName,
 							routeId = item.routeId,
 							direction = item.direction,

@@ -79,7 +79,6 @@ class DirectionFragmentViewModel(
 											//FIXME normally, we should use a separate class, but for
 											// simplicity, it works for now
 											ExoBusItem(
-												position = index,
 												routeId = routeInfo.routeId,
 												stopName = item,
 												direction = headsigns.data.first().tripHeadSign,
@@ -93,7 +92,6 @@ class DirectionFragmentViewModel(
 										_bottomDirection.update {
 											stopNames.data.second.mapIndexed { index, item ->
 												ExoBusItem(
-													position = index,
 													routeId = routeInfo.routeId,
 													stopName = item,
 													direction = headsigns.data.last().tripHeadSign,
@@ -117,7 +115,6 @@ class DirectionFragmentViewModel(
 							//_cardViewColour.value = R.color.transparent_orange
 							_topDirection.value = stopNames.data.first.mapIndexed { index, item ->
 								ExoTrainItem(
-									position = index,
 									routeId = routeInfo.routeId,
 									//DO NOT SET IT YET SINCE WE ARE ONLY CHOOSING A DIR
 									stopName = item,
@@ -131,7 +128,6 @@ class DirectionFragmentViewModel(
 
 							_bottomDirection.value = stopNames.data.second.mapIndexed { index, item ->
 								ExoTrainItem(
-									position = index,
 									routeId = routeInfo.routeId,
 									//DO NOT SET IT YET SINCE WE ARE ONLY CHOOSING A DIR
 									stopName = item,
@@ -159,7 +155,6 @@ class DirectionFragmentViewModel(
 									directions.data as List<DirectionInfo.StmDirectionInfo>
 									_topDirection.value = stopNames.data.first.mapIndexed { index, item ->
 										StmBusItem(
-											position = index,
 											routeId = routeInfo.routeId,
 											stopName = item,
 											direction = directions.data[0].tripHeadSign,
@@ -172,7 +167,6 @@ class DirectionFragmentViewModel(
 									if (directions.data.size > 1){
 										_bottomDirection.value = stopNames.data.second.mapIndexed { index, item ->
 											StmBusItem(
-												position = index,
 												routeId = routeInfo.routeId,
 												stopName = item,
 												direction = directions.data[1].tripHeadSign,

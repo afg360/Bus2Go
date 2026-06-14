@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.core.view.forEach
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModel
@@ -19,10 +18,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.domain.exceptions.Bus2GoBaseException
 import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.databinding.FragmentFavouritesBinding
+import dev.mainhq.bus2go.domain.entity.FavouriteTransitData
 import dev.mainhq.bus2go.presentation.core.UiState
 import dev.mainhq.bus2go.presentation.main.home.TagEvent
 import dev.mainhq.bus2go.presentation.stop_times.StopTimesActivity
@@ -31,6 +30,7 @@ import dev.mainhq.bus2go.utils.launchViewModelCollectLatest
 import dev.mainhq.bus2go.utils.makeGone
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.filterNotNull
+import dev.mainhq.bus2go.presentation.main.home.favourites.FavouritesDisplayModel
 
 
 class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
@@ -87,7 +87,7 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
                 }
                 else {
                     val intent = Intent(view.context, StopTimesActivity::class.java)
-                    intent.putExtra(ExtrasTagNames.TRANSIT_DATA, favouriteTransitData)
+                    intent.putExtra(ExtrasTagNames.TRANSIT_DATA, FavouriteTransitData.fromFavouriteTransitDataToTransitData(favouriteTransitData))
 
                     itemView.context.startActivity(intent)
                     view.clearFocus()
@@ -115,6 +115,7 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
                 dragged: RecyclerView.ViewHolder,
                 target: RecyclerView.ViewHolder,
             ): Boolean {
+                favouritesViewModel
                 (recyclerView.adapter as FavouritesListElemsAdapter?)
                     ?.moveItem(dragged.adapterPosition, target.adapterPosition)
                 return true
@@ -163,7 +164,7 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
 
         jobs.add(
             launchViewModelCollectLatest(favouritesViewModel.favouritesToRemove.filterNotNull()) {
-                    favouritesToRemove -> adapter.toggleForRemoval(favouritesToRemove)
+                favouritesToRemove -> adapter.toggleForRemoval(favouritesToRemove)
             })
 
 
@@ -254,7 +255,7 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
             }
     }
 
-    private fun selectFavourite(itemView: View, favouriteTransitData: TransitData){
+    private fun selectFavourite(itemView: View, favouriteTransitData: FavouriteTransitData){
         val checkBoxView = itemView.findViewById<MaterialCheckBox>(R.id.favourites_check_box)
         checkBoxView.isChecked = !checkBoxView.isChecked
         if (checkBoxView.isChecked) favouritesSharedViewModel.incrementNumFavouritesSelected()

@@ -1,9 +1,10 @@
 package dev.mainhq.bus2go.domain.use_case.favourites
 
 import dev.mainhq.bus2go.domain.entity.TransitData
-import dev.mainhq.bus2go.domain.entity.ExoBusItem
-import dev.mainhq.bus2go.domain.entity.ExoTrainItem
-import dev.mainhq.bus2go.domain.entity.StmBusItem
+import dev.mainhq.bus2go.domain.entity.FavouriteTransitData
+import dev.mainhq.bus2go.domain.entity.FavouriteTransitData.StmBusFavouriteItem
+import dev.mainhq.bus2go.domain.entity.FavouriteTransitData.ExoBusFavouriteItem
+import dev.mainhq.bus2go.domain.entity.FavouriteTransitData.ExoTrainFavouriteItem
 import dev.mainhq.bus2go.domain.repository.ExoFavouritesRepository
 import dev.mainhq.bus2go.domain.repository.StmFavouritesRepository
 
@@ -12,11 +13,19 @@ class AddFavourite(
 	private val stmFavouritesRepository: StmFavouritesRepository
 ) {
 
-	suspend operator fun invoke(favourite: TransitData){
+	suspend operator fun invoke(transitData: TransitData){
+		//FIXME need algo for getting correct position to put in
+		val favourite = FavouriteTransitData.fromTransitDataToFavouriteTransitData(transitData, )
 		when(favourite){
-			is StmBusItem -> stmFavouritesRepository.addStmBusFavourite(favourite)
-			is ExoTrainItem -> exoFavouritesRepository.addExoTrainFavourite(favourite)
-			is ExoBusItem -> exoFavouritesRepository.addExoBusFavourite(favourite)
+			is StmBusFavouriteItem -> {
+				stmFavouritesRepository.addStmBusFavourite(favourite)
+			}
+			is ExoBusFavouriteItem -> {
+				exoFavouritesRepository.addExoBusFavourite(favourite)
+			}
+			is ExoTrainFavouriteItem -> {
+				exoFavouritesRepository.addExoTrainFavourite(favourite)
+			}
 		}
 	}
 }

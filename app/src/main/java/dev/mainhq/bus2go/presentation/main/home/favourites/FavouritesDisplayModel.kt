@@ -1,11 +1,11 @@
 package dev.mainhq.bus2go.presentation.main.home.favourites
 
-import dev.mainhq.bus2go.domain.entity.TransitData
+import dev.mainhq.bus2go.domain.entity.FavouriteTransitData
 
 data class FavouritesDisplayModel(
 	//not ideal to have it non-private, but allows us for the moment to setup the onLongClickListener
 	// for the favouritesListElemsAdapter
-	val favouriteTransitData: TransitData,
+	val favouriteTransitData: FavouriteTransitData,
 	val directionText: String,
 	//tells us if directionText needs to be truncated bcz of its size
 	val toTruncate: Boolean,
@@ -31,7 +31,7 @@ data class FavouritesDisplayModel(
 				stopNameText == other.stopNameText
 	}
 
-	fun isToRemove(toRemove: List<TransitData>): Boolean{
+	fun isToRemove(toRemove: List<FavouriteTransitData>): Boolean{
 		return toRemove.contains(favouriteTransitData)
 	}
 }

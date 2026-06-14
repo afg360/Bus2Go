@@ -2,16 +2,14 @@ package dev.mainhq.bus2go.presentation.main.home.favourites
 
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.ImageView
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
+import dev.mainhq.bus2go.domain.entity.FavouriteTransitData
 import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.utils.makeGone
 import dev.mainhq.bus2go.utils.makeVisible
@@ -26,9 +24,9 @@ import dev.mainhq.bus2go.utils.swap
  **/
 class FavouritesListElemsAdapter(
     private var list : List<FavouritesDisplayModel>,
-    private val onClickListener: (View, TransitData) -> Unit,
-    private val onLongClickListener: (View, TransitData) -> Boolean,
-    private var toRemoveList: List<TransitData>
+    private val onClickListener: (View, FavouriteTransitData) -> Unit,
+    private val onLongClickListener: (View, FavouriteTransitData) -> Boolean,
+    private var toRemoveList: List<FavouriteTransitData>
 )
     : RecyclerView.Adapter<FavouritesListElemsAdapter.ViewHolder>(){
 
@@ -144,7 +142,7 @@ class FavouritesListElemsAdapter(
         //}
     }
 
-    fun toggleForRemoval(items: List<TransitData>){
+    fun toggleForRemoval(items: List<FavouriteTransitData>){
         this.toRemoveList = items
         notifyItemRangeChanged(0, this.list.size, CHECKBOXES_PAYLOAD)
     }

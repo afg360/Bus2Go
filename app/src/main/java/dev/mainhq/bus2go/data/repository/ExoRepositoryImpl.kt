@@ -6,11 +6,13 @@ import dev.mainhq.bus2go.data.data_source.local.database.exo.dao.RoutesDAO
 import dev.mainhq.bus2go.data.data_source.local.database.exo.dao.StopTimesDAO
 import dev.mainhq.bus2go.data.data_source.local.database.exo.dao.TripsDAO
 import dev.mainhq.bus2go.domain.entity.TransitData
-import dev.mainhq.bus2go.domain.entity.TransitDataWithTime
 import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.entity.RouteInfo
 import dev.mainhq.bus2go.domain.entity.ExoBusItem
 import dev.mainhq.bus2go.domain.entity.ExoTrainItem
+import dev.mainhq.bus2go.domain.entity.FavouriteTransitData.ExoBusFavouriteItem
+import dev.mainhq.bus2go.domain.entity.FavouriteTransitData.ExoTrainFavouriteItem
+import dev.mainhq.bus2go.domain.entity.FavouriteTransitDataWithTime
 import dev.mainhq.bus2go.domain.repository.ExoRepository
 import dev.mainhq.bus2go.domain.entity.FuzzyQuery
 import dev.mainhq.bus2go.domain.entity.Time
@@ -95,13 +97,13 @@ class ExoRepositoryImpl(
 	}
 
 	override suspend fun getFavouriteBusStopTime(
-		exoFavouriteBusItem: ExoBusItem,
+		exoFavouriteBusItem: ExoBusFavouriteItem,
 		curTime: Time,
-	): Result<TransitDataWithTime> {
+	): Result<FavouriteTransitDataWithTime> {
 		return stopTimesDAO?.let {
 			withContext(Dispatchers.IO){
 				Result.Success(
-					TransitDataWithTime(
+					FavouriteTransitDataWithTime(
 						exoFavouriteBusItem,
 						it.getFavouriteBusStopTime(
 							exoFavouriteBusItem.stopName,
@@ -136,13 +138,13 @@ class ExoRepositoryImpl(
 
 
 	override suspend fun getFavouriteTrainStopTime(
-		exoFavouriteTrainItem: ExoTrainItem,
+		exoFavouriteTrainItem: ExoTrainFavouriteItem,
 		curTime: Time,
-	) : Result<TransitDataWithTime> {
+	) : Result<FavouriteTransitDataWithTime> {
 		return stopTimesDAO?.let {
 			withContext(Dispatchers.IO){
 				Result.Success(
-					TransitDataWithTime(
+					FavouriteTransitDataWithTime(
 						exoFavouriteTrainItem,
 						it.getFavouriteTrainStopTime(exoFavouriteTrainItem.routeId,
 							exoFavouriteTrainItem.stopName,

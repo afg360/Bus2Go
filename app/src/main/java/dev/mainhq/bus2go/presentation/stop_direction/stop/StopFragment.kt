@@ -17,6 +17,7 @@ import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.databinding.FragmentChooseStopBinding
 import dev.mainhq.bus2go.domain.entity.compareTransitData
+import dev.mainhq.bus2go.domain.entity.getSameFavouriteItem
 import dev.mainhq.bus2go.presentation.stop_direction.AnimationDirection
 import dev.mainhq.bus2go.presentation.stop_direction.StopDirectionViewModel
 import dev.mainhq.bus2go.presentation.stop_times.StopTimesActivity
@@ -67,8 +68,9 @@ class StopFragment : Fragment(R.layout.fragment_choose_stop) {
             viewModel.favourites.value.flatMap { it.value },
             //TODO update the little star
             toggleFavouritesClickListener = { view, innerTransitData ->
-                if (viewModel.favourites.value.flatMap { it.value}.compareTransitData(innerTransitData)){
-                    viewModel.removeFavourite(innerTransitData)
+                val favouriteItem = viewModel.favourites.value.flatMap { it.value }.getSameFavouriteItem(innerTransitData)
+                if (favouriteItem != null){
+                    viewModel.removeFavourite(favouriteItem)
                     view.findViewById<ImageView>(R.id.favourite_star_selection)
                         .setBackgroundResource(R.drawable.favourite_drawable_off)
                 }

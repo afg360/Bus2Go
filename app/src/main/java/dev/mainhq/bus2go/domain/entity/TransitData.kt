@@ -6,7 +6,6 @@ import kotlinx.parcelize.Parcelize
 
 /** Entity to interface with data coming from dataStore */
 sealed class TransitData: Parcelable {
-	abstract val position : Int //used to get the position in which it is laid out in the list
 	abstract val routeId : String
 	abstract val stopName : String
 	abstract val direction : String
@@ -17,13 +16,25 @@ sealed class TransitData: Parcelable {
 	}
 }
 
-fun <T: TransitData> Iterable<T>.compareTransitData(other: T): Boolean {
+fun <T: FavouriteTransitData, R: TransitData> Iterable<T>.compareTransitData(other: R): Boolean {
 	this.forEach {
-		if (it.compareMainAttr(other)){
+		if (FavouriteTransitData.fromFavouriteTransitDataToTransitData(it).compareMainAttr(other)){
 			return true
 		}
 	}
 	return false
+}
+
+/**
+ * @return The FavouriteTransitData in the iterable equivalent to the input TransitData
+ * */
+fun <T: FavouriteTransitData, R: TransitData> Iterable<T>.getSameFavouriteItem(other: R): T? {
+	this.forEach {
+		if (FavouriteTransitData.fromFavouriteTransitDataToTransitData(it).compareMainAttr(other)){
+			return it
+		}
+	}
+	return null
 }
 
 @Parcelize
@@ -31,7 +42,6 @@ fun <T: TransitData> Iterable<T>.compareTransitData(other: T): Boolean {
  * @param routeId aka busNum.
  **/
 data class StmBusItem(
-	override val position: Int,
 	override val routeId : String,
 	override val stopName: String,
 	override val direction : String,
@@ -46,7 +56,6 @@ data class StmBusItem(
  * @param direction aka headsign
  * */
 data class ExoBusItem(
-	override val position: Int,
 	override val routeId : String,
 	override val stopName : String,
 	override val direction: String,
@@ -57,7 +66,6 @@ data class ExoBusItem(
 
 @Parcelize
 data class ExoTrainItem(
-	override val position: Int,
 	override val routeId : String,
 	override val stopName : String,
 	override val direction : String,

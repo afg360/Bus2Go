@@ -1,5 +1,6 @@
 package dev.mainhq.bus2go.domain.use_case.favourites
 
+import dev.mainhq.bus2go.domain.entity.FavouriteTransitData
 import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.domain.entity.TransitType
 import dev.mainhq.bus2go.domain.repository.ExoFavouritesRepository
@@ -12,7 +13,7 @@ class GetFavourites(
 	private val stmFavouritesRepository: StmFavouritesRepository
 ) {
 
-	operator fun invoke(): Flow<HashMap<TransitType, List<TransitData>>> {
+	operator fun invoke(): Flow<HashMap<TransitType, List<FavouriteTransitData>>> {
 		return combine(
 			stmFavouritesRepository.getStmBusFavourites(),
 			exoFavouritesRepository.getExoBusFavourites(),

@@ -1,10 +1,11 @@
 package dev.mainhq.bus2go.domain.use_case.favourites
 
 import dev.mainhq.bus2go.domain.core.Result
-import dev.mainhq.bus2go.domain.entity.ExoBusItem
 import dev.mainhq.bus2go.domain.entity.ExoTrainItem
-import dev.mainhq.bus2go.domain.entity.StmBusItem
-import dev.mainhq.bus2go.domain.entity.TransitDataWithTime
+import dev.mainhq.bus2go.domain.entity.FavouriteTransitData.StmBusFavouriteItem
+import dev.mainhq.bus2go.domain.entity.FavouriteTransitData.ExoBusFavouriteItem
+import dev.mainhq.bus2go.domain.entity.FavouriteTransitData.ExoTrainFavouriteItem
+import dev.mainhq.bus2go.domain.entity.FavouriteTransitDataWithTime
 import dev.mainhq.bus2go.domain.repository.ExoRepository
 import dev.mainhq.bus2go.domain.repository.StmRepository
 import dev.mainhq.bus2go.domain.entity.Time
@@ -25,7 +26,7 @@ class GetFavouritesWithTimeData(
 
 	//FIXME perhaps use a flow instead since we will be continusously updating the curTime
 	@OptIn(ExperimentalCoroutinesApi::class)
-	operator fun invoke(): Flow<Result<List<TransitDataWithTime>>> {
+	operator fun invoke(): Flow<Result<List<FavouriteTransitDataWithTime>>> {
 		//TODO have a better algorithm to handle correctly the position sorting (right now STM will always be on top of others)
 		return getFavourites.invoke().transformLatest { hashMap ->
 			while (true) {
@@ -35,25 +36,25 @@ class GetFavouritesWithTimeData(
 						when(map.key) {
 							TransitType.STM -> {
 								map.value
-									.sortedBy { it.position }
-									.map { stmRepository.getFavouriteStopTime(it as StmBusItem, time) }
+									.map { stmRepository.getFavouriteStopTime(it as StmBusFavouriteItem, time) }
 									.filter { it.instanceOf(Result.Success::class) }
 									.map { (it as Result.Success).data }
 							}
 							TransitType.EXO_BUS -> {
-								map.value.sortedBy { it.position }
-									.map { exoRepository.getFavouriteBusStopTime(it as ExoBusItem, time) }
+								map.value
+									.map { exoRepository.getFavouriteBusStopTime(it as ExoBusFavouriteItem, time) }
 									.filter { it.instanceOf(Result.Success::class) }
 									.map { (it as Result.Success).data }
 							}
 							TransitType.EXO_TRAIN -> {
-								map.value.sortedBy { it.position }
-									.map { exoRepository.getFavouriteTrainStopTime(it as ExoTrainItem, time) }
+								map.value
+									.map { exoRepository.getFavouriteTrainStopTime(it as ExoTrainFavouriteItem, time) }
 									.filter { it.instanceOf(Result.Success::class) }
 									.map { (it as Result.Success).data }
 							}
 						}
 					}.flatten()
+					//FIXME what happens if multiple items have the same position number (e.g. because from different agencies)
 				))
 				delay(5000)
 			}

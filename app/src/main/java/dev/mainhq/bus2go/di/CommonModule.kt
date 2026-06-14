@@ -6,6 +6,7 @@ import dev.mainhq.bus2go.data.data_source.local.database.exo.AppDatabaseExo
 import dev.mainhq.bus2go.data.data_source.local.database.stm.AppDatabaseSTM
 import dev.mainhq.bus2go.data.data_source.local.datastore.app_state.appStateDataStore
 import dev.mainhq.bus2go.data.data_source.local.datastore.exo.exoFavouritesDataStore
+import dev.mainhq.bus2go.data.data_source.local.datastore.favourites_position.favouritesPositionDataStore
 import dev.mainhq.bus2go.data.data_source.local.datastore.stm.stmFavouritesDataStore
 import dev.mainhq.bus2go.data.data_source.local.datastore.tags.TagsHandler
 import dev.mainhq.bus2go.data.data_source.notifications.NotificationHandler
@@ -58,7 +59,8 @@ class CommonModule(applicationContext: Context) {
 
 	private val stmFavouritesRepository = StmFavouritesRepositoryImpl(
 		tagsHandler = tagsHandler,
-		stmFavouritesDataStore = applicationContext.stmFavouritesDataStore
+		stmFavouritesDataStore = applicationContext.stmFavouritesDataStore,
+		favouritesPositionDataStore = applicationContext.favouritesPositionDataStore
 	)
 
 	private val exoDatabase = AppDatabaseExo.getInstance(applicationContext)
@@ -71,7 +73,8 @@ class CommonModule(applicationContext: Context) {
 
 	private val exoFavouritesRepository = ExoFavouritesRepositoryImpl(
 		tagsHandler = tagsHandler,
-		exoFavouritesDataStore = applicationContext.exoFavouritesDataStore
+		exoFavouritesDataStore = applicationContext.exoFavouritesDataStore,
+		favouritesPositionDataStore = applicationContext.favouritesPositionDataStore
 	)
 
 	val getAllTags = GetAllTags(

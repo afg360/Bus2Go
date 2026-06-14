@@ -9,12 +9,12 @@ import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.StopsDAO
 import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.StopsInfoDAO
 import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.TripsDAO
 import dev.mainhq.bus2go.data.data_source.local.datastore.PreferenceMapper
+import dev.mainhq.bus2go.domain.entity.FavouriteTransitData.StmBusFavouriteItem
 import dev.mainhq.bus2go.domain.entity.stm.CalendarDates
 import dev.mainhq.bus2go.domain.repository.StmRepository
 import dev.mainhq.bus2go.domain.entity.TransitData
-import dev.mainhq.bus2go.domain.entity.TransitDataWithTime
+import dev.mainhq.bus2go.domain.entity.FavouriteTransitDataWithTime
 import dev.mainhq.bus2go.domain.entity.RouteInfo
-import dev.mainhq.bus2go.domain.entity.StmBusItem
 import dev.mainhq.bus2go.domain.entity.FuzzyQuery
 import dev.mainhq.bus2go.domain.entity.Time
 import dev.mainhq.bus2go.domain.entity.stm.DirectionInfo
@@ -118,14 +118,14 @@ class StmRepositoryImpl(
 
 	//TODO move to FavouritesImpl?
 	override suspend fun getFavouriteStopTime(
-		stmFavouriteBusItem: StmBusItem,
+		stmFavouriteBusItem: StmBusFavouriteItem,
 		curTime: Time
-	): Result<TransitDataWithTime> {
+	): Result<FavouriteTransitDataWithTime> {
 		return stopsInfoDAO?.let {
 			withContext(Dispatchers.IO){
 				val stmFavouriteBusItemDto = PreferenceMapper.mapStmBusToDto(stmFavouriteBusItem)
 				Result.Success(
-					TransitDataWithTime(
+					FavouriteTransitDataWithTime(
 						stmFavouriteBusItem,
 						it.getFavouriteStopTime(
 							stmFavouriteBusItemDto.stopName,

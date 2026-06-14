@@ -10,6 +10,7 @@ import dev.mainhq.bus2go.data.data_source.local.datastore.stm.entity.StmFavourit
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import java.io.File
+import java.util.UUID
 
 val Context.stmFavouritesDataStore by dataStore(
 	fileName = "favourites_stm_v2.json",
@@ -46,9 +47,9 @@ val Context.stmFavouritesDataStore by dataStore(
 
 				return StmFavouritesDataDto(
 					version = 2,
-					listSTM = dataV1.listSTM.mapIndexed { index, item  ->
+					listSTM = dataV1.listSTM.map { item  ->
 						StmFavouriteBusItemDto(
-							index,
+							id = UUID.randomUUID().toString(),
 							item.stopName,
 							item.routeId,
 							item.direction,

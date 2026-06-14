@@ -9,6 +9,7 @@ import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.domain.entity.ExoBusItem
 import dev.mainhq.bus2go.domain.entity.ExoTrainItem
+import dev.mainhq.bus2go.domain.entity.FavouriteTransitData
 import dev.mainhq.bus2go.domain.entity.StmBusItem
 import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.domain.entity.compareTransitData
@@ -16,7 +17,7 @@ import dev.mainhq.bus2go.domain.entity.compareTransitData
 
 class StopListElemsAdapter (
     private var transitData: List<TransitData>,
-    private var favourites: List<TransitData>,
+    private var favourites: List<FavouriteTransitData>,
     private val toggleFavouritesClickListener: (View, TransitData) -> Unit,
     private val onClickListener: (TransitData) -> Unit
 ) : RecyclerView.Adapter<StopListElemsAdapter.ViewHolder>() {
@@ -75,7 +76,7 @@ class StopListElemsAdapter (
         notifyItemRangeChanged(0, itemCount)
     }
 
-    fun updateFavourites(favourites: List<TransitData>){
+    fun updateFavourites(favourites: List<FavouriteTransitData>){
         this.favourites = favourites
         notifyItemRangeChanged(0, itemCount, FAVOURITES_PAYLOAD)
     }
