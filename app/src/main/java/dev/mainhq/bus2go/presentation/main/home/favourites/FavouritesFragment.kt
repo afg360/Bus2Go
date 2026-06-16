@@ -55,6 +55,7 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
                 return FavouritesViewModel(
                     (this@FavouritesFragment.requireActivity().application as Bus2GoApplication).commonModule.getFavouritesWithTimeData,
                     (this@FavouritesFragment.requireActivity().application as Bus2GoApplication).commonModule.removeFavourite,
+                    (this@FavouritesFragment.requireActivity().application as Bus2GoApplication).commonModule.moveFavourite,
                     (this@FavouritesFragment.requireActivity().application as Bus2GoApplication).commonModule.addTag,
                 ) as T
             }
@@ -115,9 +116,9 @@ class FavouritesFragment: Fragment(R.layout.fragment_favourites) {
                 dragged: RecyclerView.ViewHolder,
                 target: RecyclerView.ViewHolder,
             ): Boolean {
-                favouritesViewModel
-                (recyclerView.adapter as FavouritesListElemsAdapter?)
-                    ?.moveItem(dragged.adapterPosition, target.adapterPosition)
+                favouritesViewModel.moveFavourite(dragged.adapterPosition, target.adapterPosition)
+//                (recyclerView.adapter as FavouritesListElemsAdapter?)
+//                    ?.moveItem()
                 return true
             }
 

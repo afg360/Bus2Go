@@ -6,16 +6,18 @@ import dev.mainhq.bus2go.domain.entity.FavouriteTransitData.StmBusFavouriteItem
 import dev.mainhq.bus2go.domain.entity.FavouriteTransitData.ExoBusFavouriteItem
 import dev.mainhq.bus2go.domain.entity.FavouriteTransitData.ExoTrainFavouriteItem
 import dev.mainhq.bus2go.domain.repository.ExoFavouritesRepository
+import dev.mainhq.bus2go.domain.repository.FavouritesPositionRepository
 import dev.mainhq.bus2go.domain.repository.StmFavouritesRepository
 
 class AddFavourite(
+	private val stmFavouritesRepository: StmFavouritesRepository,
 	private val exoFavouritesRepository: ExoFavouritesRepository,
-	private val stmFavouritesRepository: StmFavouritesRepository
+	private val favouritesPositionRepository: FavouritesPositionRepository
 ) {
 
 	suspend operator fun invoke(transitData: TransitData){
 		//FIXME need algo for getting correct position to put in
-		val favourite = FavouriteTransitData.fromTransitDataToFavouriteTransitData(transitData, )
+		val favourite = FavouriteTransitData.fromTransitDataToFavouriteTransitData(transitData)
 		when(favourite){
 			is StmBusFavouriteItem -> {
 				stmFavouritesRepository.addStmBusFavourite(favourite)
@@ -27,5 +29,6 @@ class AddFavourite(
 				exoFavouritesRepository.addExoTrainFavourite(favourite)
 			}
 		}
+		favouritesPositionRepository.addFavourite(favourite)
 	}
 }

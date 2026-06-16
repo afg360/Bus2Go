@@ -12,6 +12,7 @@ import dev.mainhq.bus2go.domain.entity.Tag
 import dev.mainhq.bus2go.domain.entity.FavouriteTransitDataWithTime
 import dev.mainhq.bus2go.domain.use_case.favourites.AddTag
 import dev.mainhq.bus2go.domain.use_case.favourites.GetFavouritesWithTimeData
+import dev.mainhq.bus2go.domain.use_case.favourites.MoveFavourite
 import dev.mainhq.bus2go.domain.use_case.favourites.RemoveFavourite
 import dev.mainhq.bus2go.presentation.core.UiState
 import kotlinx.coroutines.async
@@ -30,6 +31,7 @@ import java.time.LocalTime
 class FavouritesViewModel(
     getFavouritesWithTimeData: GetFavouritesWithTimeData,
     private val removeFavourite: RemoveFavourite,
+    private val moveFavourite: MoveFavourite,
     private val addTag: AddTag
 ) : ViewModel(){
 
@@ -40,7 +42,7 @@ class FavouritesViewModel(
     //should be using stateFlow, but I hate that goes through an empty list first and that gets displayed...
 	private val _favouriteTransitData = getFavouritesWithTimeData.invoke().map { favouritesTimeWithData ->
                 when(favouritesTimeWithData) {
-                    is Result.Error -> TODO()
+                    is Result.Error -> { emptyList() }
                     is Result.Success<List<FavouriteTransitDataWithTime>> -> {
 						favouritesTimeWithData.data.ifEmpty { emptyList() }
                     }
@@ -255,9 +257,10 @@ class FavouritesViewModel(
         }
     }
 
-    //TODO
-    fun moveFavourite(currPosition: Int, newPosition: Int) {
-         mutableListOf(1, 2, )
+    fun moveFavourite(oldPosition: Int, newPosition: Int) {
+         viewModelScope.launch {
+             moveFavourite.invoke(oldPosition, newPosition)
+         }
     }
 
     fun addTag(tag: String, transitData: List<FavouriteTransitData>){

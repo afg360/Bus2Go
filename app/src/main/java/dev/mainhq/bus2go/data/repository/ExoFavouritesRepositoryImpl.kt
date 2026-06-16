@@ -20,7 +20,6 @@ import kotlinx.coroutines.withContext
 
 class ExoFavouritesRepositoryImpl(
 	private val tagsHandler: TagsHandler,
-	private val favouritesPositionDataStore: DataStore<FavouritesPositionDataDto>,
 	private val exoFavouritesDataStore: DataStore<ExoFavouritesDataDto>
 ): ExoFavouritesRepository {
 	override fun getExoBusFavourites(): Flow<List<ExoBusFavouriteItem>> {
@@ -33,11 +32,6 @@ class ExoFavouritesRepositoryImpl(
 
 	override suspend fun removeExoBusFavourite(data: ExoBusFavouriteItem) {
 		withContext(Dispatchers.IO) {
-			favouritesPositionDataStore.updateData { favourites ->
-				favourites.copy(listFavouritesPosition = favourites.listFavouritesPosition.mutate { list ->
-					list.remove(list.first { it.itemId == data.id.toString() })
-				})
-			}
 			exoFavouritesDataStore.updateData { favourites ->
 				favourites.copy(listExo = favourites.listExo.mutate {
 					//maybe add a tripid or some identifier so that it is a unique thing deleted
@@ -49,11 +43,6 @@ class ExoFavouritesRepositoryImpl(
 
 	override suspend fun removeExoTrainFavourite(data: ExoTrainFavouriteItem) {
 		withContext(Dispatchers.IO) {
-			favouritesPositionDataStore.updateData { favourites ->
-				favourites.copy(listFavouritesPosition = favourites.listFavouritesPosition.mutate { list ->
-					list.remove(list.first { it.itemId == data.id.toString() })
-				})
-			}
 			exoFavouritesDataStore.updateData { favourites ->
 				favourites.copy(listExoTrain = favourites.listExoTrain.mutate {
 					//maybe add a tripid or some identifier so that it is a unique thing deleted
@@ -65,11 +54,6 @@ class ExoFavouritesRepositoryImpl(
 
 	override suspend fun addExoBusFavourite(data: ExoBusFavouriteItem) {
 		withContext(Dispatchers.IO) {
-			favouritesPositionDataStore.updateData { favourites ->
-				favourites.copy(listFavouritesPosition = favourites.listFavouritesPosition.mutate { list ->
-					list.add(PositionDto(data.id.toString(), TransitType.EXO_BUS))
-				})
-			}
 			exoFavouritesDataStore.updateData { favourites ->
 				favourites.copy(listExo = favourites.listExo.mutate {
 					it.add(PreferenceMapper.mapExoBusToDto(data))
@@ -80,11 +64,6 @@ class ExoFavouritesRepositoryImpl(
 
 	override suspend fun addExoTrainFavourite(data: ExoTrainFavouriteItem) {
 		withContext(Dispatchers.IO) {
-			favouritesPositionDataStore.updateData { favourites ->
-				favourites.copy(listFavouritesPosition = favourites.listFavouritesPosition.mutate { list ->
-					list.add(PositionDto(data.id.toString(), TransitType.EXO_TRAIN))
-				})
-			}
 			exoFavouritesDataStore.updateData { favourites ->
 				favourites.copy(listExoTrain = favourites.listExoTrain.mutate {
 					it.add(PreferenceMapper.mapExoTrainToDto(data))
@@ -93,17 +72,7 @@ class ExoFavouritesRepositoryImpl(
 		}
 	}
 
-	override suspend fun setFavouritePosition(
-		favouriteTransitData: FavouriteTransitData,
-		newPosition: Int,
-	) {
-		TODO("Not yet implemented")
-	}
-
-	override suspend fun setTag(
-		tag: Tag,
-		items: List<FavouriteTransitData>,
-	) {
+	override suspend fun setTag(tag: Tag, items: List<FavouriteTransitData>) {
 		val tagDto = PreferenceMapper.mapTagToDto(tag)
 		tagsHandler.addTag(tagDto)
 		exoFavouritesDataStore.updateData { favourites ->

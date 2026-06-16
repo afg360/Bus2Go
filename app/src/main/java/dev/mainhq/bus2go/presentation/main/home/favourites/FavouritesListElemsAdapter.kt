@@ -4,13 +4,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.domain.entity.FavouriteTransitData
-import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.utils.makeGone
 import dev.mainhq.bus2go.utils.makeVisible
 import dev.mainhq.bus2go.utils.swap
@@ -129,17 +129,9 @@ class FavouritesListElemsAdapter(
     }
 
     fun updateAdapter(list: List<FavouritesDisplayModel>){
-        val oldList = this.list
+        val diffUtilCalc = DiffUtil.calculateDiff(MyDiffUtilImpl(this.list, list))
         this.list = list
-
-        //FIXME improve by using itemrange with payloads instead of this
-        //if (oldList.size != this.list.size || !oldList.all { oldItem -> this.list.any { newItem -> oldItem.isMainDataEqual(newItem) } } ){
-            notifyDataSetChanged()
-        //}
-        //else we simply want to update the time displayed
-        //else {
-        //    notifyItemRangeChanged(0, oldList.size, TIME_PAYLOAD)
-        //}
+        diffUtilCalc.dispatchUpdatesTo(this)
     }
 
     fun toggleForRemoval(items: List<FavouriteTransitData>){
@@ -186,5 +178,28 @@ class FavouritesListElemsAdapter(
         /** Invisible for all except exo buses */
         //val routeLongNameTextView: MaterialTextView = view.findViewById(R.id.favouritesExoRouteLongNameTextView)
         val dragAndDropIcon: ImageView = view.findViewById(R.id.favouritesDragAndDropIcon)
+    }
+
+    private class MyDiffUtilImpl(
+        private val oldList: List<FavouritesDisplayModel>,
+        private val newList: List<FavouritesDisplayModel>
+    ): DiffUtil.Callback() {
+        override fun getOldListSize(): Int {
+            return oldList.size
+        }
+
+        override fun getNewListSize(): Int {
+            return newList.size
+        }
+
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return oldList[oldItemPosition].favouriteTransitData.id == newList[newItemPosition].favouriteTransitData.id
+                    && oldList[oldItemPosition].favouriteTransitData::class.java == newList[newItemPosition].favouriteTransitData::class.java
+        }
+
+        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return oldList[oldItemPosition].arrivalTimeText == newList[newItemPosition].arrivalTimeText
+                    && oldList[oldItemPosition].timeRemainingText == newList[newItemPosition].timeRemainingText
+        }
     }
 }

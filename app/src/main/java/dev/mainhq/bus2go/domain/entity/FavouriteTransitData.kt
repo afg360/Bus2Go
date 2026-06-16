@@ -11,6 +11,9 @@ sealed class FavouriteTransitData {
 	abstract val tags: List<Tag>
 
 	companion object {
+		/**
+		 * Make a TransitData into a FavouriteTransitData by generating a new UUID
+		 **/
 		fun fromTransitDataToFavouriteTransitData(transitData: TransitData): FavouriteTransitData {
 			return when(transitData) {
 				is StmBusItem -> {

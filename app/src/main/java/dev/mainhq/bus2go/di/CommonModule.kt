@@ -14,6 +14,7 @@ import dev.mainhq.bus2go.data.data_source.remote.NetworkMonitor
 import dev.mainhq.bus2go.data.repository.AppStateRepositoryImpl
 import dev.mainhq.bus2go.data.repository.ExoFavouritesRepositoryImpl
 import dev.mainhq.bus2go.data.repository.ExoRepositoryImpl
+import dev.mainhq.bus2go.data.repository.FavouritePositionRepositoryImpl
 import dev.mainhq.bus2go.data.repository.NotificationRepositoryImpl
 import dev.mainhq.bus2go.data.repository.SettingsRepositoryImpl
 import dev.mainhq.bus2go.data.repository.StmFavouritesRepositoryImpl
@@ -30,6 +31,7 @@ import dev.mainhq.bus2go.domain.use_case.favourites.AddTag
 import dev.mainhq.bus2go.domain.use_case.favourites.GetAllTags
 import dev.mainhq.bus2go.domain.use_case.favourites.GetFavourites
 import dev.mainhq.bus2go.domain.use_case.favourites.GetFavouritesWithTimeData
+import dev.mainhq.bus2go.domain.use_case.favourites.MoveFavourite
 import dev.mainhq.bus2go.domain.use_case.favourites.RemoveFavourite
 import dev.mainhq.bus2go.domain.use_case.settings.GetSettings
 import dev.mainhq.bus2go.domain.use_case.transit.GetDirections
@@ -60,7 +62,6 @@ class CommonModule(applicationContext: Context) {
 	private val stmFavouritesRepository = StmFavouritesRepositoryImpl(
 		tagsHandler = tagsHandler,
 		stmFavouritesDataStore = applicationContext.stmFavouritesDataStore,
-		favouritesPositionDataStore = applicationContext.favouritesPositionDataStore
 	)
 
 	private val exoDatabase = AppDatabaseExo.getInstance(applicationContext)
@@ -74,7 +75,10 @@ class CommonModule(applicationContext: Context) {
 	private val exoFavouritesRepository = ExoFavouritesRepositoryImpl(
 		tagsHandler = tagsHandler,
 		exoFavouritesDataStore = applicationContext.exoFavouritesDataStore,
-		favouritesPositionDataStore = applicationContext.favouritesPositionDataStore
+	)
+
+	private val favouritesPositionRepository = FavouritePositionRepositoryImpl (
+		applicationContext.favouritesPositionDataStore
 	)
 
 	val getAllTags = GetAllTags(
@@ -107,13 +111,19 @@ class CommonModule(applicationContext: Context) {
 
 	//FIXME not ideal to make them like this...
 	val addFavourite = AddFavourite(
+		stmFavouritesRepository,
 		exoFavouritesRepository,
-		stmFavouritesRepository
+		favouritesPositionRepository
 	)
 
 	val removeFavourite = RemoveFavourite(
+		stmFavouritesRepository,
 		exoFavouritesRepository,
-		stmFavouritesRepository
+		favouritesPositionRepository
+	)
+
+	val moveFavourite = MoveFavourite(
+		favouritesPositionRepository
 	)
 
 	val setDatabaseExpirationDate = SetDatabaseExpirationDate(appStateRepository)
@@ -138,14 +148,15 @@ class CommonModule(applicationContext: Context) {
 	)
 
 	val getFavourites = GetFavourites(
-		exoFavouritesRepository,
-		stmFavouritesRepository
+		stmFavouritesRepository,
+		exoFavouritesRepository
 	)
 
 	val getFavouritesWithTimeData = GetFavouritesWithTimeData(
 		getFavourites,
+		stmRepository,
 		exoRepository,
-		stmRepository
+		favouritesPositionRepository
 	)
 
 	val getTransitTime = GetTransitTime(

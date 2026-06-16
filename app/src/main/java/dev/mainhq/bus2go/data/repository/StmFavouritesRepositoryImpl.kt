@@ -2,15 +2,12 @@ package dev.mainhq.bus2go.data.repository
 
 import androidx.datastore.core.DataStore
 import dev.mainhq.bus2go.data.data_source.local.datastore.PreferenceMapper
-import dev.mainhq.bus2go.data.data_source.local.datastore.favourites_position.entity.FavouritesPositionDataDto
-import dev.mainhq.bus2go.data.data_source.local.datastore.favourites_position.entity.PositionDto
 import dev.mainhq.bus2go.domain.repository.StmFavouritesRepository
 import dev.mainhq.bus2go.data.data_source.local.datastore.stm.entity.StmFavouritesDataDto
 import dev.mainhq.bus2go.data.data_source.local.datastore.tags.TagsHandler
 import dev.mainhq.bus2go.domain.entity.FavouriteTransitData
 import dev.mainhq.bus2go.domain.entity.FavouriteTransitData.StmBusFavouriteItem
 import dev.mainhq.bus2go.domain.entity.Tag
-import dev.mainhq.bus2go.domain.entity.TransitType
 import kotlinx.collections.immutable.mutate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -19,7 +16,6 @@ import kotlinx.coroutines.withContext
 
 class StmFavouritesRepositoryImpl(
 	private val tagsHandler: TagsHandler, //TODO make as a Datastore instead?
-	private val favouritesPositionDataStore: DataStore<FavouritesPositionDataDto>,
 	private val stmFavouritesDataStore: DataStore<StmFavouritesDataDto>
 ) : StmFavouritesRepository {
 
@@ -29,11 +25,6 @@ class StmFavouritesRepositoryImpl(
 
 	override suspend fun removeStmBusFavourite(data: StmBusFavouriteItem) {
 		withContext(Dispatchers.IO){
-			favouritesPositionDataStore.updateData { favourites ->
-				favourites.copy(listFavouritesPosition = favourites.listFavouritesPosition.mutate { list ->
-					list.remove(list.first { it.itemId == data.id.toString() })
-				})
-			}
 			stmFavouritesDataStore.updateData { stmFavouritesData ->
 				stmFavouritesData.copy(listSTM = stmFavouritesData.listSTM.mutate {
 					it.remove(PreferenceMapper.mapStmBusToDto(data))
@@ -44,11 +35,6 @@ class StmFavouritesRepositoryImpl(
 
 	override suspend fun addStmBusFavourite(data: StmBusFavouriteItem) {
 		withContext(Dispatchers.IO){
-			favouritesPositionDataStore.updateData { favourites ->
-				favourites.copy(listFavouritesPosition = favourites.listFavouritesPosition.mutate { list ->
-					list.add(PositionDto(data.id.toString(), TransitType.STM))
-				})
-			}
 			stmFavouritesDataStore.updateData { stmFavouritesData ->
 				stmFavouritesData.copy(listSTM = stmFavouritesData.listSTM.mutate {
 					//FIXME will that add data uniquely...?
@@ -58,12 +44,6 @@ class StmFavouritesRepositoryImpl(
 		}
 	}
 
-	override suspend fun setFavouritePosition(
-		favouriteTransitData: FavouriteTransitData,
-		newPosition: Int,
-	) {
-		TODO("Not yet implemented")
-	}
 
 	override suspend fun setTag(tag: Tag, items: List<FavouriteTransitData>) {
 		val tagDto = PreferenceMapper.mapTagToDto(tag)
