@@ -31,7 +31,8 @@ import java.io.IOException
 @Database(
     entities = [Routes::class, Trips::class, StopTimes::class, Stops::class, Calendar::class,
         CalendarDates::class, Shapes::class, Forms::class],
-    version = 2
+    version = 2,
+    exportSchema = true
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabaseExo : RoomDatabase() {

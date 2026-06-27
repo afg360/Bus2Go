@@ -5,11 +5,12 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 
-@Entity(foreignKeys = [ForeignKey(entity = Forms::class, parentColumns = ["shape_id"], childColumns = ["shape_id"])])
+@Entity()
 data class Shapes (
     @PrimaryKey val id : Int,
     @ColumnInfo(name = "shape_id") val shapeId : Int,
-    @ColumnInfo(name = "lat") val latitude : Double,
-    @ColumnInfo(name = "long") val longitude : Double,
-    @ColumnInfo(name = "sequence") val sequence : Int,
+    @ColumnInfo(name = "shape_pt_lat") val latitude : Double,
+    @ColumnInfo(name = "shape_pt_long") val longitude : Double,
+    @ColumnInfo(name = "shape_pt_sequence") val sequence : Int,
+    @ColumnInfo(name = "route_pattern_id") val routePatternId : String,
 )

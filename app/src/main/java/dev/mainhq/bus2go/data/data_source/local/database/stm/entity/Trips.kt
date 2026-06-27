@@ -10,7 +10,6 @@ import androidx.room.PrimaryKey;
     foreignKeys = [
         ForeignKey(entity = Routes::class, parentColumns = ["route_id"], childColumns = ["route_id"]),
         ForeignKey(entity = Calendar::class, parentColumns = ["service_id"], childColumns = ["service_id"]),
-        ForeignKey(entity = Forms::class, parentColumns = ["shape_id"], childColumns = ["shape_id"])
     ]
 )
 data class Trips(

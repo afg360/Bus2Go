@@ -5,9 +5,8 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 
 @Entity(primaryKeys = ["service_id", "date"],
-	foreignKeys = [
-		ForeignKey(Calendar::class, parentColumns = ["service_id"], childColumns = ["service_id"])
-	])
+	foreignKeys = [ForeignKey(entity = Calendar::class, parentColumns = ["service_id"], childColumns = ["service_id"])]
+	)
 data class CalendarDates (
 	@ColumnInfo(name="service_id")
 	val serviceId: String,

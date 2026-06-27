@@ -11,8 +11,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import dev.mainhq.bus2go.data.data_source.local.Converters
 import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.CalendarDAO
 import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.CalendarDatesDAO
-import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.ConfigDAO
-import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.FormsDAO
+import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.FeedInfoDAO
 import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.RoutesDAO
 import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.ShapesDAO
 import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.StopsDAO
@@ -20,21 +19,20 @@ import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.StopsInfoDAO
 import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.TripsDAO
 import dev.mainhq.bus2go.data.data_source.local.database.stm.entity.Calendar
 import dev.mainhq.bus2go.data.data_source.local.database.stm.entity.CalendarDates
-import dev.mainhq.bus2go.data.data_source.local.database.stm.entity.Forms
+import dev.mainhq.bus2go.data.data_source.local.database.stm.entity.FeedInfo
 import dev.mainhq.bus2go.data.data_source.local.database.stm.entity.Routes
 import dev.mainhq.bus2go.data.data_source.local.database.stm.entity.Shapes
 import dev.mainhq.bus2go.data.data_source.local.database.stm.entity.Stops
 import dev.mainhq.bus2go.data.data_source.local.database.stm.entity.StopsInfo
 import dev.mainhq.bus2go.data.data_source.local.database.stm.entity.Trips
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.sql.SQLException
 
 @Database(
     entities = [Routes::class, Trips::class, StopsInfo::class,
-        Stops::class, Calendar::class, CalendarDates::class, Shapes::class, Forms::class],
-    version = 3
+        Stops::class, Calendar::class, CalendarDates::class, Shapes::class, FeedInfo::class],
+    version = 3,
+    exportSchema = true
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabaseSTM : RoomDatabase() {
@@ -45,7 +43,7 @@ abstract class AppDatabaseSTM : RoomDatabase() {
     abstract fun calendarDao() : CalendarDAO
     abstract fun calendarDatesDao() : CalendarDatesDAO
     abstract fun shapesDao() : ShapesDAO
-    abstract fun formsDao() : FormsDAO
+    abstract fun feedInfoDao() : FeedInfoDAO
 //    abstract fun configDao(): ConfigDAO
 
     companion object {
