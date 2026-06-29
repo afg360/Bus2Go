@@ -95,7 +95,7 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
             }
         }
 
-        binding.addTag.setOnClickListener {
+        binding.addTagWidget.setOnClickListener {
             //TODO show a dialog box with a text field
             //user enters the text
             //we dismiss the dialog, and create a new tag if it doesn't already exist

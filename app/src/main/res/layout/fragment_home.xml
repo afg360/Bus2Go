@@ -73,18 +73,36 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         />
                     
-                    <androidx.appcompat.widget.AppCompatImageButton
-                        android:id="@+id/add_tag"
+                    <LinearLayout
+                        android:id="@+id/addTagWidget"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:src="@drawable/tag"
-                        android:background="?attr/selectableItemBackground"
-                        android:contentDescription="Add a Tag"
-                        android:layout_marginEnd="5dp"
+                        android:layout_height="match_parent"
+                        android:layout_margin="15dp"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:background="?attr/selectableItemBackgroundBorderless"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/removeItemsWidget"
-                        />
+                        >
+                        <androidx.appcompat.widget.AppCompatImageButton
+                            android:id="@+id/add_tag"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/tag"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:contentDescription="Add a Tag"
+                            android:layout_marginEnd="8dp"
+                            app:layout_constraintEnd_toStartOf="@id/removeItemsWidget"
+                            />
+                        <com.google.android.material.textview.MaterialTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Add Tag"
+                            android:textSize="12sp"
+                            android:fontFamily="@font/goli_regular"
+                            />
+                    </LinearLayout>
                     <LinearLayout
                         android:id="@+id/removeItemsWidget"
                         android:layout_width="wrap_content"
@@ -92,12 +110,12 @@
                         android:layout_margin="15dp"
                         android:orientation="vertical"
                         android:gravity="center"
-                        android:background="?attr/selectableItemBackground"
+                        android:background="?attr/selectableItemBackgroundBorderless"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         >
-                        <androidx.appcompat.widget.AppCompatImageButton
+                        <androidx.appcompat.widget.AppCompatImageView
                             android:id="@+id/removeItemsButton"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
