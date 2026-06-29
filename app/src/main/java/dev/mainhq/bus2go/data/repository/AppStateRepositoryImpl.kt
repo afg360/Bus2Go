@@ -12,6 +12,7 @@ import dev.mainhq.bus2go.domain.entity.DbToDownload
 import dev.mainhq.bus2go.domain.repository.AppStateRepository
 import dev.mainhq.bus2go.domain.entity.Time
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -28,43 +29,49 @@ class AppStateRepositoryImpl(
 ): AppStateRepository {
 
 	//FIXME use the result pattern for cleaner handling of IO errors
-
-	override suspend fun getDatabaseExpirationDate(): Result<LocalDate> {
+	override suspend fun getNextDatabaseExpirationNotifDate(): Result<LocalDate> {
 		return withContext(Dispatchers.IO) {
-			appStateDataStore.data.first()[AppStateDataStoreKeys.DATABASES_EXPIRATION_DATE]?.let{
+			appStateDataStore.data.first()[AppStateDataStoreKeys.NEXT_DATABASE_EXPIRATION_NOTIF_DATE]?.let{
 				Result.Success(LocalDate.parse(it, DateTimeFormatter.BASIC_ISO_DATE))
 			} ?: Result.Error(null)
 		}
 	}
 
-	override suspend fun setDatabaseExpirationDate(localDate: LocalDate){
+	//TODO
+	override suspend fun setNextDatabaseExpirationNotifDate(localDate: LocalDate) {
 		withContext(Dispatchers.IO) {
 			appStateDataStore.edit { mutablePreferences ->
-				mutablePreferences[AppStateDataStoreKeys.DATABASES_EXPIRATION_DATE] = Time.toLocalDateString(localDate)
+				mutablePreferences[AppStateDataStoreKeys.NEXT_DATABASE_EXPIRATION_NOTIF_DATE] = Time.toLocalDateString(localDate)
 			}
 		}
 	}
 
 	override suspend fun getGarbageFiles(): List<String> {
 		return withContext(Dispatchers.IO) {
-			//TODO also check if
-			"^(stm|exo)(_sample)?_data_\\d+.db.gz$".toRegex() //(with \\d smaller than current version)
-			dataDir.list()?.filter {
-				it.matches("\\.te?mp$".toRegex()) ||
-				try {
-					//we will be keeping database with the current version in case something has gone wrong...
-					val dbVersion = it.split("_").last().removeSuffix(".db.gz").toInt()
-					dbVersion < getExoDatabaseVersion() || dbVersion < getStmDatabaseVersion()
-				}
-				catch (e: NoSuchElementException){
-					//TODO("Logging to see wtf has gone wrong...")
-					false
-				}
-				catch (e: NumberFormatException){
-					false
-				}
-			} ?: listOf()
+			//FIXME do we need dataDir or filesDir?
+			val tmps = filesDir.list()?.filter { it.matches("\\.(te?mp|part)$".toRegex()) }?.filterNotNull() ?: listOf()
+			val stmMaxVersion = getMaxVersion(DbToDownload.STM)
+			val exoMaxVersion = getMaxVersion(DbToDownload.EXO)
+			println("Stm: $stmMaxVersion, Exo: $exoMaxVersion")
+			tmps + _getGarbageFiles(DbToDownload.STM, stmMaxVersion) + _getGarbageFiles(DbToDownload.EXO, exoMaxVersion)
 		}
+	}
+
+	private fun getMaxVersion(dbToDownload: DbToDownload): Int {
+		return filesDir.list()?.filter {
+			it.matches("^(${dbToDownload.name.lowercase()})(_sample)?_data_[0-9]+\\.db\\.gz$".toRegex()) //(with \\d smaller than current version)
+		}?.map {
+			//we will be keeping database with the current version in case something has gone wrong...
+			it.split("_").last().removeSuffix(".db.gz").toInt()
+		}?.maxBy { it } ?: -1
+	}
+
+	private fun _getGarbageFiles(dbToDownload: DbToDownload, maxVersion: Int): List<String> {
+		return filesDir.list()?.filter {
+			it.matches("^(${dbToDownload.name.lowercase()})(_sample)?_data_[0-9]+\\.db\\.gz$".toRegex()) //(with \\d smaller than current version)
+		}?.filter {
+			it.split("_").last().removeSuffix(".db.gz").toInt() < maxVersion
+		}?.filterNotNull() ?: listOf()
 	}
 
 	override suspend fun doesUpToDateCompressedDbExist(
@@ -86,19 +93,21 @@ class AppStateRepositoryImpl(
 
 	override suspend fun deleteFile(filename: String){
 		return withContext(Dispatchers.IO){
-			val file = File(dataDir, filename)
-			if (!file.exists()){
-				throw IllegalArgumentException("File does not exist the files dir or is invalid")
+			val file = File(filesDir, filename)
+			if (file.exists()){
+				file.delete()
 			}
-			file.delete()
+			else {
+				println("File ${file.name} does not exist in filesDir")
+			}
 		}
 	}
 
-	override suspend fun getDbUpdateDialogLastShownDate(): Result<LocalDate> {
-		return withContext(Dispatchers.IO){
-			appStateDataStore.data.first()[AppStateDataStoreKeys.DATABASES_DIALOG_LAST_SHOWN_DATE]?.let {
-				Result.Success(LocalDate.parse(it, DateTimeFormatter.BASIC_ISO_DATE))
-			} ?: Result.Error(null)
+	override fun getDbUpdateDialogLastShownDate(): Flow<Result<LocalDate>> {
+		return appStateDataStore.data.map {
+			val lastShownDate = it[AppStateDataStoreKeys.DATABASES_DIALOG_LAST_SHOWN_DATE]
+				?: return@map Result.Error(null)
+			Result.Success(LocalDate.parse(lastShownDate, DateTimeFormatter.BASIC_ISO_DATE))
 		}
 	}
 

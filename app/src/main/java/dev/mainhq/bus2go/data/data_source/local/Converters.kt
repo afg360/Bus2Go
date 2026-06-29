@@ -13,12 +13,12 @@ class Converters {
     * dealing with LocalDate...
     */
     @TypeConverter
-    fun toTime(str : String?) : Time? {
+    fun toTime(str : String?): Time? {
         return str?.let{ Time.fromString(it) }
     }
 
     @TypeConverter
-    fun fromTime(time : Time?) : String? {
+    fun fromTime(time : Time?): String? {
         return time?.toString()
     }
 
@@ -26,12 +26,20 @@ class Converters {
     /**
      * Only used for CalendarDAOs
      **/
-    fun toLocalDate(str: String?): LocalDate?{
-        return str?.let{ LocalDate.parse(it, DateTimeFormatter.BASIC_ISO_DATE)}
+    fun toLocalDate(str: String?): LocalDate? {
+        return str?.let{ LocalDate.parse(it, DateTimeFormatter.BASIC_ISO_DATE) }
     }
 
     @TypeConverter
-    fun userQuerySearch(query : FuzzyQuery) : String {
+    /**
+     * Only used for CalendarDAOs
+     **/
+    fun toLocalDate(int: Int?): LocalDate? {
+        return int?.let{ LocalDate.parse(it.toString(), DateTimeFormatter.BASIC_ISO_DATE) }
+    }
+
+    @TypeConverter
+    fun userQuerySearch(query : FuzzyQuery): String {
         return query.toString()
     }
 }

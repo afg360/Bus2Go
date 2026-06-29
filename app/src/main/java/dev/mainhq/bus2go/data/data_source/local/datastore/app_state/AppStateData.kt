@@ -12,14 +12,12 @@ import androidx.datastore.preferences.preferencesDataStore
 val Context.appStateDataStore: DataStore<Preferences> by preferencesDataStore(
 	name = "application_state",
 	produceMigrations = { context ->
-		listOf(
-		)
+		listOf( )
 	}
 )
 
 object AppStateDataStoreKeys {
-	//TODO perhaps be replaced with SQLITE thingy
-	val DATABASES_EXPIRATION_DATE = stringPreferencesKey("db_expiration_date")
+	val NEXT_DATABASE_EXPIRATION_NOTIF_DATE = stringPreferencesKey("next_database_expiration_notif_date")
 	val DATABASES_DIALOG_LAST_SHOWN_DATE = stringPreferencesKey("db_dialog_last_shown_date")
 	val IS_FIRST_TIME = booleanPreferencesKey("is_first_time")
 	//stores the saved version of the databases (NOT THE DATABASE SCHEMA VERSIONS!)

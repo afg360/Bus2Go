@@ -234,11 +234,6 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        mainActivityViewModel.onResume()
-    }
-
 
     /*
     fun setAlarm(context: Context, calendar: Calendar) {

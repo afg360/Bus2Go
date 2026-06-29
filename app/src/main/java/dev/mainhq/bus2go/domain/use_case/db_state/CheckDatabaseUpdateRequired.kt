@@ -8,13 +8,12 @@ import java.time.LocalDate
 
 class CheckDatabaseUpdateRequired(
 	private val appStateRepository: AppStateRepository,
-	private val setDatabaseExpirationDate: SetDatabaseExpirationDate,
 	private val transitRepos: List<TransitRepository>,
 ) {
 
 	/** @return May be null if the time has already passed. Else the database is up to date at the moment */
 	suspend operator fun invoke(): Result<List<DbToDownload>> {
-		val minDatesForUpdate = transitRepos.map { it.dbName to it.getMaxEndDate() }
+		val minDatesForUpdate = transitRepos.map { it.dbName to it.getDatabaseExpirationDate() }
 		if (minDatesForUpdate.isEmpty()) {
 			return Result.Error(null, "None of the databases exist...")
 		}

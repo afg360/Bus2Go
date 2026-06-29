@@ -8,6 +8,6 @@ class SetDatabaseExpirationDate(
 ) {
 
 	suspend operator fun invoke(localDate: LocalDate){
-		appStateRepository.setDatabaseExpirationDate(localDate)
+		appStateRepository.setNextDatabaseExpirationNotifDate(localDate)
 	}
 }

@@ -5,6 +5,7 @@ import java.time.LocalDate
 
 interface TransitRepository {
 	val dbName: String
+
 	/** @return Latest calendar date before data not being up to date. **/
-	suspend fun getMaxEndDate() : Result<LocalDate>
+	suspend fun getDatabaseExpirationDate(): Result<LocalDate>
 }

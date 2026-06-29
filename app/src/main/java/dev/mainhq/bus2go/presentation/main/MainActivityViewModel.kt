@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import kotlin.coroutines.coroutineContext
 
 class MainActivityViewModel(
 	private val checkDatabaseUpdateRequired: CheckDatabaseUpdateRequired,
@@ -44,24 +45,19 @@ class MainActivityViewModel(
 	private val observeDownloadDatabaseTask: ObserveDownloadDatabaseTask
 ): ViewModel() {
 
+	//TODO clean up this class by using flows correctly
+	// checking if dialog has been shown today seems to be broken, need to write tests for that
+
 	private val _activityFragment = MutableStateFlow(ActivityFragment.HOME)
 	val activityFragment = _activityFragment.asStateFlow()
-
-	//TODO ask AI how would he design an app with multiple screens and that check whether some
-	// action has been performed or not -> use flows? channel? event shit?
 
 	//use a shared flow to have the same value shared among collectors
 	private val _resp = flow {
 		emit(checkDatabaseUpdateRequired.invoke())
 	}.shareIn(viewModelScope, started = SharingStarted.WhileSubscribed(5000))
 
-	private val _wasUpdateDialogShownToday = MutableSharedFlow<Boolean>(replay = 1)
-
-	fun onResume() {
-		viewModelScope.launch {
-			_wasUpdateDialogShownToday.emit(wasUpdateDialogShownToday.invoke())
-		}
-	}
+	private val _wasUpdateDialogShownToday = wasUpdateDialogShownToday.invoke()
+		.shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), replay = 1)
 
 	//TODO instead of storing a string, store some sort of enum (with a string value attached to it)
 	val updateTextViewString = _resp.map { resp ->

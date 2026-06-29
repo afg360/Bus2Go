@@ -30,8 +30,8 @@ class ExoRepositoryImpl(
 	override val dbName: String = "Exo"
 ): ExoRepository {
 
-	override suspend fun getMaxEndDate(): Result<LocalDate> {
-		return calendarDAO?.let{ Result.Success(it.getMaxEndDate()) } ?: Result.Error(null)
+	override suspend fun getDatabaseExpirationDate(): Result<LocalDate> {
+		return calendarDAO?.let{ Result.Success(it.getExpirationDate()) } ?: Result.Error(null)
 	}
 
 	override suspend fun getRouteInfo(routeId: FuzzyQuery): Result<List<RouteInfo>> {

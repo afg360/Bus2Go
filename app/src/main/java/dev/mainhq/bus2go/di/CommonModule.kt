@@ -19,6 +19,7 @@ import dev.mainhq.bus2go.data.repository.NotificationRepositoryImpl
 import dev.mainhq.bus2go.data.repository.SettingsRepositoryImpl
 import dev.mainhq.bus2go.data.repository.StmFavouritesRepositoryImpl
 import dev.mainhq.bus2go.data.repository.StmRepositoryImpl
+import dev.mainhq.bus2go.domain.use_case.CleanUpGarbageFiles
 import dev.mainhq.bus2go.domain.use_case.settings.SaveAllNotifSettings
 import dev.mainhq.bus2go.domain.use_case.settings.SaveBus2GoServer
 import dev.mainhq.bus2go.domain.use_case.db_state.CheckDatabaseUpdateRequired
@@ -43,7 +44,7 @@ class CommonModule(applicationContext: Context) {
 
 	private val stmDatabase = AppDatabaseSTM.getInstance(applicationContext)
 	private val stmRepository = StmRepositoryImpl(
-		calendarDAO = stmDatabase?.calendarDao(),
+		feedInfoDAO = stmDatabase?.feedInfoDao(),
 		calendarDatesDAO = stmDatabase?.calendarDatesDao(),
 		routesDAO = stmDatabase?.routesDao(),
 		stopsDAO = stmDatabase?.stopDao(),
@@ -129,7 +130,6 @@ class CommonModule(applicationContext: Context) {
 	val setDatabaseExpirationDate = SetDatabaseExpirationDate(appStateRepository)
 	val checkDatabaseUpdateRequired = CheckDatabaseUpdateRequired(
 		appStateRepository,
-		setDatabaseExpirationDate,
 		listOf(exoRepository, stmRepository)
 	)
 	val wasUpdateDialogShownToday = WasUpdateDialogShownToday(
@@ -173,5 +173,9 @@ class CommonModule(applicationContext: Context) {
 		loggerImpl,
 		exoRepository,
 		stmRepository
+	)
+
+	val cleanUpGarbageFiles = CleanUpGarbageFiles(
+		appStateRepository
 	)
 }

@@ -2,17 +2,18 @@ package dev.mainhq.bus2go.domain.repository
 
 import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.entity.DbToDownload
+import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 
 //TODO output a result object (in case of failure, we will retry...), or maybe a boolean...
 interface AppStateRepository {
 
 	/**
-	 * Retrieves the expiration date of databases stored for the app.
+	 * Retrieves the sooner expiration date of databases stored for the app.
 	 * Could also represent the date when the user would like to next receive some sort of notification
 	 **/
-	suspend fun getDatabaseExpirationDate(): Result<LocalDate>
-	suspend fun setDatabaseExpirationDate(localDate: LocalDate)
+	suspend fun getNextDatabaseExpirationNotifDate(): Result<LocalDate>
+	suspend fun setNextDatabaseExpirationNotifDate(localDate: LocalDate)
 
 	/** Gives a list of garbage files downloaded by the application (old databases, part files, etc.) */
 	suspend fun getGarbageFiles(): List<String>
@@ -32,7 +33,7 @@ interface AppStateRepository {
 	/**
 	 * Gets whether or not the dialog for updating databases was shown today
 	 */
-	suspend fun getDbUpdateDialogLastShownDate(): Result<LocalDate>
+	fun getDbUpdateDialogLastShownDate(): Flow<Result<LocalDate>>
 	suspend fun setUpdateDbDialogLastShownDate(date: LocalDate)
 
 	/** Gets the version of the saved local STM database */

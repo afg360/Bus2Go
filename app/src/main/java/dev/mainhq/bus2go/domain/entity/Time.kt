@@ -170,7 +170,7 @@ class Time(localDateTime: LocalDateTime) : Parcelable, Comparable<Time> {
 
         /**
          * Create a new time object from a String. Used inside Room Data Types converters
-         * @throws DateTimeParseException
+         * @throws java.time.format.DateTimeParseException
          **/
         //TODO only in strings we need to consider when time is greater than 24h since only in the strings it happens...
         fun fromString(time : String, date : String) : Time {

@@ -4,6 +4,7 @@ import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.data.data_source.local.database.DbMapper
 import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.CalendarDAO
 import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.CalendarDatesDAO
+import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.FeedInfoDAO
 import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.RoutesDAO
 import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.StopsDAO
 import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.StopsInfoDAO
@@ -24,7 +25,7 @@ import kotlinx.coroutines.withContext
 import java.time.LocalDate
 
 class StmRepositoryImpl(
-	private val calendarDAO: CalendarDAO?,
+	private val feedInfoDAO: FeedInfoDAO?,
 	private val calendarDatesDAO: CalendarDatesDAO?,
 	private val routesDAO: RoutesDAO?,
 	private val stopsDAO: StopsDAO?,
@@ -33,9 +34,9 @@ class StmRepositoryImpl(
 	override val dbName: String = "Stm",
 ): StmRepository {
 
-	override suspend fun getMaxEndDate(): Result<LocalDate> {
-		return calendarDAO?.let{
-			withContext(Dispatchers.IO){ Result.Success(it.getMaxEndDate()) }
+	override suspend fun getDatabaseExpirationDate(): Result<LocalDate> {
+		return feedInfoDAO?.let{
+			withContext(Dispatchers.IO){ Result.Success(it.getExpirationDate()) }
 		} ?: Result.Error(null)
 	}
 

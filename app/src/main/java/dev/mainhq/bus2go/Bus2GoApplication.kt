@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
+import dev.mainhq.bus2go.data.data_source.local.datastore.app_state.appStateDataStore
 import dev.mainhq.bus2go.data.data_source.local.datastore.tags.TagsHandler
 import dev.mainhq.bus2go.di.CommonModule
 import dev.mainhq.bus2go.data.worker.UpdateManagerWorker.Companion.FILE_NAME
@@ -38,10 +39,7 @@ open class Bus2GoApplication : Application() {
 		manageApkFiles()
 
 		coroutineScope.launch {
-			//TODO cleanup garbage files
-			applicationContext.filesDir.list()?.filter {
-				it.matches(".*\\.db\\.gz\\.part$".toRegex())
-			}?.forEach { File(applicationContext.filesDir, it).delete() }
+			commonModule.cleanUpGarbageFiles()
 		}
 	}
 
