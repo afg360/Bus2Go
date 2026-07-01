@@ -1,7 +1,8 @@
-package dev.mainhq.bus2go.presentation.main.home.favourites
+package dev.mainhq.bus2go.presentation.main.home
 
 import dev.mainhq.bus2go.domain.entity.FavouriteTransitData
 
+//TODO could store a field isChecked for removal
 data class FavouritesDisplayModel(
 	//not ideal to have it non-private, but allows us for the moment to setup the onLongClickListener
 	// for the favouritesListElemsAdapter

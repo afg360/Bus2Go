@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go.presentation.main.home.favourites
+package dev.mainhq.bus2go.presentation.main.home
 
 import android.view.LayoutInflater
 import android.view.View
@@ -15,20 +15,19 @@ import dev.mainhq.bus2go.utils.makeGone
 import dev.mainhq.bus2go.utils.makeVisible
 import dev.mainhq.bus2go.utils.swap
 
-//FIXME could make the list thing a bit more efficient and simply change all the times instead
 /**
  * @param onClickListener An onClickListener for each item in the adapter. It should either start the
  * Times activity if not in selection mode, or to allow selection/deselection of an item of the
  * recycler view if in selection mode. Should select the checkbox and the thing itself.
- * @param onLongClickListener An onLongClickListener for each item in the adapter.
+ * @param onLongClickListener An onLongClickListener for each item in the adapter. Made for entering
+ * selection mode.
  **/
 class FavouritesListElemsAdapter(
-    private var list : List<FavouritesDisplayModel>,
-    private val onClickListener: (View, FavouriteTransitData) -> Unit,
-    private val onLongClickListener: (View, FavouriteTransitData) -> Boolean,
-    private var toRemoveList: List<FavouriteTransitData>
-)
-    : RecyclerView.Adapter<FavouritesListElemsAdapter.ViewHolder>(){
+	private var list : List<FavouritesDisplayModel>,
+	private val onClickListener: (View, FavouriteTransitData) -> Unit,
+	private val onLongClickListener: (View, FavouriteTransitData) -> Boolean,
+	private var toRemoveList: List<FavouriteTransitData>
+) : RecyclerView.Adapter<FavouritesListElemsAdapter.ViewHolder>(){
 
     private companion object {
         private const val CHECKBOXES_PAYLOAD = "CHECKBOXES"
@@ -38,7 +37,8 @@ class FavouritesListElemsAdapter(
     private var selectedMode = false
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(LayoutInflater.from(parent.context)
+        return ViewHolder(
+			LayoutInflater.from(parent.context)
             .inflate(R.layout.elem_favourites_list, parent, false)
         )
     }
@@ -81,9 +81,6 @@ class FavouritesListElemsAdapter(
         }
         holder.tripHeadsignTextView.text = info.tripHeadsignText
 
-        //val drawable = holder.itemView.resources.getDrawable(R.drawable.favourites_tripheadsign_background, null)
-        //drawable.setTint(holder.itemView.resources.getColor(info.dataDisplayColor, null))
-        //holder.tripHeadsignTextView.setBackgroundDrawable(drawable)
         holder.tripHeadsignTextView.setTextColor(holder.itemView.resources.getColor(info.dataDisplayColor, null))
 
         if (selectedMode) {
@@ -96,12 +93,12 @@ class FavouritesListElemsAdapter(
         holder.checkBoxView.isChecked = toRemoveList.contains(info.favouriteTransitData)
 
         //TODO send the movement event to deal with the ItemTouchHelper
-        holder.dragAndDropIcon.setOnLongClickListener {
-            false
-        }
+        holder.dragAndDropIcon.setOnLongClickListener { false }
 
         holder.itemView.setOnClickListener { onClickListener(it, info.favouriteTransitData) }
-        //holder.checkBoxView.setOnClickListener { onClickListener(holder.itemView, info.favouriteTransitData) }
+        holder.checkBoxView.setOnClickListener {
+            onClickListener(holder.itemView, info.favouriteTransitData)
+        }
 
         holder.itemView.setOnLongClickListener{
             onLongClickListener(it, info.favouriteTransitData)
@@ -121,8 +118,10 @@ class FavouritesListElemsAdapter(
             holder.arrivalTimeTextView.text = info.arrivalTimeText
             holder.arrivalTimeTextView.makeVisible()
             when (info.urgency){
-                Urgency.IMMINENT -> holder.timeRemainingTextView.setTextColor(holder.itemView.resources.getColor(R.color.red, null))
-                Urgency.SOON -> holder.timeRemainingTextView.setTextColor(holder.itemView.resources.getColor(R.color.yellow, null))
+                Urgency.IMMINENT -> holder.timeRemainingTextView.setTextColor(holder.itemView.resources.getColor(
+					R.color.red, null))
+                Urgency.SOON -> holder.timeRemainingTextView.setTextColor(holder.itemView.resources.getColor(
+					R.color.yellow, null))
                 Urgency.DISTANT -> holder.timeRemainingTextView.setTextColor(MaterialColors.getColor(holder.itemView, android.R.attr.editTextColor))
             }
         }

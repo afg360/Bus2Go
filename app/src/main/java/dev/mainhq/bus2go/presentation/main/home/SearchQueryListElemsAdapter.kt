@@ -11,10 +11,10 @@ import dev.mainhq.bus2go.domain.entity.ExoTrainRouteInfo
 import dev.mainhq.bus2go.domain.entity.RouteInfo
 import dev.mainhq.bus2go.domain.entity.StmBusRouteInfo
 
-class BusListElemsAdapter(
+class SearchQueryListElemsAdapter(
     private var busData: List<RouteInfo>,
     private val onClickListener: (RouteInfo) -> Unit
-) : RecyclerView.Adapter<BusListElemsAdapter.ViewHolder>() {
+) : RecyclerView.Adapter<SearchQueryListElemsAdapter.ViewHolder>() {
     //when doing bus num >= 400, then color = green
     // if  >= 300, then color = black
     // else blue

@@ -20,7 +20,7 @@ import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.data.data_source.local.datastore.deprecated.ExoBusData
 import dev.mainhq.bus2go.domain.entity.Time
-import dev.mainhq.bus2go.presentation.main.home.favourites.FavouritesViewModel
+import dev.mainhq.bus2go.presentation.main.home.FavouritesViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

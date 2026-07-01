@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.color.MaterialColors
 import dev.mainhq.bus2go.R
 import com.google.android.material.textview.MaterialTextView
-import dev.mainhq.bus2go.presentation.main.home.favourites.Urgency
+import dev.mainhq.bus2go.presentation.main.home.Urgency
 
 //TODO
 //could add view/onTouchListener to handle touch holding, etc.

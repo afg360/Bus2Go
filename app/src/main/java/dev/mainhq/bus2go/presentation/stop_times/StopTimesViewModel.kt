@@ -10,7 +10,7 @@ import dev.mainhq.bus2go.domain.entity.StmBusItem
 import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.domain.use_case.transit.GetTransitTime
 import dev.mainhq.bus2go.domain.entity.Time
-import dev.mainhq.bus2go.presentation.main.home.favourites.Urgency
+import dev.mainhq.bus2go.presentation.main.home.Urgency
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow

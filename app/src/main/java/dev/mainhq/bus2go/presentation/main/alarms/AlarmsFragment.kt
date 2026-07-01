@@ -22,7 +22,7 @@ import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.presentation.settings.SettingsActivity
 import dev.mainhq.bus2go.presentation.main.alarms.adapters.AlarmsListElemAdapter
 import dev.mainhq.bus2go.data.data_source.local.datastore.alarms.Alarm
-import dev.mainhq.bus2go.presentation.main.home.favourites.FavouritesViewModel
+import dev.mainhq.bus2go.presentation.main.home.FavouritesViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

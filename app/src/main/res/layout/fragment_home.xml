@@ -86,7 +86,6 @@
                         app:layout_constraintEnd_toStartOf="@id/removeItemsWidget"
                         >
                         <androidx.appcompat.widget.AppCompatImageButton
-                            android:id="@+id/add_tag"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:src="@drawable/tag"
@@ -151,12 +150,33 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 >
                 
-                <androidx.fragment.app.FragmentContainerView
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/favouritesFragmentContainer"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    app:layout_constraintTop_toBottomOf="@id/mainAppBar"
-                    />
+                    >
+                    
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/favourites_text_view"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="10dp"
+                        tools:text="Favourites"
+                        android:textSize="20sp"
+                        android:fontFamily="@font/goli_medium"
+                        android:padding="10dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+                    
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/favouritesRecyclerView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="fill_vertical"
+                        app:layout_constraintTop_toBottomOf="@+id/favourites_text_view" />
+                
+                </androidx.constraintlayout.widget.ConstraintLayout>
+                
             </androidx.core.widget.NestedScrollView>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
