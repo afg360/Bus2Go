@@ -1,5 +1,6 @@
 package dev.mainhq.bus2go.data.data_source.remote
 
+import dev.mainhq.bus2go.domain.core.Logger
 import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.exceptions.NetworkException
 import io.ktor.client.HttpClient
@@ -12,6 +13,7 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.Url
 import io.ktor.utils.io.ByteReadChannel
 import java.io.IOException
+import java.net.ConnectException
 import java.util.concurrent.TimeUnit
 import java.net.UnknownHostException
 
@@ -72,5 +74,48 @@ object NetworkClient {
 		}
 	}
 
+	/** A helper function dealing with formatting correctly the network call and doing basic checks */
+	suspend fun <T> call(
+		url: Url,
+		onError: () -> Result<T>,
+		onSuccess: suspend (Result.Success<ByteReadChannel>) -> T,
+		networkMonitor: NetworkMonitor,
+		logger: Logger?,
+		tag: String
+	): Result<T>{
+		if (!networkMonitor.isConnected()) {
+			logger?.error(tag, "Not connected")
+			return Result.Error(null, "Not connected to the internet")
+		}
+
+		try{
+			//if we receive an Error, then the url is wrong
+			logger?.debug(tag, url.toString())
+			return when(val res = NetworkClient.get(url)){
+				is Result.Error -> onError()
+				is Result.Success<ByteReadChannel> -> Result.Success(onSuccess(res))
+			}
+		}
+		catch (iae: IllegalArgumentException){
+			logger?.error(tag, "Malformed URL", iae)
+			return Result.Error(null, "The URL was malformed")
+		}
+		catch (coe: ConnectTimeoutException){
+			logger?.error(tag, "Connection timed out...", coe)
+			return Result.Error(null, "Connection has timed out")
+		}
+		catch (uho: UnknownHostException){
+			logger?.error(tag, "Unknown host", uho)
+			return Result.Error(null, "The host does not exist")
+		}
+		catch (ce: ConnectException){
+			logger?.error(tag, "Connection Exception", ce)
+			return Result.Error(null, "Cannot connect to the server")
+		}
+		catch (ioe: IOException){
+			logger?.error(tag, "Unknown IOException occurred", ioe)
+			return Result.Error(ioe, null)
+		}
+	}
 	//TODO websockets handling
 }

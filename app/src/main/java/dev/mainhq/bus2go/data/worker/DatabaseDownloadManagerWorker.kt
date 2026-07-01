@@ -4,9 +4,7 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import android.widget.Toast
-import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
@@ -14,7 +12,6 @@ import androidx.work.workDataOf
 import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.data.data_source.notifications.NotificationHandler
-import dev.mainhq.bus2go.data.repository.DatabaseDownloadRepositoryImpl.Companion.TAG
 import dev.mainhq.bus2go.domain.entity.AppVersions
 import dev.mainhq.bus2go.domain.entity.DbToDownload
 import dev.mainhq.bus2go.domain.entity.NotificationType
@@ -22,7 +19,6 @@ import dev.mainhq.bus2go.domain.entity.Progress
 import dev.mainhq.bus2go.domain.exceptions.NetworkException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlin.properties.Delegates
 import dev.mainhq.bus2go.domain.core.Result as Bus2GoResult
 
 //FIXME needs refactoring to domain layer...

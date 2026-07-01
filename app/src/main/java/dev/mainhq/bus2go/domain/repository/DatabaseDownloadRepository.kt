@@ -13,7 +13,6 @@ interface DatabaseDownloadRepository {
 	/** Test if the server is a valid bus2go server. */
 	suspend fun getIsBus2Go(str: String): Result<Boolean>
 
-	@Throws(IllegalArgumentException::class)
 	/** Check what is the most up to date version of the database to download */
 	suspend fun getDbUpToDateVersion(dbToDownload: DbToDownload): Result<Int>
 
@@ -26,8 +25,8 @@ interface DatabaseDownloadRepository {
 	 * Download an agency database from a bus2go server if no local up to date compressed file has
 	 * been found.
 	 * **/
-	suspend fun getDb(dbToDownload: DbToDownload, versionNeeded: Int): Flow<Progress>
+	fun getDb(dbToDownload: DbToDownload, versionNeeded: Int): Flow<Progress>
 
 	/** Decompress the given file if it exists */
-	suspend fun decompressFile(dbPath: String, dbName: String, version: Int): Flow<Progress>
+	fun decompressFile(dbPath: String, dbName: String, version: Int): Flow<Progress>
 }

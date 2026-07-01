@@ -47,8 +47,8 @@ class MainActivity : BaseActivity() {
                         setDatabaseExpirationDate = it.commonModule.setDatabaseExpirationDate,
                         getSettings = it.commonModule.getSettings,
                         checkIsBus2GoServer = it.appModule.checkIsBus2GoServer,
-                        scheduleDownloadDatabaseTask = it.appModule.scheduleDownloadDatabaseTask,
-                        observeDownloadDatabaseTask = it.appModule.observeDownloadDatabaseTask
+                        scheduleDownloadDatabaseTask = it.commonModule.scheduleDownloadDatabaseTask,
+                        observeDownloadDatabaseTask = it.commonModule.observeDownloadDatabaseTask
                     ) as T
                 }
             }

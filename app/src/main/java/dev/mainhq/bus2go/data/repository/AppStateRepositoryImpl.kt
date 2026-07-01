@@ -6,7 +6,7 @@ import androidx.datastore.preferences.core.edit
 import dev.mainhq.bus2go.data.data_source.local.database.exo.AppDatabaseExo
 import dev.mainhq.bus2go.data.data_source.local.database.stm.AppDatabaseSTM
 import dev.mainhq.bus2go.data.data_source.local.datastore.app_state.AppStateDataStoreKeys
-import dev.mainhq.bus2go.data.repository.DatabaseDownloadRepositoryImpl.Companion.COMPRESSION_EXT
+import dev.mainhq.bus2go.data.repository.DatabaseDownloadRepositoryAbstractImpl.Companion.COMPRESSION_EXT
 import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.entity.DbToDownload
 import dev.mainhq.bus2go.domain.repository.AppStateRepository
@@ -17,10 +17,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.lang.NumberFormatException
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.util.NoSuchElementException
 
 class AppStateRepositoryImpl(
 	private val appStateDataStore: DataStore<Preferences>,
@@ -59,11 +57,12 @@ class AppStateRepositoryImpl(
 
 	private fun getMaxVersion(dbToDownload: DbToDownload): Int {
 		return filesDir.list()?.filter {
-			it.matches("^(${dbToDownload.name.lowercase()})(_sample)?_data_[0-9]+\\.db\\.gz$".toRegex()) //(with \\d smaller than current version)
+			it.matches("^(${dbToDownload.name.lowercase()})(_sample)?_data_[0-9]+\\.db\\.gz$".toRegex())
 		}?.map {
 			//we will be keeping database with the current version in case something has gone wrong...
 			it.split("_").last().removeSuffix(".db.gz").toInt()
-		}?.maxBy { it } ?: -1
+			//for if the list is empty (i.e. nothing downloaded yet), return null
+		}?.maxByOrNull { it } ?: -1
 	}
 
 	private fun _getGarbageFiles(dbToDownload: DbToDownload, maxVersion: Int): List<String> {

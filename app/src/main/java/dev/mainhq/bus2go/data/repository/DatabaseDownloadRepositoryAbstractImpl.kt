@@ -1,27 +1,21 @@
 package dev.mainhq.bus2go.data.repository
 
-import dev.mainhq.bus2go.BuildConfig
 import dev.mainhq.bus2go.data.data_source.remote.NetworkClient
 import dev.mainhq.bus2go.data.data_source.remote.NetworkMonitor
 import dev.mainhq.bus2go.domain.core.Logger
-import dev.mainhq.bus2go.domain.entity.DbToDownload
-import dev.mainhq.bus2go.domain.exceptions.NetworkException
 import dev.mainhq.bus2go.domain.repository.DatabaseDownloadRepository
 import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.entity.AppVersions
+import dev.mainhq.bus2go.domain.entity.DbToDownload
 import dev.mainhq.bus2go.domain.entity.Progress
-import dev.mainhq.bus2go.domain.entity.NotificationType
+import dev.mainhq.bus2go.domain.exceptions.NetworkException
 import io.ktor.client.call.body
-import io.ktor.client.network.sockets.ConnectTimeoutException
 import io.ktor.http.URLBuilder
-import io.ktor.http.Url
-import io.ktor.http.set
 import io.ktor.utils.io.ByteReadChannel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
@@ -32,83 +26,75 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
-import java.net.ConnectException
-import java.net.UnknownHostException
 import java.util.zip.GZIPInputStream
 
-class DatabaseDownloadRepositoryImpl(
-	baseUrl: String?,
-	private val networkMonitor: NetworkMonitor,
-	private val filesDir: File,
-	private val logger: Logger?
-): DatabaseDownloadRepository {
-
-	private var baseUrl: String = baseUrl ?: BuildConfig.LOCAL_HOST
-
-	//TODO should be used in case we change the url
-	fun setBaseUrl(url: String){
-		baseUrl = url
-	}
+abstract class DatabaseDownloadRepositoryAbstractImpl: DatabaseDownloadRepository {
+	protected abstract val baseHost : String
+	protected abstract val filesDir: File
+	protected abstract val networkMonitor: NetworkMonitor
+	protected abstract val logger: Logger?
+	protected abstract val tag: String
 
 	override val DB_NAME_STM = "stm_data"
 	override val DB_NAME_EXO = "exo_data"
 
 	companion object {
 		const val COMPRESSION_EXT = "gz"
-
-		const val TAG = "DATABASE_DOWNLOAD"
-
 		private const val EXPECTED_MESSAGE = "This is a Bus2Go server... potentially"
 		private const val API_VERSION = "v1"
 	}
 
-	override suspend fun getIsBus2Go(str: String): Result<Boolean> {
+	protected suspend fun _getIsBus2Go(str: String, port: Int): Result<Boolean> {
 		//TODO eventually also set a header to send to prove perhaps identity from client
 		val url = URLBuilder(
 			host = str,
-			//FIXME to port 443
-			port = BuildConfig.DEFAULT_PORT,
+			port = port,
 			pathSegments = listOf("api", "version")
 		).build()
 
-		return call(
+		return NetworkClient.call(
 			url,
 			onError = { Result.Success(false) },
 			onSuccess = { res ->
 				//before returning success, read the message and compare
 				val response = Json.decodeFromString<JsonObject>(res.data.readRemaining().readText())
-				logger?.debug(TAG, response.toString())
 				val message = response["message"]?.jsonPrimitive?.content
 				val version = response["version"]?.jsonPrimitive?.content
 				message == EXPECTED_MESSAGE && version == API_VERSION
-			}
+			},
+			networkMonitor = networkMonitor,
+			logger = logger,
+			tag = tag
 		)
 	}
 
-	override suspend fun getDbUpToDateVersion(dbToDownload: DbToDownload): Result<Int> {
+	protected suspend fun _getDbUpToDateVersion(dbToDownload: DbToDownload, port: Int): Result<Int> {
 		val url = URLBuilder(
-			host = baseUrl,
-			port = BuildConfig.DEFAULT_PORT,
+			host = baseHost,
+			port = port,
 			pathSegments = listOf("api", "download", API_VERSION, dbToDownload.name.lowercase(), "version")
 		).build()
-		return call(
+		return NetworkClient.call(
 			url,
 			onError = { Result.Error(null, "Wrong call to api...?") },
 			onSuccess = { res ->
 				Json.decodeFromString<JsonObject>(res.data.readRemaining().readText())["version"]
 					?.jsonPrimitive?.int ?: -1
-			}
+			},
+			networkMonitor = networkMonitor,
+			logger = logger,
+			tag = tag
 		)
 	}
 
-	override suspend fun getAllDbUpToDateVersion(): Result<Map<DbToDownload, Int>> {
+	protected suspend fun _getAllDbUpToDateVersion(port: Int): Result<Map<DbToDownload, Int>> {
 		val url = URLBuilder(
-			host = baseUrl,
-			port = BuildConfig.DEFAULT_PORT,
+			host = baseHost,
+			port = port,
 			//FIXME needs to be replaced since "all" is not a valid endpoint
 			pathSegments = listOf("api", "download", API_VERSION, "versions")
 		).build()
-		return call(
+		return NetworkClient.call(
 			url,
 			onError = { Result.Error(null, "Wrong call to api...?") },
 			onSuccess = { res ->
@@ -125,75 +111,36 @@ class DatabaseDownloadRepositoryImpl(
 						}
 					}
 					.toMap()
-			}
+			},
+			networkMonitor = networkMonitor,
+			logger = logger,
+			tag = tag
 		)
 	}
 
-	override suspend fun getAppVersionCodeRequired(): Result<AppVersions> {
-		return call(
-			url = URLBuilder()
-				.apply {
-					host = BuildConfig.LOCAL_HOST
-					port = BuildConfig.DEFAULT_PORT
-					pathSegments = listOf("api", "download", API_VERSION, "app_version_code_required")
-				}
-				.build(),
+	protected suspend fun _getAppVersionCodeRequired(port: Int): Result<AppVersions> {
+		return NetworkClient.call(
+			url = URLBuilder(
+				host = baseHost,
+				port = port,
+				pathSegments = listOf("api", "download", API_VERSION, "app_version_code_required")
+			).build(),
 			onError = { Result.Error(null, "Wrong api call") },
 			onSuccess = {
 				Json.decodeFromString<AppVersions>(it.data.readRemaining().readText())
-			}
+			},
+			networkMonitor = networkMonitor,
+			logger = logger,
+			tag = tag
 		)
 	}
 
-
-	/** A helper function dealing with formatting correctly the network call and doing basic checks */
-	private suspend fun <T> call(
-		url: Url,
-		onError: () -> Result<T>,
-		onSuccess: suspend (Result.Success<ByteReadChannel>) -> T
-	): Result<T>{
-		if (!networkMonitor.isConnected()) {
-			logger?.error(TAG, "Not connected")
-			return Result.Error(null, "Not connected to the internet")
-		}
-
-		try{
-			//if we receive an Error, then the url is wrong
-			logger?.debug(TAG, url.toString())
-			return when(val res = NetworkClient.get(url)){
-				is Result.Error -> onError()
-				is Result.Success<ByteReadChannel> -> Result.Success(onSuccess(res))
-			}
-		}
-		catch (iae: IllegalArgumentException){
-			logger?.error(TAG, "Malformed URL", iae)
-			return Result.Error(null, "The URL was malformed")
-		}
-		catch (coe: ConnectTimeoutException){
-			logger?.error(TAG, "Connection timed out...", coe)
-			return Result.Error(null, "Connection has timed out")
-		}
-		catch (uho: UnknownHostException){
-			logger?.error(TAG, "Unknown host", uho)
-			return Result.Error(null, "The host does not exist")
-		}
-		catch (ce: ConnectException){
-			logger?.error(TAG, "Connection Exception", ce)
-			return Result.Error(null, "Cannot connect to the server")
-		}
-		catch (ioe: IOException){
-			logger?.error(TAG, "Unknown IOException occurred", ioe)
-			return Result.Error(ioe, null)
-		}
-	}
-
-	override suspend fun getDb(dbToDownload: DbToDownload, versionNeeded: Int): Flow<Progress> {
+	protected fun _getDb(dbToDownload: DbToDownload, versionNeeded: Int, port: Int): Flow<Progress> {
 		return flow {
 			emit(Progress.Idle)
-
 			val urlBuilder = URLBuilder(
-				host = baseUrl,
-				port = BuildConfig.DEFAULT_PORT,
+				host = baseHost,
+				port = port,
 				pathSegments = when(dbToDownload){
 					DbToDownload.STM -> listOf("api", "download", API_VERSION, "stm")//"debug", "sample_data", "stm")
 					DbToDownload.EXO -> listOf("api", "download", API_VERSION, "exo")
@@ -216,7 +163,7 @@ class DatabaseDownloadRepositoryImpl(
 					//FIXME better parsing should happen here in case quotes and other garbage is added...
 					val fileName = it.headers["content-disposition"]?.substringAfter("attachment; filename=")
 						?: throw NetworkException("Content-Disposition HTTP header needed for file name not set by server...")
-					logger?.debug(TAG, fileName)
+					logger?.debug(tag, fileName)
 					tmpCompressedFile = File(filesDir, "$fileName.part")
 					var lastNotifTime = System.currentTimeMillis()
 					var totalDownloaded = 0
@@ -261,10 +208,10 @@ class DatabaseDownloadRepositoryImpl(
 					tmpCompressedFile?.delete()
 				}
 			}
-		}
+		}.flowOn(Dispatchers.IO)
 	}
 
-	override suspend fun decompressFile(dbPath: String, dbName: String, version: Int): Flow<Progress> {
+	protected fun _decompressFile(dbPath: String, dbName: String, version: Int): Flow<Progress> {
 		return flow {
 			//FIXMe for now the final file name doesnt contain db version, add it eventually (see abstrack Room classes)
 			// or store it directly inside the db inside a config/metadata table
@@ -273,7 +220,7 @@ class DatabaseDownloadRepositoryImpl(
 			val compressedFile = File(filesDir, "${dbName}_${version}.db.gz")
 			if (destFile.exists()) destFile.delete()
 
-			logger?.debug(TAG, "Decompressing")
+			logger?.debug(tag, "Decompressing")
 			FileInputStream(compressedFile).use { fileIn ->
 				GZIPInputStream(fileIn).use { zstdIn ->
 					FileOutputStream(destFile).use { fileOut ->
@@ -287,7 +234,7 @@ class DatabaseDownloadRepositoryImpl(
 							emit(Progress.Completed(true))
 						}
 						catch (ioe: IOException){
-							logger?.error(TAG, ioe.message.toString())
+							logger?.error(tag, ioe.message.toString())
 							//delete garbage/corrupted files
 							if (compressedFile.exists()) compressedFile.delete()
 							if (destFile.exists()) destFile.delete()
@@ -298,5 +245,4 @@ class DatabaseDownloadRepositoryImpl(
 			}
 		}.flowOn(Dispatchers.IO)
 	}
-
 }

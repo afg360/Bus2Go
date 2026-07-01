@@ -37,13 +37,36 @@ android {
         }
     }
     
-    sourceSets {
-        androidTest.assets.srcDirs += files("$projectDir/schemas".toString())
-    }
-    
     //include properties defined locally
     def localProperties = new Properties()
     localProperties.load(new FileInputStream(rootProject.file("local.properties")))
+    
+    signingConfigs {
+        alpha {
+            storeFile rootProject.file("bus2go.jks")
+            storePassword localProperties.getProperty("STORE_PASSWORD")
+            keyAlias localProperties.getProperty("KEY_ALPHA")
+            keyPassword localProperties.getProperty("KEY_ALPHA_PASSWORD")
+        }
+        
+        release {
+            storeFile rootProject.file("bus2go.jks")
+            storePassword localProperties.getProperty("STORE_PASSWORD")
+            keyAlias localProperties.getProperty("KEY_RELEASE")
+            keyPassword localProperties.getProperty("KEY_RELEASE_PASSWORD")
+        }
+    }
+    
+    sourceSets {
+        androidTest.assets.srcDirs += files("$projectDir/schemas".toString())
+        
+        alpha {
+            java.srcDirs 'src/release/kotlin'
+        }
+        release {
+            java.srcDirs 'src/release/kotlin'
+        }
+    }
     
     buildTypes {
         debug {
@@ -60,15 +83,24 @@ android {
         alpha {
             applicationIdSuffix ".alpha"
             versionNameSuffix "-alpha"
-            //minifyEnabled true
+            debuggable true
+            minifyEnabled false
+            signingConfig signingConfigs.alpha
             //proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         
         release {
             minifyEnabled true
+            debuggable false
+            signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+        
     }
+    
+    lint {
+    }
+    
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8

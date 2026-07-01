@@ -1,5 +1,3 @@
-package dev.mainhq.bus2go.di
-
 import android.content.Context
 import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.data.repository.DatabaseDownloadRepositoryImpl

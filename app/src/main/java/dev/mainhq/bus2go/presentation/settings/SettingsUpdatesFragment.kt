@@ -22,7 +22,7 @@ class SettingsUpdatesFragment: PreferenceFragmentCompat() {
 				return (this@SettingsUpdatesFragment.requireActivity().application as Bus2GoApplication)
 					.let{
 						SettingsUpdateFragmentViewModel(
-							it.appModule.scheduleDownloadDatabaseTask,
+							it.commonModule.scheduleDownloadDatabaseTask,
 						) as T
 					}
 			}

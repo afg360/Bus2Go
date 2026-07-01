@@ -32,7 +32,7 @@ class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
 				return ConfigDatabasesFragmentViewModel(
 					//TODO this is shit
 					(this@ConfigDatabasesFragment.requireActivity().application as Bus2GoApplication)
-						.appModule.scheduleDownloadDatabaseTask
+						.commonModule.scheduleDownloadDatabaseTask
 				) as T
 			}
 		}

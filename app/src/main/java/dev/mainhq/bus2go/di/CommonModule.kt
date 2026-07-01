@@ -1,6 +1,8 @@
 package dev.mainhq.bus2go.di
 
 import android.content.Context
+import androidx.work.WorkManager
+import dev.mainhq.bus2go.data.backgroundtask.DatabaseDownloadSchedulerImpl
 import dev.mainhq.bus2go.data.core.LoggerImpl
 import dev.mainhq.bus2go.data.data_source.local.database.exo.AppDatabaseExo
 import dev.mainhq.bus2go.data.data_source.local.database.stm.AppDatabaseSTM
@@ -20,6 +22,8 @@ import dev.mainhq.bus2go.data.repository.SettingsRepositoryImpl
 import dev.mainhq.bus2go.data.repository.StmFavouritesRepositoryImpl
 import dev.mainhq.bus2go.data.repository.StmRepositoryImpl
 import dev.mainhq.bus2go.domain.use_case.CleanUpGarbageFiles
+import dev.mainhq.bus2go.domain.use_case.ObserveDownloadDatabaseTask
+import dev.mainhq.bus2go.domain.use_case.ScheduleDownloadDatabaseTask
 import dev.mainhq.bus2go.domain.use_case.settings.SaveAllNotifSettings
 import dev.mainhq.bus2go.domain.use_case.settings.SaveBus2GoServer
 import dev.mainhq.bus2go.domain.use_case.db_state.CheckDatabaseUpdateRequired
@@ -41,6 +45,16 @@ import dev.mainhq.bus2go.domain.use_case.transit.GetStopNames
 import dev.mainhq.bus2go.domain.use_case.transit.GetTransitTime
 
 class CommonModule(applicationContext: Context) {
+	private val databaseDownloadScheduler = DatabaseDownloadSchedulerImpl(
+		WorkManager.getInstance(applicationContext)
+	)
+	val scheduleDownloadDatabaseTask = ScheduleDownloadDatabaseTask(
+		databaseDownloadScheduler,
+	)
+
+	val observeDownloadDatabaseTask = ObserveDownloadDatabaseTask(
+		databaseDownloadScheduler,
+	)
 
 	private val stmDatabase = AppDatabaseSTM.getInstance(applicationContext)
 	private val stmRepository = StmRepositoryImpl(
