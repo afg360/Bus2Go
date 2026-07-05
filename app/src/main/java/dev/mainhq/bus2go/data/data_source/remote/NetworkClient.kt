@@ -12,10 +12,80 @@ import io.ktor.client.request.prepareGet
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.Url
 import io.ktor.utils.io.ByteReadChannel
+import okhttp3.ConnectionSpec
 import java.io.IOException
 import java.net.ConnectException
 import java.util.concurrent.TimeUnit
 import java.net.UnknownHostException
+import java.net.UnknownServiceException
+import java.security.cert.X509Certificate
+import javax.net.ssl.SSLHandshakeException
+import javax.net.ssl.X509TrustManager
+
+import dev.mainhq.bus2go.data.core.LoggerImpl
+import java.security.KeyStore
+import java.security.SecureRandom
+import java.security.cert.CertificateException
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManagerFactory
+
+
+class UnpinnedCertificateException(
+	val certificate: X509Certificate,
+) : CertificateException("Certificate not pinned: ${certificate.subjectX500Principal.name}")
+
+class MyTrustManager(
+	private val systemTrustManager: X509TrustManager,
+	private val logger: Logger?
+//	private val keyStore: KeyStore,
+): X509TrustManager {
+
+	companion object {
+		private const val PREF_PINNED_CERTS = "pinned_certs"
+	}
+
+	/**
+	 * Will not be used since we are a client, but uses default nonetheless
+	 * @throws java.lang.IllegalArgumentException if null or zero-length chain is passed in for the
+	 * chain parameter or if null or zero-length string is passed in for the authType parameter
+	 * @throws java.security.cert.CertificateException if the certificate chain is not trusted by
+	 * this TrustManager
+	 */
+	override fun checkClientTrusted(chain: Array<out X509Certificate>?, authType: String?) {
+		if (chain == null || authType == null || chain.isEmpty()) {
+			throw java.lang.IllegalArgumentException()
+		}
+		systemTrustManager.checkClientTrusted(chain, authType)
+	}
+
+
+	/**
+	 * @throws java.lang.IllegalArgumentException if null or zero-length chain is passed in for the
+	 * chain parameter or if null or zero-length string is passed in for the authType parameter
+	 * @throws java.security.cert.CertificateException if the certificate chain is not trusted by
+	 * this TrustManager
+	 */
+	override fun checkServerTrusted(chain: Array<out X509Certificate>?, authType: String?) {
+		if (chain == null || authType == null || chain.isEmpty()) {
+			throw java.lang.IllegalArgumentException()
+		}
+		val serverCert = chain[0]
+		logger?.debug("NETWORK-CERT", serverCert.subjectX500Principal.name)
+		try {
+			systemTrustManager.checkServerTrusted(chain, authType)
+		}
+		catch (ce: CertificateException) {
+			throw UnpinnedCertificateException(serverCert)
+		}
+
+		// TODO Check if this certificate is already pinned
+
+		// TODO Not pinned yet — throw exception so UI can show cert details
+	}
+
+	override fun getAcceptedIssuers(): Array<out X509Certificate> = systemTrustManager.acceptedIssuers
+
+}
 
 object NetworkClient {
 	private val client = HttpClient(OkHttp){
@@ -31,16 +101,45 @@ object NetworkClient {
 		}
 	}
 
+	private val selfHostedClient = HttpClient(OkHttp){
+		engine {
+			config {
+				connectTimeout(15_000, TimeUnit.MILLISECONDS)
+				readTimeout(15_000, TimeUnit.MILLISECONDS)
+				writeTimeout(15_000, TimeUnit.MILLISECONDS)
+				//FIXME add the correct fields
+				val trustManager = MyTrustManager(
+					TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
+						.apply {
+							init(null as KeyStore?)
+						}
+						.trustManagers
+						.filterIsInstance<X509TrustManager>()
+						.first(),
+					LoggerImpl()
+//					KeyStore.getInstance("")
+				)
+				val sslContext = SSLContext.getInstance("TLS").apply {
+					init(null, arrayOf(trustManager), SecureRandom())
+				}
+				sslSocketFactory(sslContext.socketFactory, trustManager)
+			}
+		}
+	}
+
 	/**
 	 * @return A Result.Success if no exception AND no http error occurred. Otherwise returns a
 	 * Result.Error
 	 * @throws IllegalArgumentException
 	 * @throws ConnectTimeoutException
 	 * @throws UnknownHostException
+	 * @throws UnknownServiceException When TLS/SSL is not used for production code
+	 * @throws SSLHandshakeException When unverified certificate is used
 	 **/
-	suspend fun get(url: Url): Result<ByteReadChannel> {
+	suspend fun get(url: Url, isLocal: Boolean): Result<ByteReadChannel> {
 		try {
-			val response = client.get(url) {}
+			val response = if (isLocal) selfHostedClient.get(url) {}
+			else client.get(url) {}
 			return when(response.status.value){
 				in 100..199 -> Result.Success(response.body<ByteReadChannel>())
 
@@ -81,7 +180,8 @@ object NetworkClient {
 		onSuccess: suspend (Result.Success<ByteReadChannel>) -> T,
 		networkMonitor: NetworkMonitor,
 		logger: Logger?,
-		tag: String
+		tag: String,
+		isLocal: Boolean = false
 	): Result<T>{
 		if (!networkMonitor.isConnected()) {
 			logger?.error(tag, "Not connected")
@@ -91,7 +191,7 @@ object NetworkClient {
 		try{
 			//if we receive an Error, then the url is wrong
 			logger?.debug(tag, url.toString())
-			return when(val res = NetworkClient.get(url)){
+			return when(val res = get(url, isLocal)){
 				is Result.Error -> onError()
 				is Result.Success<ByteReadChannel> -> Result.Success(onSuccess(res))
 			}
@@ -112,10 +212,21 @@ object NetworkClient {
 			logger?.error(tag, "Connection Exception", ce)
 			return Result.Error(null, "Cannot connect to the server")
 		}
+		//Caused when only TLS calls can be made to a non-TLS server/endpoint
+		catch (use: UnknownServiceException) {
+			logger?.error(tag, "SSL/TLS is not configured on the server side or this version of the app", use)
+			return Result.Error(use, "This version of the app or the server does not have SSL/TLS enabled")
+		}
+		//Caused when SSL certificate is wrong
+		catch (he: SSLHandshakeException) {
+			logger?.error(tag, "Server SSL Certificate is invalid")
+			return Result.Error(he, "Server SSL Certificate is invalid. You may need to manually add it to your device if you are self hosting the server")
+		}
 		catch (ioe: IOException){
 			logger?.error(tag, "Unknown IOException occurred", ioe)
 			return Result.Error(ioe, null)
 		}
 	}
+
 	//TODO websockets handling
 }

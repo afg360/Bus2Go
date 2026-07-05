@@ -10,8 +10,12 @@ interface DatabaseDownloadRepository {
 	val DB_NAME_STM: String
 	val DB_NAME_EXO: String
 
-	/** Test if the server is a valid bus2go server. */
+	/** Tests if the server is a valid bus2go server. To be used ONLY when using a web server from
+	 * official domain names. */
 	suspend fun getIsBus2Go(str: String): Result<Boolean>
+
+	/** Tests if the server is a valid bus2go server. To be used ONLY when using a self-hosted server. */
+	suspend fun getIsSelfHostedBus2Go(str: String): Result<Boolean>
 
 	/** Check what is the most up to date version of the database to download */
 	suspend fun getDbUpToDateVersion(dbToDownload: DbToDownload): Result<Int>

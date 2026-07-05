@@ -11,6 +11,7 @@ import dev.mainhq.bus2go.domain.entity.Progress
 import dev.mainhq.bus2go.domain.exceptions.NetworkException
 import io.ktor.client.call.body
 import io.ktor.http.URLBuilder
+import io.ktor.http.URLProtocol
 import io.ktor.utils.io.ByteReadChannel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -47,6 +48,7 @@ abstract class DatabaseDownloadRepositoryAbstractImpl: DatabaseDownloadRepositor
 	protected suspend fun _getIsBus2Go(str: String, port: Int): Result<Boolean> {
 		//TODO eventually also set a header to send to prove perhaps identity from client
 		val url = URLBuilder(
+			protocol = URLProtocol.HTTPS,
 			host = str,
 			port = port,
 			pathSegments = listOf("api", "version")
@@ -65,6 +67,31 @@ abstract class DatabaseDownloadRepositoryAbstractImpl: DatabaseDownloadRepositor
 			networkMonitor = networkMonitor,
 			logger = logger,
 			tag = tag
+		)
+	}
+
+	protected suspend fun _getIsSelfHostedBus2Go(str: String, port: Int): Result<Boolean> {
+		val url = URLBuilder(
+			protocol = URLProtocol.HTTPS,
+			host = str,
+			port = port,
+			pathSegments = listOf("api", "version")
+		).build()
+
+		return NetworkClient.call(
+			url,
+			onError = { Result.Success(false) },
+			onSuccess = { res ->
+				//before returning success, read the message and compare
+				val response = Json.decodeFromString<JsonObject>(res.data.readRemaining().readText())
+				val message = response["message"]?.jsonPrimitive?.content
+				val version = response["version"]?.jsonPrimitive?.content
+				message == EXPECTED_MESSAGE && version == API_VERSION
+			},
+			networkMonitor = networkMonitor,
+			logger = logger,
+			tag = tag,
+			isLocal = true
 		)
 	}
 

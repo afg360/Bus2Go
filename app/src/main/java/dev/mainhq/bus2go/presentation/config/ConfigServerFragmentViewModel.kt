@@ -2,8 +2,11 @@ package dev.mainhq.bus2go.presentation.config
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.mainhq.bus2go.data.data_source.remote.UnpinnedCertificateException
 import dev.mainhq.bus2go.domain.core.Result
+import dev.mainhq.bus2go.domain.entity.Time
 import dev.mainhq.bus2go.domain.entity.UrlChecker
+import dev.mainhq.bus2go.domain.use_case.AcceptSelfSignedCertificate
 import dev.mainhq.bus2go.domain.use_case.settings.CheckIsBus2GoServer
 import dev.mainhq.bus2go.domain.use_case.settings.SaveAllNotifSettings
 import dev.mainhq.bus2go.domain.use_case.settings.SaveBus2GoServer
@@ -20,92 +23,145 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.CertificatePinner.Companion.sha256Hash
 
-//TODO will eventually need a use case to handle a list of available public servers...
 
 class ConfigServerFragmentViewModel(
 	private val checkIsBus2GoServer: CheckIsBus2GoServer,
 	private val saveBus2GoServer: SaveBus2GoServer,
-	private val saveAllNotifSettings: SaveAllNotifSettings
+	private val saveAllNotifSettings: SaveAllNotifSettings,
+	private val acceptSelfSignedCertificate: AcceptSelfSignedCertificate
 ): ViewModel(), SettingsSavableViewModel {
-
 
 	private val _buttonText = MutableStateFlow("Skip")
 	val buttonText = _buttonText.asStateFlow()
 
 	//store 1 element
-	private val _textInputText: MutableSharedFlow<UiState<String>> = MutableSharedFlow(replay = 1)
-	val textInputText = _textInputText.asSharedFlow()
+	private val _textInputText: MutableStateFlow<UiState<String>> = MutableStateFlow(UiState.Init)
+	val textInputText = _textInputText.asStateFlow()
 
 	private val _serverResponse: MutableStateFlow<UiState<Boolean>> = MutableStateFlow(UiState.Init)
 	val serverResponse = _serverResponse.asStateFlow()
 
-	private val _savingServerState: MutableStateFlow<UiState<String>> = MutableStateFlow(UiState.Init)
-	val savingServerState = _savingServerState.asStateFlow()
-
-	private var job: Job? = null
-
-
 	fun setServer(potentialUrl: String){
 		//FIXME do some user input handling here
 		//TODO verify if the user added an "http[s]://" thingy and whatnot
-		job?.cancel()
 		_serverResponse.update { UiState.Init }
 		val config = UrlChecker.check(potentialUrl)
+		if (config == null) {
+			_buttonText.update { "Skip" }
+			_textInputText.update { UiState.Error("") }
+		}
+		else if (config.data.isEmpty()) {
+			_buttonText.update { "Skip" }
+			_textInputText.update { UiState.Success("") }
+		}
+		else {
+			_buttonText.update { "Continue" }
+			_textInputText.update { UiState.Success(config.data) }
+		}
+	}
+
+
+	private val _warnUser: MutableSharedFlow<WarningType> = MutableSharedFlow()
+	val warnUser = _warnUser.asSharedFlow()
+
+	/** Called when the user clicks on Continue after having written a potential bsu2go server */
+	fun verifyUserInputServer() {
 		viewModelScope.launch(Dispatchers.Main) {
-			if (config == null) {
-				_buttonText.update { "Skip" }
-				_textInputText.emit(UiState.Error(""))
+			//before doing this shit, check if _serverResponse is already in success mode from the previous data...
+			//if it is, no need to check back
+			_serverResponse.update { UiState.Loading }
+			//capture the textInputText
+			if (_textInputText.value.instanceOf(UiState.Error::class)) {
+				_serverResponse.update { UiState.Error("Invalid URL") }
 			}
-			else if (config.data.isEmpty()) {
-				_buttonText.update { "Skip" }
-				_textInputText.emit(UiState.Success(""))
+
+			val inputTextString = (_textInputText.value as UiState.Success).data
+			when(_serverType.value) {
+				ServerType.SELF_HOSTED -> {
+					_warnUser.emit(WarningType.QuerySelfHosted)
+				}
+				ServerType.WEB -> {
+					val result = checkIsBus2GoServer.invoke(inputTextString, _serverType.value)
+					_checkIsBus2Go(inputTextString, result)
+				}
 			}
-			else {
-				_buttonText.update {  "Continue" }
-				_textInputText.emit(UiState.Success(config.data))
+
+		}
+	}
+
+	/** Called once the user accepts to query a self hosted potential bus2go server */
+	fun checkIsBus2Go() {
+		assert(_serverType.value == ServerType.SELF_HOSTED)
+		viewModelScope.launch {
+			val inputTextString = (_textInputText.value as UiState.Success).data
+			val result = checkIsBus2GoServer.invoke(inputTextString, _serverType.value)
+			when (result) {
+				is Result.Error -> {
+					val exception = result.throwable?.findCause<UnpinnedCertificateException>()
+					if (exception != null) {
+						_warnUser.emit(WarningType.AcceptSelfSignedCertificate(
+							exception.certificate.subjectX500Principal.name,
+							exception.certificate.issuerX500Principal.name,
+							exception.certificate.notAfter.toString(),
+							exception.certificate.sha256Hash().toString()
+						))
+					}
+					else {
+						//TODO put "Skip option"
+						_serverResponse.update { UiState.Error("Unexpected Error occurred") }
+					}
+				}
+				else -> _checkIsBus2Go(inputTextString, result)
 			}
 		}
 	}
 
-	/** Called when the user clicks on Continue after having written a potential bsu2go server */
-	fun checkIsBus2GoServer() {
-		//before doing this shit, check if _serverResponse is already in success mode from the previous data...
-		//if it is, no need to check back
-		_serverResponse.update { UiState.Loading }
+	fun acceptCert() {
+		viewModelScope.launch {
+			acceptSelfSignedCertificate.invoke()
+		}
+	}
 
-		job = viewModelScope.launch(Dispatchers.Main) {
-			//capture the textInputText
-			val value = _textInputText.first()
-			if (value.instanceOf(UiState.Error::class)) _serverResponse.update { UiState.Error("") }
-			val coroutineExceptionHandler = CoroutineExceptionHandler{_, throwable ->
-				throwable.printStackTrace()
+	private inline fun <reified T : Throwable> Throwable.findCause(): T? {
+		var current: Throwable? = this
+		while (current != null) {
+			if (current is T) return current
+			current = current.cause
+		}
+		return null
+	}
+
+	private fun _checkIsBus2Go(inputTextString: String, result: Result<Boolean>) {
+		//if message is null from server success, then show invalid
+		when (result) {
+			is Result.Error -> {
+				_buttonText.update { "Skip" }
+				_serverResponse.value =
+					if (result.message != null) UiState.Error(result.message)
+					else UiState.Error("")
 			}
-			withContext(Dispatchers.IO + coroutineExceptionHandler) {
-				val result = checkIsBus2GoServer.invoke((value as UiState.Success).data)
-				//if message is null from server success, then show invalid
-				withContext(Dispatchers.Main) {
-					when (result) {
-						is Result.Error -> {
-							_buttonText.update { "Skip" }
-							_serverResponse.value =
-								if (result.message != null) UiState.Error(result.message)
-								else UiState.Error("")
-						}
 
-						is Result.Success<Boolean> -> {
-							if (result.data){
-								_buttonText.update { "Continue" }
-								//FIXME for the moment ignore success/failure status
-								saveBus2GoServer.invoke(value.data)
-							}
-							 else _buttonText.update { "Skip" }
-							_serverResponse.update { UiState.Success(result.data) }
-						}
-					}
+			is Result.Success<Boolean> -> {
+				if (result.data){
+					_buttonText.update { "Continue" }
+					//FIXME for the moment ignore success/failure status
+					saveBus2GoServer.invoke(inputTextString)
 				}
+				else {
+					_buttonText.update { "Skip" }
+				}
+				_serverResponse.update { UiState.Success(result.data) }
 			}
 		}
+	}
+
+	private val _serverType = MutableStateFlow(ServerType.SELF_HOSTED)
+	val serverType = _serverType.asStateFlow()
+
+	fun toggleServerType() {
+		_serverType.update { !_serverType.value }
 	}
 
 	override fun saveSettings() {
@@ -114,8 +170,7 @@ class ConfigServerFragmentViewModel(
 		}
 	}
 
-	fun cancel(){
-		job?.cancel()
+	fun cancelQuery(){
 		_serverResponse.update { UiState.Init }
 	}
 }

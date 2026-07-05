@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.use_case.settings.CheckIsBus2GoServer
 import dev.mainhq.bus2go.domain.use_case.settings.SaveBus2GoServer
+import dev.mainhq.bus2go.presentation.config.ServerType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -19,10 +20,11 @@ class SettingsMainFragmentViewModel(
 	private val _toastText = MutableSharedFlow<Response>(replay = 0)
 	val toastText = _toastText.asSharedFlow()
 
+	//FIXME logic for ServerType
 	fun checkIsBus2GoServer(string: String) {
-		viewModelScope.launch(Dispatchers.IO) {
+		viewModelScope.launch {
 			//TODO perhaps isntead of replacing with empty, dont save anything (keep the older one)
-			when(val res = checkIsBus2GoServer.invoke(string)){
+			when(val res = checkIsBus2GoServer.invoke(string, ServerType.SELF_HOSTED)){
 				is Result.Error -> {
 					saveBus2GoServer.invoke("")
 					res.message?.also { _toastText.emit(Response(false, it, null)) }

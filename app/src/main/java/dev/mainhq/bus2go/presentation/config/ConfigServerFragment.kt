@@ -3,20 +3,20 @@ package dev.mainhq.bus2go.presentation.config
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.textfield.TextInputEditText
 import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.R
+import dev.mainhq.bus2go.databinding.FragmentConfigServerBinding
 import dev.mainhq.bus2go.presentation.core.UiState
 import dev.mainhq.bus2go.utils.launchViewModelCollectLatest
 
@@ -37,22 +37,34 @@ class ConfigServerFragment: Fragment(R.layout.fragment_config_server) {
 					ConfigServerFragmentViewModel(
 						it.appModule.checkIsBus2GoServer,
 						it.commonModule.saveBus2GoServer,
-						it.commonModule.saveAllNotifSettings
+						it.commonModule.saveAllNotifSettings,
+						it.commonModule.acceptSelfSignedCertificate
 					) as T
 				}
 			}
 		}
 	}
 
+	private var _binding: FragmentConfigServerBinding? = null
+	private val binding get() = _binding!!
+
+	override fun onCreateView(
+		inflater: LayoutInflater,
+		container: ViewGroup?,
+		savedInstanceState: Bundle?
+	): View? {
+		_binding = FragmentConfigServerBinding.inflate(inflater)
+		return binding.root
+	}
+
 	//stores the bus2go server to use as a realtime data server and update and shit...
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 		super.onViewCreated(view, savedInstanceState)
 
-		val progressIndicator = view.findViewById<CircularProgressIndicator>(R.id.config_server_continue_button_progress_indicator)
+		val progressIndicator = binding.configServerContinueButtonProgressIndicator
+		val textInput = binding.configSelectServerTextInputEditText
 
-		val textInput = view.findViewById<TextInputEditText>(R.id.config_select_server_textInputEditText)
-
-		val button = view.findViewById<MaterialButton>(R.id.config_select_server_continue_button)
+		val button = binding.configSelectServerContinueButton
 		button.setOnClickListener{
 			if (viewModel.buttonText.value == "Skip") {
 				MaterialAlertDialogBuilder(requireContext())
@@ -62,14 +74,66 @@ class ConfigServerFragment: Fragment(R.layout.fragment_config_server) {
 						viewModel.saveSettings()
 						sharedViewModel.triggerEvent(true)
 						dialogInterface.dismiss()
-
 					}
 					.setNegativeButton("Cancel"){ dialogInterface, _ ->
 						dialogInterface.dismiss()
 					}
 					.show()
 			}
-			else viewModel.checkIsBus2GoServer()
+			else viewModel.verifyUserInputServer()
+		}
+
+		binding.configSelectServerTypeSwitch.setOnClickListener {
+			viewModel.toggleServerType()
+		}
+
+		launchViewModelCollectLatest(viewModel.serverType) {
+			binding.configSelectServerTypeTextView.text = it.toString()
+		}
+
+		launchViewModelCollectLatest(viewModel.warnUser) {
+			when(it) {
+				WarningType.QuerySelfHosted -> {
+					MaterialAlertDialogBuilder(requireContext())
+						.setTitle("Security Warning!")
+						.setMessage("You are about to perform an action that may have security ramifications\nAre you sure to query this server?")
+						.setPositiveButton("Accept") { dialogInterface, _ ->
+							viewModel.checkIsBus2Go()
+						}
+						.setNegativeButton("Decline") { dialogInterface, _ ->
+							viewModel.cancelQuery()
+							dialogInterface.dismiss()
+						}
+						.setOnCancelListener { dialogInterface ->
+							viewModel.cancelQuery()
+							dialogInterface.dismiss()
+						}
+						.show()
+				}
+				is WarningType.AcceptSelfSignedCertificate -> {
+					MaterialAlertDialogBuilder(requireContext())
+						.setTitle("Accept Self-Signed Certificate?")
+						.setMessage("""Do you want to accept this self-signed certificate?
+							| Server: ${it.server}
+							| Issuer: ${it.issuer}
+							| Expires: ${it.expires}
+							| Fingerprint: ${it.fingerprint}
+						""".trimMargin())
+						.setPositiveButton("Accept") { dialogInterface, _ ->
+							viewModel.cancelQuery()
+							Toast.makeText(requireContext(), "Cert seems to be accepted...?", Toast.LENGTH_SHORT).show()
+						}
+						.setNegativeButton("Decline") { dialogInterface, _ ->
+							viewModel.cancelQuery()
+							dialogInterface.dismiss()
+						}
+						.setOnCancelListener { dialogInterface ->
+							viewModel.cancelQuery()
+							dialogInterface.dismiss()
+						}
+						.show()
+				}
+			}
 		}
 
 		launchViewModelCollectLatest(viewModel.serverResponse){
@@ -85,7 +149,7 @@ class ConfigServerFragment: Fragment(R.layout.fragment_config_server) {
 						Snackbar.make(requireContext(), view, it.message, Snackbar.LENGTH_INDEFINITE)
 							.setAction("Retry"){
 								//FIXME Button quirks because constantly updated...
-								viewModel.checkIsBus2GoServer()
+								viewModel.verifyUserInputServer()
 							}
 							.show()
 
@@ -106,7 +170,7 @@ class ConfigServerFragment: Fragment(R.layout.fragment_config_server) {
 					button.isEnabled = true
 					//if the response was valid, go to databases
 					if (it.data) {
-						viewModel.cancel()
+						viewModel.cancelQuery()
 						sharedViewModel.setFragment(nextFrag)
 					}
 					//else show an error on the inputText, and display "Skip" on the button (or perhaps a retry)
@@ -142,7 +206,7 @@ class ConfigServerFragment: Fragment(R.layout.fragment_config_server) {
 
 		val mainBackPressCallBack = object: OnBackPressedCallback(true){
 			override fun handleOnBackPressed() {
-				viewModel.cancel()
+				viewModel.cancelQuery()
 				sharedViewModel.setFragment(prevFrag)
 				//must be reenabled when clicking on the EditTextView
 				//isEnabled = false

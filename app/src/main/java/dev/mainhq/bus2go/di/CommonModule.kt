@@ -21,6 +21,7 @@ import dev.mainhq.bus2go.data.repository.NotificationRepositoryImpl
 import dev.mainhq.bus2go.data.repository.SettingsRepositoryImpl
 import dev.mainhq.bus2go.data.repository.StmFavouritesRepositoryImpl
 import dev.mainhq.bus2go.data.repository.StmRepositoryImpl
+import dev.mainhq.bus2go.domain.use_case.AcceptSelfSignedCertificate
 import dev.mainhq.bus2go.domain.use_case.CleanUpGarbageFiles
 import dev.mainhq.bus2go.domain.use_case.ObserveDownloadDatabaseTask
 import dev.mainhq.bus2go.domain.use_case.ScheduleDownloadDatabaseTask
@@ -117,6 +118,8 @@ class CommonModule(applicationContext: Context) {
 
 	val saveBus2GoServer = SaveBus2GoServer(settingsRepository)
 	val saveAllNotifSettings = SaveAllNotifSettings(settingsRepository, appStateRepository)
+
+	val acceptSelfSignedCertificate = AcceptSelfSignedCertificate()
 
 	val getRouteInfo = GetRouteInfo(
 		exoRepository,

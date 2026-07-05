@@ -14,6 +14,7 @@ import dev.mainhq.bus2go.domain.use_case.db_state.SetUpdateDbDialogLastAsToday
 import dev.mainhq.bus2go.domain.use_case.db_state.WasUpdateDialogShownToday
 import dev.mainhq.bus2go.domain.use_case.settings.CheckIsBus2GoServer
 import dev.mainhq.bus2go.domain.use_case.settings.GetSettings
+import dev.mainhq.bus2go.presentation.config.ServerType
 import dev.mainhq.bus2go.presentation.core.UiState
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consume
@@ -129,7 +130,7 @@ class MainActivityViewModel(
 				//TODO("Not Implemented")
 			}
 			else {
-				when(val resp = checkIsBus2GoServer.invoke(server)){
+				when(val resp = checkIsBus2GoServer.invoke(server, ServerType.SELF_HOSTED)){
 					is Result.Error -> _updateDbState.update { UpdateDbState.NotConnectedToInternet }
 					is Result.Success<Boolean> -> {
 						if (resp.data) {

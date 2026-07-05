@@ -27,11 +27,17 @@ class DatabaseDownloadRepositoryImpl(
 	override val logger = null
 
 	private companion object {
-		private const val DEFAULT_PORT = 8000 //443
+		private const val DEFAULT_PORT = 443
 	}
+
+	//TODO each function shall check whether it should be self hosted or not and use the correct port?
 
 	override suspend fun getIsBus2Go(str: String): Result<Boolean> {
 		return super._getIsBus2Go(str, DEFAULT_PORT)
+	}
+
+	override suspend fun getIsSelfHostedBus2Go(str: String): Result<Boolean> {
+		return super._getIsSelfHostedBus2Go(str, DEFAULT_PORT)
 	}
 
 	override suspend fun getDbUpToDateVersion(dbToDownload: DbToDownload): Result<Int> {

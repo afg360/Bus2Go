@@ -6,6 +6,7 @@ sealed class UrlChecker {
 	data class IpAddress(override val data: String): UrlChecker()
 
 	companion object {
+		//FIXME doesn't work properly (e.g. 10 0 0..1 could work
 		fun check(string: String): UrlChecker? {
 			val elems = string.split(".")
 			if (elems.any { it.isBlank() }) return null
