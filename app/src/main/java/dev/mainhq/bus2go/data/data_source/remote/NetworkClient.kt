@@ -12,80 +12,16 @@ import io.ktor.client.request.prepareGet
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.Url
 import io.ktor.utils.io.ByteReadChannel
-import okhttp3.ConnectionSpec
+import java.io.File
 import java.io.IOException
 import java.net.ConnectException
 import java.util.concurrent.TimeUnit
 import java.net.UnknownHostException
 import java.net.UnknownServiceException
-import java.security.cert.X509Certificate
 import javax.net.ssl.SSLHandshakeException
-import javax.net.ssl.X509TrustManager
-
-import dev.mainhq.bus2go.data.core.LoggerImpl
-import java.security.KeyStore
 import java.security.SecureRandom
-import java.security.cert.CertificateException
 import javax.net.ssl.SSLContext
-import javax.net.ssl.TrustManagerFactory
 
-
-class UnpinnedCertificateException(
-	val certificate: X509Certificate,
-) : CertificateException("Certificate not pinned: ${certificate.subjectX500Principal.name}")
-
-class MyTrustManager(
-	private val systemTrustManager: X509TrustManager,
-	private val logger: Logger?
-//	private val keyStore: KeyStore,
-): X509TrustManager {
-
-	companion object {
-		private const val PREF_PINNED_CERTS = "pinned_certs"
-	}
-
-	/**
-	 * Will not be used since we are a client, but uses default nonetheless
-	 * @throws java.lang.IllegalArgumentException if null or zero-length chain is passed in for the
-	 * chain parameter or if null or zero-length string is passed in for the authType parameter
-	 * @throws java.security.cert.CertificateException if the certificate chain is not trusted by
-	 * this TrustManager
-	 */
-	override fun checkClientTrusted(chain: Array<out X509Certificate>?, authType: String?) {
-		if (chain == null || authType == null || chain.isEmpty()) {
-			throw java.lang.IllegalArgumentException()
-		}
-		systemTrustManager.checkClientTrusted(chain, authType)
-	}
-
-
-	/**
-	 * @throws java.lang.IllegalArgumentException if null or zero-length chain is passed in for the
-	 * chain parameter or if null or zero-length string is passed in for the authType parameter
-	 * @throws java.security.cert.CertificateException if the certificate chain is not trusted by
-	 * this TrustManager
-	 */
-	override fun checkServerTrusted(chain: Array<out X509Certificate>?, authType: String?) {
-		if (chain == null || authType == null || chain.isEmpty()) {
-			throw java.lang.IllegalArgumentException()
-		}
-		val serverCert = chain[0]
-		logger?.debug("NETWORK-CERT", serverCert.subjectX500Principal.name)
-		try {
-			systemTrustManager.checkServerTrusted(chain, authType)
-		}
-		catch (ce: CertificateException) {
-			throw UnpinnedCertificateException(serverCert)
-		}
-
-		// TODO Check if this certificate is already pinned
-
-		// TODO Not pinned yet — throw exception so UI can show cert details
-	}
-
-	override fun getAcceptedIssuers(): Array<out X509Certificate> = systemTrustManager.acceptedIssuers
-
-}
 
 object NetworkClient {
 	private val client = HttpClient(OkHttp){
@@ -101,28 +37,23 @@ object NetworkClient {
 		}
 	}
 
-	private val selfHostedClient = HttpClient(OkHttp){
-		engine {
-			config {
-				connectTimeout(15_000, TimeUnit.MILLISECONDS)
-				readTimeout(15_000, TimeUnit.MILLISECONDS)
-				writeTimeout(15_000, TimeUnit.MILLISECONDS)
-				//FIXME add the correct fields
-				val trustManager = MyTrustManager(
-					TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
-						.apply {
-							init(null as KeyStore?)
-						}
-						.trustManagers
-						.filterIsInstance<X509TrustManager>()
-						.first(),
-					LoggerImpl()
-//					KeyStore.getInstance("")
-				)
-				val sslContext = SSLContext.getInstance("TLS").apply {
-					init(null, arrayOf(trustManager), SecureRandom())
+	private lateinit var selfHostedClient: HttpClient
+
+	fun init(filesDir: File) {
+		selfHostedClient = HttpClient(OkHttp){
+			engine {
+				config {
+					connectTimeout(15_000, TimeUnit.MILLISECONDS)
+					readTimeout(15_000, TimeUnit.MILLISECONDS)
+					writeTimeout(15_000, TimeUnit.MILLISECONDS)
+					val trustManager = CustomTrustManager.build(filesDir)
+					val sslContext = SSLContext.getInstance("TLS").apply {
+						init(null, arrayOf(trustManager), SecureRandom())
+					}
+					//FIXME add correct code
+					hostnameVerifier{ _, _ -> true }
+					sslSocketFactory(sslContext.socketFactory, trustManager)
 				}
-				sslSocketFactory(sslContext.socketFactory, trustManager)
 			}
 		}
 	}

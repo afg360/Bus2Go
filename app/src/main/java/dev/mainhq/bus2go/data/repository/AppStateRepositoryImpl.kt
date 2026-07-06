@@ -3,6 +3,7 @@ package dev.mainhq.bus2go.data.repository
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import dev.mainhq.bus2go.data.data_source.local.LocalKeyStore
 import dev.mainhq.bus2go.data.data_source.local.database.exo.AppDatabaseExo
 import dev.mainhq.bus2go.data.data_source.local.database.stm.AppDatabaseSTM
 import dev.mainhq.bus2go.data.data_source.local.datastore.app_state.AppStateDataStoreKeys
@@ -17,14 +18,17 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.security.cert.X509Certificate
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 class AppStateRepositoryImpl(
 	private val appStateDataStore: DataStore<Preferences>,
+	private val localKeyStore: LocalKeyStore,
 	private val dataDir: File,
 	private val filesDir: File
 ): AppStateRepository {
+
 
 	//FIXME use the result pattern for cleaner handling of IO errors
 	override suspend fun getNextDatabaseExpirationNotifDate(): Result<LocalDate> {
@@ -177,6 +181,12 @@ class AppStateRepositoryImpl(
 			appStateDataStore.edit { mutablePreferences ->
 				mutablePreferences[AppStateDataStoreKeys.IS_FIRST_TIME] = false
 			}
+		}
+	}
+
+	override suspend fun setSelfSignedCert(cert: X509Certificate) {
+		withContext(Dispatchers.IO) {
+			localKeyStore.saveNewCertificate(cert)
 		}
 	}
 }

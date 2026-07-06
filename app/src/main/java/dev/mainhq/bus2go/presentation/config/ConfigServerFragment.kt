@@ -120,8 +120,8 @@ class ConfigServerFragment: Fragment(R.layout.fragment_config_server) {
 							| Fingerprint: ${it.fingerprint}
 						""".trimMargin())
 						.setPositiveButton("Accept") { dialogInterface, _ ->
-							viewModel.cancelQuery()
-							Toast.makeText(requireContext(), "Cert seems to be accepted...?", Toast.LENGTH_SHORT).show()
+							viewModel.acceptCert()
+							dialogInterface.dismiss()
 						}
 						.setNegativeButton("Decline") { dialogInterface, _ ->
 							viewModel.cancelQuery()

@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.work.WorkManager
 import dev.mainhq.bus2go.data.backgroundtask.DatabaseDownloadSchedulerImpl
 import dev.mainhq.bus2go.data.core.LoggerImpl
+import dev.mainhq.bus2go.data.data_source.local.LocalKeyStore
 import dev.mainhq.bus2go.data.data_source.local.database.exo.AppDatabaseExo
 import dev.mainhq.bus2go.data.data_source.local.database.stm.AppDatabaseSTM
 import dev.mainhq.bus2go.data.data_source.local.datastore.app_state.appStateDataStore
@@ -67,8 +68,11 @@ class CommonModule(applicationContext: Context) {
 		tripsDAO = stmDatabase?.tripsDao()
 	)
 
+	private val localKeyStore = LocalKeyStore(applicationContext.filesDir)
+
 	val appStateRepository = AppStateRepositoryImpl(
 		appStateDataStore = applicationContext.appStateDataStore,
+		localKeyStore = localKeyStore,
 		dataDir = applicationContext.dataDir,
 		filesDir = applicationContext.filesDir
 	)
@@ -119,7 +123,9 @@ class CommonModule(applicationContext: Context) {
 	val saveBus2GoServer = SaveBus2GoServer(settingsRepository)
 	val saveAllNotifSettings = SaveAllNotifSettings(settingsRepository, appStateRepository)
 
-	val acceptSelfSignedCertificate = AcceptSelfSignedCertificate()
+	val acceptSelfSignedCertificate = AcceptSelfSignedCertificate(
+		appStateRepository = appStateRepository
+	)
 
 	val getRouteInfo = GetRouteInfo(
 		exoRepository,

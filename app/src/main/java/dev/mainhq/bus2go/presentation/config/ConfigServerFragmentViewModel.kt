@@ -2,19 +2,16 @@ package dev.mainhq.bus2go.presentation.config
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dev.mainhq.bus2go.data.data_source.remote.UnpinnedCertificateException
 import dev.mainhq.bus2go.domain.core.Result
-import dev.mainhq.bus2go.domain.entity.Time
 import dev.mainhq.bus2go.domain.entity.UrlChecker
+import dev.mainhq.bus2go.domain.exceptions.UnpinnedCertificateException
 import dev.mainhq.bus2go.domain.use_case.AcceptSelfSignedCertificate
 import dev.mainhq.bus2go.domain.use_case.settings.CheckIsBus2GoServer
 import dev.mainhq.bus2go.domain.use_case.settings.SaveAllNotifSettings
 import dev.mainhq.bus2go.domain.use_case.settings.SaveBus2GoServer
 import dev.mainhq.bus2go.presentation.core.UiState
 import io.ktor.util.reflect.instanceOf
-import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -22,8 +19,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import okhttp3.CertificatePinner.Companion.sha256Hash
+import java.security.cert.X509Certificate
 
 
 class ConfigServerFragmentViewModel(
@@ -63,7 +60,7 @@ class ConfigServerFragmentViewModel(
 	}
 
 
-	private val _warnUser: MutableSharedFlow<WarningType> = MutableSharedFlow()
+	private val _warnUser: MutableSharedFlow<WarningType> = MutableSharedFlow(replay = 1)
 	val warnUser = _warnUser.asSharedFlow()
 
 	/** Called when the user clicks on Continue after having written a potential bsu2go server */
@@ -101,12 +98,7 @@ class ConfigServerFragmentViewModel(
 				is Result.Error -> {
 					val exception = result.throwable?.findCause<UnpinnedCertificateException>()
 					if (exception != null) {
-						_warnUser.emit(WarningType.AcceptSelfSignedCertificate(
-							exception.certificate.subjectX500Principal.name,
-							exception.certificate.issuerX500Principal.name,
-							exception.certificate.notAfter.toString(),
-							exception.certificate.sha256Hash().toString()
-						))
+						_warnUser.emit(WarningType.AcceptSelfSignedCertificate(exception.certificate))
 					}
 					else {
 						//TODO put "Skip option"
@@ -120,7 +112,13 @@ class ConfigServerFragmentViewModel(
 
 	fun acceptCert() {
 		viewModelScope.launch {
-			acceptSelfSignedCertificate.invoke()
+			when(val throwable = _warnUser.first()) {
+				WarningType.QuerySelfHosted -> throw Exception("Wtf")
+				is WarningType.AcceptSelfSignedCertificate -> {
+					acceptSelfSignedCertificate.invoke(throwable.cert)
+				}
+			}
+			checkIsBus2Go()
 		}
 	}
 

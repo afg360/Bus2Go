@@ -7,6 +7,7 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import dev.mainhq.bus2go.data.data_source.local.datastore.app_state.appStateDataStore
 import dev.mainhq.bus2go.data.data_source.local.datastore.tags.TagsHandler
+import dev.mainhq.bus2go.data.data_source.remote.NetworkClient
 import dev.mainhq.bus2go.di.CommonModule
 import dev.mainhq.bus2go.data.worker.UpdateManagerWorker.Companion.FILE_NAME
 import dev.mainhq.bus2go.di.AppModule
@@ -36,18 +37,23 @@ open class Bus2GoApplication : Application() {
 
 		//TODO move logic to use case classes
 		initTagsFiles()
+		initNetworkClient()
 		manageApkFiles()
 
 		coroutineScope.launch {
-			commonModule.cleanUpGarbageFiles()
+			commonModule::cleanUpGarbageFiles
 		}
 	}
 
-
-	//FIXME move this shit to the data layer...
 	private fun initTagsFiles(){
 		coroutineScope.launch {
 			TagsHandler.initFile(this@Bus2GoApplication)
+		}
+	}
+
+	private fun initNetworkClient(){
+		coroutineScope.launch {
+			NetworkClient.init(filesDir)
 		}
 	}
 

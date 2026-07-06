@@ -3,6 +3,7 @@ package dev.mainhq.bus2go.domain.repository
 import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.entity.DbToDownload
 import kotlinx.coroutines.flow.Flow
+import java.security.cert.X509Certificate
 import java.time.LocalDate
 
 //TODO output a result object (in case of failure, we will retry...), or maybe a boolean...
@@ -49,4 +50,6 @@ interface AppStateRepository {
 
 	/** Initialises the isFirstTime flag to be set to false. */
 	suspend fun setIsNotFirstTime()
+
+	suspend fun setSelfSignedCert(cert: X509Certificate)
 }
