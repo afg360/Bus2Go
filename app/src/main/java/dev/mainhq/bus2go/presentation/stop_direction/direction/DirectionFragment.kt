@@ -36,13 +36,14 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 
 //TODO
-//change appbar to be only a back button
+//change appbainvoke()r to be only a back button
 //TODO may make it a swappable ui instead of choosing button0 or 1
 class DirectionFragment : Fragment() {
     private val viewModel: DirectionFragmentViewModel by activityViewModels{
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 if (modelClass.isAssignableFrom(DirectionFragmentViewModel::class.java)){
+                    @Suppress("UNCHECKED_CAST")
                     return (this@DirectionFragment.requireActivity().application as Bus2GoApplication).let {
                         DirectionFragmentViewModel(
                             getDirections = it.commonModule.getDirections,
@@ -60,6 +61,7 @@ class DirectionFragment : Fragment() {
     private val sharedStopViewModel: StopFragmentViewModel by activityViewModels{
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                @Suppress("UNCHECKED_CAST")
                 return (this@DirectionFragment.requireActivity().application as Bus2GoApplication)
                     .let {
                         StopFragmentViewModel(

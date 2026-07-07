@@ -19,9 +19,10 @@ class LauncherActivity: BaseActivity() {
 	private val launcherActivityViewModel: LauncherActivityViewModel by viewModels{
 		object: ViewModelProvider.Factory{
 			override fun <T : ViewModel> create(modelClass: Class<T>): T {
+				@Suppress("UNCHECKED_CAST")
 				return LauncherActivityViewModel(
+					(this@LauncherActivity.application as Bus2GoApplication).commonModule.settingsRepository,
 					(this@LauncherActivity.application as Bus2GoApplication).commonModule.isFirstTimeAppLaunched,
-					(this@LauncherActivity.application as Bus2GoApplication).commonModule.getSettings
 				) as T
 			}
 		}

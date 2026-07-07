@@ -29,6 +29,7 @@ class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
 	private val viewModel: ConfigDatabasesFragmentViewModel by activityViewModels{
 		object: ViewModelProvider.Factory{
 			override fun <T : ViewModel> create(modelClass: Class<T>): T {
+				@Suppress("UNCHECKED_CAST")
 				return ConfigDatabasesFragmentViewModel(
 					//TODO this is shit
 					(this@ConfigDatabasesFragment.requireActivity().application as Bus2GoApplication)

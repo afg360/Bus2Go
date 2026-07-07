@@ -1,53 +1,129 @@
 package dev.mainhq.bus2go.data.repository
 
-import android.annotation.SuppressLint
 import android.content.Context
-import androidx.preference.PreferenceManager
 import dev.mainhq.bus2go.R
+import dev.mainhq.bus2go.data.data_source.local.datastore.settings.SettingsDataStoreKeys
+import dev.mainhq.bus2go.data.data_source.local.datastore.settings.settingsDataStore
+import dev.mainhq.bus2go.domain.entity.ServerChoice
 import dev.mainhq.bus2go.domain.entity.SettingsData
 import dev.mainhq.bus2go.domain.repository.SettingsRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 
 class SettingsRepositoryImpl(
 	private val appContext: Context
 ): SettingsRepository {
 
-	companion object {
-		private const val LANGUAGE = "language"
-		private const val DARK_MODE = "dark-mode"
-		private const val SERVER_CHOICE = "server-choice"
-		private const val REAL_TIME_DATA = "real-time-data"
-		private const val UPDATE_NOTIF = "update-notifications"
-		private const val DB_UPDATE_NOTIF = "db-update-notifications"
+	override val lang: Flow<Int>
+		/**
+		 * @return Returns -1 if no item in the array with the saved data
+		 * */
+		get() {
+			return appContext.settingsDataStore.data.map {
+				getLangResId(it[SettingsDataStoreKeys.SERVER])
+			}
+		}
+
+	override suspend fun setLang(langPos: Int) {
+		withContext(Dispatchers.IO) {
+			appContext.settingsDataStore.updateData {
+				it.toMutablePreferences().toMutablePreferences().apply {
+					val langsArray = appContext.resources.getStringArray(R.array.langs)
+					if (langPos > langsArray.size) {
+						set(SettingsDataStoreKeys.LANGUAGE, "System")
+					} else {
+						set(SettingsDataStoreKeys.LANGUAGE, langsArray[langPos])
+					}
+				}
+			}
+		}
 	}
 
-	override fun getSettings(): SettingsData {
-		val prefs = PreferenceManager.getDefaultSharedPreferences(appContext)
-		return SettingsData(
-			language = prefs.getString(LANGUAGE, "System") ?: "System",
-			isDarkMode = prefs.getBoolean(DARK_MODE, true),
-			serverChoice = prefs.getString(SERVER_CHOICE, "") ?: "",
-			isRealTime = prefs.getBoolean(REAL_TIME_DATA, false)
-		)
+	override val isDarkMode: Flow<Boolean>
+		get() {
+			return appContext.settingsDataStore.data.map {
+				it[SettingsDataStoreKeys.IS_DARK_MODE] ?: true
+			}
+		}
+
+	override suspend fun toggleTheme() {
+		withContext(Dispatchers.IO) {
+			appContext.settingsDataStore.updateData {
+				it.toMutablePreferences().toMutablePreferences().apply {
+					set(SettingsDataStoreKeys.IS_DARK_MODE, get(SettingsDataStoreKeys.IS_DARK_MODE)?.not() ?: true)
+				}
+			}
+		}
 	}
 
-	@SuppressLint("UseKtx")
-	override fun saveBus2GoServer(url: String): Boolean {
-		return PreferenceManager.getDefaultSharedPreferences(appContext).edit()
-			.putString(SERVER_CHOICE, url)
-			.commit()
+	override val serverChoice: Flow<ServerChoice>
+		get() {
+			return appContext.settingsDataStore.data.map {
+				ServerChoice(
+					it[SettingsDataStoreKeys.SERVER] ?: "",
+					it[SettingsDataStoreKeys.IS_SELF_HOSTED] ?: true
+				)
+			}
+		}
+
+	override suspend fun setBus2GoServer(url: String) {
+		withContext(Dispatchers.IO) {
+			appContext.settingsDataStore.updateData {
+				it.toMutablePreferences().apply {
+					set(SettingsDataStoreKeys.SERVER, url)
+				}
+			}
+		}
 	}
 
-	@SuppressLint("UseKtx")
-	override fun saveAppUpdateNotifSetting(appUpdateNotif: Boolean): Boolean {
-		return PreferenceManager.getDefaultSharedPreferences(appContext).edit()
-			.putBoolean(UPDATE_NOTIF, appUpdateNotif)
-			.commit()
+	override suspend fun toggleIsSelfHosted() {
+		withContext(Dispatchers.IO) {
+			appContext.settingsDataStore.updateData {
+				it.toMutablePreferences().apply {
+					set(SettingsDataStoreKeys.IS_SELF_HOSTED, get(SettingsDataStoreKeys.IS_SELF_HOSTED)?.not() ?: true)
+				}
+			}
+		}
 	}
 
-	@SuppressLint("UseKtx")
-	override fun saveDbUpdateNotifSetting(dbUpdateNotif: Boolean): Boolean {
-		return PreferenceManager.getDefaultSharedPreferences(appContext).edit()
-			.putBoolean(DB_UPDATE_NOTIF, dbUpdateNotif)
-			.commit()
+	override val isRealTimeOn: Flow<Boolean>
+		get() {
+			return appContext.settingsDataStore.data.map {
+				it[SettingsDataStoreKeys.IS_REAL_TIME_ON] ?: false
+			}
+		}
+
+	override suspend fun saveAppUpdateNotifSetting(appUpdateNotif: Boolean) {
+		withContext(Dispatchers.IO) {
+			appContext.settingsDataStore.updateData {
+				it.toMutablePreferences().apply {
+					set(SettingsDataStoreKeys.IS_APP_UPDATES_NOTIFS_ON, appUpdateNotif)
+				}
+			}
+		}
+	}
+
+	override suspend fun saveDbUpdateNotifSetting(dbUpdateNotif: Boolean) {
+		withContext(Dispatchers.IO) {
+			appContext.settingsDataStore.updateData {
+				it.toMutablePreferences().apply {
+					set(SettingsDataStoreKeys.IS_DATABASE_UPDATES_NOTIFS_ON, dbUpdateNotif)
+				}
+			}
+		}
+	}
+
+	private fun getLangResId(langStr: String?): Int {
+		return appContext.resources.getStringArray(R.array.langs)
+			.indexOf(langStr ?: "System").let {
+				if (it < 0) {
+					0
+				}
+				else {
+					it
+				}
+			}
 	}
 }

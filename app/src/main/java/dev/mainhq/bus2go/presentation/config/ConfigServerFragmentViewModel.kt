@@ -19,8 +19,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import okhttp3.CertificatePinner.Companion.sha256Hash
-import java.security.cert.X509Certificate
 
 
 class ConfigServerFragmentViewModel(
@@ -88,6 +86,15 @@ class ConfigServerFragmentViewModel(
 		}
 	}
 
+	private inline fun <reified T : Throwable> Throwable.findCause(): T? {
+		var current: Throwable? = this
+		while (current != null) {
+			if (current is T) return current
+			current = current.cause
+		}
+		return null
+	}
+
 	/** Called once the user accepts to query a self hosted potential bus2go server */
 	fun checkIsBus2Go() {
 		assert(_serverType.value == ServerType.SELF_HOSTED)
@@ -122,15 +129,6 @@ class ConfigServerFragmentViewModel(
 		}
 	}
 
-	private inline fun <reified T : Throwable> Throwable.findCause(): T? {
-		var current: Throwable? = this
-		while (current != null) {
-			if (current is T) return current
-			current = current.cause
-		}
-		return null
-	}
-
 	private fun _checkIsBus2Go(inputTextString: String, result: Result<Boolean>) {
 		//if message is null from server success, then show invalid
 		when (result) {
@@ -145,7 +143,9 @@ class ConfigServerFragmentViewModel(
 				if (result.data){
 					_buttonText.update { "Continue" }
 					//FIXME for the moment ignore success/failure status
-					saveBus2GoServer.invoke(inputTextString)
+					viewModelScope.launch {
+						saveBus2GoServer.invoke(inputTextString)
+					}
 				}
 				else {
 					_buttonText.update { "Skip" }

@@ -16,17 +16,15 @@ class SettingsSharedViewModel: ViewModel() {
 	private val _fragmentUsed = MutableStateFlow(FragmentUsed.MAIN)
 	val fragmentUsed = _fragmentUsed.asStateFlow()
 
-	private val _isLoading = MutableSharedFlow<Boolean>(replay = 0)
-	val isLoading = _isLoading.asSharedFlow()
+	private val _isLoading = MutableStateFlow(false)
+	val isLoading = _isLoading.asStateFlow()
 
 	fun setFragment(fragmentUsed: FragmentUsed){
 		_fragmentUsed.update { fragmentUsed }
 	}
 
 	fun setLoading(loading: Boolean){
-		viewModelScope.launch(Dispatchers.Main) {
-			_isLoading.emit(loading)
-		}
+		_isLoading.update { loading }
 	}
 
 }

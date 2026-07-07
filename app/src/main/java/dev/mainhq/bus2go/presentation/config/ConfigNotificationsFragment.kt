@@ -29,6 +29,7 @@ class ConfigNotificationsFragment: Fragment(R.layout.fragment_config_notificatio
 	private val viewModel: ConfigNotificationsFragmentViewModel by activityViewModels{
 		object : ViewModelProvider.Factory {
 			override fun <T : ViewModel> create(modelClass: Class<T>): T {
+				@Suppress("UNCHECKED_CAST")
 				return (requireActivity().application as Bus2GoApplication).let{
 					ConfigNotificationsFragmentViewModel(
 						it.commonModule.saveAllNotifSettings,

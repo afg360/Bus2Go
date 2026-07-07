@@ -33,6 +33,7 @@ class ConfigServerFragment: Fragment(R.layout.fragment_config_server) {
 	private val viewModel: ConfigServerFragmentViewModel by activityViewModels{
 		object: ViewModelProvider.Factory {
 			override fun <T : ViewModel> create(modelClass: Class<T>): T {
+				@Suppress("UNCHECKED_CAST")
 				return (requireActivity().application as Bus2GoApplication).let{
 					ConfigServerFragmentViewModel(
 						it.appModule.checkIsBus2GoServer,
@@ -88,6 +89,7 @@ class ConfigServerFragment: Fragment(R.layout.fragment_config_server) {
 		}
 
 		launchViewModelCollectLatest(viewModel.serverType) {
+			binding.configSelectServerTypeSwitch.isChecked = it != ServerType.SELF_HOSTED
 			binding.configSelectServerTypeTextView.text = it.toString()
 		}
 

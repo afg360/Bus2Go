@@ -10,7 +10,6 @@ import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.content.FileProvider
-import androidx.preference.PreferenceManager
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import dev.mainhq.bus2go.R
@@ -38,6 +37,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import java.io.File
 
 
+//TODO
 /** Manages new app update downloads and installations */
 class UpdateManagerWorker(context: Context, workerParams: WorkerParameters,
 						  /*private val notificationManager: NotificationManager */ //FIXME For testing purposes
@@ -57,6 +57,7 @@ class UpdateManagerWorker(context: Context, workerParams: WorkerParameters,
 		//api endpoint for all releases
 		val githubReleases = "https://api.github.com/repos/afg360/bus2go/releases"
 
+		//TODO move this to Domain and Data Layer
 		val client = HttpClient(OkHttp){}
 		val httpResponse: HttpResponse = client.get(githubReleases) {
 			headers {
@@ -81,8 +82,9 @@ class UpdateManagerWorker(context: Context, workerParams: WorkerParameters,
 
 				if (localVersionName < tagVersion){
 					Log.d("UPDATES", "Seems that you need to update!")
-					val isAutoUpdate = PreferenceManager.getDefaultSharedPreferences(applicationContext)
-						.getBoolean("auto-updates", false)
+					val isAutoUpdate = false
+//						PreferenceManager.getDefaultSharedPreferences(applicationContext)
+//						.getBoolean("auto-updates", false)
 					//if autoUpdate is not on, notification click will send to browser -> website where to download
 					//(for now github, eventually server or even fdroid managed)
 

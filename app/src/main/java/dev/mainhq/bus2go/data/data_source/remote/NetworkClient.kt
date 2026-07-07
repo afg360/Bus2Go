@@ -94,9 +94,10 @@ object NetworkClient {
 	}
 
 	//FIXME handle http responses here...
-	suspend fun <T> getAndExecute(url: Url, block: suspend (HttpResponse) -> T): T {
+	suspend fun <T> getAndExecute(url: Url, isLocal: Boolean, block: suspend (HttpResponse) -> T): T {
 		try {
-			return client.prepareGet(url).execute(block)
+			return if (isLocal) selfHostedClient.prepareGet(url).execute(block)
+			else client.prepareGet(url).execute(block)
 		}
 		catch (ioe: IOException){
 			//FIXME instead use a logger to log, and maybe do some notification or snackbar or something...
@@ -112,7 +113,7 @@ object NetworkClient {
 		networkMonitor: NetworkMonitor,
 		logger: Logger?,
 		tag: String,
-		isLocal: Boolean = false
+		isLocal: Boolean
 	): Result<T>{
 		if (!networkMonitor.isConnected()) {
 			logger?.error(tag, "Not connected")

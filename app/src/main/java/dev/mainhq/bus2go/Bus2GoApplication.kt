@@ -4,8 +4,6 @@ import android.app.Application
 import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
-import androidx.appcompat.app.AppCompatDelegate
-import dev.mainhq.bus2go.data.data_source.local.datastore.app_state.appStateDataStore
 import dev.mainhq.bus2go.data.data_source.local.datastore.tags.TagsHandler
 import dev.mainhq.bus2go.data.data_source.remote.NetworkClient
 import dev.mainhq.bus2go.di.CommonModule
@@ -14,10 +12,8 @@ import dev.mainhq.bus2go.di.AppModule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.File
 
 open class Bus2GoApplication : Application() {
@@ -41,7 +37,7 @@ open class Bus2GoApplication : Application() {
 		manageApkFiles()
 
 		coroutineScope.launch {
-			commonModule::cleanUpGarbageFiles
+			commonModule.cleanUpGarbageFiles()
 		}
 	}
 
@@ -57,6 +53,7 @@ open class Bus2GoApplication : Application() {
 		}
 	}
 
+	//TODO move this code to data layer and use useCases instead
 	private fun manageApkFiles(){
 		//check if an apk of the app exists in the cache. if it does and current version is newer, delete older version
 		coroutineScope.launch {

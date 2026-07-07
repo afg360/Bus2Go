@@ -9,9 +9,4 @@
     <array name="servers">
         <!-- Add a default? -->
     </array>
-    <array name="themes">
-        <item>@string/system</item>
-        <item>@string/light</item>
-        <item>@string/dark</item>
-    </array>
 </resources>

@@ -13,21 +13,26 @@ import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import dev.mainhq.bus2go.presentation.base.BaseActivity
 import dev.mainhq.bus2go.R
+import dev.mainhq.bus2go.databinding.SettingsActivityBinding
+import dev.mainhq.bus2go.utils.launchViewModelCollectLatest
 import dev.mainhq.bus2go.utils.makeGone
 import dev.mainhq.bus2go.utils.makeVisible
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class SettingsActivity : BaseActivity() {
+class SettingsActivity() : BaseActivity() {
 
     private val viewModel: SettingsSharedViewModel by viewModels()
 
+    private lateinit var binding: SettingsActivityBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        binding = SettingsActivityBinding.inflate(layoutInflater)
 
-        setContentView(R.layout.settings_activity)
+        setContentView(binding.root)
 
-        val menuBar = findViewById<MaterialToolbar>(R.id.settingsToolBar)
+        val menuBar = binding.settingsToolBar
         menuInflater.inflate(R.menu.app_bar_settings, menuBar.menu)
         menuBar.setOnMenuItemClickListener {
             when (it.itemId){
@@ -39,39 +44,30 @@ class SettingsActivity : BaseActivity() {
             }
         }
 
-        lifecycleScope.launch(Dispatchers.Main) {
-            repeatOnLifecycle(Lifecycle.State.STARTED){
-                viewModel.fragmentUsed.collect{
+        launchViewModelCollectLatest(viewModel.fragmentUsed) {
+            supportFragmentManager
+                .beginTransaction()
+                .apply {
                     when(it){
                         FragmentUsed.MAIN -> {
-                            supportFragmentManager.beginTransaction()
-                                .replace(R.id.preferencesFragmentContainer, SettingsMainFragment())
-                                .commit()
+                            replace(R.id.settings_fragment_container_view, SettingsMainFragment())
                         }
                         FragmentUsed.UPDATES -> {
-                            supportFragmentManager.beginTransaction()
-                                .replace(R.id.preferencesFragmentContainer, SettingsUpdatesFragment())
-                                .commit()
+                            replace(R.id.settings_fragment_container_view, SettingsUpdatesFragment())
                         }
                     }
                 }
-            }
+                .commit()
         }
 
-        lifecycleScope.launch(Dispatchers.Main) {
-            repeatOnLifecycle(Lifecycle.State.STARTED){
-                val loadingBar = findViewById<CircularProgressIndicator>(R.id.preferences_loading_bar)
-                viewModel.isLoading.collect{
-                    if (it) {
-                        loadingBar.makeVisible()
-                    }
-                    else {
-                        loadingBar.makeGone()
-                    }
-                }
+        launchViewModelCollectLatest(viewModel.isLoading) {
+            if (it) {
+                binding.preferencesLoadingBar.makeVisible()
+            }
+            else {
+                binding.preferencesLoadingBar.makeGone()
             }
         }
-
     }
 
     fun changeTheme(isDarkMode: Boolean){

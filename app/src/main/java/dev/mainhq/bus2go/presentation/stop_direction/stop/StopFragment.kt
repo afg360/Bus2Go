@@ -34,6 +34,7 @@ class StopFragment : Fragment(R.layout.fragment_choose_stop) {
     private val viewModel : StopFragmentViewModel by activityViewModels {
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                @Suppress("UNCHECKED_CAST")
                 return (this@StopFragment.requireActivity().application as Bus2GoApplication)
                     .let {
                         StopFragmentViewModel(

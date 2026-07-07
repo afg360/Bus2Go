@@ -48,6 +48,7 @@ class StopTimesActivity : BaseActivity() {
             object : ViewModelProvider.Factory {
                 override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
                     if (modelClass.isAssignableFrom(StopTimesViewModel::class.java)){
+                        @Suppress("UNCHECKED_CAST")
                         return StopTimesViewModel(
                             (this@StopTimesActivity.application as Bus2GoApplication).commonModule.getTransitTime,
                             transitData

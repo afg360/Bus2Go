@@ -1,0 +1,410 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    >
+    
+    <!-- General Settings -->
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        >
+        
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="General Settings"
+            android:textColor="@color/basic_blue"
+            android:layout_marginVertical="10dp"
+            android:layout_marginStart="50dp"
+            />
+        
+        <!-- Language Settings -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/settings_language_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:layout_marginVertical="10dp"
+            >
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/settings_language_icon_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/language"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="20dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                />
+            
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/settings_language_title_text_view"
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:text="Language"
+                android:layout_marginStart="20dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/settings_language_descr_text_view"
+                app:layout_constraintStart_toEndOf="@id/settings_language_icon_view"
+                />
+            
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/settings_language_descr_text_view"
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:text="Choose the main language of the app"
+                android:layout_marginStart="20dp"
+                app:layout_constraintTop_toBottomOf="@id/settings_language_title_text_view"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@id/settings_language_icon_view"
+                />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+        
+        <!-- Theme Settings -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/settings_theme_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:layout_marginVertical="10dp"
+            >
+            
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/settings_theme_icon_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/theme"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="20dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/settings_theme_title_text_view"
+                />
+            
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/settings_theme_title_text_view"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:text="Theme"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@id/settings_theme_icon_view"
+                app:layout_constraintEnd_toStartOf="@id/settings_theme_toggle_switch_view"
+                />
+            
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/settings_theme_toggle_switch_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="10dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="10dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                />
+        
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    
+    </androidx.appcompat.widget.LinearLayoutCompat>
+    
+    <com.google.android.material.divider.MaterialDivider
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginVertical="5dp"
+        />
+    
+    <!-- Data and Syncing -->
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        >
+        
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Data and Syncing"
+            android:textColor="@color/basic_blue"
+            android:layout_marginVertical="10dp"
+            android:layout_marginStart="50dp"
+            />
+        
+        <!-- Data Config Server -->
+        <!-- TODO Could change this UI element to be better (show ip/domain below) -->
+        
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/settings_config_server_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:text="Configure your server"
+            android:layout_marginVertical="10dp"
+            android:paddingHorizontal="50dp"
+            />
+        
+        <!-- Data Syncing Updates (replaces fragment), depends on Config Server -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/settings_updates_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:layout_marginVertical="10dp"
+            >
+            
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/settings_updates_title_text_view"
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:text="Updates"
+                android:layout_marginStart="50dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/settings_updates_descr_text_view"
+                app:layout_constraintStart_toStartOf="parent"
+                />
+            
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/settings_updates_descr_text_view"
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:text="Configure how to handle different update schemes...?"
+                android:layout_marginStart="50dp"
+                app:layout_constraintTop_toBottomOf="@id/settings_updates_title_text_view"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                />
+        
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    
+        <!-- Data Real-Time Data Updates (Coming Soon), depends on Config Server  -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/settings_realtime_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:layout_marginVertical="10dp"
+            >
+            
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/settings_realtime_title_text_view"
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:text="Real Time Data Updates"
+                android:layout_marginStart="50dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/settings_realtime_descr_text_view"
+                app:layout_constraintStart_toStartOf="parent"
+                />
+            
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/settings_realtime_descr_text_view"
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:text="Toggle on or off to enable real time data updates (uses internet)"
+                android:layout_marginStart="50dp"
+                app:layout_constraintTop_toBottomOf="@id/settings_realtime_title_text_view"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                />
+            
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/settings_realtime_toggle_switch_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                />
+            
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    
+    </androidx.appcompat.widget.LinearLayoutCompat>
+    
+    
+    <com.google.android.material.divider.MaterialDivider
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginVertical="5dp"
+        />
+    
+    <!-- Support -->
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        >
+        
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Support"
+            android:textColor="@color/basic_blue"
+            android:layout_marginVertical="10dp"
+            android:layout_marginStart="50dp"
+            />
+        
+        <!-- Support Donate -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/settings_donate_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:layout_marginVertical="10dp"
+            >
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/settings_donate_icon_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/heart"
+                android:layout_marginVertical="10dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="20dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                />
+            
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/settings_donate_title_text_view"
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:text="Donate"
+                android:layout_marginStart="20dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/settings_donate_descr_text_view"
+                app:layout_constraintStart_toEndOf="@id/settings_donate_icon_view"
+                />
+            
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/settings_donate_descr_text_view"
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:text="Donate to support the contributors of the app"
+                android:layout_marginStart="20dp"
+                app:layout_constraintTop_toBottomOf="@id/settings_donate_title_text_view"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@id/settings_donate_icon_view"
+                />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+        
+        <!-- Support Send Feedback -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/settings_feedback_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:layout_marginVertical="10dp"
+            >
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/settings_feedback_icon_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/feedback"
+                android:layout_marginVertical="10dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="20dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                />
+            
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/settings_feedback_title_text_view"
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:text="Send Feedback"
+                android:layout_marginStart="20dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/settings_feedback_descr_text_view"
+                app:layout_constraintStart_toEndOf="@id/settings_feedback_icon_view"
+                />
+            
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/settings_feedback_descr_text_view"
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:text="Report technical issues or suggest new features"
+                android:layout_marginStart="20dp"
+                app:layout_constraintTop_toBottomOf="@id/settings_feedback_title_text_view"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@id/settings_feedback_icon_view"
+                />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    
+    </androidx.appcompat.widget.LinearLayoutCompat>
+    
+    <com.google.android.material.divider.MaterialDivider
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginVertical="5dp"
+        />
+    
+    <!-- About -->
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        >
+        
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="About"
+            android:textColor="@color/basic_blue"
+            android:layout_marginVertical="10dp"
+            android:layout_marginStart="50dp"
+            />
+        
+        <!-- About Info -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:layout_marginVertical="10dp"
+            >
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/settings_about_icon_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/info"
+                android:layout_marginVertical="10dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="20dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                />
+            
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/settings_about_title_text_view"
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:text="App Info"
+                android:layout_marginStart="20dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/settings_about_descr_text_view"
+                app:layout_constraintStart_toEndOf="@id/settings_about_icon_view"
+                />
+            
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/settings_about_descr_text_view"
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:text="Software Version: X.X.X?-alpha"
+                android:layout_marginStart="20dp"
+                app:layout_constraintTop_toBottomOf="@id/settings_about_title_text_view"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@id/settings_about_icon_view"
+                />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+</androidx.appcompat.widget.LinearLayoutCompat>

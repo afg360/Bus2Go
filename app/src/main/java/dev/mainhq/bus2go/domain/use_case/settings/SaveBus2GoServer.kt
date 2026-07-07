@@ -6,7 +6,7 @@ class SaveBus2GoServer(
 	private val settingsRepository: SettingsRepository
 ) {
 
-	operator fun invoke(url: String): Boolean{
-		return settingsRepository.saveBus2GoServer(url)
+	suspend operator fun invoke(url: String) {
+		return settingsRepository.setBus2GoServer(url)
 	}
 }

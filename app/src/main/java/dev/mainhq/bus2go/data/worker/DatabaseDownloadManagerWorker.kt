@@ -18,6 +18,7 @@ import dev.mainhq.bus2go.domain.entity.NotificationType
 import dev.mainhq.bus2go.domain.entity.Progress
 import dev.mainhq.bus2go.domain.exceptions.NetworkException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import dev.mainhq.bus2go.domain.core.Result as Bus2GoResult
 
@@ -40,6 +41,9 @@ class DatabaseDownloadManagerWorker(
 
 	private val appStateRepository =
 		(applicationContext as Bus2GoApplication).commonModule.appStateRepository
+
+	private val settingsRepository =
+		(applicationContext as Bus2GoApplication).commonModule.settingsRepository
 
 	private lateinit var dbToDownload: DbToDownload
 
@@ -113,7 +117,9 @@ class DatabaseDownloadManagerWorker(
 	): Result {
 		//TODO careful with this part, as a possible race condition may occur if at the same time we
 		// are decompressing from already downloaded file
-		return when (val res = dbDownloadRepository.getDbUpToDateVersion(dbToDownload)){
+		//TODO check if this flow call actually works
+		val serverChoice = settingsRepository.serverChoice.first()
+		return when (val res = dbDownloadRepository.getDbUpToDateVersion(serverChoice, dbToDownload)){
 			is Bus2GoResult.Error -> throw NetworkException(res.message)
 			is Bus2GoResult.Success<Int> -> {
 				if (!isAppUpToDate()){
@@ -137,7 +143,8 @@ class DatabaseDownloadManagerWorker(
 					}
 
 					if (appStateRepository.doesUpToDateCompressedDbExist(dbToDownload, res.data) == null){
-						dbDownloadRepository.getDb(dbToDownload, res.data).collect { progress ->
+						dbDownloadRepository.getDb(serverChoice, dbToDownload, res.data)
+							.collect { progress ->
 							when(progress) {
 								is Progress.Downloading -> {
 									withContext(Dispatchers.Main){
@@ -216,7 +223,10 @@ class DatabaseDownloadManagerWorker(
 	 * */
 	private suspend fun isAppUpToDate(): Boolean {
 		//TODO also check if the version is smaller than the max accepted version
-		return when(val resp = dbDownloadRepository.getAppVersionCodeRequired()){
+		//TODO verify flow.first works properly
+		return when(val resp = dbDownloadRepository.getAppVersionCodeRequired(
+			settingsRepository.serverChoice.first()
+		)){
 			is Bus2GoResult.Error -> false
 			is Bus2GoResult.Success<AppVersions> -> {
 				applicationContext

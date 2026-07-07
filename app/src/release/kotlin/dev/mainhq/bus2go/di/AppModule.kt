@@ -9,7 +9,6 @@ class AppModule(applicationContext: Context) {
 
 	val dbDownloadRepository = DatabaseDownloadRepositoryImpl(
 		applicationContext as Bus2GoApplication,
-		applicationContext.commonModule.settingsRepository,
 		applicationContext.commonModule.networkMonitor,
 	)
 

@@ -46,6 +46,7 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
     private val homeFragmentViewModel: HomeFragmentViewModel by viewModels {
         object: ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                @Suppress("UNCHECKED_CAST")
                 return HomeFragmentViewModel(
                     (this@HomeFragment.requireActivity().application as Bus2GoApplication).commonModule.getRouteInfo,
                     (this@HomeFragment.requireActivity().application as Bus2GoApplication).commonModule.getAllTags,
@@ -59,6 +60,7 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
     private val favouritesViewModel: FavouritesViewModel by viewModels {
         object: ViewModelProvider.Factory{
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                @Suppress("UNCHECKED_CAST")
                 return FavouritesViewModel(
                     (this@HomeFragment.requireActivity().application as Bus2GoApplication).commonModule.getFavouritesWithTimeData,
                     (this@HomeFragment.requireActivity().application as Bus2GoApplication).commonModule.removeFavourite,

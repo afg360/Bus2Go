@@ -2,6 +2,7 @@ package dev.mainhq.bus2go.presentation.launcher
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.mainhq.bus2go.domain.repository.SettingsRepository
 import dev.mainhq.bus2go.domain.use_case.db_state.IsFirstTimeAppLaunched
 import dev.mainhq.bus2go.domain.use_case.settings.GetSettings
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,17 +17,16 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class LauncherActivityViewModel(
+	settingsRepository: SettingsRepository,
 	private val isFirstTimeAppLaunchedUseCase: IsFirstTimeAppLaunched,
-	private val getSettings: GetSettings
 ): ViewModel() {
 
 	val isFirstTime = flow {
 		emit(isFirstTimeAppLaunchedUseCase.invoke())
 	}.stateIn(viewModelScope, started = SharingStarted.WhileSubscribed(5000), null)
 
-	val isDarkMode = flow {
-		emit(getSettings.invoke().isDarkMode)
-	}.stateIn(viewModelScope, started = SharingStarted.WhileSubscribed(5000), null)
+	val isDarkMode = settingsRepository.isDarkMode
+		.stateIn(viewModelScope, started = SharingStarted.WhileSubscribed(5000), null)
 
 	//using these instead of checking for null, because we want to make sure that every operation is
 	// completed when reading the data before being sure to proceed to the next, not to proceed to the next

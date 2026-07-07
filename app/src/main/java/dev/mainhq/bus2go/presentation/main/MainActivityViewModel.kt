@@ -6,6 +6,7 @@ import androidx.work.WorkInfo
 import dev.mainhq.bus2go.domain.backgroundtask.DatabaseDownloadScheduler
 import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.entity.DbToDownload
+import dev.mainhq.bus2go.domain.repository.SettingsRepository
 import dev.mainhq.bus2go.domain.use_case.ObserveDownloadDatabaseTask
 import dev.mainhq.bus2go.domain.use_case.ScheduleDownloadDatabaseTask
 import dev.mainhq.bus2go.domain.use_case.db_state.CheckDatabaseUpdateRequired
@@ -26,6 +27,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
@@ -40,7 +42,7 @@ class MainActivityViewModel(
 	private val wasUpdateDialogShownToday: WasUpdateDialogShownToday,
 	private val setUpdateDbDialogLastAsToday: SetUpdateDbDialogLastAsToday,
 	private val setDatabaseExpirationDate: SetDatabaseExpirationDate,
-	private val getSettings: GetSettings,
+	private val settingsRepository: SettingsRepository,
 	private val checkIsBus2GoServer: CheckIsBus2GoServer,
 	private val scheduleDownloadDatabaseTask: ScheduleDownloadDatabaseTask,
 	private val observeDownloadDatabaseTask: ObserveDownloadDatabaseTask
@@ -119,11 +121,12 @@ class MainActivityViewModel(
 
 	fun updateDatabase(){
 		viewModelScope.launch {
-			//be sure to have a valid bus2go database -> this in itself should check that we are connected to the internet
-			//if we are, start the download process, show some loading in notifs, and make a toast about download that has started
-			//else, make a toast error (or perhaps instead use a snackbar so that we can try again)
+			//TODO be sure to have a valid bus2go database -> this in itself should check that we are connected to the internet
+			// if we are, start the download process, show some loading in notifs, and make a toast about download that has started
+			// else, make a toast error (or perhaps instead use a snackbar so that we can try again)
 
-			val server = getSettings.invoke().serverChoice
+			//FIXME this is not going to be working the way it is intended to
+			val server = settingsRepository.serverChoice.first().server
 			if (server.isBlank()){
 				//no server was selected by the user, prompt him to do so or to do that later
 				_updateDbState.update { UpdateDbState.Error("Please connect to a bus2go server") }

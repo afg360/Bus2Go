@@ -1,23 +1,25 @@
 package dev.mainhq.bus2go.domain.repository
 
+import dev.mainhq.bus2go.domain.entity.ServerChoice
 import dev.mainhq.bus2go.domain.entity.SettingsData
+import kotlinx.coroutines.flow.Flow
 
 interface SettingsRepository {
 
-	fun getSettings(): SettingsData
+	val lang: Flow<Int>
+	suspend fun setLang(langPos: Int)
 
+	val isDarkMode: Flow<Boolean>
+	suspend fun toggleTheme()
 	//TODO more there...
 
-	/** @return A boolean indicating success/failure */
-	fun saveBus2GoServer(url: String): Boolean
+	val serverChoice: Flow<ServerChoice>
+	suspend fun setBus2GoServer(url: String)
+	suspend fun toggleIsSelfHosted()
 
-	/** @param appUpdateNotif Boolean to save
-	 * @return Success or failure of operation
-	 */
-	fun saveAppUpdateNotifSetting(appUpdateNotif: Boolean): Boolean
+	val isRealTimeOn: Flow<Boolean>
 
-	/**
-	 * @return Success or failure of operation
-	 */
-	fun saveDbUpdateNotifSetting(dbUpdateNotif: Boolean): Boolean
+	suspend fun saveAppUpdateNotifSetting(appUpdateNotif: Boolean)
+
+	suspend fun saveDbUpdateNotifSetting(dbUpdateNotif: Boolean)
 }

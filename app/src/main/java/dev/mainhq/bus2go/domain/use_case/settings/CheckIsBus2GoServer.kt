@@ -21,7 +21,7 @@ class CheckIsBus2GoServer(
 		when(serverType) {
 			ServerType.SELF_HOSTED -> {
 				//TODO right network call
-				return when(val res = databaseDownloadRepository.getIsSelfHostedBus2Go(str)){
+				return when(val res = databaseDownloadRepository.getIsBus2Go(str, true)){
 					is Result.Error -> when(res.throwable){
 						//not connected to the internet
 						null -> Result.Error(null, res.message)
@@ -38,7 +38,7 @@ class CheckIsBus2GoServer(
 				}
 			}
 			ServerType.WEB -> {
-				return when(val res = databaseDownloadRepository.getIsBus2Go(str)){
+				return when(val res = databaseDownloadRepository.getIsBus2Go(str, false)){
 					is Result.Error -> when(res.throwable){
 						//not connected to the internet
 						null -> Result.Error(null, res.message)

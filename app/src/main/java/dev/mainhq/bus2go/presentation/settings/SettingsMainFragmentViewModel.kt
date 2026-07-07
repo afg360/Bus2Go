@@ -3,22 +3,63 @@ package dev.mainhq.bus2go.presentation.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.mainhq.bus2go.domain.core.Result
+import dev.mainhq.bus2go.domain.entity.ServerChoice
+import dev.mainhq.bus2go.domain.repository.SettingsRepository
 import dev.mainhq.bus2go.domain.use_case.settings.CheckIsBus2GoServer
 import dev.mainhq.bus2go.domain.use_case.settings.SaveBus2GoServer
 import dev.mainhq.bus2go.presentation.config.ServerType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class SettingsMainFragmentViewModel(
+	private val settingsRepository: SettingsRepository,
 	private val checkIsBus2GoServer: CheckIsBus2GoServer,
 	private val saveBus2GoServer: SaveBus2GoServer
 ): ViewModel() {
 
 	private val _toastText = MutableSharedFlow<Response>(replay = 0)
 	val toastText = _toastText.asSharedFlow()
+
+	val langChoice = settingsRepository.lang
+		.stateIn(
+			viewModelScope,
+			SharingStarted.WhileSubscribed(5000),
+			0
+		)
+
+	fun setLang(langPos: Int) {
+		viewModelScope.launch {
+			settingsRepository.setLang(langPos)
+		}
+	}
+
+	val isDarkMode = settingsRepository.isDarkMode
+		.stateIn(
+			viewModelScope,
+			SharingStarted.WhileSubscribed(5000),
+			true
+		)
+
+	fun toggleDarkMode() {
+		viewModelScope.launch {
+			settingsRepository.toggleTheme()
+		}
+	}
+
+	val serverChoice = settingsRepository.serverChoice
+		.stateIn(
+			viewModelScope,
+			SharingStarted.WhileSubscribed(5000),
+			ServerChoice(
+				"",
+				true
+			)
+		)
 
 	//FIXME logic for ServerType
 	fun checkIsBus2GoServer(string: String) {
@@ -45,4 +86,12 @@ class SettingsMainFragmentViewModel(
 			}
 		}
 	}
+
+	val isRealTimeOn = settingsRepository.isRealTimeOn
+		.stateIn(
+			viewModelScope,
+			SharingStarted.WhileSubscribed(5000),
+			false
+		)
+
 }

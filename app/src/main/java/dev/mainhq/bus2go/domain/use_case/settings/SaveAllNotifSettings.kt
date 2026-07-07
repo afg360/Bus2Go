@@ -8,16 +8,16 @@ class SaveAllNotifSettings(
 	private val appStateRepository: AppStateRepository
 ) {
 
-	suspend operator fun invoke(appUpdateNotif: Boolean, dbUpdateNotif: Boolean): Boolean {
+	suspend operator fun invoke(appUpdateNotif: Boolean, dbUpdateNotif: Boolean) {
 		appStateRepository.setIsNotFirstTime()
-		return settingsRepository.saveAppUpdateNotifSetting(appUpdateNotif)
-				&& settingsRepository.saveDbUpdateNotifSetting(dbUpdateNotif)
+		settingsRepository.saveAppUpdateNotifSetting(appUpdateNotif)
+		settingsRepository.saveDbUpdateNotifSetting(dbUpdateNotif)
 	}
 
 	/** Default behaviour is to set every notif setting to false */
-	suspend operator fun invoke(): Boolean {
+	suspend operator fun invoke() {
 		appStateRepository.setIsNotFirstTime()
-		return settingsRepository.saveAppUpdateNotifSetting(false)
-				&& settingsRepository.saveDbUpdateNotifSetting(false)
+		settingsRepository.saveAppUpdateNotifSetting(false)
+		settingsRepository.saveDbUpdateNotifSetting(false)
 	}
 }

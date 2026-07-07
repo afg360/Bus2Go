@@ -22,6 +22,7 @@ class StopDirectionActivity: BaseActivity() {
 		object : ViewModelProvider.Factory {
 			override fun <T : ViewModel> create(modelClass: Class<T>): T {
 				if (modelClass.isAssignableFrom(DirectionFragmentViewModel::class.java)) {
+					@Suppress("UNCHECKED_CAST")
 					return (application as Bus2GoApplication).let {
 						DirectionFragmentViewModel(
 							getDirections = it.commonModule.getDirections,

@@ -39,13 +39,14 @@ class MainActivity : BaseActivity() {
     private val mainActivityViewModel: MainActivityViewModel by viewModels{
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                @Suppress("UNCHECKED_CAST")
                 return (this@MainActivity.application as Bus2GoApplication).let{
                     MainActivityViewModel(
                         checkDatabaseUpdateRequired = it.commonModule.checkDatabaseUpdateRequired,
                         wasUpdateDialogShownToday = it.commonModule.wasUpdateDialogShownToday,
                         setUpdateDbDialogLastAsToday = it.commonModule.setUpdateDbDialogLastAsToday,
                         setDatabaseExpirationDate = it.commonModule.setDatabaseExpirationDate,
-                        getSettings = it.commonModule.getSettings,
+                        settingsRepository = it.commonModule.settingsRepository,
                         checkIsBus2GoServer = it.appModule.checkIsBus2GoServer,
                         scheduleDownloadDatabaseTask = it.commonModule.scheduleDownloadDatabaseTask,
                         observeDownloadDatabaseTask = it.commonModule.observeDownloadDatabaseTask
