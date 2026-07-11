@@ -47,7 +47,7 @@ class SettingsMainFragmentViewModel(
 
 	fun toggleDarkMode() {
 		viewModelScope.launch {
-			settingsRepository.toggleTheme()
+			settingsRepository.setIsDarkMode(!isDarkMode.value)
 		}
 	}
 

@@ -5,7 +5,6 @@ import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.data.data_source.local.datastore.settings.SettingsDataStoreKeys
 import dev.mainhq.bus2go.data.data_source.local.datastore.settings.settingsDataStore
 import dev.mainhq.bus2go.domain.entity.ServerChoice
-import dev.mainhq.bus2go.domain.entity.SettingsData
 import dev.mainhq.bus2go.domain.repository.SettingsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -33,7 +32,8 @@ class SettingsRepositoryImpl(
 					val langsArray = appContext.resources.getStringArray(R.array.langs)
 					if (langPos > langsArray.size) {
 						set(SettingsDataStoreKeys.LANGUAGE, "System")
-					} else {
+					}
+					else {
 						set(SettingsDataStoreKeys.LANGUAGE, langsArray[langPos])
 					}
 				}
@@ -48,11 +48,11 @@ class SettingsRepositoryImpl(
 			}
 		}
 
-	override suspend fun toggleTheme() {
+	override suspend fun setIsDarkMode(isDarkMode: Boolean) {
 		withContext(Dispatchers.IO) {
 			appContext.settingsDataStore.updateData {
 				it.toMutablePreferences().toMutablePreferences().apply {
-					set(SettingsDataStoreKeys.IS_DARK_MODE, get(SettingsDataStoreKeys.IS_DARK_MODE)?.not() ?: true)
+					set(SettingsDataStoreKeys.IS_DARK_MODE, isDarkMode)
 				}
 			}
 		}

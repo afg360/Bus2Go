@@ -5,7 +5,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CompoundButton
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -16,6 +18,7 @@ import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.databinding.FragmentSettingsMainBinding
 import dev.mainhq.bus2go.utils.launchViewModelCollectLatest
+import kotlinx.coroutines.flow.drop
 
 class SettingsMainFragment : Fragment() {
 
@@ -86,12 +89,18 @@ class SettingsMainFragment : Fragment() {
         }
 
         /* Theme */
-        launchViewModelCollectLatest(viewModel.isDarkMode) {
-            binding.settingsThemeToggleSwitchView.isChecked = it
-            (requireActivity() as SettingsActivity).changeTheme(it)
-        }
+        //FIXME May have a race condition bug...
         binding.settingsThemeView.setOnClickListener {
             viewModel.toggleDarkMode()
+            toggleTheme()
+        }
+        binding.settingsThemeToggleSwitchView.setOnClickListener {
+            viewModel.toggleDarkMode()
+            toggleTheme()
+        }
+
+        launchViewModelCollectLatest(viewModel.isDarkMode) {
+            binding.settingsThemeToggleSwitchView.isChecked = it
         }
 
         /* Data and Syncing Section */
@@ -133,4 +142,15 @@ class SettingsMainFragment : Fragment() {
         binding.settingsAboutDescrTextView.text = "Software version: $versionName"
     }
 
+    private fun toggleTheme(){
+        when(AppCompatDelegate.getDefaultNightMode()) {
+            AppCompatDelegate.MODE_NIGHT_YES -> {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+            }
+            else -> {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            }
+        }
+        requireActivity().recreate()
+    }
 }

@@ -10,7 +10,7 @@ interface SettingsRepository {
 	suspend fun setLang(langPos: Int)
 
 	val isDarkMode: Flow<Boolean>
-	suspend fun toggleTheme()
+	suspend fun setIsDarkMode(isDarkMode: Boolean)
 	//TODO more there...
 
 	val serverChoice: Flow<ServerChoice>
