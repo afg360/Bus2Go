@@ -16,34 +16,41 @@ class ConfigDatabasesFragmentViewModel(
 	private val scheduleDownloadDatabaseTask: ScheduleDownloadDatabaseTask
 ): ViewModel() {
 
-	private val _dbToDownload: MutableStateFlow<MutableSet<DbToDownload>> = MutableStateFlow(mutableSetOf())
+	private val _dbToDownload: MutableStateFlow<Set<DbToDownload>> = MutableStateFlow(mutableSetOf())
 	val dbToDownload = _dbToDownload.asStateFlow()
 
 	fun toggleStm(){
 		_dbToDownload.update {
+			val newSet = it.toMutableSet()
 			if (it.contains(DbToDownload.STM)){
-				it.remove(DbToDownload.STM)
+				newSet.remove(DbToDownload.STM)
+				newSet
 			}
-			else it.add(DbToDownload.STM)
-			it
+			else {
+				newSet.add(DbToDownload.STM)
+			}
+			newSet
 		}
 	}
 
 	fun toggleExo(){
 		_dbToDownload.update {
+			val newSet = it.toMutableSet()
 			if (it.contains(DbToDownload.EXO)){
-				it.remove(DbToDownload.EXO)
+				newSet.remove(DbToDownload.EXO)
 			}
-			else it.add(DbToDownload.EXO)
-			it
+			else {
+				newSet.add(DbToDownload.EXO)
+			}
+			newSet
 		}
 	}
 
-	fun isStmChecked(): Boolean{
+	fun isStmChecked(): Boolean {
 		return _dbToDownload.value.contains(DbToDownload.STM)
 	}
 
-	fun isExoChecked(): Boolean{
+	fun isExoChecked(): Boolean {
 		return _dbToDownload.value.contains(DbToDownload.EXO)
 	}
 

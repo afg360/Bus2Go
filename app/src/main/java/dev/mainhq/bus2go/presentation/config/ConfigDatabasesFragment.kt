@@ -67,7 +67,12 @@ class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
 
 
 		launchViewModelCollectLatest(viewModel.dbToDownload){
-			binding.configDownloadDatabaseContinueButton.text = if (it.isEmpty()) "Skip" else "Continue"
+			binding.configDownloadDatabaseContinueButton.text = if (it.isEmpty()) {
+				"Skip"
+			}
+			else {
+				"Continue"
+			}
 		}
 		requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object: OnBackPressedCallback(true){
 			override fun handleOnBackPressed() {
@@ -96,7 +101,7 @@ class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
 					.setNegativeButton("Cancel"){ dialogInterface, _ -> /*close the dialog*/ dialogInterface.dismiss() }
 					.show()
 			}
-			else{
+			else {
 				MaterialAlertDialogBuilder(requireContext())
 					.setTitle("Are you sure?")
 					.setMessage("You won't be able to properly use the app without a database installed (you can always download one later)")
