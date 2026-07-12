@@ -36,8 +36,8 @@ class ConfigServerFragment: Fragment(R.layout.fragment_config_server) {
 				@Suppress("UNCHECKED_CAST")
 				return (requireActivity().application as Bus2GoApplication).let{
 					ConfigServerFragmentViewModel(
+						it.commonModule.settingsRepository,
 						it.appModule.checkIsBus2GoServer,
-						it.commonModule.saveBus2GoServer,
 						it.commonModule.saveAllNotifSettings,
 						it.commonModule.acceptSelfSignedCertificate
 					) as T

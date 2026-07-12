@@ -27,7 +27,6 @@ import dev.mainhq.bus2go.domain.use_case.CleanUpGarbageFiles
 import dev.mainhq.bus2go.domain.use_case.ObserveDownloadDatabaseTask
 import dev.mainhq.bus2go.domain.use_case.ScheduleDownloadDatabaseTask
 import dev.mainhq.bus2go.domain.use_case.settings.SaveAllNotifSettings
-import dev.mainhq.bus2go.domain.use_case.settings.SaveBus2GoServer
 import dev.mainhq.bus2go.domain.use_case.db_state.CheckDatabaseUpdateRequired
 import dev.mainhq.bus2go.domain.use_case.db_state.IsFirstTimeAppLaunched
 import dev.mainhq.bus2go.domain.use_case.db_state.SetDatabaseExpirationDate
@@ -120,7 +119,6 @@ class CommonModule(applicationContext: Context) {
 	val loggerImpl = LoggerImpl()
 	val networkMonitor = NetworkMonitor.getInstance(applicationContext, loggerImpl)
 
-	val saveBus2GoServer = SaveBus2GoServer(settingsRepository)
 	val saveAllNotifSettings = SaveAllNotifSettings(settingsRepository, appStateRepository)
 
 	val acceptSelfSignedCertificate = AcceptSelfSignedCertificate(

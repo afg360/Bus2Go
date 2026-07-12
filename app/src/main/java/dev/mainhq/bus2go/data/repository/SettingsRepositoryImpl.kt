@@ -68,11 +68,12 @@ class SettingsRepositoryImpl(
 			}
 		}
 
-	override suspend fun setBus2GoServer(url: String) {
+	override suspend fun setBus2GoServer(serverChoice: ServerChoice) {
 		withContext(Dispatchers.IO) {
 			appContext.settingsDataStore.updateData {
 				it.toMutablePreferences().apply {
-					set(SettingsDataStoreKeys.SERVER, url)
+					set(SettingsDataStoreKeys.SERVER, serverChoice.server)
+					set(SettingsDataStoreKeys.IS_SELF_HOSTED, serverChoice.isSelfHosted)
 				}
 			}
 		}

@@ -44,4 +44,13 @@
     <string name="train_direction">Vers %1$s</string>
     <string name="welcome">Bienvenue!</string>
     <string name="config_continue">Continuer</string>
+    <string name="db_auto_updates">Mises à jour automatiques des bases de données</string>
+    <string name="db_auto_updates_summary">Activer ou désactiver les mises à jour automatiques des bases de données qui ont été téléchargées</string>
+    <string name="support">Supporter</string>
+    <string name="donate">Donner</string>
+    <string name="donate_summary">Donnez pour supporter les contributeurs de l\'application</string>
+    <string name="send_feedback">Envoyer des commentaires</string>
+    <string name="send_feedback_summary">Signaler un problème technique ou suggérer une amélioration</string>
+    <string name="about">À propos</string>
+    <string name="app_info">Infos sur l\'application</string>
 </resources>

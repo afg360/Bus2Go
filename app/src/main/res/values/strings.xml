@@ -50,4 +50,11 @@
     <string name="db_update_notifs_summary">Enable notifications for when new databases are available</string>
     <string name="db_auto_updates">Automatic Database Updates</string>
     <string name="db_auto_updates_summary">Toggle on or off to enable the app to update automatically after new databases have been found</string>
+    <string name="support">Support</string>
+    <string name="donate">Donate</string>
+    <string name="donate_summary">Donate to support the contributors of the app</string>
+    <string name="send_feedback">Send Feedback</string>
+    <string name="send_feedback_summary">Report technical issues or suggest new features</string>
+    <string name="about">About</string>
+    <string name="app_info">App Info</string>
 </resources>

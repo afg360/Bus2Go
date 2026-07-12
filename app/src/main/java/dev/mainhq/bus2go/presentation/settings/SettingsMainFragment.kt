@@ -2,6 +2,8 @@ package dev.mainhq.bus2go.presentation.settings
 
 import android.content.pm.PackageInfo
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,11 +16,13 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.materialswitch.MaterialSwitch
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.databinding.FragmentSettingsMainBinding
 import dev.mainhq.bus2go.utils.launchViewModelCollectLatest
-import kotlinx.coroutines.flow.drop
 
 class SettingsMainFragment : Fragment() {
 
@@ -31,7 +35,6 @@ class SettingsMainFragment : Fragment() {
                     SettingsMainFragmentViewModel(
                         it.commonModule.settingsRepository,
                         it.appModule.checkIsBus2GoServer,
-                        it.commonModule.saveBus2GoServer
                     ) as T
                 }
             }
@@ -56,11 +59,6 @@ class SettingsMainFragment : Fragment() {
         launchViewModelCollectLatest(viewModel.toastText){
             sharedViewModel.setLoading(false)
             Toast.makeText(requireContext(), it.string, Toast.LENGTH_SHORT).show()
-            //TODO Dialog part here
-//            val editTextPreference = viewModel.settings.value.serverChoice
-//                preferenceManager.findPreference<EditTextPreference>("server-choice")
-//            if (it.isValid) editTextPreference?.text = it.data
-//            else editTextPreference?.text = ""
         }
 
         launchViewModelCollectLatest(viewModel.isRealTimeOn) {
@@ -95,8 +93,7 @@ class SettingsMainFragment : Fragment() {
             toggleTheme()
         }
         binding.settingsThemeToggleSwitchView.setOnClickListener {
-            viewModel.toggleDarkMode()
-            toggleTheme()
+            binding.settingsThemeView.performClick()
         }
 
         launchViewModelCollectLatest(viewModel.isDarkMode) {
@@ -109,6 +106,70 @@ class SettingsMainFragment : Fragment() {
             //TODO
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Config Server")
+                .setView(
+                    layoutInflater
+                        .inflate(R.layout.fragment_settings_main_config_server_dialog, null)
+                        .apply {
+                            //Setup basic UI fields from previous settings
+                            val serverTypeSwitch = findViewById<MaterialSwitch>(R.id.settings_dialog_select_server_type_switch)
+                            serverTypeSwitch.isChecked = !viewModel.serverChoice.value.isSelfHosted
+                            val serverTypeSwitchText = findViewById<MaterialTextView>(R.id.settings_dialog_select_server_type_text_view)
+                            serverTypeSwitchText.text = if (viewModel.serverChoice.value.isSelfHosted) {
+                                "Self-Hosted"
+                            }
+                            else {
+                                "Web"
+                            }
+                            viewModel.setDialogIsSelfHosted(viewModel.serverChoice.value.isSelfHosted)
+                            serverTypeSwitch.setOnClickListener {
+                                viewModel.toggleDialogIsSelfHosted()
+                                serverTypeSwitchText.text = viewModel.getDialogIsSelfHostedText()
+                            }
+                            val serverEditText = findViewById<TextInputEditText>(R.id.settings_dialog_select_server_text_input_edit_text)
+                            serverEditText.setText(viewModel.serverChoice.value.server)
+                            serverEditText.addTextChangedListener(object: TextWatcher {
+                                override fun afterTextChanged(editable: Editable?) {
+                                    editable?.also {
+                                        viewModel.setDialogInput(it.toString())
+                                    }
+                                }
+
+                                override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) { }
+                                override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) { }
+                            })
+                        }
+                )
+                .setPositiveButton("Confirm") { dialogInterface, _ ->
+//                    val foo = dialogView.findViewById<MaterialTextView>(R.id.settings_dialog_select_server_type_text_view)
+//                    Toast.makeText(it.context, foo.text, Toast.LENGTH_SHORT).show()
+                    viewModel.submitDialogFields()
+                    dialogInterface.dismiss()
+                }
+                .setNegativeButton("Delete") { dialogInterface, _ ->
+                    //Set the server to be nothing
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setTitle("Delete Server Entry?")
+                        .setMessage("Are you sure you want to delete the server?")
+                        .setPositiveButton("Yes") { innerDialogInterface, _ ->
+                            viewModel.setDialogIsSelfHosted(true)
+                            viewModel.setDialogInput("")
+                            viewModel.submitDialogFields()
+                            innerDialogInterface.dismiss()
+                            dialogInterface.dismiss()
+                        }
+                        .setNegativeButton("No") { innerDialogInterface, _ ->
+                            innerDialogInterface.dismiss()
+                        }
+                        .show()
+                }
+                .setNeutralButton("Cancel") { dialogInterface, _ ->
+                    viewModel.setDialogIsSelfHosted(viewModel.serverChoice.value.isSelfHosted)
+                    viewModel.setDialogInput(viewModel.serverChoice.value.server)
+                    dialogInterface.dismiss()
+                }
+                .setOnCancelListener { dialogInterface ->
+                    dialogInterface.dismiss()
+                }
                 .show()
         }
 
@@ -135,11 +196,11 @@ class SettingsMainFragment : Fragment() {
             //TODO
         }
 
-
         /* About Section */
         val packageInfo: PackageInfo = requireContext().packageManager.getPackageInfo(requireContext().packageName, 0)
         val versionName = packageInfo.versionName ?: throw IllegalStateException("Cannot have a null value version name!")
         binding.settingsAboutDescrTextView.text = "Software version: $versionName"
+        binding.settingsAboutView.setOnClickListener {  }
     }
 
     private fun toggleTheme(){

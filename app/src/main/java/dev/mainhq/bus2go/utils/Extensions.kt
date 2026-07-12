@@ -66,3 +66,17 @@ fun <T> MutableList<T>.swap(oldPosition: Int, newPosition: Int) {
 	this[newPosition] = this[oldPosition]
 	this[oldPosition] = oldItem
 }
+
+/**
+ * Find the cause/exception that threw this exception with the same type as given to the type parameter
+ * @return null if the type of exception searched for wasn't a cause of this exception
+ * Otherwise, returns the exception
+ */
+inline fun <reified T : Throwable> Throwable.findCause(): T? {
+	var current: Throwable? = this
+	while (current != null) {
+		if (current is T) return current
+		current = current.cause
+	}
+	return null
+}

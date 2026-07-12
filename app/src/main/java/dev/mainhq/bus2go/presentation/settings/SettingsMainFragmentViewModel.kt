@@ -4,22 +4,22 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.entity.ServerChoice
+import dev.mainhq.bus2go.domain.exceptions.UnpinnedCertificateException
 import dev.mainhq.bus2go.domain.repository.SettingsRepository
 import dev.mainhq.bus2go.domain.use_case.settings.CheckIsBus2GoServer
-import dev.mainhq.bus2go.domain.use_case.settings.SaveBus2GoServer
 import dev.mainhq.bus2go.presentation.config.ServerType
-import kotlinx.coroutines.Dispatchers
+import dev.mainhq.bus2go.utils.findCause
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class SettingsMainFragmentViewModel(
 	private val settingsRepository: SettingsRepository,
 	private val checkIsBus2GoServer: CheckIsBus2GoServer,
-	private val saveBus2GoServer: SaveBus2GoServer
 ): ViewModel() {
 
 	private val _toastText = MutableSharedFlow<Response>(replay = 0)
@@ -61,37 +61,66 @@ class SettingsMainFragmentViewModel(
 			)
 		)
 
-	//FIXME logic for ServerType
-	fun checkIsBus2GoServer(string: String) {
-		viewModelScope.launch {
-			//TODO perhaps isntead of replacing with empty, dont save anything (keep the older one)
-			when(val res = checkIsBus2GoServer.invoke(string, ServerType.SELF_HOSTED)){
-				is Result.Error -> {
-					saveBus2GoServer.invoke("")
-					res.message?.also { _toastText.emit(Response(false, it, null)) }
-						?: _toastText.emit(Response(false, "Some unknown error occurred", null))
-				}
-				is Result.Success<Boolean> -> {
-					withContext(Dispatchers.Main){
-						if (res.data){
-							saveBus2GoServer.invoke(string)
-							_toastText.emit(Response(true, "Server Changed Successfully", string))
-						}
-						else {
-							saveBus2GoServer.invoke("")
-							_toastText.emit(Response(false, "Invalid Bus2Go Server", null))
-						}
-					}
-				}
-			}
-		}
-	}
-
 	val isRealTimeOn = settingsRepository.isRealTimeOn
 		.stateIn(
 			viewModelScope,
 			SharingStarted.WhileSubscribed(5000),
 			false
 		)
+
+	private val _dialogIsSelfHosted = MutableStateFlow(false)
+	fun setDialogIsSelfHosted(isSelfHosted: Boolean) {
+		_dialogIsSelfHosted.update { isSelfHosted }
+	}
+	fun toggleDialogIsSelfHosted() {
+		_dialogIsSelfHosted.update { !_dialogIsSelfHosted.value }
+	}
+
+	fun getDialogIsSelfHostedText(): String {
+		return if (_dialogIsSelfHosted.value) "Self-Hosted"
+		else "Web"
+	}
+
+	private val _dialogInput = MutableStateFlow("")
+	fun setDialogInput(str: String) {
+		_dialogInput.update { str }
+	}
+
+	fun submitDialogFields() {
+		viewModelScope.launch {
+			//We are storing the flow values inside other variables in case some change happens
+			// meanwhile
+			val serverChoice = ServerChoice(_dialogInput.value, _dialogIsSelfHosted.value)
+			when(val res = checkIsBus2GoServer.invoke(serverChoice.server, serverChoice.isSelfHosted.toServerType())){
+				is Result.Error -> {
+					//FIXME do we really store something nothing?
+					settingsRepository.setBus2GoServer(ServerChoice("", true))
+					val cause = res.throwable?.findCause<UnpinnedCertificateException>()
+					if (cause == null) {
+						res.message?.also { _toastText.emit(Response(false, it, null)) }
+							?: _toastText.emit(Response(false, "Some unknown error occurred", null))
+					}
+					else {
+						_toastText.emit(Response(false, "SSL/TLS certificate error", null))
+					}
+				}
+				is Result.Success<Boolean> -> {
+					if (res.data){
+						settingsRepository.setBus2GoServer(serverChoice)
+						_toastText.emit(Response(true, "Server Changed Successfully", serverChoice.server))
+					}
+					else {
+						settingsRepository.setBus2GoServer(ServerChoice("", true))
+						_toastText.emit(Response(false, "Invalid Bus2Go Server", null))
+					}
+				}
+			}
+		}
+	}
+
+	private fun Boolean.toServerType(): ServerType {
+		return if (this) ServerType.SELF_HOSTED
+		else ServerType.WEB
+	}
 
 }

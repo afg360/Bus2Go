@@ -63,6 +63,7 @@ open class Bus2GoApplication : Application() {
 				try{
 					val packageInfo = applicationContext.packageManager
 						.getPackageInfo(packageName, 0)
+					@Suppress("DEPRECATION")
 					val versionCode = if (Build.VERSION.SDK_INT >= 28) packageInfo.longVersionCode
 					else packageInfo.versionCode.toLong()
 
@@ -71,6 +72,7 @@ open class Bus2GoApplication : Application() {
 							"${applicationContext.cacheDir}/$FILE_NAME",
 							PackageManager.GET_META_DATA
 						)?.also {
+							@Suppress("DEPRECATION")
 							val apkVersionCode = if (Build.VERSION.SDK_INT >= 28) it.longVersionCode
 							else it.versionCode.toLong()
 

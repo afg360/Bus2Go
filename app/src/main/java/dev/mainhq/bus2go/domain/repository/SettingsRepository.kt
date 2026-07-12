@@ -14,7 +14,7 @@ interface SettingsRepository {
 	//TODO more there...
 
 	val serverChoice: Flow<ServerChoice>
-	suspend fun setBus2GoServer(url: String)
+	suspend fun setBus2GoServer(serverChoice: ServerChoice)
 	suspend fun toggleIsSelfHosted()
 
 	val isRealTimeOn: Flow<Boolean>

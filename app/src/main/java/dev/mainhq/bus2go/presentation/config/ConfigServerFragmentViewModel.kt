@@ -3,13 +3,15 @@ package dev.mainhq.bus2go.presentation.config
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.mainhq.bus2go.domain.core.Result
+import dev.mainhq.bus2go.domain.entity.ServerChoice
 import dev.mainhq.bus2go.domain.entity.UrlChecker
 import dev.mainhq.bus2go.domain.exceptions.UnpinnedCertificateException
+import dev.mainhq.bus2go.domain.repository.SettingsRepository
 import dev.mainhq.bus2go.domain.use_case.AcceptSelfSignedCertificate
 import dev.mainhq.bus2go.domain.use_case.settings.CheckIsBus2GoServer
 import dev.mainhq.bus2go.domain.use_case.settings.SaveAllNotifSettings
-import dev.mainhq.bus2go.domain.use_case.settings.SaveBus2GoServer
 import dev.mainhq.bus2go.presentation.core.UiState
+import dev.mainhq.bus2go.utils.findCause
 import io.ktor.util.reflect.instanceOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -22,8 +24,8 @@ import kotlinx.coroutines.launch
 
 
 class ConfigServerFragmentViewModel(
+	private val settingsRepository: SettingsRepository,
 	private val checkIsBus2GoServer: CheckIsBus2GoServer,
-	private val saveBus2GoServer: SaveBus2GoServer,
 	private val saveAllNotifSettings: SaveAllNotifSettings,
 	private val acceptSelfSignedCertificate: AcceptSelfSignedCertificate
 ): ViewModel(), SettingsSavableViewModel {
@@ -86,14 +88,6 @@ class ConfigServerFragmentViewModel(
 		}
 	}
 
-	private inline fun <reified T : Throwable> Throwable.findCause(): T? {
-		var current: Throwable? = this
-		while (current != null) {
-			if (current is T) return current
-			current = current.cause
-		}
-		return null
-	}
 
 	/** Called once the user accepts to query a self hosted potential bus2go server */
 	fun checkIsBus2Go() {
@@ -142,9 +136,9 @@ class ConfigServerFragmentViewModel(
 			is Result.Success<Boolean> -> {
 				if (result.data){
 					_buttonText.update { "Continue" }
-					//FIXME for the moment ignore success/failure status
+					//FIXME need to pass down a correct ServerChoice
 					viewModelScope.launch {
-						saveBus2GoServer.invoke(inputTextString)
+						settingsRepository.setBus2GoServer(ServerChoice(inputTextString, true))
 					}
 				}
 				else {
