@@ -96,7 +96,14 @@ class SettingsRepositoryImpl(
 			}
 		}
 
-	override suspend fun saveAppUpdateNotifSetting(appUpdateNotif: Boolean) {
+	override val isAppUpdatesNotifOn: Flow<Boolean>
+		get() {
+			return appContext.settingsDataStore.data.map {
+				it[SettingsDataStoreKeys.IS_APP_UPDATES_NOTIFS_ON] ?: false
+			}
+		}
+
+	override suspend fun setAppUpdatesNotif(appUpdateNotif: Boolean) {
 		withContext(Dispatchers.IO) {
 			appContext.settingsDataStore.updateData {
 				it.toMutablePreferences().apply {
@@ -106,11 +113,52 @@ class SettingsRepositoryImpl(
 		}
 	}
 
-	override suspend fun saveDbUpdateNotifSetting(dbUpdateNotif: Boolean) {
+	override val isAutoAppUpdatesOn: Flow<Boolean>
+		get() {
+			return appContext.settingsDataStore.data.map {
+				it[SettingsDataStoreKeys.IS_AUTOMATIC_UPDATES_ON] ?: false
+			}
+		}
+
+	override suspend fun setAutoAppUpdates(isAutoAppUpdate: Boolean) {
+		withContext(Dispatchers.IO) {
+			appContext.settingsDataStore.updateData {
+				it.toMutablePreferences().apply {
+					set(SettingsDataStoreKeys.IS_AUTOMATIC_UPDATES_ON, isAutoAppUpdate)
+				}
+			}
+		}
+	}
+
+	override val isDbUpdatesNotifOn: Flow<Boolean>
+		get() {
+			return appContext.settingsDataStore.data.map {
+				it[SettingsDataStoreKeys.IS_DATABASE_UPDATES_NOTIFS_ON] ?: false
+			}
+		}
+
+	override suspend fun setDbUpdatesNotif(dbUpdateNotif: Boolean) {
 		withContext(Dispatchers.IO) {
 			appContext.settingsDataStore.updateData {
 				it.toMutablePreferences().apply {
 					set(SettingsDataStoreKeys.IS_DATABASE_UPDATES_NOTIFS_ON, dbUpdateNotif)
+				}
+			}
+		}
+	}
+
+	override val isDbAutoUpdatesOn: Flow<Boolean>
+		get() {
+			return appContext.settingsDataStore.data.map {
+				it[SettingsDataStoreKeys.IS_AUTOMATIC_DATABASE_UPDATES_ON] ?: false
+			}
+		}
+
+	override suspend fun setDbAutoUpdates(isAutoDbUpdate: Boolean) {
+		withContext(Dispatchers.IO) {
+			appContext.settingsDataStore.updateData {
+				it.toMutablePreferences().apply {
+					set(SettingsDataStoreKeys.IS_AUTOMATIC_DATABASE_UPDATES_ON, isAutoDbUpdate)
 				}
 			}
 		}

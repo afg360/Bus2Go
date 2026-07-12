@@ -37,7 +37,10 @@ class SettingsActivity() : BaseActivity() {
         menuBar.setOnMenuItemClickListener {
             when (it.itemId){
                 R.id.settingsBackButton -> {
-                    finish()
+                    when(viewModel.fragmentUsed.value) {
+						FragmentUsed.MAIN -> finish()
+						FragmentUsed.UPDATES -> viewModel.setFragment(FragmentUsed.MAIN)
+					}
                     true
                 }
                 else -> false

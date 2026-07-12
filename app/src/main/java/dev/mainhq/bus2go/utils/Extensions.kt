@@ -16,7 +16,7 @@ import kotlin.coroutines.CoroutineContext
 
 
 /** Assumes that the long in question is in milliseconds */
-fun Long.toEpochDay(): Long{
+fun Long.toEpochDay(): Long {
 	return this / (3600 * 1000 * 24)
 }
 

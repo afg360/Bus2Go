@@ -1,7 +1,6 @@
 package dev.mainhq.bus2go.domain.repository
 
 import dev.mainhq.bus2go.domain.entity.ServerChoice
-import dev.mainhq.bus2go.domain.entity.SettingsData
 import kotlinx.coroutines.flow.Flow
 
 interface SettingsRepository {
@@ -19,7 +18,15 @@ interface SettingsRepository {
 
 	val isRealTimeOn: Flow<Boolean>
 
-	suspend fun saveAppUpdateNotifSetting(appUpdateNotif: Boolean)
+	val isAppUpdatesNotifOn: Flow<Boolean>
+	suspend fun setAppUpdatesNotif(appUpdateNotif: Boolean)
 
-	suspend fun saveDbUpdateNotifSetting(dbUpdateNotif: Boolean)
+	val isAutoAppUpdatesOn: Flow<Boolean>
+	suspend fun setAutoAppUpdates(isAutoAppUpdate: Boolean)
+
+	val isDbUpdatesNotifOn: Flow<Boolean>
+	suspend fun setDbUpdatesNotif(dbUpdateNotif: Boolean)
+
+	val isDbAutoUpdatesOn: Flow<Boolean>
+	suspend fun setDbAutoUpdates(isAutoDbUpdate: Boolean)
 }

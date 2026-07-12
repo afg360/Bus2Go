@@ -68,6 +68,7 @@ class SettingsMainFragment : Fragment() {
 
         /* General settings Section */
         /* Langs */
+        //TODO use Locales API
         binding.settingsLanguageView.setOnClickListener {
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Language")
@@ -103,7 +104,7 @@ class SettingsMainFragment : Fragment() {
         /* Data and Syncing Section */
         /* Config Server */
         binding.settingsConfigServerTitle.setOnClickListener {
-            //TODO
+            //FIXME put better toast errors
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Config Server")
                 .setView(
@@ -140,12 +141,10 @@ class SettingsMainFragment : Fragment() {
                         }
                 )
                 .setPositiveButton("Confirm") { dialogInterface, _ ->
-//                    val foo = dialogView.findViewById<MaterialTextView>(R.id.settings_dialog_select_server_type_text_view)
-//                    Toast.makeText(it.context, foo.text, Toast.LENGTH_SHORT).show()
                     viewModel.submitDialogFields()
                     dialogInterface.dismiss()
                 }
-                .setNegativeButton("Delete") { dialogInterface, _ ->
+                .setNeutralButton("Delete") { dialogInterface, _ ->
                     //Set the server to be nothing
                     MaterialAlertDialogBuilder(requireContext())
                         .setTitle("Delete Server Entry?")
@@ -162,7 +161,7 @@ class SettingsMainFragment : Fragment() {
                         }
                         .show()
                 }
-                .setNeutralButton("Cancel") { dialogInterface, _ ->
+                .setNegativeButton("Cancel") { dialogInterface, _ ->
                     viewModel.setDialogIsSelfHosted(viewModel.serverChoice.value.isSelfHosted)
                     viewModel.setDialogInput(viewModel.serverChoice.value.server)
                     dialogInterface.dismiss()

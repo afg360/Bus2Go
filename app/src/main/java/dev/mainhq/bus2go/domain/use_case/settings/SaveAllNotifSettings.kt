@@ -10,14 +10,14 @@ class SaveAllNotifSettings(
 
 	suspend operator fun invoke(appUpdateNotif: Boolean, dbUpdateNotif: Boolean) {
 		appStateRepository.setIsNotFirstTime()
-		settingsRepository.saveAppUpdateNotifSetting(appUpdateNotif)
-		settingsRepository.saveDbUpdateNotifSetting(dbUpdateNotif)
+		settingsRepository.setAppUpdatesNotif(appUpdateNotif)
+		settingsRepository.setDbUpdatesNotif(dbUpdateNotif)
 	}
 
 	/** Default behaviour is to set every notif setting to false */
 	suspend operator fun invoke() {
 		appStateRepository.setIsNotFirstTime()
-		settingsRepository.saveAppUpdateNotifSetting(false)
-		settingsRepository.saveDbUpdateNotifSetting(false)
+		settingsRepository.setAppUpdatesNotif(false)
+		settingsRepository.setDbUpdatesNotif(false)
 	}
 }
