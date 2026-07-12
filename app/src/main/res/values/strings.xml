@@ -26,7 +26,7 @@
     <string name="real_time_data_updates">Real time data updates</string>
     <string name="real_time_data_updates_summary">Toggle on or off to enable real time data updates (uses internet)</string>
     <string name="language_summary">Choose the main language of the app</string>
-    <string name="auto_updates">Automatic updates</string>
+    <string name="auto_updates">Automatic Updates</string>
     <string name="auto_updates_summary">Toggle on or off to enable the app to update automatically after a new release has been found</string>
     <string name="update_notifications">App Updates</string>
     <string name="update_notifications_summary">Toggle on/off to activate/deactivate notifications for new updates of the application</string>
