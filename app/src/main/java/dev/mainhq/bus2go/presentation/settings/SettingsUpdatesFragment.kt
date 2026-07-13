@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
+import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -27,7 +28,6 @@ class SettingsUpdatesFragment: Fragment() {
 					.let{
 						SettingsUpdatesFragmentViewModel(
 							it.commonModule.settingsRepository,
-							it.commonModule.scheduleDownloadDatabaseTask,
 						) as T
 					}
 			}
@@ -71,11 +71,8 @@ class SettingsUpdatesFragment: Fragment() {
 		launchViewModelCollectLatest(viewModel.isAppUpdatesNotifOn) {
 			binding.settingsAppUpdatesToggleSwitchView.isChecked = it
 			binding.settingsAppAutoUpdatesView.isEnabled = it
-			binding.settingsAppAutoUpdatesView.alpha = if (!it) {
-				0.5f
-			}
-			else {
-				1.0f
+			binding.settingsAppAutoUpdatesView.children.forEach { child ->
+				child.isEnabled = it
 			}
 		}
 
@@ -93,22 +90,7 @@ class SettingsUpdatesFragment: Fragment() {
 
 		/* Manual Database Downloads/Updates */
 		binding.settingsDatabaseManualDownloadView.setOnClickListener {
-			val options = arrayOf("Stm", "Exo")
-			val checkedItems = booleanArrayOf(false, false)
-			MaterialAlertDialogBuilder(requireActivity())
-				.setTitle("Select databases")
-				.setMultiChoiceItems(options, checkedItems){ _, which, isChecked ->
-					checkedItems[which] = isChecked
-				}
-				.setPositiveButton("Positive"){ dialogInterface, foo ->
-					if (checkedItems[0]) viewModel.downloadStm()
-					if (checkedItems[1]) viewModel.downloadExo()
-					dialogInterface.dismiss()
-				}
-				.setNegativeButton("Cancel"){ dialogInterface, foo ->
-					dialogInterface.cancel()
-				}
-				.show()
+			sharedViewModel.setFragment(FragmentUsed.DATABASE_DOWNLOADS)
 		}
 
 		/* Database Updates */
@@ -121,11 +103,8 @@ class SettingsUpdatesFragment: Fragment() {
 		launchViewModelCollectLatest(viewModel.isDbUpdatesNotifOn) {
 			binding.settingsDatabaseUpdatesToggleSwitchView.isChecked = it
 			binding.settingsAutoDatabaseUpdatesView.isEnabled = it
-			binding.settingsAutoDatabaseUpdatesView.alpha = if (!it) {
-				0.5f
-			}
-			else {
-				1.0f
+			binding.settingsAutoDatabaseUpdatesView.children.forEach { child ->
+				child.isEnabled = it
 			}
 		}
 

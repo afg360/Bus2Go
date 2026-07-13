@@ -8,11 +8,13 @@ import dev.mainhq.bus2go.domain.exceptions.UnpinnedCertificateException
 import dev.mainhq.bus2go.domain.repository.SettingsRepository
 import dev.mainhq.bus2go.domain.use_case.settings.CheckIsBus2GoServer
 import dev.mainhq.bus2go.presentation.config.ServerType
+import dev.mainhq.bus2go.presentation.core.UiState
 import dev.mainhq.bus2go.utils.findCause
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -52,13 +54,18 @@ class SettingsMainFragmentViewModel(
 	}
 
 	val serverChoice = settingsRepository.serverChoice
+		.map {
+			if (it.server.isBlank()) {
+				UiState.Error("No server saved")
+			}
+			else {
+				UiState.Success(it)
+			}
+		}
 		.stateIn(
 			viewModelScope,
 			SharingStarted.WhileSubscribed(5000),
-			ServerChoice(
-				"",
-				true
-			)
+			UiState.Init
 		)
 
 	val isRealTimeOn = settingsRepository.isRealTimeOn

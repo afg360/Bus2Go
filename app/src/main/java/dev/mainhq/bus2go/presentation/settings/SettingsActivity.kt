@@ -38,8 +38,15 @@ class SettingsActivity() : BaseActivity() {
             when (it.itemId){
                 R.id.settingsBackButton -> {
                     when(viewModel.fragmentUsed.value) {
-						FragmentUsed.MAIN -> finish()
-						FragmentUsed.UPDATES -> viewModel.setFragment(FragmentUsed.MAIN)
+						FragmentUsed.MAIN -> {
+                            finish()
+                        }
+						FragmentUsed.UPDATES -> {
+                            viewModel.setFragment(FragmentUsed.MAIN)
+                        }
+                        FragmentUsed.DATABASE_DOWNLOADS -> {
+                            viewModel.setFragment(FragmentUsed.UPDATES)
+                        }
 					}
                     true
                 }
@@ -57,6 +64,9 @@ class SettingsActivity() : BaseActivity() {
                         }
                         FragmentUsed.UPDATES -> {
                             replace(R.id.settings_fragment_container_view, SettingsUpdatesFragment())
+                        }
+                        FragmentUsed.DATABASE_DOWNLOADS -> {
+                            replace(R.id.settings_fragment_container_view, SettingsDownloadDatabasesFragment())
                         }
                     }
                 }

@@ -1,6 +1,7 @@
 package dev.mainhq.bus2go.domain.repository
 
 import dev.mainhq.bus2go.domain.core.Result
+import dev.mainhq.bus2go.domain.entity.DatabaseState
 import dev.mainhq.bus2go.domain.entity.DbToDownload
 import kotlinx.coroutines.flow.Flow
 import java.security.cert.X509Certificate
@@ -44,6 +45,8 @@ interface AppStateRepository {
 	/** Gets the version of the saved local EXO database */
 	suspend fun getExoDatabaseVersion(): Int
 	suspend fun updateExoDatabaseVersion(version: Int)
+
+	val downloadedDatabases: Flow<List<DatabaseState>>
 
 	/** Checks if it is the first time that the app has been launched. **/
 	suspend fun getIsFirstTime(): Boolean

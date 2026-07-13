@@ -7,9 +7,9 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CompoundButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -22,6 +22,8 @@ import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.databinding.FragmentSettingsMainBinding
+import dev.mainhq.bus2go.domain.entity.ServerChoice
+import dev.mainhq.bus2go.presentation.core.UiState
 import dev.mainhq.bus2go.utils.launchViewModelCollectLatest
 
 class SettingsMainFragment : Fragment() {
@@ -112,22 +114,26 @@ class SettingsMainFragment : Fragment() {
                         .inflate(R.layout.fragment_settings_main_config_server_dialog, null)
                         .apply {
                             //Setup basic UI fields from previous settings
+                            val serverChoice = when(val serverChoice = viewModel.serverChoice.value) {
+								is UiState.Success<ServerChoice> -> serverChoice.data
+                                else -> { ServerChoice("", true) }
+							}
                             val serverTypeSwitch = findViewById<MaterialSwitch>(R.id.settings_dialog_select_server_type_switch)
-                            serverTypeSwitch.isChecked = !viewModel.serverChoice.value.isSelfHosted
+                            serverTypeSwitch.isChecked = !serverChoice.isSelfHosted
                             val serverTypeSwitchText = findViewById<MaterialTextView>(R.id.settings_dialog_select_server_type_text_view)
-                            serverTypeSwitchText.text = if (viewModel.serverChoice.value.isSelfHosted) {
+                            serverTypeSwitchText.text = if (serverChoice.isSelfHosted) {
                                 "Self-Hosted"
                             }
                             else {
                                 "Web"
                             }
-                            viewModel.setDialogIsSelfHosted(viewModel.serverChoice.value.isSelfHosted)
+                            viewModel.setDialogIsSelfHosted(serverChoice.isSelfHosted)
                             serverTypeSwitch.setOnClickListener {
                                 viewModel.toggleDialogIsSelfHosted()
                                 serverTypeSwitchText.text = viewModel.getDialogIsSelfHostedText()
                             }
                             val serverEditText = findViewById<TextInputEditText>(R.id.settings_dialog_select_server_text_input_edit_text)
-                            serverEditText.setText(viewModel.serverChoice.value.server)
+                            serverEditText.setText(serverChoice.server)
                             serverEditText.addTextChangedListener(object: TextWatcher {
                                 override fun afterTextChanged(editable: Editable?) {
                                     editable?.also {
@@ -162,14 +168,45 @@ class SettingsMainFragment : Fragment() {
                         .show()
                 }
                 .setNegativeButton("Cancel") { dialogInterface, _ ->
-                    viewModel.setDialogIsSelfHosted(viewModel.serverChoice.value.isSelfHosted)
-                    viewModel.setDialogInput(viewModel.serverChoice.value.server)
+                    val serverChoice = when(val serverChoice = viewModel.serverChoice.value) {
+                        is UiState.Success<ServerChoice> -> serverChoice.data
+                        else -> ServerChoice("", true)
+					}
+                    viewModel.setDialogIsSelfHosted(serverChoice.isSelfHosted)
+                    viewModel.setDialogInput(serverChoice.server)
                     dialogInterface.dismiss()
                 }
                 .setOnCancelListener { dialogInterface ->
                     dialogInterface.dismiss()
                 }
                 .show()
+        }
+
+        launchViewModelCollectLatest(viewModel.serverChoice) {
+            when(it) {
+                is UiState.Success<ServerChoice> -> {
+                    binding.settingsUpdatesView.isEnabled = true
+                    binding.settingsUpdatesView.children.forEach { child ->
+                        child.isEnabled = true
+                    }
+
+                    binding.settingsRealtimeView.isEnabled = true
+                    binding.settingsRealtimeView.children.forEach { child ->
+                        child.isEnabled = true
+                    }
+                }
+				is UiState.Error -> {
+                    binding.settingsUpdatesView.isEnabled = false
+                    binding.settingsUpdatesView.children.forEach { child ->
+                        child.isEnabled = false
+                    }
+                    binding.settingsRealtimeView.isEnabled = false
+                    binding.settingsRealtimeView.children.forEach { child ->
+                        child.isEnabled = false
+                    }
+                }
+                else -> {}
+			}
         }
 
         /* Updates */

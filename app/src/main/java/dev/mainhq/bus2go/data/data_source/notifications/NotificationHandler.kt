@@ -114,7 +114,7 @@ class NotificationHandler(private val appContext: Context) {
 			channelId = APP_UPDATES,
 			title = "App Update Error",
 			description = "Error trying to update Bus2Go... Tap to retry",
-			icon = R.drawable.error_notif_sign,
+			icon = R.drawable.error_sign,
 			priority = NotificationCompat.PRIORITY_HIGH
 		).setOngoing(false).setProgress(0, 0, false)
 			.build()
@@ -190,7 +190,7 @@ class NotificationHandler(private val appContext: Context) {
 			channelId = DB_UPDATES,
 			title = "Error trying to download database",
 			description = "You may try to redownload the database in the settings",
-			icon = R.drawable.error_notif_sign, //TODO change
+			icon = R.drawable.error_sign, //TODO change
 			priority = NotificationCompat.PRIORITY_HIGH
 		).setOngoing(false).setProgress(0, 0, false)
 			.build()

@@ -1,20 +1,24 @@
 package dev.mainhq.bus2go.data.repository
 
+import android.content.res.Resources
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.data.data_source.local.LocalKeyStore
 import dev.mainhq.bus2go.data.data_source.local.database.exo.AppDatabaseExo
 import dev.mainhq.bus2go.data.data_source.local.database.stm.AppDatabaseSTM
 import dev.mainhq.bus2go.data.data_source.local.datastore.app_state.AppStateDataStoreKeys
 import dev.mainhq.bus2go.data.repository.DatabaseDownloadRepositoryAbstractImpl.Companion.COMPRESSION_EXT
 import dev.mainhq.bus2go.domain.core.Result
+import dev.mainhq.bus2go.domain.entity.DatabaseState
 import dev.mainhq.bus2go.domain.entity.DbToDownload
 import dev.mainhq.bus2go.domain.repository.AppStateRepository
 import dev.mainhq.bus2go.domain.entity.Time
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -26,7 +30,7 @@ class AppStateRepositoryImpl(
 	private val appStateDataStore: DataStore<Preferences>,
 	private val localKeyStore: LocalKeyStore,
 	private val dataDir: File,
-	private val filesDir: File
+	private val filesDir: File,
 ): AppStateRepository {
 
 
@@ -154,6 +158,28 @@ class AppStateRepositoryImpl(
 			}
 		}
 	}
+
+	override val downloadedDatabases: Flow<List<DatabaseState>>
+		get() {
+			return appStateDataStore.data.map { preferences ->
+				val list = mutableListOf<DatabaseState>()
+				val stmVersion = preferences[AppStateDataStoreKeys.SQLITE_STM_VERSION]
+				if (stmVersion == null) {
+					list.add(DatabaseState.DatabaseNotDownloaded(DbToDownload.STM))
+				}
+				else {
+					list.add(DatabaseState.DatabaseDownloaded(DbToDownload.STM, stmVersion))
+				}
+				val exoVersion = preferences[AppStateDataStoreKeys.SQLITE_EXO_VERSION]
+				if (exoVersion == null) {
+					list.add(DatabaseState.DatabaseNotDownloaded(DbToDownload.EXO))
+				}
+				else {
+					list.add(DatabaseState.DatabaseDownloaded(DbToDownload.EXO, exoVersion))
+				}
+				list
+			}
+		}
 
 	/**
 	 * To check if first time opening the app, check for the existence of the PreferenceManager field
