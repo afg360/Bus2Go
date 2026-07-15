@@ -12,16 +12,32 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import kotlin.coroutines.CoroutineContext
 
 
-/** Assumes that the long in question is in milliseconds */
+/** Assumes that the long in question is in milliseconds. */
 fun Long.toEpochDay(): Long {
 	return this / (3600 * 1000 * 24)
 }
 
 fun LocalDate.toEpochMillis(): Long {
 	return this.toEpochDay() * 24 * 3600 * 1000
+}
+
+/** Check if the localDate is lesser than today. */
+fun LocalDate.isExpired(): Boolean {
+	return this < LocalDate.now()
+}
+
+/** @return A string of the form YYYYMMDD. */
+fun LocalDate.toLocalDateString(): String {
+	return format(DateTimeFormatter.BASIC_ISO_DATE)
+}
+
+/** @return A string of the form Jan 01, 1970. */
+fun LocalDate.cleanString(): String {
+	return format(DateTimeFormatter.ofPattern("MMM dd, uuuu"))
 }
 
 fun View.makeVisible(){

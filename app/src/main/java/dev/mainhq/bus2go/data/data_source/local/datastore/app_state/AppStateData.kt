@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import dev.mainhq.bus2go.domain.entity.DbToDownload
 
 
 val Context.appStateDataStore: DataStore<Preferences> by preferencesDataStore(
@@ -23,4 +24,11 @@ object AppStateDataStoreKeys {
 	//stores the saved version of the databases (NOT THE DATABASE SCHEMA VERSIONS!)
 	val SQLITE_STM_VERSION = intPreferencesKey("sqlite_stm_version")
 	val SQLITE_EXO_VERSION = intPreferencesKey("sqlite_exo_version")
+
+	fun getDatabaseVersionPreference(db: DbToDownload): Preferences.Key<Int> {
+		return when(db) {
+			DbToDownload.STM -> SQLITE_STM_VERSION
+			DbToDownload.EXO -> SQLITE_EXO_VERSION
+		}
+	}
 }

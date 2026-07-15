@@ -1,10 +1,9 @@
 package dev.mainhq.bus2go.data.repository
 
-import android.content.res.Resources
+import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
-import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.data.data_source.local.LocalKeyStore
 import dev.mainhq.bus2go.data.data_source.local.database.exo.AppDatabaseExo
 import dev.mainhq.bus2go.data.data_source.local.database.stm.AppDatabaseSTM
@@ -15,6 +14,8 @@ import dev.mainhq.bus2go.domain.entity.DatabaseState
 import dev.mainhq.bus2go.domain.entity.DbToDownload
 import dev.mainhq.bus2go.domain.repository.AppStateRepository
 import dev.mainhq.bus2go.domain.entity.Time
+import dev.mainhq.bus2go.domain.repository.TransitRepository
+import dev.mainhq.bus2go.utils.toLocalDateString
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -31,10 +32,10 @@ class AppStateRepositoryImpl(
 	private val localKeyStore: LocalKeyStore,
 	private val dataDir: File,
 	private val filesDir: File,
+	private val repos: List<TransitRepository>
 ): AppStateRepository {
 
 
-	//FIXME use the result pattern for cleaner handling of IO errors
 	override suspend fun getNextDatabaseExpirationNotifDate(): Result<LocalDate> {
 		return withContext(Dispatchers.IO) {
 			appStateDataStore.data.first()[AppStateDataStoreKeys.NEXT_DATABASE_EXPIRATION_NOTIF_DATE]?.let{
@@ -43,11 +44,10 @@ class AppStateRepositoryImpl(
 		}
 	}
 
-	//TODO
 	override suspend fun setNextDatabaseExpirationNotifDate(localDate: LocalDate) {
 		withContext(Dispatchers.IO) {
 			appStateDataStore.edit { mutablePreferences ->
-				mutablePreferences[AppStateDataStoreKeys.NEXT_DATABASE_EXPIRATION_NOTIF_DATE] = Time.toLocalDateString(localDate)
+				mutablePreferences[AppStateDataStoreKeys.NEXT_DATABASE_EXPIRATION_NOTIF_DATE] = localDate.toLocalDateString()
 			}
 		}
 	}
@@ -93,8 +93,7 @@ class AppStateRepositoryImpl(
 		//logger?.debug(TAG, "Looking for already downloaded databases")
 		return filesDir.listFiles()
 			?.find {
-				it.name.matches("${dbNamePrefix}_${version}\\.db\\.${COMPRESSION_EXT}$"
-					.toRegex())
+				it.name.matches("${dbNamePrefix}_${version}\\.db\\.${COMPRESSION_EXT}$".toRegex())
 			}?.name
 	}
 
@@ -111,17 +110,17 @@ class AppStateRepositoryImpl(
 	}
 
 	override fun getDbUpdateDialogLastShownDate(): Flow<Result<LocalDate>> {
-		return appStateDataStore.data.map {
-			val lastShownDate = it[AppStateDataStoreKeys.DATABASES_DIALOG_LAST_SHOWN_DATE]
-				?: return@map Result.Error(null)
-			Result.Success(LocalDate.parse(lastShownDate, DateTimeFormatter.BASIC_ISO_DATE))
+		return appStateDataStore.data.map { preferences ->
+			preferences[AppStateDataStoreKeys.DATABASES_DIALOG_LAST_SHOWN_DATE]?.let { date ->
+				Result.Success(LocalDate.parse(date, DateTimeFormatter.BASIC_ISO_DATE))
+			} ?: Result.Error(null)
 		}
 	}
 
 	override suspend fun setUpdateDbDialogLastShownDate(date: LocalDate) {
 		withContext(Dispatchers.IO){
 			appStateDataStore.edit { mutablePreferences ->
-				mutablePreferences[AppStateDataStoreKeys.DATABASES_DIALOG_LAST_SHOWN_DATE] = Time.toLocalDateString(date)
+				mutablePreferences[AppStateDataStoreKeys.DATABASES_DIALOG_LAST_SHOWN_DATE] = date.toLocalDateString()
 			}
 		}
 	}
@@ -163,19 +162,32 @@ class AppStateRepositoryImpl(
 		get() {
 			return appStateDataStore.data.map { preferences ->
 				val list = mutableListOf<DatabaseState>()
-				val stmVersion = preferences[AppStateDataStoreKeys.SQLITE_STM_VERSION]
-				if (stmVersion == null) {
-					list.add(DatabaseState.DatabaseNotDownloaded(DbToDownload.STM))
-				}
-				else {
-					list.add(DatabaseState.DatabaseDownloaded(DbToDownload.STM, stmVersion))
-				}
-				val exoVersion = preferences[AppStateDataStoreKeys.SQLITE_EXO_VERSION]
-				if (exoVersion == null) {
-					list.add(DatabaseState.DatabaseNotDownloaded(DbToDownload.EXO))
-				}
-				else {
-					list.add(DatabaseState.DatabaseDownloaded(DbToDownload.EXO, exoVersion))
+				//Version number may exist, but during download some shit might have happened to cancel
+				// download of the actual database, need to check for that edge case
+				repos.forEach { repo ->
+					val repoName = DbToDownload.getEntry(repo.dbName)
+					val expirationDate = repo.getDatabaseExpirationDate()
+					when(expirationDate) {
+						is Result.Error -> {
+							list.add(DatabaseState.DatabaseNotDownloaded(repoName))
+						}
+						is Result.Success<LocalDate> -> {
+							val sqliteVersion = preferences[AppStateDataStoreKeys.getDatabaseVersionPreference(repoName)]
+							if (sqliteVersion == null) {
+								list.add(DatabaseState.DatabaseNotDownloaded(repoName))
+							}
+							else {
+								list.add(DatabaseState.DatabaseDownloaded(
+									DbToDownload.STM,
+									sqliteVersion,
+									expirationDate.data,
+									//FIXME NEED A MORE RELIABLE WAY TO SETUP THIS STRING THAT DEPENDS
+									// ON BACKEND HAVING CORRECT NAMING
+									File(dataDir, "databases/${repoName.toString().lowercase()}_data.db").length() / 1_000_000L
+								))
+							}
+						}
+					}
 				}
 				list
 			}

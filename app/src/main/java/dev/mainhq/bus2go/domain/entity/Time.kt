@@ -53,7 +53,7 @@ class Time(localDateTime: LocalDateTime) : Parcelable, Comparable<Time> {
      * We do not expect Durations of more than a day
      * @return If the duration is negative, null.
      **/
-    operator fun minus(time : Time) : LocalTime?{
+    operator fun minus(time : Time): LocalTime? {
         //Takes the sec arg first...
         if (this < time) return null
         val duration = Duration.between(LocalDateTime.of(time.localDate, time.localTime), LocalDateTime.of(this.localDate, this.localTime))
@@ -80,14 +80,14 @@ class Time(localDateTime: LocalDateTime) : Parcelable, Comparable<Time> {
     }
 
     data class Day (val time: LocalTime, val days: Long){
-        operator fun compareTo(other: Day): Int{
+        operator fun compareTo(other: Day): Int {
             val diff = this.days - other.days
-            if (diff != 0L) return (this.days - diff).toInt()
-            else return this.time.compareTo(other.time)
+            return if (diff != 0L) (this.days - diff).toInt()
+            else this.time.compareTo(other.time)
         }
     }
 
-    fun timeRemaining() : LocalTime? {
+    fun timeRemaining(): LocalTime? {
         return this - Time(LocalDateTime.now())
     }
 
@@ -173,7 +173,7 @@ class Time(localDateTime: LocalDateTime) : Parcelable, Comparable<Time> {
          * @throws java.time.format.DateTimeParseException
          **/
         //TODO only in strings we need to consider when time is greater than 24h since only in the strings it happens...
-        fun fromString(time : String, date : String) : Time {
+        fun fromString(time : String, date : String): Time {
             val localDate = LocalDate.parse(date, DateTimeFormatter.BASIC_ISO_DATE)
             val list : List<String> = time.split(":")
             try {
@@ -192,7 +192,7 @@ class Time(localDateTime: LocalDateTime) : Parcelable, Comparable<Time> {
          * @param time Must be of format HH:MM:SS
          * @throws IllegalArgumentException
          **/
-        fun fromString(time : String) : Time {
+        fun fromString(time : String): Time {
             val localDate = LocalDate.now()
             val list : List<String> = time.split(":")
             try {
@@ -213,11 +213,5 @@ class Time(localDateTime: LocalDateTime) : Parcelable, Comparable<Time> {
             return Time(LocalDateTime.ofEpochSecond(unixTime, 0, ZoneOffset.ofHours(-5)))
         }
 
-        /**
-         * Formats correctly a localDate to a string.
-         **/
-        fun toLocalDateString(localDate: LocalDate): String {
-            return localDate.format(DateTimeFormatter.BASIC_ISO_DATE)
-        }
     }
 }

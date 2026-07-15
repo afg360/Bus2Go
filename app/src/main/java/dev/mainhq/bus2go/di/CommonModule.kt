@@ -69,12 +69,6 @@ class CommonModule(applicationContext: Context) {
 
 	private val localKeyStore = LocalKeyStore(applicationContext.filesDir)
 
-	val appStateRepository = AppStateRepositoryImpl(
-		appStateDataStore = applicationContext.appStateDataStore,
-		localKeyStore = localKeyStore,
-		dataDir = applicationContext.dataDir,
-		filesDir = applicationContext.filesDir
-	)
 
 	private val tagsHandler = TagsHandler.getInstance(applicationContext)
 
@@ -98,6 +92,17 @@ class CommonModule(applicationContext: Context) {
 
 	private val favouritesPositionRepository = FavouritePositionRepositoryImpl (
 		applicationContext.favouritesPositionDataStore
+	)
+
+	val appStateRepository = AppStateRepositoryImpl(
+		appStateDataStore = applicationContext.appStateDataStore,
+		localKeyStore = localKeyStore,
+		dataDir = applicationContext.dataDir,
+		filesDir = applicationContext.filesDir,
+		repos = listOf(
+			stmRepository,
+			exoRepository
+		)
 	)
 
 	val getAllTags = GetAllTags(
