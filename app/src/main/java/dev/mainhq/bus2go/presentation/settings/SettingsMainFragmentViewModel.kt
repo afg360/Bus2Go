@@ -4,16 +4,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.entity.ServerChoice
+import dev.mainhq.bus2go.domain.exceptions.ExpiredCertificateException
 import dev.mainhq.bus2go.domain.exceptions.UnpinnedCertificateException
 import dev.mainhq.bus2go.domain.repository.SettingsRepository
+import dev.mainhq.bus2go.domain.use_case.AcceptSelfSignedCertificate
 import dev.mainhq.bus2go.domain.use_case.settings.CheckIsBus2GoServer
 import dev.mainhq.bus2go.presentation.config.ServerType
+import dev.mainhq.bus2go.presentation.config.WarningType
 import dev.mainhq.bus2go.presentation.core.UiState
 import dev.mainhq.bus2go.utils.findCause
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -22,10 +26,8 @@ import kotlinx.coroutines.launch
 class SettingsMainFragmentViewModel(
 	private val settingsRepository: SettingsRepository,
 	private val checkIsBus2GoServer: CheckIsBus2GoServer,
+	val acceptSelfSignedCertificate: AcceptSelfSignedCertificate,
 ): ViewModel() {
-
-	private val _toastText = MutableSharedFlow<Response>(replay = 0)
-	val toastText = _toastText.asSharedFlow()
 
 	val langChoice = settingsRepository.lang
 		.stateIn(
@@ -93,35 +95,76 @@ class SettingsMainFragmentViewModel(
 		_dialogInput.update { str }
 	}
 
+	private val _warnUser = MutableSharedFlow<WarningType.AcceptSelfSignedCertificate>(replay = 1)
+	val warnUser = _warnUser.asSharedFlow()
+
+	private val _toastText = MutableSharedFlow<Response>(replay = 0)
+	val toastText = _toastText.asSharedFlow()
+
 	fun submitDialogFields() {
 		viewModelScope.launch {
 			//We are storing the flow values inside other variables in case some change happens
 			// meanwhile
 			val serverChoice = ServerChoice(_dialogInput.value, _dialogIsSelfHosted.value)
-			when(val res = checkIsBus2GoServer.invoke(serverChoice.server, serverChoice.isSelfHosted.toServerType())){
-				is Result.Error -> {
-					//FIXME do we really store something nothing?
-					settingsRepository.setBus2GoServer(ServerChoice("", true))
-					val cause = res.throwable?.findCause<UnpinnedCertificateException>()
-					if (cause == null) {
-						res.message?.also { _toastText.emit(Response(false, it, null)) }
-							?: _toastText.emit(Response(false, "Some unknown error occurred", null))
+			if (serverChoice.isSelfHosted) {
+				when(val res = checkIsBus2GoServer.invoke(serverChoice.server, serverChoice.isSelfHosted.toServerType())){
+					is Result.Error -> {
+						if (res.throwable?.findCause<UnpinnedCertificateException>() != null) {
+							_warnUser.emit(WarningType.AcceptSelfSignedCertificate(res.throwable.findCause<UnpinnedCertificateException>()!!.certificate))
+						}
+						else if (res.throwable?.findCause<ExpiredCertificateException>() != null) {
+							res.message?.also { _toastText.emit(Response(false, "Expired SSL certificate", null)) }
+						}
+						else {
+							_toastText.emit(Response(false, "Some unknown error occurred", null))
+						}
 					}
-					else {
-						_toastText.emit(Response(false, "SSL/TLS certificate error", null))
-					}
-				}
-				is Result.Success<Boolean> -> {
-					if (res.data){
-						settingsRepository.setBus2GoServer(serverChoice)
-						_toastText.emit(Response(true, "Server Changed Successfully", serverChoice.server))
-					}
-					else {
-						settingsRepository.setBus2GoServer(ServerChoice("", true))
-						_toastText.emit(Response(false, "Invalid Bus2Go Server", null))
+					is Result.Success<Boolean> -> {
+						if (res.data){
+							settingsRepository.setBus2GoServer(serverChoice)
+							_toastText.emit(Response(true, "Server Changed Successfully", serverChoice.server))
+						}
+						else {
+							settingsRepository.setBus2GoServer(ServerChoice("", true))
+							_toastText.emit(Response(false, "Invalid Bus2Go Server", null))
+						}
 					}
 				}
 			}
+			else {
+				when(val res = checkIsBus2GoServer.invoke(serverChoice.server, serverChoice.isSelfHosted.toServerType())){
+					is Result.Error -> {
+						//FIXME do we really store something that is nothing?
+						settingsRepository.setBus2GoServer(ServerChoice("", true))
+						if (res.throwable?.findCause<UnpinnedCertificateException>() != null) {
+							_toastText.emit(Response(false, "SSL/TLS certificate error", null))
+						}
+						else if (res.throwable?.findCause<ExpiredCertificateException>() != null) {
+							res.message?.also { _toastText.emit(Response(false, "Expired SSL certificate", null)) }
+						}
+						else {
+							_toastText.emit(Response(false, "Some unknown error occurred", null))
+						}
+					}
+					is Result.Success<Boolean> -> {
+						if (res.data){
+							settingsRepository.setBus2GoServer(serverChoice)
+							_toastText.emit(Response(true, "Server Changed Successfully", serverChoice.server))
+						}
+						else {
+							settingsRepository.setBus2GoServer(ServerChoice("", true))
+							_toastText.emit(Response(false, "Invalid Bus2Go Server", null))
+						}
+					}
+				}
+			}
+		}
+	}
+
+	fun acceptSelfSignedCert() {
+		viewModelScope.launch {
+			acceptSelfSignedCertificate.invoke(_warnUser.first().cert)
+			submitDialogFields()
 		}
 	}
 

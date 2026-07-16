@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.entity.ServerChoice
 import dev.mainhq.bus2go.domain.entity.UrlChecker
+import dev.mainhq.bus2go.domain.exceptions.ExpiredCertificateException
 import dev.mainhq.bus2go.domain.exceptions.UnpinnedCertificateException
 import dev.mainhq.bus2go.domain.repository.SettingsRepository
 import dev.mainhq.bus2go.domain.use_case.AcceptSelfSignedCertificate
@@ -94,12 +95,13 @@ class ConfigServerFragmentViewModel(
 		assert(_serverType.value == ServerType.SELF_HOSTED)
 		viewModelScope.launch {
 			val inputTextString = (_textInputText.value as UiState.Success).data
-			val result = checkIsBus2GoServer.invoke(inputTextString, _serverType.value)
-			when (result) {
+			when (val result = checkIsBus2GoServer.invoke(inputTextString, _serverType.value)) {
 				is Result.Error -> {
-					val exception = result.throwable?.findCause<UnpinnedCertificateException>()
-					if (exception != null) {
-						_warnUser.emit(WarningType.AcceptSelfSignedCertificate(exception.certificate))
+					if (result.throwable?.findCause<UnpinnedCertificateException>() != null) {
+						_warnUser.emit(WarningType.AcceptSelfSignedCertificate(result.throwable.findCause<UnpinnedCertificateException>()!!.certificate))
+					}
+					else if (result.throwable?.findCause<ExpiredCertificateException>() != null) {
+						_serverResponse.update { UiState.Error("Server SSL certificate is expired") }
 					}
 					else {
 						//TODO put "Skip option"
@@ -123,6 +125,9 @@ class ConfigServerFragmentViewModel(
 		}
 	}
 
+	/**
+	 * @param result The output from a CheckIsBus2Go call to check if we have a valid Bus2Go server.
+	 * */
 	private fun _checkIsBus2Go(inputTextString: String, result: Result<Boolean>) {
 		//if message is null from server success, then show invalid
 		when (result) {

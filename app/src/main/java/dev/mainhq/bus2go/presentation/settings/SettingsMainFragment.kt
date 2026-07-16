@@ -37,6 +37,7 @@ class SettingsMainFragment : Fragment() {
                     SettingsMainFragmentViewModel(
                         it.commonModule.settingsRepository,
                         it.appModule.checkIsBus2GoServer,
+                        it.commonModule.acceptSelfSignedCertificate
                     ) as T
                 }
             }
@@ -207,6 +208,28 @@ class SettingsMainFragment : Fragment() {
                 }
                 else -> {}
 			}
+        }
+
+        launchViewModelCollectLatest(viewModel.warnUser) {
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Accept Self-Signed Certificate?")
+                .setMessage("""Do you want to accept this self-signed certificate?
+							| Server: ${it.server}
+							| Issuer: ${it.issuer}
+							| Expires: ${it.expires}
+							| Fingerprint: ${it.fingerprint}
+						""".trimMargin())
+                .setPositiveButton("Accept") { dialogInterface, _ ->
+                    viewModel.acceptSelfSignedCert()
+                    dialogInterface.dismiss()
+                }
+                .setNegativeButton("Decline") { dialogInterface, _ ->
+                    dialogInterface.dismiss()
+                }
+                .setOnCancelListener { dialogInterface ->
+                    dialogInterface.dismiss()
+                }
+                .show()
         }
 
         /* Updates */
