@@ -21,6 +21,7 @@ import java.net.UnknownServiceException
 import javax.net.ssl.SSLHandshakeException
 import java.security.SecureRandom
 import javax.net.ssl.SSLContext
+import javax.net.ssl.X509TrustManager
 
 
 object NetworkClient {
@@ -39,14 +40,13 @@ object NetworkClient {
 
 	private lateinit var selfHostedClient: HttpClient
 
-	fun init(filesDir: File) {
+	fun init(trustManager: X509TrustManager) {
 		selfHostedClient = HttpClient(OkHttp){
 			engine {
 				config {
 					connectTimeout(15_000, TimeUnit.MILLISECONDS)
 					readTimeout(15_000, TimeUnit.MILLISECONDS)
 					writeTimeout(15_000, TimeUnit.MILLISECONDS)
-					val trustManager = CustomTrustManager.build(filesDir)
 					val sslContext = SSLContext.getInstance("TLS").apply {
 						init(null, arrayOf(trustManager), SecureRandom())
 					}

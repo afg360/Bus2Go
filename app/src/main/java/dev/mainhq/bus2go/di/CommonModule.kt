@@ -13,6 +13,7 @@ import dev.mainhq.bus2go.data.data_source.local.datastore.favourites_position.fa
 import dev.mainhq.bus2go.data.data_source.local.datastore.stm.stmFavouritesDataStore
 import dev.mainhq.bus2go.data.data_source.local.datastore.tags.TagsHandler
 import dev.mainhq.bus2go.data.data_source.notifications.NotificationHandler
+import dev.mainhq.bus2go.data.data_source.remote.CustomTrustManager
 import dev.mainhq.bus2go.data.data_source.remote.NetworkMonitor
 import dev.mainhq.bus2go.data.repository.AppStateRepositoryImpl
 import dev.mainhq.bus2go.data.repository.ExoFavouritesRepositoryImpl
@@ -68,6 +69,7 @@ class CommonModule(applicationContext: Context) {
 	)
 
 	private val localKeyStore = LocalKeyStore(applicationContext.filesDir)
+	val customTrustManager = CustomTrustManager.build(localKeyStore)
 
 
 	private val tagsHandler = TagsHandler.getInstance(applicationContext)

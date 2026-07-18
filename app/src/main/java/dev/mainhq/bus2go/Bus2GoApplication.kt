@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
 import dev.mainhq.bus2go.data.data_source.local.datastore.tags.TagsHandler
+import dev.mainhq.bus2go.data.data_source.remote.CustomTrustManager
 import dev.mainhq.bus2go.data.data_source.remote.NetworkClient
 import dev.mainhq.bus2go.di.CommonModule
 import dev.mainhq.bus2go.data.worker.UpdateManagerWorker.Companion.FILE_NAME
@@ -49,7 +50,7 @@ open class Bus2GoApplication : Application() {
 
 	private fun initNetworkClient(){
 		coroutineScope.launch {
-			NetworkClient.init(filesDir)
+			NetworkClient.init(commonModule.customTrustManager)
 		}
 	}
 
