@@ -19,6 +19,7 @@ import dev.mainhq.bus2go.data.repository.AppStateRepositoryImpl
 import dev.mainhq.bus2go.data.repository.ExoFavouritesRepositoryImpl
 import dev.mainhq.bus2go.data.repository.ExoRepositoryImpl
 import dev.mainhq.bus2go.data.repository.ExoTrainFavouritesRepositoryImpl
+import dev.mainhq.bus2go.data.repository.ExoTrainRepositoryImpl
 import dev.mainhq.bus2go.data.repository.FavouritePositionRepositoryImpl
 import dev.mainhq.bus2go.data.repository.NotificationRepositoryImpl
 import dev.mainhq.bus2go.data.repository.SettingsRepositoryImpl
@@ -93,6 +94,13 @@ class CommonModule(applicationContext: Context) {
 		exoFavouritesDataStore = applicationContext.exoFavouritesDataStore,
 	)
 
+	private val exoTrainRepository = ExoTrainRepositoryImpl(
+		calendarDAO = exoDatabase?.calendarDao(),
+		routesDAO = exoDatabase?.routesDao(),
+		stopTimesDAO = exoDatabase?.stopTimesDao(),
+		tripsDAO = exoDatabase?.tripsDao()
+	)
+
 	private val exoTrainFavouritesRepository = ExoTrainFavouritesRepositoryImpl(
 		tagsHandler = tagsHandler,
 		exoFavouritesDataStore = applicationContext.exoFavouritesDataStore,
@@ -142,8 +150,11 @@ class CommonModule(applicationContext: Context) {
 	)
 
 	val getRouteInfo = GetRouteInfo(
-		stmRepository,
-		exoRepository,
+		listOf(
+			stmRepository,
+			exoRepository,
+			exoTrainRepository
+		)
 	)
 
 
@@ -199,26 +210,37 @@ class CommonModule(applicationContext: Context) {
 	)
 
 	val getFavouritesWithTimeData = GetFavouritesWithTimeData(
+		listOf(
+			stmRepository,
+			exoRepository,
+			exoTrainRepository
+		),
 		getFavourites,
-		stmRepository,
-		exoRepository,
 		favouritesPositionRepository
 	)
 
 	val getTransitTime = GetTransitTime(
-		exoRepository,
-		stmRepository
+		listOf(
+			stmRepository,
+			exoRepository,
+			exoTrainRepository
+		)
 	)
 
 	val getDirections = GetDirections(
-		exoRepository,
-		stmRepository
+		listOf(
+			stmRepository,
+			exoRepository,
+			exoTrainRepository,
+		)
 	)
 
 	val getStopNames = GetStopNames(
-		loggerImpl,
-		exoRepository,
-		stmRepository
+		listOf(
+			stmRepository,
+			exoRepository,
+			exoTrainRepository
+		)
 	)
 
 	val cleanUpGarbageFiles = CleanUpGarbageFiles(

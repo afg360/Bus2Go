@@ -1,16 +1,14 @@
 package dev.mainhq.bus2go.data.backgroundtask
 
 import androidx.work.BackoffPolicy
-import androidx.work.Constraints
 import androidx.work.ExistingWorkPolicy
-import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import dev.mainhq.bus2go.data.worker.DatabaseDownloadManagerWorker
 import dev.mainhq.bus2go.domain.backgroundtask.DatabaseDownloadScheduler
-import dev.mainhq.bus2go.domain.entity.DbToDownload
+import dev.mainhq.bus2go.domain.entity.DatabaseAgency
 import kotlinx.coroutines.flow.Flow
 import java.util.UUID
 import java.util.concurrent.TimeUnit
@@ -19,8 +17,8 @@ class DatabaseDownloadSchedulerImpl(
 	private val workManager: WorkManager
 ): DatabaseDownloadScheduler {
 
-	override suspend fun scheduleDatabaseDownloadTask(dbToDownload: DbToDownload): UUID {
-		return enqueueTask(dbToDownload.name.uppercase())
+	override suspend fun scheduleDatabaseDownloadTask(databaseAgency: DatabaseAgency): UUID {
+		return enqueueTask(databaseAgency.name.uppercase())
 	}
 
 	private fun enqueueTask(key: String): UUID {

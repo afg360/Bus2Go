@@ -2,7 +2,7 @@ package dev.mainhq.bus2go.domain.repository
 
 import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.entity.DatabaseState
-import dev.mainhq.bus2go.domain.entity.DbToDownload
+import dev.mainhq.bus2go.domain.entity.DatabaseAgency
 import kotlinx.coroutines.flow.Flow
 import java.security.cert.X509Certificate
 import java.time.LocalDate
@@ -26,7 +26,7 @@ interface AppStateRepository {
 	 * @throws IllegalArgumentException When giving ALL instead of a single db type.
 	 * */
 	@Throws(IllegalArgumentException::class)
-	suspend fun doesUpToDateCompressedDbExist(db: DbToDownload, version: Int): String?
+	suspend fun doesUpToDateCompressedDbExist(db: DatabaseAgency, version: Int): String?
 
 	/** @throws IllegalArgumentException When the given file does not exist */
 	@Throws(IllegalArgumentException ::class)

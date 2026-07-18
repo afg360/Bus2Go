@@ -6,6 +6,9 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import dev.mainhq.bus2go.domain.entity.TransitType
+import dev.mainhq.bus2go.domain.repository.FavouritesRepository
+import dev.mainhq.bus2go.domain.repository.TransitRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
@@ -14,6 +17,7 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlin.coroutines.CoroutineContext
+import kotlin.jvm.Throws
 
 
 /** Assumes that the long in question is in milliseconds. */
@@ -81,6 +85,18 @@ fun <T> MutableList<T>.swap(oldPosition: Int, newPosition: Int) {
 	val oldItem = this[newPosition]
 	this[newPosition] = this[oldPosition]
 	this[oldPosition] = oldItem
+}
+
+/** @throws IllegalStateException When the list does not contain the repo of the transitType */
+@Throws(IllegalStateException::class)
+fun List<TransitRepository>.queryRepos(transitType: TransitType): TransitRepository {
+	return this.find { it.transitType == transitType } ?: throw IllegalStateException("Transit type must exist in the list")
+}
+
+/** @throws IllegalStateException When the list does not contain the repo of the transitType */
+@Throws(IllegalStateException::class)
+fun List<FavouritesRepository>.queryRepos(transitType: TransitType): FavouritesRepository {
+	return this.find { it.transitType == transitType } ?: throw IllegalStateException("Transit type must exist in the list")
 }
 
 /**

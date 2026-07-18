@@ -3,9 +3,8 @@ package dev.mainhq.bus2go.presentation.main
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.WorkInfo
-import dev.mainhq.bus2go.domain.backgroundtask.DatabaseDownloadScheduler
 import dev.mainhq.bus2go.domain.core.Result
-import dev.mainhq.bus2go.domain.entity.DbToDownload
+import dev.mainhq.bus2go.domain.entity.DatabaseAgency
 import dev.mainhq.bus2go.domain.repository.SettingsRepository
 import dev.mainhq.bus2go.domain.use_case.ObserveDownloadDatabaseTask
 import dev.mainhq.bus2go.domain.use_case.ScheduleDownloadDatabaseTask
@@ -14,15 +13,11 @@ import dev.mainhq.bus2go.domain.use_case.db_state.SetDatabaseExpirationDate
 import dev.mainhq.bus2go.domain.use_case.db_state.SetUpdateDbDialogLastAsToday
 import dev.mainhq.bus2go.domain.use_case.db_state.WasUpdateDialogShownToday
 import dev.mainhq.bus2go.domain.use_case.settings.CheckIsBus2GoServer
-import dev.mainhq.bus2go.domain.use_case.settings.GetSettings
 import dev.mainhq.bus2go.presentation.config.ServerType
 import dev.mainhq.bus2go.presentation.core.UiState
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.consume
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -35,7 +30,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import kotlin.coroutines.coroutineContext
 
 class MainActivityViewModel(
 	private val checkDatabaseUpdateRequired: CheckDatabaseUpdateRequired,
@@ -66,7 +60,7 @@ class MainActivityViewModel(
 	val updateTextViewString = _resp.map { resp ->
 		when (resp) {
 			is Result.Error -> ""
-			is Result.Success<List<DbToDownload>> -> {
+			is Result.Success<List<DatabaseAgency>> -> {
 				//TODO use a string resource
 				if (resp.data.isEmpty()) ""
 				else if (resp.data.size == 1) "${resp.data.first()} database needs to be updated"
@@ -79,7 +73,7 @@ class MainActivityViewModel(
 	{ resp, wasUpdateDialogShownToday ->
 		when (resp) {
 			is Result.Error -> wasUpdateDialogShownToday
-			is Result.Success<List<DbToDownload>> -> resp.data.isNotEmpty() && !wasUpdateDialogShownToday
+			is Result.Success<List<DatabaseAgency>> -> resp.data.isNotEmpty() && !wasUpdateDialogShownToday
 		}
 	}
 

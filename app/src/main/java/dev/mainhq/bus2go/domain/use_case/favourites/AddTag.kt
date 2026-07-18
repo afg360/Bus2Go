@@ -7,15 +7,20 @@ import dev.mainhq.bus2go.domain.entity.FavouriteTransitData.ExoBusFavouriteItem
 import dev.mainhq.bus2go.domain.entity.FavouriteTransitData.ExoTrainFavouriteItem
 import dev.mainhq.bus2go.domain.entity.TransitType
 import dev.mainhq.bus2go.domain.repository.FavouritesRepository
+import dev.mainhq.bus2go.utils.queryRepos
 
 class AddTag(
 	private val favouritesRepository: List<FavouritesRepository>,
 ){
 	suspend operator fun invoke(tag: Tag, favourites: List<FavouriteTransitData>) {
-		val stmItems = favourites.filter { it is StmBusFavouriteItem }
-		val exoItems = favourites.filter { it is ExoTrainFavouriteItem || it is ExoBusFavouriteItem }
-		favouritesRepository.find { it.transitType == TransitType.STM }!!.setTag(tag, stmItems)
-		favouritesRepository.filter { it.transitType == TransitType.EXO_BUS || it.transitType == TransitType.EXO_TRAIN }!!
-			.forEach { it.setTag(tag, exoItems) }
+		favourites.filter { it is StmBusFavouriteItem }.also {
+			favouritesRepository.queryRepos(TransitType.STM).setTag(tag, it)
+		}
+		favourites.filter { it is ExoBusFavouriteItem }.also {
+			favouritesRepository.queryRepos(TransitType.EXO_BUS).setTag(tag, it)
+		}
+		favourites.filter { it is ExoTrainFavouriteItem }.also {
+			favouritesRepository.queryRepos(TransitType.EXO_TRAIN).setTag(tag, it)
+		}
 	}
 }

@@ -13,7 +13,6 @@ import dev.mainhq.bus2go.domain.use_case.settings.CheckIsBus2GoServer
 import dev.mainhq.bus2go.domain.use_case.settings.SaveAllNotifSettings
 import dev.mainhq.bus2go.presentation.core.UiState
 import dev.mainhq.bus2go.utils.findCause
-import io.ktor.util.reflect.instanceOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -71,7 +70,7 @@ class ConfigServerFragmentViewModel(
 			//if it is, no need to check back
 			_serverResponse.update { UiState.Loading }
 			//capture the textInputText
-			if (_textInputText.value.instanceOf(UiState.Error::class)) {
+			if (_textInputText.value is UiState.Error) {
 				_serverResponse.update { UiState.Error("Invalid URL") }
 			}
 

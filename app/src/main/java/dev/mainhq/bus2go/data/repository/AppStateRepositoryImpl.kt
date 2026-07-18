@@ -10,7 +10,7 @@ import dev.mainhq.bus2go.data.data_source.local.datastore.app_state.AppStateData
 import dev.mainhq.bus2go.data.repository.DatabaseDownloadRepositoryAbstractImpl.Companion.COMPRESSION_EXT
 import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.entity.DatabaseState
-import dev.mainhq.bus2go.domain.entity.DbToDownload
+import dev.mainhq.bus2go.domain.entity.DatabaseAgency
 import dev.mainhq.bus2go.domain.repository.AppStateRepository
 import dev.mainhq.bus2go.domain.repository.TransitRepository
 import dev.mainhq.bus2go.utils.toLocalDateString
@@ -53,16 +53,16 @@ class AppStateRepositoryImpl(
 		return withContext(Dispatchers.IO) {
 			//FIXME do we need dataDir or filesDir?
 			val tmps = filesDir.list()?.filter { it.matches("\\.(te?mp|part)$".toRegex()) }?.filterNotNull() ?: listOf()
-			val stmMaxVersion = getMaxVersion(DbToDownload.STM)
-			val exoMaxVersion = getMaxVersion(DbToDownload.EXO)
+			val stmMaxVersion = getMaxVersion(DatabaseAgency.STM)
+			val exoMaxVersion = getMaxVersion(DatabaseAgency.EXO)
 			println("Stm: $stmMaxVersion, Exo: $exoMaxVersion")
-			tmps + _getGarbageFiles(DbToDownload.STM, stmMaxVersion) + _getGarbageFiles(DbToDownload.EXO, exoMaxVersion)
+			tmps + _getGarbageFiles(DatabaseAgency.STM, stmMaxVersion) + _getGarbageFiles(DatabaseAgency.EXO, exoMaxVersion)
 		}
 	}
 
-	private fun getMaxVersion(dbToDownload: DbToDownload): Int {
+	private fun getMaxVersion(databaseAgency: DatabaseAgency): Int {
 		return filesDir.list()?.filter {
-			it.matches("^(${dbToDownload.name.lowercase()})(_sample)?_data_[0-9]+\\.db\\.gz$".toRegex())
+			it.matches("^(${databaseAgency.name.lowercase()})(_sample)?_data_[0-9]+\\.db\\.gz$".toRegex())
 		}?.map {
 			//we will be keeping database with the current version in case something has gone wrong...
 			it.split("_").last().removeSuffix(".db.gz").toInt()
@@ -70,21 +70,21 @@ class AppStateRepositoryImpl(
 		}?.maxByOrNull { it } ?: -1
 	}
 
-	private fun _getGarbageFiles(dbToDownload: DbToDownload, maxVersion: Int): List<String> {
+	private fun _getGarbageFiles(databaseAgency: DatabaseAgency, maxVersion: Int): List<String> {
 		return filesDir.list()?.filter {
-			it.matches("^(${dbToDownload.name.lowercase()})(_sample)?_data_[0-9]+\\.db\\.gz$".toRegex()) //(with \\d smaller than current version)
+			it.matches("^(${databaseAgency.name.lowercase()})(_sample)?_data_[0-9]+\\.db\\.gz$".toRegex()) //(with \\d smaller than current version)
 		}?.filter {
 			it.split("_").last().removeSuffix(".db.gz").toInt() < maxVersion
 		}?.filterNotNull() ?: listOf()
 	}
 
 	override suspend fun doesUpToDateCompressedDbExist(
-		db: DbToDownload,
+		db: DatabaseAgency,
 		version: Int,
 	): String? {
 		val dbNamePrefix = when(db){
-			DbToDownload.STM -> AppDatabaseSTM.FILENAME_PREFIX
-			DbToDownload.EXO -> AppDatabaseExo.FILENAME_PREFIX
+			DatabaseAgency.STM -> AppDatabaseSTM.FILENAME_PREFIX
+			DatabaseAgency.EXO -> AppDatabaseExo.FILENAME_PREFIX
 		}
 		//TODO before downloading, check if file exists already with the correct version
 		//logger?.debug(TAG, "Looking for already downloaded databases")
@@ -162,7 +162,7 @@ class AppStateRepositoryImpl(
 				//Version number may exist, but during download some shit might have happened to cancel
 				// download of the actual database, need to check for that edge case
 				repos.forEach { repo ->
-					val repoName = DbToDownload.getEntry(repo.dbName)
+					val repoName = DatabaseAgency.getEntry(repo.dbName)
 					val expirationDate = repo.getDatabaseExpirationDate()
 					when(expirationDate) {
 						is Result.Error -> {
@@ -175,7 +175,7 @@ class AppStateRepositoryImpl(
 							}
 							else {
 								list.add(DatabaseState.DatabaseDownloaded(
-									DbToDownload.STM,
+									DatabaseAgency.STM,
 									sqliteVersion,
 									expirationDate.data,
 									//FIXME NEED A MORE RELIABLE WAY TO SETUP THIS STRING THAT DEPENDS

@@ -1,7 +1,5 @@
 package dev.mainhq.bus2go.domain.entity
 
-import dev.mainhq.bus2go.domain.entity.DbToDownload.EXO
-
 //Used internally for making it easier to decipher lists of data
 enum class TransitType(private val str: String) {
 	STM("Stm"),

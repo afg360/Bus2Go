@@ -7,6 +7,7 @@ import dev.mainhq.bus2go.domain.entity.FavouriteTransitData.ExoTrainFavouriteIte
 import dev.mainhq.bus2go.domain.entity.TransitType
 import dev.mainhq.bus2go.domain.repository.FavouritesPositionRepository
 import dev.mainhq.bus2go.domain.repository.FavouritesRepository
+import dev.mainhq.bus2go.utils.queryRepos
 
 class RemoveFavourite(
 	private val favouritesRepos: List<FavouritesRepository>,
@@ -16,16 +17,13 @@ class RemoveFavourite(
 	suspend operator fun invoke(favourite: FavouriteTransitData){
 		when(favourite){
 			is StmBusFavouriteItem -> {
-				favouritesRepos.find { it.transitType == TransitType.STM }!!
-					.removeFavourite(favourite)
+				favouritesRepos.queryRepos(TransitType.STM).removeFavourite(favourite)
 			}
 			is ExoBusFavouriteItem -> {
-				favouritesRepos.find { it.transitType == TransitType.EXO_BUS }!!
-					.removeFavourite(favourite)
+				favouritesRepos.queryRepos(TransitType.EXO_BUS).removeFavourite(favourite)
 			}
 			is ExoTrainFavouriteItem -> {
-				favouritesRepos.find { it.transitType == TransitType.EXO_TRAIN }!!
-					.removeFavourite(favourite)
+				favouritesRepos.queryRepos(TransitType.EXO_TRAIN).removeFavourite(favourite)
 			}
 		}
 		favouritesPositionRepository.removeFavourite(favourite)

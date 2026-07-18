@@ -1,7 +1,6 @@
 package dev.mainhq.bus2go.data.repository
 
 import dev.mainhq.bus2go.data.data_source.notifications.NotificationHandler
-import dev.mainhq.bus2go.domain.entity.DbToDownload
 import dev.mainhq.bus2go.domain.entity.NotificationType
 import dev.mainhq.bus2go.domain.repository.NotificationsRepository
 

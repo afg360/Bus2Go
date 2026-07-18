@@ -1,7 +1,7 @@
 package dev.mainhq.bus2go.domain.use_case.db_state
 
 import dev.mainhq.bus2go.domain.core.Result
-import dev.mainhq.bus2go.domain.entity.DbToDownload
+import dev.mainhq.bus2go.domain.entity.DatabaseAgency
 import dev.mainhq.bus2go.domain.repository.AppStateRepository
 import dev.mainhq.bus2go.domain.repository.TransitRepository
 import java.time.LocalDate
@@ -12,7 +12,7 @@ class CheckDatabaseUpdateRequired(
 ) {
 
 	/** @return May be null if the time has already passed. Else the database is up to date at the moment */
-	suspend operator fun invoke(): Result<List<DbToDownload>> {
+	suspend operator fun invoke(): Result<List<DatabaseAgency>> {
 		val minDatesForUpdate = transitRepos.map { it.dbName to it.getDatabaseExpirationDate() }
 		if (minDatesForUpdate.isEmpty()) {
 			return Result.Error(null, "None of the databases exist...")
@@ -26,8 +26,8 @@ class CheckDatabaseUpdateRequired(
 			.filter { (it.second as Result.Success<LocalDate>).data <= LocalDate.now() }
 			.map {
 				when(it.first.lowercase()) {
-					DbToDownload.STM.name.lowercase() -> DbToDownload.STM
-					DbToDownload.EXO.name.lowercase() -> DbToDownload.EXO
+					DatabaseAgency.STM.name.lowercase() -> DatabaseAgency.STM
+					DatabaseAgency.EXO.name.lowercase() -> DatabaseAgency.EXO
 					else -> throw IllegalStateException("Invalid data")
 				}
 			}

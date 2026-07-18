@@ -6,7 +6,7 @@ import dev.mainhq.bus2go.domain.core.Logger
 import dev.mainhq.bus2go.domain.repository.DatabaseDownloadRepository
 import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.entity.AppVersions
-import dev.mainhq.bus2go.domain.entity.DbToDownload
+import dev.mainhq.bus2go.domain.entity.DatabaseAgency
 import dev.mainhq.bus2go.domain.entity.Progress
 import dev.mainhq.bus2go.domain.entity.ServerChoice
 import dev.mainhq.bus2go.domain.exceptions.NetworkException
@@ -16,7 +16,6 @@ import io.ktor.http.URLProtocol
 import io.ktor.utils.io.ByteReadChannel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.serialization.json.Json
@@ -73,13 +72,13 @@ abstract class DatabaseDownloadRepositoryAbstractImpl: DatabaseDownloadRepositor
 	}
 
 
-	protected suspend fun _getDbUpToDateVersion(serverChoice: ServerChoice, dbToDownload: DbToDownload): Result<Int> {
+	protected suspend fun _getDbUpToDateVersion(serverChoice: ServerChoice, databaseAgency: DatabaseAgency): Result<Int> {
 		return NetworkClient.call(
 			URLBuilder(
 				protocol = protocol,
 				host = serverChoice.server,
 				port = defaultPort,
-				pathSegments = listOf("api", "download", API_VERSION, dbToDownload.name.lowercase(), "version")
+				pathSegments = listOf("api", "download", API_VERSION, databaseAgency.name.lowercase(), "version")
 			).build(),
 			onError = { Result.Error(null, "Wrong call to api...?") },
 			onSuccess = { res ->
@@ -93,7 +92,7 @@ abstract class DatabaseDownloadRepositoryAbstractImpl: DatabaseDownloadRepositor
 		)
 	}
 
-	protected suspend fun _getAllDbUpToDateVersion(serverChoice: ServerChoice): Result<Map<DbToDownload, Int>> {
+	protected suspend fun _getAllDbUpToDateVersion(serverChoice: ServerChoice): Result<Map<DatabaseAgency, Int>> {
 		return NetworkClient.call(
 			URLBuilder(
 				protocol = protocol,
@@ -108,10 +107,10 @@ abstract class DatabaseDownloadRepositoryAbstractImpl: DatabaseDownloadRepositor
 					.flatMap {
 						when(it.jsonObject["database"]?.jsonPrimitive?.toString()) {
 							"stm" -> {
-								listOf(DbToDownload.STM to (it.jsonObject["version"]?.jsonPrimitive?.int ?: -1))
+								listOf(DatabaseAgency.STM to (it.jsonObject["version"]?.jsonPrimitive?.int ?: -1))
 							}
 							"exo" -> {
-								listOf(DbToDownload.EXO to (it.jsonObject["version"]?.jsonPrimitive?.int ?: -1))
+								listOf(DatabaseAgency.EXO to (it.jsonObject["version"]?.jsonPrimitive?.int ?: -1))
 							}
 							else -> { listOf() }
 						}
@@ -144,23 +143,23 @@ abstract class DatabaseDownloadRepositoryAbstractImpl: DatabaseDownloadRepositor
 		)
 	}
 
-	protected fun _getDb(serverChoice: ServerChoice, dbToDownload: DbToDownload, versionNeeded: Int): Flow<Progress> {
+	protected fun _getDb(serverChoice: ServerChoice, databaseAgency: DatabaseAgency, versionNeeded: Int): Flow<Progress> {
 		return flow {
 			emit(Progress.Idle)
 			val url = URLBuilder(
 				protocol = protocol,
 				host = serverChoice.server,
 				port = defaultPort,
-				pathSegments = when(dbToDownload){
-					DbToDownload.STM -> listOf("api", "download", API_VERSION, "stm")//"debug", "sample_data", "stm")
-					DbToDownload.EXO -> listOf("api", "download", API_VERSION, "exo")
+				pathSegments = when(databaseAgency){
+					DatabaseAgency.STM -> listOf("api", "download", API_VERSION, "stm")//"debug", "sample_data", "stm")
+					DatabaseAgency.EXO -> listOf("api", "download", API_VERSION, "exo")
 				}
 			).build()
 
 			//saves the file in the filesDir, needs to be moved to the databases dir
-			val dbNameList = when(dbToDownload){
-				DbToDownload.STM -> listOf(DB_NAME_STM)
-				DbToDownload.EXO -> listOf(DB_NAME_EXO)
+			val dbNameList = when(databaseAgency){
+				DatabaseAgency.STM -> listOf(DB_NAME_STM)
+				DatabaseAgency.EXO -> listOf(DB_NAME_EXO)
 			}
 
 			NetworkClient.getAndExecute(url, serverChoice.isSelfHosted){

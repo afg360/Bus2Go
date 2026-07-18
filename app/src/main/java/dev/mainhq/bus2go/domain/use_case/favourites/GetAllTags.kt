@@ -7,6 +7,7 @@ class GetAllTags(
 	private val favouritesRepository: FavouritesRepository
 ){
 
+	//FIXME not only 1 possible favouritesRepo...
 	suspend operator fun invoke(): List<Tag> {
 		return favouritesRepository.getTags()
 	}

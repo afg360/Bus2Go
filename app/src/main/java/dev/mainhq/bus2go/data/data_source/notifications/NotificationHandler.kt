@@ -12,7 +12,7 @@ import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.domain.entity.DbToDownload
+import dev.mainhq.bus2go.domain.entity.DatabaseAgency
 
 class NotificationHandler(private val appContext: Context) {
 
@@ -43,8 +43,8 @@ class NotificationHandler(private val appContext: Context) {
 			.setShowBadge(false)
 			.build()
 
-		fun getDbNotificationId(dbToDownload: DbToDownload): Int {
-			return dbToDownload.ordinal + baseDbUpdateNotifId
+		fun getDbNotificationId(databaseAgency: DatabaseAgency): Int {
+			return databaseAgency.ordinal + baseDbUpdateNotifId
 		}
 	}
 
@@ -124,7 +124,7 @@ class NotificationHandler(private val appContext: Context) {
 
 	/* ---------------------- Database Update Notifications ------------------------- */
 	/** @param database Is it a bus2go or exo db, or something else */
-	fun notifyDbUpdateAvailable(database: DbToDownload){
+	fun notifyDbUpdateAvailable(database: DatabaseAgency){
 		createNotificationBuilder(
 			channelId = DB_UPDATES,
 			title = "New Database Available",
@@ -136,7 +136,7 @@ class NotificationHandler(private val appContext: Context) {
 			.also { postNotif(database.ordinal + baseDbUpdateNotifId, it) }
 	}
 
-	fun notifyDbDownloading(database: DbToDownload, current: Int, contentLength: Int){
+	fun notifyDbDownloading(database: DatabaseAgency, current: Int, contentLength: Int){
 		createNotificationBuilder(
 			channelId = DB_UPDATES,
 			title = "Downloading Bus2Go database...",
@@ -148,7 +148,7 @@ class NotificationHandler(private val appContext: Context) {
 			.also { postNotif(database.ordinal + baseDbUpdateNotifId, it) }
 	}
 
-	fun notifyDbExtracting(database: DbToDownload){
+	fun notifyDbExtracting(database: DatabaseAgency){
 		createNotificationBuilder(
 			channelId = DB_UPDATES,
 			title = "Extracting database...",
@@ -160,7 +160,7 @@ class NotificationHandler(private val appContext: Context) {
 			.also { postNotif(database.ordinal + baseDbUpdateNotifId, it) }
 	}
 
-	fun notifyDbUpdateDone(database: DbToDownload){
+	fun notifyDbUpdateDone(database: DatabaseAgency){
 		//FIXME for it to work, need to schedule a restart using alarm manager and broadcast receivers,
 		// and then completely shutdown the app using android.os.killProcess()
 		val intent = appContext.packageManager.getLaunchIntentForPackage(appContext.packageName)
@@ -185,7 +185,7 @@ class NotificationHandler(private val appContext: Context) {
 	}
 
 	//TODO
-	fun notifyDbDownloadFailed(database: DbToDownload){
+	fun notifyDbDownloadFailed(database: DatabaseAgency){
 		createNotificationBuilder(
 			channelId = DB_UPDATES,
 			title = "Error trying to download database",

@@ -13,7 +13,7 @@ import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.data.data_source.notifications.NotificationHandler
 import dev.mainhq.bus2go.domain.entity.AppVersions
-import dev.mainhq.bus2go.domain.entity.DbToDownload
+import dev.mainhq.bus2go.domain.entity.DatabaseAgency
 import dev.mainhq.bus2go.domain.entity.NotificationType
 import dev.mainhq.bus2go.domain.entity.Progress
 import dev.mainhq.bus2go.domain.exceptions.NetworkException
@@ -45,12 +45,12 @@ class DatabaseDownloadManagerWorker(
 	private val settingsRepository =
 		(applicationContext as Bus2GoApplication).commonModule.settingsRepository
 
-	private lateinit var dbToDownload: DbToDownload
+	private lateinit var databaseAgency: DatabaseAgency
 
 	override suspend fun getForegroundInfo(): ForegroundInfo {
 		return ForegroundInfo(
 			//FIXME use the repo/domain layer instead
-			NotificationHandler.getDbNotificationId(dbToDownload),
+			NotificationHandler.getDbNotificationId(databaseAgency),
 			NotificationCompat.Builder(applicationContext, NotificationHandler.dbNotifChannel.id)
 				.setContentTitle("Doing some shit")
 				.setContentText("CoroutineWorker doing some shit")
@@ -74,26 +74,26 @@ class DatabaseDownloadManagerWorker(
 		// and in notifications, show a "tap to restart"
 		return withContext(Dispatchers.IO) {
 			try {
-				dbToDownload = when(dbToDownloadString) {
+				databaseAgency = when(dbToDownloadString) {
 					"STM" -> {
-						DbToDownload.STM
+						DatabaseAgency.STM
 					}
 					"EXO" -> {
-						DbToDownload.EXO
+						DatabaseAgency.EXO
 					}
 					else -> {
 						throw IllegalStateException("You forgot to add the correct key")
 					}
 				}
 				setForeground(getForegroundInfo())
-				when (dbToDownload) {
-					DbToDownload.STM -> {
+				when (databaseAgency) {
+					DatabaseAgency.STM -> {
 						downloadDb(
 							getCurrentDbVersion = appStateRepository::getStmDatabaseVersion,
 							updateDbVersion = appStateRepository::updateStmDatabaseVersion,
 						)
 					}
-					DbToDownload.EXO -> {
+					DatabaseAgency.EXO -> {
 						downloadDb(
 							getCurrentDbVersion = appStateRepository::getExoDatabaseVersion,
 							updateDbVersion = appStateRepository::updateExoDatabaseVersion
@@ -104,7 +104,7 @@ class DatabaseDownloadManagerWorker(
 			catch (e: Exception) {
 				Log.e("DB_WORKER", "An exception occurred...\n ${e.message}")
 				withContext(Dispatchers.Main){
-					notificationsRepository.notify(NotificationType.DbUpdateError(dbToDownload))
+					notificationsRepository.notify(NotificationType.DbUpdateError(databaseAgency))
 				}
 				Result.failure()
 			}
@@ -119,13 +119,13 @@ class DatabaseDownloadManagerWorker(
 		// are decompressing from already downloaded file
 		//TODO check if this flow call actually works
 		val serverChoice = settingsRepository.serverChoice.first()
-		return when (val res = dbDownloadRepository.getDbUpToDateVersion(serverChoice, dbToDownload)){
+		return when (val res = dbDownloadRepository.getDbUpToDateVersion(serverChoice, databaseAgency)){
 			is Bus2GoResult.Error -> throw NetworkException(res.message)
 			is Bus2GoResult.Success<Int> -> {
 				if (!isAppUpToDate()){
 					Log.d("DB_WORKER", "App version not up to date with database")
 					withContext(Dispatchers.Main){
-						notificationsRepository.notify(NotificationType.DbUpdateError(dbToDownload))
+						notificationsRepository.notify(NotificationType.DbUpdateError(databaseAgency))
 					}
 					Result.failure()
 				}
@@ -137,20 +137,20 @@ class DatabaseDownloadManagerWorker(
 				//instead of right away decompressing the file, we need to make sure the db doesnt already exist...
 				//FIXMe for now, we will do the replacement cause fuck it i want it to work, user does it explicitly
 				if (res.data >= currDbVersion) {
-					val dbName = when(dbToDownload){
-						DbToDownload.STM -> dbDownloadRepository.DB_NAME_STM
-						DbToDownload.EXO -> dbDownloadRepository.DB_NAME_EXO
+					val dbName = when(databaseAgency){
+						DatabaseAgency.STM -> dbDownloadRepository.DB_NAME_STM
+						DatabaseAgency.EXO -> dbDownloadRepository.DB_NAME_EXO
 					}
 
-					if (appStateRepository.doesUpToDateCompressedDbExist(dbToDownload, res.data) == null){
-						dbDownloadRepository.getDb(serverChoice, dbToDownload, res.data)
+					if (appStateRepository.doesUpToDateCompressedDbExist(databaseAgency, res.data) == null){
+						dbDownloadRepository.getDb(serverChoice, databaseAgency, res.data)
 							.collect { progress ->
 							when(progress) {
 								is Progress.Downloading -> {
 									withContext(Dispatchers.Main){
 										notificationsRepository.notify(
 											NotificationType.DbDownloading(
-												dbToDownload,
+												databaseAgency,
 												progress.current,
 												progress.contentLength
 											)
@@ -161,7 +161,7 @@ class DatabaseDownloadManagerWorker(
 								is Progress.Completed -> {
 									if (!progress.success){
 										withContext(Dispatchers.Main) {
-											notificationsRepository.notify(NotificationType.DbUpdateError(dbToDownload))
+											notificationsRepository.notify(NotificationType.DbUpdateError(databaseAgency))
 										}
 										Result.retry()
 									}
@@ -172,7 +172,7 @@ class DatabaseDownloadManagerWorker(
 								is Progress.Failed -> {
 									//TODO some cleanup first
 									withContext(Dispatchers.Main) {
-										notificationsRepository.notify(NotificationType.DbUpdateError(dbToDownload))
+										notificationsRepository.notify(NotificationType.DbUpdateError(databaseAgency))
 									}
 									Result.retry()
 								}
@@ -190,12 +190,12 @@ class DatabaseDownloadManagerWorker(
 						when(progress) {
 							Progress.Idle -> {
 								withContext(Dispatchers.Main) {
-									notificationsRepository.notify(NotificationType.DbExtracting(dbToDownload))
+									notificationsRepository.notify(NotificationType.DbExtracting(databaseAgency))
 								}
 							}
 							is Progress.Completed -> {
 								withContext(Dispatchers.Main) {
-									notificationsRepository.notify(NotificationType.DbUpdateDone(dbToDownload))
+									notificationsRepository.notify(NotificationType.DbUpdateDone(databaseAgency))
 								}
 							}
 							else -> throw IllegalStateException("Wtf")

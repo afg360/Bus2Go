@@ -2,7 +2,6 @@ package dev.mainhq.bus2go.data.repository
 
 import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.data.data_source.local.database.DbMapper
-import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.CalendarDAO
 import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.CalendarDatesDAO
 import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.FeedInfoDAO
 import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.RoutesDAO
@@ -10,15 +9,17 @@ import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.StopsDAO
 import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.StopsInfoDAO
 import dev.mainhq.bus2go.data.data_source.local.database.stm.dao.TripsDAO
 import dev.mainhq.bus2go.data.data_source.local.datastore.PreferenceMapper
+import dev.mainhq.bus2go.domain.entity.DatabaseAgency
+import dev.mainhq.bus2go.domain.entity.FavouriteTransitData
 import dev.mainhq.bus2go.domain.entity.FavouriteTransitData.StmBusFavouriteItem
-import dev.mainhq.bus2go.domain.entity.stm.CalendarDates
-import dev.mainhq.bus2go.domain.repository.StmRepository
 import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.domain.entity.FavouriteTransitDataWithTime
 import dev.mainhq.bus2go.domain.entity.RouteInfo
 import dev.mainhq.bus2go.domain.entity.FuzzyQuery
 import dev.mainhq.bus2go.domain.entity.Time
+import dev.mainhq.bus2go.domain.entity.TransitType
 import dev.mainhq.bus2go.domain.entity.stm.DirectionInfo
+import dev.mainhq.bus2go.domain.repository.TransitRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
@@ -31,8 +32,10 @@ class StmRepositoryImpl(
 	private val stopsDAO: StopsDAO?,
 	private val stopsInfoDAO: StopsInfoDAO?,
 	private val tripsDAO: TripsDAO?,
-	override val dbName: String = "Stm",
-): StmRepository {
+): TransitRepository {
+
+	override val transitType = TransitType.STM
+	override val dbName = DatabaseAgency.STM.toString()
 
 	override suspend fun getDatabaseExpirationDate(): Result<LocalDate> {
 		return feedInfoDAO?.let{
@@ -40,17 +43,7 @@ class StmRepositoryImpl(
 		} ?: Result.Error(null)
 	}
 
-	override suspend fun getAllCalendarDates(): Result<List<CalendarDates>> {
-		return calendarDatesDAO?.let{
-			withContext(Dispatchers.IO) {
-				Result.Success(it.getAllCalendarDates()
-					.map { calDate -> CalendarDates(calDate.serviceId, calDate.date, calDate.exceptionType) }
-				)
-			}
-		} ?: Result.Error(null)
-	}
-
-	override suspend fun getBusRouteInfo(routeId: FuzzyQuery): Result<List<RouteInfo>> {
+	override suspend fun getRouteInfo(routeId: FuzzyQuery): Result<List<RouteInfo>> {
 		return routesDAO?.let{
 			withContext(Dispatchers.IO) {
 				Result.Success(it.getBusRouteInfo(routeId).toMutableList()
@@ -61,31 +54,27 @@ class StmRepositoryImpl(
 		} ?: Result.Error(null)
 	}
 
-	override suspend fun getStopName(stopId: Int) = withContext(Dispatchers.IO) {
-		stopsDAO?.let { Result.Success(it.getStopName(stopId)) } ?: Result.Error(null)
-	}
-
-	override suspend fun getStopNames(headsign1: String, headsign2: String, routeId: String)
+	override suspend fun getStopNames(direction1: String, direction2: String?, routeId: String?)
 	: Result<Pair<List<String>, List<String>>> {
 		return stopsInfoDAO?.let {
 			withContext(Dispatchers.IO) {
-				val job1 = async{ it.getStopNames(headsign1, routeId) }
-				val job2 = async{ it.getStopNames(headsign2, routeId) }
+				val job1 = async{ it.getStopNames(direction1, routeId!!) }
+				val job2 = async{ it.getStopNames(direction2!!, routeId!!) }
 				Result.Success(Pair(job1.await(), job2.await()))
 			}
 		} ?: Result.Error(null)
 	}
 
-	override suspend fun getStopTimes(stmTransitData: TransitData, curTime: Time): Result<List<Time>> {
+	override suspend fun getStopTimes(transitData: TransitData, curTime: Time): Result<List<Time>> {
 		return stopsInfoDAO?.let{
 			withContext(Dispatchers.IO) {
 				Result.Success(
 					it.getStopTimes(
-						stmTransitData.stopName,
+						transitData.stopName,
 						curTime.getDayString(),
 						curTime.getTimeString(),
-						stmTransitData.direction,
-						stmTransitData.routeId.toInt(),
+						transitData.direction,
+						transitData.routeId.toInt(),
 						curTime.getTodayString()
 					)
 				)
@@ -93,41 +82,31 @@ class StmRepositoryImpl(
 		} ?: Result.Error(null)
 	}
 
-	/** Used for alarms... */
-	/*
-	override suspend fun getStopTimes(stopName: String, headsign: String, routeId: Int, curTime: Time) =
-		withContext(Dispatchers.IO) {
-			stopsInfoDAO.getStopTimes(stopName, curTime.getDayString(), headsign, routeId, curTime.getDayString())
-		}
-	 */
-
-	override suspend fun getOldTimes(stmTransitData: TransitData, curTime: Time): Result<List<Time>> {
+	override suspend fun getOldStopTimes(transitData: TransitData, curTime: Time): Result<List<Time>> {
 		return stopsInfoDAO?.let {
 			withContext(Dispatchers.IO) {
 				Result.Success(
 					it.getOldTimes(
-						stmTransitData.stopName,
+						transitData.stopName,
 						curTime.getDayString(),
 						curTime.getTimeString(),
-						stmTransitData.direction,
-						stmTransitData.routeId
+						transitData.direction,
+						transitData.routeId
 					)
 				)
 			}
 		} ?: Result.Error(null)
 	}
 
-	//TODO move to FavouritesImpl?
-	override suspend fun getFavouriteStopTime(
-		stmFavouriteBusItem: StmBusFavouriteItem,
-		curTime: Time
-	): Result<FavouriteTransitDataWithTime> {
+	override suspend fun getFavouriteStopTime(favouriteTransitData: FavouriteTransitData, curTime: Time)
+	: Result<FavouriteTransitDataWithTime> {
+		favouriteTransitData as StmBusFavouriteItem
 		return stopsInfoDAO?.let {
 			withContext(Dispatchers.IO){
-				val stmFavouriteBusItemDto = PreferenceMapper.mapStmBusToDto(stmFavouriteBusItem)
+				val stmFavouriteBusItemDto = PreferenceMapper.mapStmBusToDto(favouriteTransitData)
 				Result.Success(
 					FavouriteTransitDataWithTime(
-						stmFavouriteBusItem,
+						favouriteTransitData,
 						it.getFavouriteStopTime(
 							stmFavouriteBusItemDto.stopName,
 							curTime.getDayString(),
@@ -142,10 +121,10 @@ class StmRepositoryImpl(
 		} ?: Result.Error(null)
 	}
 
-	override suspend fun getDirectionInfo(routeId: Int): Result<List<DirectionInfo>> {
+	override suspend fun getTripHeadsigns(routeId: String): Result<List<DirectionInfo>> {
 		return tripsDAO?.let { tripsDAO ->
 			withContext(Dispatchers.IO) {
-				Result.Success(tripsDAO.getDirectionInfo(routeId)
+				Result.Success(tripsDAO.getDirectionInfo(routeId.toInt())
 					.map { DirectionInfo.StmDirectionInfo(it.tripHeadSign, it.directionId) }
 				)
 			}

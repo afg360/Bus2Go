@@ -7,16 +7,17 @@ import dev.mainhq.bus2go.data.data_source.local.database.exo.dao.StopTimesDAO
 import dev.mainhq.bus2go.data.data_source.local.database.exo.dao.TripsDAO
 import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.domain.core.Result
+import dev.mainhq.bus2go.domain.entity.DatabaseAgency
 import dev.mainhq.bus2go.domain.entity.RouteInfo
 import dev.mainhq.bus2go.domain.entity.ExoBusItem
-import dev.mainhq.bus2go.domain.entity.ExoTrainItem
+import dev.mainhq.bus2go.domain.entity.FavouriteTransitData
 import dev.mainhq.bus2go.domain.entity.FavouriteTransitData.ExoBusFavouriteItem
-import dev.mainhq.bus2go.domain.entity.FavouriteTransitData.ExoTrainFavouriteItem
 import dev.mainhq.bus2go.domain.entity.FavouriteTransitDataWithTime
-import dev.mainhq.bus2go.domain.repository.ExoRepository
 import dev.mainhq.bus2go.domain.entity.FuzzyQuery
 import dev.mainhq.bus2go.domain.entity.Time
+import dev.mainhq.bus2go.domain.entity.TransitType
 import dev.mainhq.bus2go.domain.entity.stm.DirectionInfo
+import dev.mainhq.bus2go.domain.repository.TransitRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
@@ -27,8 +28,10 @@ class ExoRepositoryImpl(
 	private val routesDAO: RoutesDAO?,
 	private val stopTimesDAO: StopTimesDAO?,
 	private val tripsDAO: TripsDAO?,
-	override val dbName: String = "Exo"
-): ExoRepository {
+): TransitRepository {
+
+	override val transitType = TransitType.EXO_BUS
+	override val dbName = DatabaseAgency.EXO.toString()
 
 	override suspend fun getDatabaseExpirationDate(): Result<LocalDate> {
 		return calendarDAO?.let{ Result.Success(it.getExpirationDate()) } ?: Result.Error(null)
@@ -44,36 +47,28 @@ class ExoRepositoryImpl(
 		} ?: Result.Error(null)
 	}
 
-	override suspend fun getBusStopNames(direction1: String, direction2: String?): Result<Pair<List<String>, List<String>>> {
+	override suspend fun getStopNames(direction1: String, direction2: String?, routeId: String?)
+	: Result<Pair<List<String>, List<String>>> {
 		return stopTimesDAO?.let { dao ->
 			withContext(Dispatchers.IO) {
-					val job1 = async { dao.getStopNames(direction1) }
-					direction2?.let {
-						Result.Success( Pair(job1.await(), async { dao.getStopNames(it) }.await()) )
-					} ?: Result.Success(Pair(job1.await(), emptyList()))
+				val job1 = async { dao.getStopNames(direction1) }
+				direction2?.let {
+					Result.Success( Pair(job1.await(), async { dao.getStopNames(it) }.await()) )
+				} ?: Result.Success(Pair(job1.await(), emptyList()))
 			}
 		} ?: Result.Error(null)
 	}
 
-	override suspend fun getTrainStopNames(routeId: String): Result<Pair<List<String>, List<String>>>{
-		return stopTimesDAO?.let {
-			withContext(Dispatchers.IO) {
-				val job1 = async { it.getTrainStopNames("trains-$routeId", 0) }
-				val job2 = async { it.getTrainStopNames("trains-$routeId", 1) }
-				Result.Success(Pair(job1.await(), job2.await()))
-			}
-		} ?: Result.Error(null)
-	}
-
-	override suspend fun getBusStopTimes(exoBusItem: ExoBusItem, curTime: Time): Result<List<Time>> {
+	override suspend fun getStopTimes(transitData: TransitData, curTime: Time): Result<List<Time>> {
+		transitData as ExoBusItem
 		return stopTimesDAO?.let {
 			withContext(Dispatchers.IO){
 				Result.Success(
 					it.getStopTimes(
-						exoBusItem.stopName,
+						transitData.stopName,
 						curTime.getDayString(),
 						curTime.getTimeString(),
-						exoBusItem.direction,
+						transitData.direction,
 						curTime.getTodayString()
 					)
 				)
@@ -81,35 +76,35 @@ class ExoRepositoryImpl(
 		} ?: Result.Error(null)
 	}
 
-	override suspend fun getOldStopTimes(exoTransitData: TransitData, curTime: Time): Result<List<Time>> {
+	override suspend fun getOldStopTimes(transitData: TransitData, curTime: Time): Result<List<Time>> {
+		transitData as ExoBusItem
 		return stopTimesDAO?.let{
 			withContext(Dispatchers.IO){
 				Result.Success(
 					it.getOldStopTimes(
-						exoTransitData.stopName,
+						transitData.stopName,
 						curTime.getDayString(),
 						curTime.getTimeString(),
-						exoTransitData.direction
+						transitData.direction
 					)
 				)
 			}
 		} ?: Result.Error(null)
 	}
 
-	override suspend fun getFavouriteBusStopTime(
-		exoFavouriteBusItem: ExoBusFavouriteItem,
-		curTime: Time,
-	): Result<FavouriteTransitDataWithTime> {
+	override suspend fun getFavouriteStopTime( favouriteTransitData: FavouriteTransitData, curTime: Time)
+	: Result<FavouriteTransitDataWithTime> {
+		favouriteTransitData as ExoBusFavouriteItem
 		return stopTimesDAO?.let {
 			withContext(Dispatchers.IO){
 				Result.Success(
 					FavouriteTransitDataWithTime(
-						exoFavouriteBusItem,
+						favouriteTransitData,
 						it.getFavouriteBusStopTime(
-							exoFavouriteBusItem.stopName,
+							favouriteTransitData.stopName,
 							curTime.getDayString(),
 							curTime.getTimeString(),
-							exoFavouriteBusItem.direction,
+							favouriteTransitData.direction,
 							curTime.getTodayString()
 						)
 					)
@@ -118,59 +113,10 @@ class ExoRepositoryImpl(
 		} ?: Result.Error(null)
 	}
 
-
-	override suspend fun getTrainStopTimes(exoTrainItem: ExoTrainItem, curTime: Time): Result<List<Time>> {
-		return stopTimesDAO?.let {
-			withContext(Dispatchers.IO){
-				Result.Success(
-					it.getTrainStopTimes(
-						exoTrainItem.routeId,
-						exoTrainItem.stopName,
-						exoTrainItem.directionId,
-						curTime.getTimeString(),
-						curTime.getDayString(),
-						curTime.getTodayString()
-					)
-				)
-			}
-		} ?: Result.Error(null)
-	}
-
-
-	override suspend fun getFavouriteTrainStopTime(
-		exoFavouriteTrainItem: ExoTrainFavouriteItem,
-		curTime: Time,
-	) : Result<FavouriteTransitDataWithTime> {
-		return stopTimesDAO?.let {
-			withContext(Dispatchers.IO){
-				Result.Success(
-					FavouriteTransitDataWithTime(
-						exoFavouriteTrainItem,
-						it.getFavouriteTrainStopTime(exoFavouriteTrainItem.routeId,
-							exoFavouriteTrainItem.stopName,
-							exoFavouriteTrainItem.directionId,
-							curTime.getTimeString(),
-							curTime.getDayString(),
-							curTime.getTodayString()
-						)
-					)
-				)
-			}
-		} ?: Result.Error(null)
-	}
-
-	override suspend fun getBusTripHeadsigns(routeId: String): Result<List<DirectionInfo>> {
+	override suspend fun getTripHeadsigns(routeId: String): Result<List<DirectionInfo>> {
 		return tripsDAO?.let {
 			withContext(Dispatchers.IO){
 				Result.Success(it.getBusTripHeadsigns(routeId).map { DirectionInfo.ExoBusDirectionInfo(it) })
-			}
-		} ?: Result.Error(null)
-	}
-
-	override suspend fun getTrainTripHeadsigns(routeId: Int, directionId: Int): Result<List<String>> {
-		return tripsDAO?.let {
-			withContext(Dispatchers.IO){
-				Result.Success(it.getTrainTripHeadsigns(routeId, directionId))
 			}
 		} ?: Result.Error(null)
 	}

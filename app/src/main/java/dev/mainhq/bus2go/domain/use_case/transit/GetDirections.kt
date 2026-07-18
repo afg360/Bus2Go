@@ -5,13 +5,13 @@ import dev.mainhq.bus2go.domain.entity.ExoBusRouteInfo
 import dev.mainhq.bus2go.domain.entity.ExoTrainRouteInfo
 import dev.mainhq.bus2go.domain.entity.RouteInfo
 import dev.mainhq.bus2go.domain.entity.StmBusRouteInfo
+import dev.mainhq.bus2go.domain.entity.TransitType
 import dev.mainhq.bus2go.domain.entity.stm.DirectionInfo
-import dev.mainhq.bus2go.domain.repository.ExoRepository
-import dev.mainhq.bus2go.domain.repository.StmRepository
+import dev.mainhq.bus2go.domain.repository.TransitRepository
+import dev.mainhq.bus2go.utils.queryRepos
 
 class GetDirections(
-	private val exoRepository: ExoRepository,
-	private val stmRepository: StmRepository
+	private val transitRepos: List<TransitRepository>
 ) {
 
 	/**
@@ -20,9 +20,13 @@ class GetDirections(
 	 **/
 	suspend operator fun invoke(routeInfo: RouteInfo): Result<List<DirectionInfo>> {
 		return when(routeInfo){
-			is ExoBusRouteInfo -> exoRepository.getBusTripHeadsigns(routeInfo.routeId)
+			is StmBusRouteInfo -> {
+				transitRepos.queryRepos(TransitType.STM).getTripHeadsigns(routeInfo.routeId)
+			}
+			is ExoBusRouteInfo -> {
+				transitRepos.queryRepos(TransitType.EXO_BUS).getTripHeadsigns(routeInfo.routeId)
+			}
 			is ExoTrainRouteInfo -> Result.Error(IllegalArgumentException("You're not supposed to use this class for trains."))
-			is StmBusRouteInfo -> stmRepository.getDirectionInfo(routeInfo.routeId.toInt())
 		}
 
 	}

@@ -6,7 +6,7 @@ import java.io.File
 import dev.mainhq.bus2go.data.data_source.remote.NetworkMonitor
 import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.entity.AppVersions
-import dev.mainhq.bus2go.domain.entity.DbToDownload
+import dev.mainhq.bus2go.domain.entity.DatabaseAgency
 import dev.mainhq.bus2go.domain.entity.Progress
 import dev.mainhq.bus2go.domain.entity.ServerChoice
 import io.ktor.http.URLProtocol
@@ -31,11 +31,11 @@ class DatabaseDownloadRepositoryImpl(
 		return super._getIsBus2Go(str, isSelfHosted)
 	}
 
-	override suspend fun getDbUpToDateVersion(serverChoice: ServerChoice, dbToDownload: DbToDownload): Result<Int> {
-		return super._getDbUpToDateVersion(serverChoice, dbToDownload)
+	override suspend fun getDbUpToDateVersion(serverChoice: ServerChoice, databaseAgency: DatabaseAgency): Result<Int> {
+		return super._getDbUpToDateVersion(serverChoice, databaseAgency)
 	}
 
-	override suspend fun getAllDbUpToDateVersion(serverChoice: ServerChoice): Result<Map<DbToDownload, Int>> {
+	override suspend fun getAllDbUpToDateVersion(serverChoice: ServerChoice): Result<Map<DatabaseAgency, Int>> {
 		return super._getAllDbUpToDateVersion(serverChoice)
 	}
 
@@ -43,8 +43,8 @@ class DatabaseDownloadRepositoryImpl(
 		return super._getAppVersionCodeRequired(serverChoice)
 	}
 
-	override fun getDb(serverChoice: ServerChoice, dbToDownload: DbToDownload, versionNeeded: Int): Flow<Progress> {
-		return super._getDb(serverChoice, dbToDownload, versionNeeded)
+	override fun getDb(serverChoice: ServerChoice, databaseAgency: DatabaseAgency, versionNeeded: Int): Flow<Progress> {
+		return super._getDb(serverChoice, databaseAgency, versionNeeded)
 	}
 
 }
