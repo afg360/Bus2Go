@@ -1,7 +1,6 @@
 package dev.mainhq.bus2go.domain.use_case.favourites
 
 import dev.mainhq.bus2go.domain.core.Result
-import dev.mainhq.bus2go.domain.entity.ExoTrainItem
 import dev.mainhq.bus2go.domain.entity.FavouriteTransitData.StmBusFavouriteItem
 import dev.mainhq.bus2go.domain.entity.FavouriteTransitData.ExoBusFavouriteItem
 import dev.mainhq.bus2go.domain.entity.FavouriteTransitData.ExoTrainFavouriteItem

@@ -11,8 +11,8 @@ import dev.mainhq.bus2go.domain.exceptions.DatabaseFormatingException
  * Class for querying transit data. Performs a search using FuzzyQuery.
  **/
 class GetRouteInfo (
-	private val exoRepository: ExoRepository,
 	private val stmRepository: StmRepository,
+	private val exoRepository: ExoRepository,
 ){
 
 	suspend operator fun invoke(query: String): Result<List<RouteInfo>>{

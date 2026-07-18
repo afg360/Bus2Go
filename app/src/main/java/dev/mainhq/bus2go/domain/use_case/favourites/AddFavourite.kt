@@ -5,13 +5,12 @@ import dev.mainhq.bus2go.domain.entity.FavouriteTransitData
 import dev.mainhq.bus2go.domain.entity.FavouriteTransitData.StmBusFavouriteItem
 import dev.mainhq.bus2go.domain.entity.FavouriteTransitData.ExoBusFavouriteItem
 import dev.mainhq.bus2go.domain.entity.FavouriteTransitData.ExoTrainFavouriteItem
-import dev.mainhq.bus2go.domain.repository.ExoFavouritesRepository
+import dev.mainhq.bus2go.domain.entity.TransitType
 import dev.mainhq.bus2go.domain.repository.FavouritesPositionRepository
-import dev.mainhq.bus2go.domain.repository.StmFavouritesRepository
+import dev.mainhq.bus2go.domain.repository.FavouritesRepository
 
 class AddFavourite(
-	private val stmFavouritesRepository: StmFavouritesRepository,
-	private val exoFavouritesRepository: ExoFavouritesRepository,
+	private val favouritesRepos: List<FavouritesRepository>,
 	private val favouritesPositionRepository: FavouritesPositionRepository
 ) {
 
@@ -20,13 +19,16 @@ class AddFavourite(
 		val favourite = FavouriteTransitData.fromTransitDataToFavouriteTransitData(transitData)
 		when(favourite){
 			is StmBusFavouriteItem -> {
-				stmFavouritesRepository.addStmBusFavourite(favourite)
+				favouritesRepos.find { it.transitType == TransitType.STM }!!
+					.addFavourite(favourite)
 			}
 			is ExoBusFavouriteItem -> {
-				exoFavouritesRepository.addExoBusFavourite(favourite)
+				favouritesRepos.find { it.transitType == TransitType.EXO_BUS }!!
+					.addFavourite(favourite)
 			}
 			is ExoTrainFavouriteItem -> {
-				exoFavouritesRepository.addExoTrainFavourite(favourite)
+				favouritesRepos.find { it.transitType == TransitType.EXO_TRAIN }!!
+					.addFavourite(favourite)
 			}
 		}
 		favouritesPositionRepository.addFavourite(favourite)

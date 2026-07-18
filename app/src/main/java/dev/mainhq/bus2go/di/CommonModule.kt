@@ -18,6 +18,7 @@ import dev.mainhq.bus2go.data.data_source.remote.NetworkMonitor
 import dev.mainhq.bus2go.data.repository.AppStateRepositoryImpl
 import dev.mainhq.bus2go.data.repository.ExoFavouritesRepositoryImpl
 import dev.mainhq.bus2go.data.repository.ExoRepositoryImpl
+import dev.mainhq.bus2go.data.repository.ExoTrainFavouritesRepositoryImpl
 import dev.mainhq.bus2go.data.repository.FavouritePositionRepositoryImpl
 import dev.mainhq.bus2go.data.repository.NotificationRepositoryImpl
 import dev.mainhq.bus2go.data.repository.SettingsRepositoryImpl
@@ -92,6 +93,11 @@ class CommonModule(applicationContext: Context) {
 		exoFavouritesDataStore = applicationContext.exoFavouritesDataStore,
 	)
 
+	private val exoTrainFavouritesRepository = ExoTrainFavouritesRepositoryImpl(
+		tagsHandler = tagsHandler,
+		exoFavouritesDataStore = applicationContext.exoFavouritesDataStore,
+	)
+
 	private val favouritesPositionRepository = FavouritePositionRepositoryImpl (
 		applicationContext.favouritesPositionDataStore
 	)
@@ -112,8 +118,11 @@ class CommonModule(applicationContext: Context) {
 	)
 
 	val addTag = AddTag(
-		stmFavouritesRepository,
-		exoFavouritesRepository
+		listOf(
+			stmFavouritesRepository,
+			exoFavouritesRepository,
+			exoTrainFavouritesRepository
+		)
 	)
 
 	val settingsRepository = SettingsRepositoryImpl(
@@ -133,21 +142,27 @@ class CommonModule(applicationContext: Context) {
 	)
 
 	val getRouteInfo = GetRouteInfo(
+		stmRepository,
 		exoRepository,
-		stmRepository
 	)
 
 
 	//FIXME not ideal to make them like this...
 	val addFavourite = AddFavourite(
-		stmFavouritesRepository,
-		exoFavouritesRepository,
+		listOf(
+			stmFavouritesRepository,
+			exoFavouritesRepository,
+			exoTrainFavouritesRepository
+		),
 		favouritesPositionRepository
 	)
 
 	val removeFavourite = RemoveFavourite(
-		stmFavouritesRepository,
-		exoFavouritesRepository,
+		listOf(
+			stmFavouritesRepository,
+			exoFavouritesRepository,
+			exoTrainFavouritesRepository
+		),
 		favouritesPositionRepository
 	)
 
@@ -176,8 +191,11 @@ class CommonModule(applicationContext: Context) {
 	)
 
 	val getFavourites = GetFavourites(
-		stmFavouritesRepository,
-		exoFavouritesRepository
+		listOf(
+			stmFavouritesRepository,
+			exoFavouritesRepository,
+			exoTrainFavouritesRepository
+		)
 	)
 
 	val getFavouritesWithTimeData = GetFavouritesWithTimeData(

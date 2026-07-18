@@ -2,12 +2,13 @@ package dev.mainhq.bus2go.data.repository
 
 import androidx.datastore.core.DataStore
 import dev.mainhq.bus2go.data.data_source.local.datastore.PreferenceMapper
-import dev.mainhq.bus2go.domain.repository.StmFavouritesRepository
 import dev.mainhq.bus2go.data.data_source.local.datastore.stm.entity.StmFavouritesDataDto
 import dev.mainhq.bus2go.data.data_source.local.datastore.tags.TagsHandler
 import dev.mainhq.bus2go.domain.entity.FavouriteTransitData
 import dev.mainhq.bus2go.domain.entity.FavouriteTransitData.StmBusFavouriteItem
 import dev.mainhq.bus2go.domain.entity.Tag
+import dev.mainhq.bus2go.domain.entity.TransitType
+import dev.mainhq.bus2go.domain.repository.FavouritesRepository
 import kotlinx.collections.immutable.mutate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -17,13 +18,18 @@ import kotlinx.coroutines.withContext
 class StmFavouritesRepositoryImpl(
 	private val tagsHandler: TagsHandler, //TODO make as a Datastore instead?
 	private val stmFavouritesDataStore: DataStore<StmFavouritesDataDto>
-) : StmFavouritesRepository {
+) : FavouritesRepository {
 
-	override fun getStmBusFavourites(): Flow<List<StmBusFavouriteItem>> {
-		return stmFavouritesDataStore.data.map { PreferenceMapper.mapStmBus(it) }
-	}
+	override val transitType: TransitType
+		get() = TransitType.STM
 
-	override suspend fun removeStmBusFavourite(data: StmBusFavouriteItem) {
+	override val favourites: Flow<List<FavouriteTransitData>>
+		get() {
+			return stmFavouritesDataStore.data.map { PreferenceMapper.mapStmBus(it) }
+		}
+
+	override suspend fun removeFavourite(data: FavouriteTransitData) {
+		data as StmBusFavouriteItem
 		withContext(Dispatchers.IO){
 			stmFavouritesDataStore.updateData { stmFavouritesData ->
 				stmFavouritesData.copy(listSTM = stmFavouritesData.listSTM.mutate {
@@ -33,7 +39,8 @@ class StmFavouritesRepositoryImpl(
 		}
 	}
 
-	override suspend fun addStmBusFavourite(data: StmBusFavouriteItem) {
+	override suspend fun addFavourite(data: FavouriteTransitData) {
+		data as StmBusFavouriteItem
 		withContext(Dispatchers.IO){
 			stmFavouritesDataStore.updateData { stmFavouritesData ->
 				stmFavouritesData.copy(listSTM = stmFavouritesData.listSTM.mutate {
@@ -43,7 +50,6 @@ class StmFavouritesRepositoryImpl(
 			}
 		}
 	}
-
 
 	override suspend fun setTag(tag: Tag, items: List<FavouriteTransitData>) {
 		val tagDto = PreferenceMapper.mapTagToDto(tag)
