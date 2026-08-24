@@ -43,7 +43,7 @@ class DatabaseDownloadRepositoryImpl(
 		return super._getAppVersionCodeRequired(serverChoice)
 	}
 
-	override fun getDb(serverChoice: ServerChoice, databaseAgency: DatabaseAgency, versionNeeded: Int): Flow<Progress> {
+	override fun downloadDb(serverChoice: ServerChoice, databaseAgency: DatabaseAgency, versionNeeded: Int): Flow<Progress> {
 		return super._getDb(serverChoice, databaseAgency, versionNeeded)
 	}
 

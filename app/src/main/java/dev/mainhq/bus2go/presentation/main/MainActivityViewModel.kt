@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.work.WorkInfo
 import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.entity.DatabaseAgency
+import dev.mainhq.bus2go.domain.entity.NotificationType
 import dev.mainhq.bus2go.domain.repository.SettingsRepository
 import dev.mainhq.bus2go.domain.use_case.ObserveDownloadDatabaseTask
 import dev.mainhq.bus2go.domain.use_case.ScheduleDownloadDatabaseTask
@@ -15,6 +16,7 @@ import dev.mainhq.bus2go.domain.use_case.db_state.WasUpdateDialogShownToday
 import dev.mainhq.bus2go.domain.use_case.settings.CheckIsBus2GoServer
 import dev.mainhq.bus2go.presentation.config.ServerType
 import dev.mainhq.bus2go.presentation.core.UiState
+import dev.mainhq.bus2go.presentation.core.UiState.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -138,20 +140,7 @@ class MainActivityViewModel(
 								assert(it is Result.Success)
 								it as Result.Success
 								scheduleDownloadDatabaseTask.invoke(it.data).forEach { workId ->
-									observeDownloadDatabaseTask.invoke(workId).collect { workInfo ->
-										when(workInfo.state) {
-											WorkInfo.State.SUCCEEDED -> {
-												if (workInfo.outputData.getString("SAME")!!.toBoolean()){
-													_notification.emit(UiState.Success("Server database not updated yet"))
-												}
-												//else { }
-											}
-											WorkInfo.State.FAILED -> TODO()
-											WorkInfo.State.BLOCKED -> TODO()
-											WorkInfo.State.CANCELLED -> TODO()
-											else -> {}
-										}
-									}
+									//TODO observe what happens
 								}
 								_updateDbState.update { UpdateDbState.NoShow }
 							}

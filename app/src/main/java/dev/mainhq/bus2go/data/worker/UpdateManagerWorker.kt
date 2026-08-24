@@ -40,7 +40,7 @@ import java.io.File
 //TODO
 /** Manages new app update downloads and installations */
 class UpdateManagerWorker(context: Context, workerParams: WorkerParameters,
-						  /*private val notificationManager: NotificationManager */ //FIXME For testing purposes
+                          /*private val notificationManager: NotificationManager */ //FIXME For testing purposes
 	) : CoroutineWorker(context, workerParams ) {
 
 	companion object {

@@ -2,6 +2,7 @@ package dev.mainhq.bus2go.data.repository
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import dev.mainhq.bus2go.data.data_source.local.LocalKeyStore
 import dev.mainhq.bus2go.data.data_source.local.database.exo.AppDatabaseExo
@@ -17,6 +18,7 @@ import dev.mainhq.bus2go.utils.toLocalDateString
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -27,7 +29,7 @@ import java.time.format.DateTimeFormatter
 class AppStateRepositoryImpl(
 	private val appStateDataStore: DataStore<Preferences>,
 	private val localKeyStore: LocalKeyStore,
-	private val dataDir: File,
+	private val databasesDir: File,
 	private val filesDir: File,
 	private val repos: List<TransitRepository>
 ): AppStateRepository {
@@ -122,73 +124,98 @@ class AppStateRepositoryImpl(
 		}
 	}
 
-	override suspend fun getStmDatabaseVersion(): Int {
-		return withContext(Dispatchers.IO){
-			 appStateDataStore.data.map { preferences ->
-				 preferences[AppStateDataStoreKeys.SQLITE_STM_VERSION] ?: -1
-			 }.first()
-		}
-	}
-
-	override suspend fun updateStmDatabaseVersion(version: Int) {
-		//TODO return a Result to indicate in case version is smaller...?
-		return withContext(Dispatchers.IO){
-			appStateDataStore.edit { mutablePreferences ->
-				mutablePreferences[AppStateDataStoreKeys.SQLITE_STM_VERSION] = version
-			}
-		}
-	}
-
-	override suspend fun getExoDatabaseVersion(): Int {
+	override suspend fun getDatabaseVersion(databaseAgency: DatabaseAgency): Int {
 		return withContext(Dispatchers.IO){
 			appStateDataStore.data.map { preferences ->
-				preferences[AppStateDataStoreKeys.SQLITE_EXO_VERSION] ?: -1
+				val appStateDataStoreKey = when(databaseAgency) {
+					DatabaseAgency.STM -> AppStateDataStoreKeys.SQLITE_STM_VERSION
+					DatabaseAgency.EXO -> AppStateDataStoreKeys.SQLITE_EXO_VERSION
+				}
+				preferences[appStateDataStoreKey] ?: -1
 			}.first()
 		}
 	}
 
-	override suspend fun updateExoDatabaseVersion(version: Int) {
+	override suspend fun updateDatabaseVersion(databaseAgency: DatabaseAgency, version: Int) {
+		//TODO return a Result to indicate in case version is smaller...?
 		return withContext(Dispatchers.IO){
 			appStateDataStore.edit { mutablePreferences ->
-				mutablePreferences[AppStateDataStoreKeys.SQLITE_EXO_VERSION] = version
+				val appStateDataStoreKey = when(databaseAgency) {
+					DatabaseAgency.STM -> AppStateDataStoreKeys.SQLITE_STM_VERSION
+					DatabaseAgency.EXO -> AppStateDataStoreKeys.SQLITE_EXO_VERSION
+				}
+				mutablePreferences[appStateDataStoreKey] = version
 			}
 		}
 	}
 
-	override val downloadedDatabases: Flow<List<DatabaseState>>
-		get() {
-			return appStateDataStore.data.map { preferences ->
-				val list = mutableListOf<DatabaseState>()
-				//Version number may exist, but during download some shit might have happened to cancel
-				// download of the actual database, need to check for that edge case
-				repos.forEach { repo ->
-					val repoName = DatabaseAgency.getEntry(repo.dbName)
-					val expirationDate = repo.getDatabaseExpirationDate()
-					when(expirationDate) {
-						is Result.Error -> {
-							list.add(DatabaseState.DatabaseNotDownloaded(repoName))
-						}
-						is Result.Success<LocalDate> -> {
-							val sqliteVersion = preferences[AppStateDataStoreKeys.getDatabaseVersionPreference(repoName)]
-							if (sqliteVersion == null) {
-								list.add(DatabaseState.DatabaseNotDownloaded(repoName))
-							}
-							else {
-								list.add(DatabaseState.DatabaseDownloaded(
-									DatabaseAgency.STM,
-									sqliteVersion,
-									expirationDate.data,
-									//FIXME NEED A MORE RELIABLE WAY TO SETUP THIS STRING THAT DEPENDS
-									// ON BACKEND HAVING CORRECT NAMING
-									File(dataDir, "databases/${repoName.toString().lowercase()}_data.db").length() / 1_000_000L
-								))
-							}
-						}
+	//TODO could instead have a private function that takes a map function, and the update database
+	// function be that map function that way when it is called it mutates as we wish the correct
+	// agency that is downloading
+	override val databases: Flow<List<DatabaseState>> = flow {
+		val list = mutableListOf<DatabaseState>()
+		//Version number may exist, but during download some shit might have happened to cancel
+		// download of the actual database, need to check for that edge case
+		repos.forEach { repo ->
+			val repoName = DatabaseAgency.getEntry(repo.dbName)
+			when (val expirationDate = repo.getDatabaseExpirationDate()) {
+				is Result.Error -> {
+					//FIXMe doesnt work yet
+					// this part may happen if the file doesn't exist, or when the file was just extracted
+					// therefore need to check if the file exists in the dir
+					databasesDir.listFiles()?.find { it.name.matches("${repoName.toString().lowercase()}_data".toRegex()) }?.also {
+						list.add(DatabaseState.NeedAppRestart(repoName))
+					} ?: list.add(DatabaseState.DatabaseNotDownloaded(repoName))
+				}
+
+				is Result.Success<LocalDate> -> {
+					val sqliteVersion =
+						appStateDataStore.data.first()[AppStateDataStoreKeys.getDatabaseVersionPreference(
+							repoName
+						)]
+					if (sqliteVersion == null) {
+						list.add(DatabaseState.DatabaseNotDownloaded(repoName))
+					} else {
+						list.add(
+							DatabaseState.DatabaseDownloaded(
+								DatabaseAgency.STM,
+								sqliteVersion,
+								expirationDate.data,
+								//FIXME NEED A MORE RELIABLE WAY TO SETUP THIS STRING THAT DEPENDS
+								// ON BACKEND HAVING CORRECT NAMING
+								File(
+									databasesDir,
+									"${repoName.toString().lowercase()}_data.db"
+								).length() / 1_000_000L
+							)
+						)
 					}
 				}
-				list
 			}
 		}
+		emit(list)
+	}
+
+	override val databaseWorkNameState = appStateDataStore.data.map { preferences ->
+		DatabaseAgency.entries.associateWith {
+			preferences[booleanPreferencesKey("UNIQUE_WORK_NAME_${it}")] ?: false
+		}
+	}
+
+	override suspend fun setRestartNeededFlag(databaseAgency: DatabaseAgency) {
+		appStateDataStore.edit { mutablePreferences ->
+			mutablePreferences[booleanPreferencesKey("UNIQUE_WORK_NAME_${databaseAgency}")] = true
+		}
+	}
+
+	override suspend fun resetRestartNeededFlag() {
+		appStateDataStore.edit { mutablePreferences ->
+			DatabaseAgency.entries.forEach {
+				mutablePreferences -= booleanPreferencesKey("UNIQUE_WORK_NAME_${it}")
+			}
+		}
+	}
+
 
 	/**
 	 * To check if first time opening the app, check for the existence of the PreferenceManager field
@@ -201,9 +228,8 @@ class AppStateRepositoryImpl(
 			val isFirstTime = appStateDataStore.data.first()[AppStateDataStoreKeys.IS_FIRST_TIME]
 			if  (isFirstTime == null){
 				//TODO check for the existence of a bus2go database folder/files
-				val directory = File(dataDir, "databases")
-				if (directory.exists() && directory.isDirectory){
-					return@withContext directory.list()?.isEmpty() ?: true
+				if (databasesDir.exists() && databasesDir.isDirectory){
+					return@withContext databasesDir.list()?.isEmpty() ?: true
 				}
 				return@withContext true
 			}
@@ -222,6 +248,19 @@ class AppStateRepositoryImpl(
 	override suspend fun setSelfSignedCert(cert: X509Certificate) {
 		withContext(Dispatchers.IO) {
 			localKeyStore.saveNewCertificate(cert)
+		}
+	}
+
+	override suspend fun deleteDatabase(databaseAgency: DatabaseAgency) {
+		withContext(Dispatchers.IO) {
+			appStateDataStore.edit { mutablePreferences ->
+				val appStateDataStoreKey = when(databaseAgency) {
+					DatabaseAgency.STM -> AppStateDataStoreKeys.SQLITE_STM_VERSION
+					DatabaseAgency.EXO -> AppStateDataStoreKeys.SQLITE_EXO_VERSION
+				}
+				mutablePreferences.remove(appStateDataStoreKey)
+				//TODO if need be, update next expiration date notif date
+			}
 		}
 	}
 }

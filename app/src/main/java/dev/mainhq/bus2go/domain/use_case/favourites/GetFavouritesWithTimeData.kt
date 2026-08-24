@@ -13,8 +13,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.transformLatest
 
-//should not only take favourites but also the time
-//(and since the time is periodically calculated, perhaps it should be sent as a flow instead?
 class GetFavouritesWithTimeData(
 	private val transitRepos: List<TransitRepository>,
 	private val getFavourites: GetFavourites,
@@ -30,30 +28,27 @@ class GetFavouritesWithTimeData(
 					when(map.key) {
 						TransitType.STM -> {
 							map.value
-								.map {
-									transitRepos.queryRepos(TransitType.STM)
+								.mapNotNull {
+									(transitRepos.queryRepos(TransitType.STM)
 										.getFavouriteStopTime(it, time)
+									as? Result.Success)?.data
 								}
-								.filter { it is Result.Success }
-								.map { (it as Result.Success).data }
 						}
 						TransitType.EXO_BUS -> {
 							map.value
-								.map {
-									transitRepos.queryRepos(TransitType.EXO_BUS)
+								.mapNotNull {
+									(transitRepos.queryRepos(TransitType.EXO_BUS)
 										.getFavouriteStopTime(it, time)
+									as? Result.Success)?.data
 								}
-								.filter { it is Result.Success }
-								.map { (it as Result.Success).data }
 						}
 						TransitType.EXO_TRAIN -> {
-							map.value
-								.map {
-									transitRepos.queryRepos(TransitType.EXO_TRAIN)
-										.getFavouriteStopTime(it, time)
-								}
-								.filter { it is Result.Success }
-								.map { (it as Result.Success).data }
+							map.value.mapNotNull {
+								(transitRepos.queryRepos(TransitType.EXO_TRAIN)
+									.getFavouriteStopTime(it, time)
+										as? Result.Success)
+									?.data
+							}
 						}
 					}
 				}.flatten())

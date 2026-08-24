@@ -23,6 +23,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
 
+//TODO handle if the result is null for when user closed and deleted the database
 class ExoRepositoryImpl(
 	private val calendarDAO: CalendarDAO?,
 	private val routesDAO: RoutesDAO?,

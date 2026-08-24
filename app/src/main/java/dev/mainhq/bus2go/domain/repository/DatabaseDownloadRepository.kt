@@ -30,7 +30,7 @@ interface DatabaseDownloadRepository {
 	 * Download an agency database from a bus2go server if no local up to date compressed file has
 	 * been found.
 	 * **/
-	fun getDb(serverChoice: ServerChoice, databaseAgency: DatabaseAgency, versionNeeded: Int): Flow<Progress>
+	fun downloadDb(serverChoice: ServerChoice, databaseAgency: DatabaseAgency, versionNeeded: Int): Flow<Progress>
 
 	/** Decompress the given file if it exists */
 	fun decompressFile(dbPath: String, dbName: String, version: Int): Flow<Progress>

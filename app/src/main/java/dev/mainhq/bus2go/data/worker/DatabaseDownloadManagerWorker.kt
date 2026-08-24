@@ -31,6 +31,9 @@ class DatabaseDownloadManagerWorker(
 
 	companion object {
 		const val KEY = "DB_TO_DOWNLOAD"
+		const val WORK_PROGRESS_CURRENT = "PROGRESS_CURRENT"
+		const val WORK_PROGRESS_MAX = "PROGRESS_MAX"
+		const val WORK_PROGRESS_IS_DECOMPRESSING = "PROGRESS_IS_DECOMPRESSING"
 	}
 
 	private val dbDownloadRepository =
@@ -47,25 +50,25 @@ class DatabaseDownloadManagerWorker(
 
 	private lateinit var databaseAgency: DatabaseAgency
 
+	private val dbToDownloadString = inputData.getString(KEY) ?: throw IllegalStateException("Expected an input")
+
 	override suspend fun getForegroundInfo(): ForegroundInfo {
+		setProgress(workDataOf(KEY to databaseAgency.name.uppercase()))
 		return ForegroundInfo(
 			//FIXME use the repo/domain layer instead
 			NotificationHandler.getDbNotificationId(databaseAgency),
 			NotificationCompat.Builder(applicationContext, NotificationHandler.dbNotifChannel.id)
-				.setContentTitle("Doing some shit")
-				.setContentText("CoroutineWorker doing some shit")
+				.setContentTitle("Initialising download")
+				.setContentText("Downloading $dbToDownloadString database for Bus2Go")
 				.setSmallIcon(R.drawable.baseline_update)
 				.setPriority(NotificationCompat.PRIORITY_LOW)
 				.setOngoing(false)
+				.setProgress(-1, -1, true)
 				.build()
 		)
 	}
 
 	override suspend fun doWork(): Result {
-		val dbToDownloadString =
-			inputData.getString(KEY) ?: throw IllegalStateException("Expected an input")
-
-		//notificationsRepository.notify(NotificationType.DbUpdateAvailable(dbToDownload))
 		Log.d("DB WORKER", "Started db download work")
 
 		//TODO notify when download starts (and show a bar perhaps)
@@ -74,47 +77,21 @@ class DatabaseDownloadManagerWorker(
 		// and in notifications, show a "tap to restart"
 		return withContext(Dispatchers.IO) {
 			try {
-				databaseAgency = when(dbToDownloadString) {
-					"STM" -> {
-						DatabaseAgency.STM
-					}
-					"EXO" -> {
-						DatabaseAgency.EXO
-					}
-					else -> {
-						throw IllegalStateException("You forgot to add the correct key")
-					}
-				}
+				databaseAgency = DatabaseAgency.getEntry(dbToDownloadString)
 				setForeground(getForegroundInfo())
-				when (databaseAgency) {
-					DatabaseAgency.STM -> {
-						downloadDb(
-							getCurrentDbVersion = appStateRepository::getStmDatabaseVersion,
-							updateDbVersion = appStateRepository::updateStmDatabaseVersion,
-						)
-					}
-					DatabaseAgency.EXO -> {
-						downloadDb(
-							getCurrentDbVersion = appStateRepository::getExoDatabaseVersion,
-							updateDbVersion = appStateRepository::updateExoDatabaseVersion
-						)
-					}
-				}
+				downloadDb()
 			}
 			catch (e: Exception) {
 				Log.e("DB_WORKER", "An exception occurred...\n ${e.message}")
 				withContext(Dispatchers.Main){
-					notificationsRepository.notify(NotificationType.DbUpdateError(databaseAgency))
+					notificationsRepository.notifyDbUpdates(NotificationType.DbUpdateError(), databaseAgency)
 				}
 				Result.failure()
 			}
 		}
 	}
 
-	private suspend fun downloadDb(
-		getCurrentDbVersion: suspend () -> Int,
-		updateDbVersion: suspend (Int) -> Unit
-	): Result {
+	private suspend fun downloadDb(): Result {
 		//TODO careful with this part, as a possible race condition may occur if at the same time we
 		// are decompressing from already downloaded file
 		//TODO check if this flow call actually works
@@ -125,16 +102,16 @@ class DatabaseDownloadManagerWorker(
 				if (!isAppUpToDate()){
 					Log.d("DB_WORKER", "App version not up to date with database")
 					withContext(Dispatchers.Main){
-						notificationsRepository.notify(NotificationType.DbUpdateError(databaseAgency))
+						notificationsRepository.notifyDbUpdates(NotificationType.DbUpdateError(), databaseAgency)
 					}
 					Result.failure()
 				}
 				//TODO in another worker, notify when not connected and only compressed file exists
 				// (so that they click on "download" to decompress it)
-				val currDbVersion = getCurrentDbVersion()
+				val currDbVersion = appStateRepository.getDatabaseVersion(databaseAgency)
 
 				//the == is important in the case where the file already exists
-				//instead of right away decompressing the file, we need to make sure the db doesnt already exist...
+				//instead of right away decompressing the file, we need to make sure the db doesn't already exist...
 				//FIXMe for now, we will do the replacement cause fuck it i want it to work, user does it explicitly
 				if (res.data >= currDbVersion) {
 					val dbName = when(databaseAgency){
@@ -143,17 +120,25 @@ class DatabaseDownloadManagerWorker(
 					}
 
 					if (appStateRepository.doesUpToDateCompressedDbExist(databaseAgency, res.data) == null){
-						dbDownloadRepository.getDb(serverChoice, databaseAgency, res.data)
+						dbDownloadRepository.downloadDb(serverChoice, databaseAgency, res.data)
 							.collect { progress ->
 							when(progress) {
 								is Progress.Downloading -> {
 									withContext(Dispatchers.Main){
-										notificationsRepository.notify(
+										setProgress(
+											workDataOf(
+												KEY to databaseAgency.name.uppercase(),
+											WORK_PROGRESS_CURRENT to progress.current,
+												WORK_PROGRESS_MAX to progress.contentLength,
+												WORK_PROGRESS_IS_DECOMPRESSING to false
+											)
+										)
+										notificationsRepository.notifyDbUpdates(
 											NotificationType.DbDownloading(
-												databaseAgency,
 												progress.current,
 												progress.contentLength
-											)
+											),
+											databaseAgency
 										)
 									}
 								}
@@ -161,7 +146,7 @@ class DatabaseDownloadManagerWorker(
 								is Progress.Completed -> {
 									if (!progress.success){
 										withContext(Dispatchers.Main) {
-											notificationsRepository.notify(NotificationType.DbUpdateError(databaseAgency))
+											notificationsRepository.notifyDbUpdates(NotificationType.DbUpdateError(), databaseAgency)
 										}
 										Result.retry()
 									}
@@ -172,14 +157,14 @@ class DatabaseDownloadManagerWorker(
 								is Progress.Failed -> {
 									//TODO some cleanup first
 									withContext(Dispatchers.Main) {
-										notificationsRepository.notify(NotificationType.DbUpdateError(databaseAgency))
+										notificationsRepository.notifyDbUpdates(NotificationType.DbUpdateError(), databaseAgency)
 									}
 									Result.retry()
 								}
 							}
 						}
 					}
-					updateDbVersion(res.data)
+					appStateRepository.updateDatabaseVersion(databaseAgency, res.data)
 					dbDownloadRepository.decompressFile(
 						//FIXME WRONG ARGS ARE GIVEN
 						applicationContext.getDatabasePath("$dbName.db").parentFile?.absolutePath
@@ -190,17 +175,24 @@ class DatabaseDownloadManagerWorker(
 						when(progress) {
 							Progress.Idle -> {
 								withContext(Dispatchers.Main) {
-									notificationsRepository.notify(NotificationType.DbExtracting(databaseAgency))
+									setProgress(
+										workDataOf(
+											KEY to databaseAgency.name.uppercase(),
+											WORK_PROGRESS_IS_DECOMPRESSING to true
+										)
+									)
+									notificationsRepository.notifyDbUpdates(NotificationType.DbExtracting, databaseAgency)
 								}
 							}
 							is Progress.Completed -> {
 								withContext(Dispatchers.Main) {
-									notificationsRepository.notify(NotificationType.DbUpdateDone(databaseAgency))
+									notificationsRepository.notifyDbUpdates(NotificationType.DbUpdateDone, databaseAgency)
 								}
 							}
 							else -> throw IllegalStateException("Wtf")
 						}
 					}
+					appStateRepository.setRestartNeededFlag(databaseAgency)
 					Result.success(workDataOf("SAME" to false))
 				}
 				else {
@@ -218,7 +210,7 @@ class DatabaseDownloadManagerWorker(
 	}
 
 	/**
-	 * Checks whether or not the current version code is up to date with the database hosted in
+	 * Checks whether the current version code is up to date with the database hosted in
 	 * backend server (newer database may be incompatible with older versions of the app).
 	 * */
 	private suspend fun isAppUpToDate(): Boolean {

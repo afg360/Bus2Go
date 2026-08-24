@@ -1,6 +1,8 @@
 package dev.mainhq.bus2go.utils
 
+import android.content.Context
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
@@ -97,6 +99,18 @@ fun List<TransitRepository>.queryRepos(transitType: TransitType): TransitReposit
 @Throws(IllegalStateException::class)
 fun List<FavouritesRepository>.queryRepos(transitType: TransitType): FavouritesRepository {
 	return this.find { it.transitType == transitType } ?: throw IllegalStateException("Transit type must exist in the list")
+}
+
+fun Context.toast(text: String) {
+	Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
+}
+
+fun AppCompatActivity.toast(text: String) {
+	Toast.makeText(applicationContext, text, Toast.LENGTH_SHORT).show()
+}
+
+fun Fragment.toast(text: String) {
+	Toast.makeText(requireContext(), text, Toast.LENGTH_SHORT).show()
 }
 
 /**

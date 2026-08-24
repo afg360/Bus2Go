@@ -35,6 +35,7 @@ open class Bus2GoApplication : Application() {
 		//TODO move logic to use case classes
 		initTagsFiles()
 		initNetworkClient()
+		resetAppNeedRestartState()
 		manageApkFiles()
 
 		coroutineScope.launch {
@@ -51,6 +52,12 @@ open class Bus2GoApplication : Application() {
 	private fun initNetworkClient(){
 		coroutineScope.launch {
 			NetworkClient.init(commonModule.customTrustManager)
+		}
+	}
+
+	private fun resetAppNeedRestartState() {
+		coroutineScope.launch {
+			commonModule.appStateRepository.resetRestartNeededFlag()
 		}
 	}
 

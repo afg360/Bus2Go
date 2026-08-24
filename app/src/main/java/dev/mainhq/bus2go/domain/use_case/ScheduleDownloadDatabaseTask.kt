@@ -11,7 +11,7 @@ class ScheduleDownloadDatabaseTask(
 	//TODO perhaps return some sort of success or failure thing
 	suspend operator fun invoke(dbsToDownload: List<DatabaseAgency>): List<UUID> {
 		return dbsToDownload.map {
-			databaseDownloadScheduler.scheduleDatabaseDownloadTask(it)
+			databaseDownloadScheduler.scheduleDatabaseDownloadTask(it.name.uppercase())
 		}
 	}
 }

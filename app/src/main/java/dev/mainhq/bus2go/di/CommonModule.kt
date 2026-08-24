@@ -16,6 +16,7 @@ import dev.mainhq.bus2go.data.data_source.notifications.NotificationHandler
 import dev.mainhq.bus2go.data.data_source.remote.CustomTrustManager
 import dev.mainhq.bus2go.data.data_source.remote.NetworkMonitor
 import dev.mainhq.bus2go.data.repository.AppStateRepositoryImpl
+import dev.mainhq.bus2go.data.repository.DatabaseControllerRepositoryImpl
 import dev.mainhq.bus2go.data.repository.ExoFavouritesRepositoryImpl
 import dev.mainhq.bus2go.data.repository.ExoRepositoryImpl
 import dev.mainhq.bus2go.data.repository.ExoTrainFavouritesRepositoryImpl
@@ -31,6 +32,7 @@ import dev.mainhq.bus2go.domain.use_case.ObserveDownloadDatabaseTask
 import dev.mainhq.bus2go.domain.use_case.ScheduleDownloadDatabaseTask
 import dev.mainhq.bus2go.domain.use_case.settings.SaveAllNotifSettings
 import dev.mainhq.bus2go.domain.use_case.db_state.CheckDatabaseUpdateRequired
+import dev.mainhq.bus2go.domain.use_case.db_state.DeleteDatabase
 import dev.mainhq.bus2go.domain.use_case.db_state.IsFirstTimeAppLaunched
 import dev.mainhq.bus2go.domain.use_case.db_state.SetDatabaseExpirationDate
 import dev.mainhq.bus2go.domain.use_case.db_state.SetUpdateDbDialogLastAsToday
@@ -47,6 +49,7 @@ import dev.mainhq.bus2go.domain.use_case.transit.GetDirections
 import dev.mainhq.bus2go.domain.use_case.transit.GetRouteInfo
 import dev.mainhq.bus2go.domain.use_case.transit.GetStopNames
 import dev.mainhq.bus2go.domain.use_case.transit.GetTransitTime
+import java.io.File
 
 class CommonModule(applicationContext: Context) {
 	private val databaseDownloadScheduler = DatabaseDownloadSchedulerImpl(
@@ -56,11 +59,13 @@ class CommonModule(applicationContext: Context) {
 		databaseDownloadScheduler,
 	)
 
-	val observeDownloadDatabaseTask = ObserveDownloadDatabaseTask(
-		databaseDownloadScheduler,
+
+	private val databaseController = DatabaseControllerRepositoryImpl(
+		applicationContext.dataDir,
+		applicationContext.cacheDir
 	)
 
-	private val stmDatabase = AppDatabaseSTM.getInstance(applicationContext)
+	private val stmDatabase = databaseController.createStmInstance(applicationContext)
 	private val stmRepository = StmRepositoryImpl(
 		feedInfoDAO = stmDatabase?.feedInfoDao(),
 		calendarDatesDAO = stmDatabase?.calendarDatesDao(),
@@ -81,7 +86,7 @@ class CommonModule(applicationContext: Context) {
 		stmFavouritesDataStore = applicationContext.stmFavouritesDataStore,
 	)
 
-	private val exoDatabase = AppDatabaseExo.getInstance(applicationContext)
+	private val exoDatabase = databaseController.createExoInstance(applicationContext)
 	private val exoRepository = ExoRepositoryImpl(
 		calendarDAO = exoDatabase?.calendarDao(),
 		routesDAO = exoDatabase?.routesDao(),
@@ -113,12 +118,17 @@ class CommonModule(applicationContext: Context) {
 	val appStateRepository = AppStateRepositoryImpl(
 		appStateDataStore = applicationContext.appStateDataStore,
 		localKeyStore = localKeyStore,
-		dataDir = applicationContext.dataDir,
+		databasesDir = File(applicationContext.dataDir, "databases"),
 		filesDir = applicationContext.filesDir,
 		repos = listOf(
 			stmRepository,
 			exoRepository
 		)
+	)
+
+	val deleteDatabase = DeleteDatabase(
+		databaseController,
+		appStateRepository
 	)
 
 	val getAllTags = GetAllTags(
@@ -191,6 +201,11 @@ class CommonModule(applicationContext: Context) {
 	)
 	val setUpdateDbDialogLastAsToday = SetUpdateDbDialogLastAsToday(
 		appStateRepository
+	)
+
+	val observeDownloadDatabaseTask = ObserveDownloadDatabaseTask(
+		appStateRepository,
+		databaseDownloadScheduler,
 	)
 
 	val getSettings = GetSettings(

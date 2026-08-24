@@ -1,6 +1,7 @@
 package dev.mainhq.bus2go.data.repository
 
 import dev.mainhq.bus2go.data.data_source.notifications.NotificationHandler
+import dev.mainhq.bus2go.domain.entity.DatabaseAgency
 import dev.mainhq.bus2go.domain.entity.NotificationType
 import dev.mainhq.bus2go.domain.repository.NotificationsRepository
 
@@ -8,10 +9,8 @@ class NotificationRepositoryImpl(
 	private val notificationHandler: NotificationHandler
 ): NotificationsRepository {
 
-	@Throws(IllegalArgumentException::class)
-	/** @throws IllegalArgumentException When giving a DbToDownload.ALL notif type */
-	override fun notify(notificationType: NotificationType) {
-		when(notificationType){
+	override fun notifyAppUpdates(notificationType: NotificationType.AppOperation) {
+		when(notificationType) {
 			is NotificationType.AppUpdateAvailable ->
 				notificationHandler.notifyAppUpdateAvailable(notificationType.version)
 
@@ -24,23 +23,30 @@ class NotificationRepositoryImpl(
 			NotificationType.AppUpdateDone -> notificationHandler.notifyAppUpdateDone()
 
 			NotificationType.AppUpdateError -> notificationHandler.notifyAppUpdateFailed()
+		}
+	}
 
+	override fun notifyDbUpdates(notificationType: NotificationType.DbOperation, databaseAgency: DatabaseAgency) {
+		when(notificationType){
 			is NotificationType.DbUpdateAvailable ->
-				notificationHandler.notifyDbUpdateAvailable(notificationType.database)
+				notificationHandler.notifyDbUpdateAvailable(databaseAgency)
+
+			is NotificationType.DbEnqueued -> notificationHandler.notifyDbDownloadStarted(databaseAgency)
 
 			is NotificationType.DbDownloading ->
 				notificationHandler.notifyDbDownloading(
-					notificationType.database,
+					databaseAgency,
 					notificationType.current,
 					notificationType.contentLength
 				)
 
-			is NotificationType.DbExtracting -> notificationHandler.notifyDbExtracting(notificationType.database)
+			is NotificationType.DbExtracting -> notificationHandler.notifyDbExtracting(databaseAgency)
 
-			is NotificationType.DbUpdateDone -> notificationHandler.notifyDbUpdateDone(notificationType.database)
+			is NotificationType.DbUpdateDone -> notificationHandler.notifyDbUpdateDone(databaseAgency)
 
-			is NotificationType.DbUpdateError -> notificationHandler.notifyDbDownloadFailed(notificationType.database)
+			is NotificationType.DbUpdateError -> notificationHandler.notifyDbDownloadFailed(databaseAgency)
 		}
 	}
+
 
 }

@@ -123,6 +123,7 @@ class NotificationHandler(private val appContext: Context) {
 	}
 
 	/* ---------------------- Database Update Notifications ------------------------- */
+
 	/** @param database Is it a bus2go or exo db, or something else */
 	fun notifyDbUpdateAvailable(database: DatabaseAgency){
 		createNotificationBuilder(
@@ -132,6 +133,19 @@ class NotificationHandler(private val appContext: Context) {
 			icon = R.drawable.baseline_update,
 			priority = NotificationCompat.PRIORITY_DEFAULT
 		).setOngoing(false)
+			.build()
+			.also { postNotif(database.ordinal + baseDbUpdateNotifId, it) }
+	}
+
+	fun notifyDbDownloadStarted(database: DatabaseAgency){
+		createNotificationBuilder(
+			channelId = DB_UPDATES,
+			title = "Starting Download",
+			description = "Download starting for $database...",
+			icon = R.drawable.baseline_update,
+			priority = NotificationCompat.PRIORITY_DEFAULT
+		).setOngoing(false)
+			.setProgress(-1, -1, true)
 			.build()
 			.also { postNotif(database.ordinal + baseDbUpdateNotifId, it) }
 	}
