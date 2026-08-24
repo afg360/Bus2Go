@@ -53,16 +53,16 @@ class Time(localDateTime: LocalDateTime) : Parcelable, Comparable<Time> {
      * We do not expect Durations of more than a day
      * @return If the duration is negative, null.
      **/
-    operator fun minus(time : Time): LocalTime? {
+    operator fun minus(time : Time): Duration? {
         //Takes the sec arg first...
         if (this < time) return null
-        val duration = Duration.between(LocalDateTime.of(time.localDate, time.localTime), LocalDateTime.of(this.localDate, this.localTime))
-        //duration.seconds === all the time (hours + minutes) in seconds
-        var mins = duration.seconds / 60
-        val secs = duration.seconds - mins * 60
-        val hours = mins / 60
-        mins -= 60 * hours
-        return LocalTime.of(hours.toInt(), mins.toInt(), secs.toInt())
+        return Duration.between(LocalDateTime.of(time.localDate, time.localTime), LocalDateTime.of(this.localDate, this.localTime))
+//        //duration.seconds === all the time (hours + minutes) in seconds
+//        var mins = duration.seconds / 60
+//        val secs = duration.seconds - mins * 60
+//        val hours = (mins / 60) % 24 //FIXME added the % 24 as a hack
+//        mins -= 60 * hours
+//        return LocalTime.of(hours.toInt(), mins.toInt(), secs.toInt())
     }
 
     /** @return null if this < time. */
@@ -87,7 +87,7 @@ class Time(localDateTime: LocalDateTime) : Parcelable, Comparable<Time> {
         }
     }
 
-    fun timeRemaining(): LocalTime? {
+    fun timeRemaining(): Duration? {
         return this - Time(LocalDateTime.now())
     }
 

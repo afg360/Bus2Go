@@ -181,7 +181,7 @@ class AlarmCreationDialog() : DialogFragment(R.layout.fragment_create_alarms_dia
                                 }
                                 (alarmCreationViewModel.alarmBusInfo.value!!.time - beforeTime).also {
                                         if (it == null) throw IllegalStateException("An error occured trying to calculate alarm times_activity.xml to go off")
-                                        set(Calendar.HOUR_OF_DAY, it.hour)
+                                        set(Calendar.HOUR_OF_DAY, it.toHours().toInt())
                                         //set(Calendar.MINUTE, it.min)
                                         //set(Calendar.SECOND, it.sec)
                                     }

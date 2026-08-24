@@ -26,6 +26,7 @@ import dev.mainhq.bus2go.data.repository.NotificationRepositoryImpl
 import dev.mainhq.bus2go.data.repository.SettingsRepositoryImpl
 import dev.mainhq.bus2go.data.repository.StmFavouritesRepositoryImpl
 import dev.mainhq.bus2go.data.repository.StmRepositoryImpl
+import dev.mainhq.bus2go.domain.entity.DatabaseAgency
 import dev.mainhq.bus2go.domain.use_case.AcceptSelfSignedCertificate
 import dev.mainhq.bus2go.domain.use_case.CleanUpGarbageFiles
 import dev.mainhq.bus2go.domain.use_case.ObserveDownloadDatabaseTask
@@ -65,7 +66,7 @@ class CommonModule(applicationContext: Context) {
 		applicationContext.cacheDir
 	)
 
-	private val stmDatabase = databaseController.createStmInstance(applicationContext)
+	private val stmDatabase = databaseController.createInstance(applicationContext, DatabaseAgency.STM) as AppDatabaseSTM?
 	private val stmRepository = StmRepositoryImpl(
 		feedInfoDAO = stmDatabase?.feedInfoDao(),
 		calendarDatesDAO = stmDatabase?.calendarDatesDao(),
@@ -86,7 +87,7 @@ class CommonModule(applicationContext: Context) {
 		stmFavouritesDataStore = applicationContext.stmFavouritesDataStore,
 	)
 
-	private val exoDatabase = databaseController.createExoInstance(applicationContext)
+	private val exoDatabase = databaseController.createInstance(applicationContext, DatabaseAgency.EXO) as AppDatabaseExo?
 	private val exoRepository = ExoRepositoryImpl(
 		calendarDAO = exoDatabase?.calendarDao(),
 		routesDAO = exoDatabase?.routesDao(),

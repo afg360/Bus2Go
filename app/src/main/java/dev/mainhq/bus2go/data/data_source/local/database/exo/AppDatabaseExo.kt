@@ -22,6 +22,7 @@ import dev.mainhq.bus2go.data.data_source.local.database.exo.entity.StopTimes
 import dev.mainhq.bus2go.data.data_source.local.database.exo.entity.Stops
 import dev.mainhq.bus2go.data.data_source.local.database.exo.entity.Trips
 import dev.mainhq.bus2go.data.data_source.local.Converters
+import dev.mainhq.bus2go.domain.core.Bus2GoLocalDatabase
 
 
 @Database(
@@ -31,7 +32,7 @@ import dev.mainhq.bus2go.data.data_source.local.Converters
     exportSchema = true
 )
 @TypeConverters(Converters::class)
-abstract class AppDatabaseExo : RoomDatabase() {
+abstract class AppDatabaseExo : RoomDatabase(), Bus2GoLocalDatabase {
     abstract fun routesDao() : RoutesDAO
     abstract fun tripsDao() : TripsDAO
     abstract fun stopDao() : StopsDAO
@@ -42,9 +43,6 @@ abstract class AppDatabaseExo : RoomDatabase() {
     abstract fun formsDao() : FormsDAO
 
     companion object {
-        const val FILENAME_PREFIX = "exo_data"
-        const val DATABASE_NAME = "$FILENAME_PREFIX.db"
-
         val MIGRATION_1_2 = object: Migration(1, 2){
             override fun migrate(db: SupportSQLiteDatabase) {
                 //TODO("Not implemented")
