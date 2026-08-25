@@ -23,7 +23,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.Duration
 import java.time.LocalTime
+import kotlin.time.toDuration
 
 class FavouritesViewModel(
 	getFavouritesWithTimeData: GetFavouritesWithTimeData,
@@ -62,9 +64,9 @@ class FavouritesViewModel(
 					if (it.arrivalTime != null) {
 						val timeRemaining = it.arrivalTime.timeRemaining()
 						val isUrgent =
-							if (timeRemaining == null || timeRemaining < LocalTime.of(0, 4, 0))
+							if (timeRemaining == null || timeRemaining < Duration.ofMinutes(4))
 								Urgency.IMMINENT
-							else if (timeRemaining < LocalTime.of(0, 11, 0))
+							else if (timeRemaining < Duration.ofMinutes(11))
 								Urgency.SOON
 							else
 								Urgency.DISTANT
@@ -179,12 +181,12 @@ class FavouritesViewModel(
         _selectedTag.update { null }
     }
 
-    private fun getTimeRemaining(remainingTime: LocalTime?): String {
-        return if (remainingTime != null && remainingTime.hour > 0) {
-            if (remainingTime.minute > 9) "In ${remainingTime.hour}h${remainingTime.minute}"
-             else "In ${remainingTime.hour}h0${remainingTime.minute}"
+    private fun getTimeRemaining(remainingTime: Duration?): String {
+        return if (remainingTime != null && remainingTime.toHours() > 0) {
+            if (remainingTime > Duration.ofMinutes(9)) "In ${remainingTime.toHours()}h${remainingTime.toMinutes() % 60}"
+             else "In ${remainingTime.toHours()}h0${remainingTime.toMinutes() % 60}"
         }
-        else if (remainingTime != null) "In ${remainingTime.minute} min"
+        else if (remainingTime != null) "In ${remainingTime.toMinutes() % 60} min"
         else "Bus has passed??"
     }
 
