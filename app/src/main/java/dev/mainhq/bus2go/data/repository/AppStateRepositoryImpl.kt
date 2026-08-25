@@ -84,15 +84,11 @@ class AppStateRepositoryImpl(
 		db: DatabaseAgency,
 		version: Int,
 	): String? {
-		val dbNamePrefix = when(db){
-			DatabaseAgency.STM -> AppDatabaseSTM.FILENAME_PREFIX
-			DatabaseAgency.EXO -> AppDatabaseExo.FILENAME_PREFIX
-		}
 		//TODO before downloading, check if file exists already with the correct version
 		//logger?.debug(TAG, "Looking for already downloaded databases")
 		return filesDir.listFiles()
 			?.find {
-				it.name.matches("${dbNamePrefix}_${version}\\.db\\.${COMPRESSION_EXT}$".toRegex())
+				it.name.matches("${db.toDatabaseFileNamePrefixString()}_${version}\\.db\\.${COMPRESSION_EXT}$".toRegex())
 			}?.name
 	}
 

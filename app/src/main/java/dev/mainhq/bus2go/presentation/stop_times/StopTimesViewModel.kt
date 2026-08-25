@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.Duration
 import java.time.LocalTime
 
 class StopTimesViewModel(
@@ -77,12 +78,12 @@ class StopTimesViewModel(
 								val timeRemaining = it.timeRemaining()
 								val timeLeftTextDisplay = timeRemaining?.let {
 									//FIXMe instead of checking hour, check if smaller than an hour
-									if (timeRemaining.hour == 0) timeRemaining.minute.toString()
+									if (timeRemaining.toHours().toInt() == 0) timeRemaining.toMinutes().toString()
 									else "" //empty string that will be replaced by the resource value
 								} ?: "Passed bus???"
-								val urgency = if (timeRemaining == null || timeRemaining < LocalTime.of(0, 4, 0))
+								val urgency = if (timeRemaining == null || timeRemaining < Duration.ofMinutes(4))
 								Urgency.IMMINENT
-								else if (timeRemaining < LocalTime.of(0, 15, 0)) Urgency.SOON
+								else if (timeRemaining < Duration.ofMinutes(15)) Urgency.SOON
 								else Urgency.DISTANT
 								StopTimesDisplayModel(
 									arrivalTime = it,

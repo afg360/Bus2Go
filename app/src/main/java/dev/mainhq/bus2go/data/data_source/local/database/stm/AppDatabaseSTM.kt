@@ -22,6 +22,7 @@ import dev.mainhq.bus2go.data.data_source.local.database.stm.entity.Shapes
 import dev.mainhq.bus2go.data.data_source.local.database.stm.entity.Stops
 import dev.mainhq.bus2go.data.data_source.local.database.stm.entity.StopsInfo
 import dev.mainhq.bus2go.data.data_source.local.database.stm.entity.Trips
+import dev.mainhq.bus2go.domain.core.Bus2GoLocalDatabase
 import java.sql.SQLException
 
 @Database(
@@ -31,7 +32,7 @@ import java.sql.SQLException
     exportSchema = true
 )
 @TypeConverters(Converters::class)
-abstract class AppDatabaseSTM : RoomDatabase() {
+abstract class AppDatabaseSTM : RoomDatabase(), Bus2GoLocalDatabase {
     abstract fun routesDao() : RoutesDAO
     abstract fun tripsDao() : TripsDAO
     abstract fun stopsInfoDao() : StopsInfoDAO
@@ -43,11 +44,6 @@ abstract class AppDatabaseSTM : RoomDatabase() {
 //    abstract fun configDao(): ConfigDAO
 
     companion object {
-        //TODO eventually write the version name on filename, not in config file
-        const val FILENAME_PREFIX = "stm_data"
-        const val DATABASE_NAME = "$FILENAME_PREFIX.db"
-        const val DATABASE_PATH = "databases/$DATABASE_NAME"
-
         //we will add a calendar_dates table
         val MIGRATION_1_2 = object : Migration(1, 2) {
             @Throws(SQLException::class)
