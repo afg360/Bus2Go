@@ -85,12 +85,22 @@
                     />
             </androidx.constraintlayout.widget.ConstraintLayout>
             <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/time_date_picker_text_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Todays date is here"
+                android:textSize="24sp"
+                android:textAlignment="center"
+                app:layout_constraintTop_toBottomOf="@id/time_title_container"
+                />
+            <!-- TODO some calendar icon on the right of the text -->
+            <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/no_available_transit_left_text_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
                 android:textAlignment="center"
-                app:layout_constraintTop_toBottomOf="@id/time_title_container"
+                app:layout_constraintTop_toBottomOf="@id/time_date_picker_text_view"
                 android:text="No available transit left for today"
                 android:textSize="15pt"
                 />
@@ -98,7 +108,7 @@
                 android:id="@+id/time_recycle_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/time_title_container"
+                app:layout_constraintTop_toBottomOf="@id/time_date_picker_text_view"
                 />
         </androidx.constraintlayout.widget.ConstraintLayout>
 

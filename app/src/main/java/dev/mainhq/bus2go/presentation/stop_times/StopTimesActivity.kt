@@ -19,24 +19,30 @@ import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.presentation.base.BaseActivity
 import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.R
+import dev.mainhq.bus2go.databinding.MainActivityBinding
+import dev.mainhq.bus2go.databinding.StopTimesActivityBinding
 import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
+import dev.mainhq.bus2go.utils.launchViewModelCollectLatest
 import dev.mainhq.bus2go.utils.makeGone
 import dev.mainhq.bus2go.utils.makeInvisible
 import dev.mainhq.bus2go.utils.makeVisible
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import java.time.LocalDateTime
 
 
 class StopTimesActivity : BaseActivity() {
 
     private var fromAlarmCreation = false
 
+    private lateinit var binding: StopTimesActivityBinding
 
 	override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.stop_times_activity)
+        binding = StopTimesActivityBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         @Suppress("DEPRECATION")
         val transitData = (if (Build.VERSION.SDK_INT >= 33)
@@ -61,41 +67,39 @@ class StopTimesActivity : BaseActivity() {
 
         fromAlarmCreation = intent.getBooleanExtra("ALARMS", false)
 
-        lifecycleScope.launch(Dispatchers.Main) {
-            //FIXME there seems to be some delay when displaying the header...
-            val stopTimesHeaderDisplayModel = stopTimesViewModel.stopTimesHeaderDisplayModel.filterNotNull().first()
-            findViewById<MaterialTextView>(R.id.time_transit_route_id_text_view).also{
-                it.text = stopTimesHeaderDisplayModel.routeIdText
-                it.textSize = stopTimesHeaderDisplayModel.routeIdTextSize
-                it.setTextColor(resources.getColor(stopTimesHeaderDisplayModel.routeIdTextColor, null))
-            }
-            //FIXME use string resources to say "to blablabla"
-            findViewById<MaterialTextView>(R.id.time_direction_text_view).text = stopTimesHeaderDisplayModel.directionText
-            findViewById<MaterialTextView>(R.id.time_stop_name_text_view).text = stopTimesHeaderDisplayModel.stopNameText
+        val stopTimesHeaderDisplayModel = stopTimesViewModel.stopTimesHeaderDisplayModel
+        binding.timeTransitRouteIdTextView.apply {
+            text = stopTimesHeaderDisplayModel.routeIdText
+            textSize = stopTimesHeaderDisplayModel.routeIdTextSize
+            setTextColor(resources.getColor(stopTimesHeaderDisplayModel.routeIdTextColor, null))
+        }
+        binding.timeDirectionTextView.text = stopTimesHeaderDisplayModel.directionText
+        binding.timeStopNameTextView.text = stopTimesHeaderDisplayModel.stopNameText
+
+        val layoutManager = LinearLayoutManager(applicationContext).apply {
+            orientation = LinearLayoutManager.VERTICAL
+        }
+        val recyclerView: RecyclerView = binding.timeRecycleView.apply {
+            this.layoutManager = layoutManager
         }
 
-        val layoutManager = LinearLayoutManager(applicationContext)
-        layoutManager.orientation = LinearLayoutManager.VERTICAL
-        val recyclerView: RecyclerView = findViewById(R.id.time_recycle_view)
-        recyclerView.layoutManager = layoutManager
         val adapter = StopTimeListElemsAdapter(listOf(), fromAlarmCreation)
         recyclerView.adapter = adapter
 
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED){
-                stopTimesViewModel.arrivalTimes.filterNotNull().collect{ arrivalTimes ->
-                    val noTransitLeftTextView = findViewById<MaterialTextView>(R.id.no_available_transit_left_text_view)
-                    if (arrivalTimes.isEmpty()){
-                        adapter.update(listOf())
-                        recyclerView.makeGone()
-                        noTransitLeftTextView.makeVisible()
-                    }
-                    else{
-                        adapter.update(arrivalTimes)
-                        recyclerView.makeVisible()
-                        noTransitLeftTextView.makeInvisible()
-                    }
-                }
+        //TODO line/logic below
+        // binding.timeDatePickerTextView.text = LocalDateTime.now()
+
+        launchViewModelCollectLatest(stopTimesViewModel.arrivalTimes) { arrivalTimes ->
+            val noTransitLeftTextView = binding.noAvailableTransitLeftTextView
+            if (arrivalTimes.isEmpty()){
+                adapter.update(listOf())
+                recyclerView.makeGone()
+                noTransitLeftTextView.makeVisible()
+            }
+            else{
+                adapter.update(arrivalTimes)
+                recyclerView.makeVisible()
+                noTransitLeftTextView.makeInvisible()
             }
         }
     }

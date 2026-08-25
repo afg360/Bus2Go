@@ -70,12 +70,10 @@ class Time(localDateTime: LocalDateTime) : Parcelable, Comparable<Time> {
         if (this < time) return null
         val duration = Duration.between(LocalDateTime.of(time.localDate, time.localTime), LocalDateTime.of(this.localDate, this.localTime))
         //duration.seconds === all the time (hours + minutes) in seconds
-        var mins = duration.seconds / 60
-        val secs = duration.seconds - mins * 60
-        var hours = mins / 60
-        mins -= 60 * hours
-        var days = hours / 24
-        hours -= 24 * days
+        val mins = duration.toMinutes() % 60
+        val secs = duration.seconds % 60
+        val hours = duration.toHours() % 24
+        val days = duration.toDays()
         return Day(LocalTime.of(hours.toInt(), mins.toInt(), secs.toInt()), days)
     }
 
