@@ -10,15 +10,14 @@ import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.domain.use_case.transit.GetTransitTime
 import dev.mainhq.bus2go.domain.entity.Time
 import dev.mainhq.bus2go.domain.use_case.db_state.GetDatabaseExpiryDate
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDate
-import kotlin.invoke
 
 class StopTimesViewModel(
 	private val transitData: TransitData,
@@ -55,12 +54,27 @@ class StopTimesViewModel(
 	}
 
 
-	val arrivalTimes = getTransitTime.invoke(transitData)
-		.stateIn(
-			viewModelScope,
-			SharingStarted.WhileSubscribed(5000),
-			emptyList()
-		)
+	private val _chosenDate: MutableStateFlow<Time?> = MutableStateFlow(null)
+	val chosenDate = _chosenDate.asStateFlow()
+
+	@OptIn(ExperimentalCoroutinesApi::class)
+	val arrivalTimes = _chosenDate.flatMapLatest {
+		getTransitTime.invoke(transitData, it)
+			.stateIn(
+				viewModelScope,
+				SharingStarted.WhileSubscribed(5000),
+				emptyList()
+			)
+	}
+
+	fun setChosenDate(millis: Long) {
+		_chosenDate.update {
+			//FIXME somehow millis is selectedDate - 1, so add a day
+			val chosenDate = Time.fromMillis(millis + 24 * 3600 * 1000).resetTime()
+			if (chosenDate == Time.now().resetTime()) null
+			else chosenDate
+		}
+	}
 
 	//represents the day the data will expire
 	val maxCalendarDate = getDatabaseExpiryDate.invoke(transitData)

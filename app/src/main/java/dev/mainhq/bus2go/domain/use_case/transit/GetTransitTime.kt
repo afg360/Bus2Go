@@ -25,7 +25,10 @@ class GetTransitTime(
 	private val transitRepos: List<TransitRepository>
 ) {
 
-	operator fun invoke(transitData: TransitData): Flow<List<StopTimesDisplayModel>> {
+	/**
+	 * @param curTime The time from which to display the transit times. Usually corresponds to [Time.now].
+	 **/
+	operator fun invoke(transitData: TransitData, curTime: Time?): Flow<List<StopTimesDisplayModel>> {
 		val transitType = when(transitData){
 			is StmBusItem -> TransitType.STM
 			is ExoBusItem -> TransitType.EXO_BUS
@@ -35,7 +38,8 @@ class GetTransitTime(
 		return flow {
 			var running = true
 			while(running) {
-				when(val transitTime = transitRepos.queryRepos(transitType).getStopTimes(transitData, Time.now())) {
+				val timeToUse = curTime ?: Time.now()
+				when(val transitTime = transitRepos.queryRepos(transitType).getStopTimes(transitData, timeToUse)) {
 					is Result.Error -> {
 						running = false
 						//FIXME show some sort of error

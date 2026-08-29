@@ -26,12 +26,14 @@ import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.databinding.MainActivityBinding
 import dev.mainhq.bus2go.databinding.StopTimesActivityBinding
+import dev.mainhq.bus2go.domain.entity.Time
 import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
 import dev.mainhq.bus2go.utils.launchViewModelCollectLatest
 import dev.mainhq.bus2go.utils.makeGone
 import dev.mainhq.bus2go.utils.makeInvisible
 import dev.mainhq.bus2go.utils.makeVisible
+import dev.mainhq.bus2go.utils.toEpochDay
 import dev.mainhq.bus2go.utils.toEpochMillis
 import dev.mainhq.bus2go.utils.toast
 import kotlinx.coroutines.Dispatchers
@@ -97,10 +99,10 @@ class StopTimesActivity : BaseActivity() {
         val adapter = StopTimeListElemsAdapter(listOf(), fromAlarmCreation)
         recyclerView.adapter = adapter
 
-        //TODO line/logic below
-        binding.timeDatePickerTextView.text =
+        launchViewModelCollectLatest(stopTimesViewModel.chosenDate) {
             //Aug. 01, 2028
-            LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMM dd, yyyy"))
+            binding.timeDatePickerTextView.text = it?.getDateOfYearString() ?: Time.now().getDateOfYearString()
+        }
 
         lifecycleScope.launch(Dispatchers.Main) {
             val maxCalendarDate = stopTimesViewModel.maxCalendarDate.filterNotNull().first().toEpochMillis()
@@ -124,7 +126,16 @@ class StopTimesActivity : BaseActivity() {
                             )
                             .build()
                     )
-                    .build()
+                    .setPositiveButtonText("Confirm")
+                    .setNegativeButtonText("Cancel")
+                    .build().also { dialog ->
+                        dialog.addOnPositiveButtonClickListener {
+                            stopTimesViewModel.setChosenDate(it)
+                        }
+                        dialog.addOnNegativeButtonClickListener {
+                            dialog.dismiss()
+                        }
+                    }
                     .show(supportFragmentManager, null)
             }
         }
