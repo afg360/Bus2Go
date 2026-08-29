@@ -22,7 +22,7 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.jvm.Throws
 
 
-/** Assumes that the long in question is in milliseconds. */
+/** Assumes that the [Long] in question is in milliseconds. */
 fun Long.toEpochDay(): Long {
 	return this / (3600 * 1000 * 24)
 }
@@ -31,17 +31,17 @@ fun LocalDate.toEpochMillis(): Long {
 	return this.toEpochDay() * 24 * 3600 * 1000
 }
 
-/** Check if the localDate is lesser than today. */
+/** Check if the [LocalDate] is lesser than today. */
 fun LocalDate.isExpired(): Boolean {
 	return this < LocalDate.now()
 }
 
-/** @return A string of the form YYYYMMDD. */
+/** @return A [String] of the form YYYYMMDD. */
 fun LocalDate.toLocalDateString(): String {
 	return format(DateTimeFormatter.BASIC_ISO_DATE)
 }
 
-/** @return A string of the form Jan 01, 1970. */
+/** @return A [String] of the form Jan 01, 1970. */
 fun LocalDate.cleanString(): String {
 	return format(DateTimeFormatter.ofPattern("MMM dd, uuuu"))
 }
@@ -89,16 +89,16 @@ fun <T> MutableList<T>.swap(oldPosition: Int, newPosition: Int) {
 	this[oldPosition] = oldItem
 }
 
-/** @throws IllegalStateException When the list does not contain the repo of the transitType */
+/** @throws IllegalStateException When the list does not contain the repo of the transitType. */
 @Throws(IllegalStateException::class)
-fun List<TransitRepository>.queryRepos(transitType: TransitType): TransitRepository {
-	return this.find { it.transitType == transitType } ?: throw IllegalStateException("Transit type must exist in the list")
+fun Iterable<TransitRepository>.queryRepos(transitType: TransitType): TransitRepository {
+	return this.find { it.transitType == transitType } ?: throw IllegalStateException("Transit type must exist in the iterable")
 }
 
-/** @throws IllegalStateException When the list does not contain the repo of the transitType */
+/** @throws IllegalStateException When the list does not contain the repo of the transitType. */
 @Throws(IllegalStateException::class)
-fun List<FavouritesRepository>.queryRepos(transitType: TransitType): FavouritesRepository {
-	return this.find { it.transitType == transitType } ?: throw IllegalStateException("Transit type must exist in the list")
+fun Iterable<FavouritesRepository>.queryRepos(transitType: TransitType): FavouritesRepository {
+	return this.find { it.transitType == transitType } ?: throw IllegalStateException("Transit type must exist in the iterable")
 }
 
 fun Context.toast(text: String) {
@@ -114,9 +114,9 @@ fun Fragment.toast(text: String) {
 }
 
 /**
- * Find the cause/exception that threw this exception with the same type as given to the type parameter
- * @return null if the type of exception searched for wasn't a cause of this exception
- * Otherwise, returns the exception
+ * Find the cause/exception that threw this exception with the same type as given to the type parameter.
+ * @return null if the type of exception searched for wasn't a cause of this exception,
+ * otherwise, returns the exception.
  */
 inline fun <reified T : Throwable> Throwable.findCause(): T? {
 	var current: Throwable? = this

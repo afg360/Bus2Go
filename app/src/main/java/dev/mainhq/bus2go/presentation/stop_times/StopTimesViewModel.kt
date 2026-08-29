@@ -3,100 +3,90 @@ package dev.mainhq.bus2go.presentation.stop_times
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.entity.ExoBusItem
 import dev.mainhq.bus2go.domain.entity.ExoTrainItem
 import dev.mainhq.bus2go.domain.entity.StmBusItem
 import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.domain.use_case.transit.GetTransitTime
 import dev.mainhq.bus2go.domain.entity.Time
-import dev.mainhq.bus2go.presentation.main.home.Urgency
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import dev.mainhq.bus2go.domain.use_case.db_state.GetDatabaseExpiryDate
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.Duration
-import java.time.LocalTime
 
 class StopTimesViewModel(
+	private val transitData: TransitData,
 	private val getTransitTime: GetTransitTime,
-	private val transitData: TransitData
+	private val getDatabaseExpiryDate: GetDatabaseExpiryDate
 ): ViewModel() {
 
-	private val _stopTimesHeaderDisplayModel: MutableStateFlow<StopTimesHeaderDisplayModel?> = MutableStateFlow(null)
-	val stopTimesHeaderDisplayModel = _stopTimesHeaderDisplayModel.asStateFlow()
+	val stopTimesHeaderDisplayModel = when(transitData){
+		is ExoBusItem -> StopTimesHeaderDisplayModel(
+			R.color.basic_purple,
+			if (transitData.routeId.length < 10) 35f else 24f,
+			transitData.routeId,
+			transitData.direction,
+			transitData.stopName
+		)
+		is ExoTrainItem -> StopTimesHeaderDisplayModel(
+			R.color.orange,
+			if (transitData.routeName.length < 10) 35f else 24f,
+			//FIXME use a string resource here...
+			"Train ${transitData.routeName}",
+			transitData.direction,
+			transitData.stopName
+		)
+		is StmBusItem -> {
+			StopTimesHeaderDisplayModel(
+				R.color.basic_blue,
+				if (transitData.routeId.length < 10) 35f else 24f,
+				transitData.routeId,
+				//remove anything inside parenthesis to reduce text...
+				transitData.lastStop.replace(Regex("\\(.*\\)"), ""),
+				transitData.stopName
+			)
+		}
+	}
 
-	private val _arrivalTimes: MutableStateFlow<List<StopTimesDisplayModel>?> = MutableStateFlow(null)
-	val arrivalTimes = _arrivalTimes.asStateFlow()
+
+	private val _chosenDate: MutableStateFlow<Time?> = MutableStateFlow(null)
+	val chosenDate = _chosenDate.asStateFlow()
+
+	@OptIn(ExperimentalCoroutinesApi::class)
+	val arrivalTimes = _chosenDate.flatMapLatest {
+		getTransitTime.invoke(transitData, it)
+			.stateIn(
+				viewModelScope,
+				SharingStarted.WhileSubscribed(5000),
+				emptyList()
+			)
+	}
+
+	fun setChosenDate(millis: Long) {
+		_chosenDate.update {
+			//FIXME somehow millis is selectedDate - 1, so add a day
+			val chosenDate = Time.fromMillis(millis + 24 * 3600 * 1000).resetTime()
+			if (chosenDate == Time.now().resetTime()) null
+			else chosenDate
+		}
+	}
+
+	//represents the day the data will expire
+	val maxCalendarDate = getDatabaseExpiryDate.invoke(transitData)
+		.stateIn(
+			viewModelScope,
+			SharingStarted.WhileSubscribed(5000),
+			null
+		)
+
 
 	//TODO caches the last time for use in the last 5 min just in case
 	private val _lastTime: MutableStateFlow<Time?> = MutableStateFlow(null)
 	val lastTime = _lastTime.asStateFlow()
 
-	init {
-		_stopTimesHeaderDisplayModel.update { 
-			when(transitData){
-				is ExoBusItem -> StopTimesHeaderDisplayModel(
-					R.color.basic_purple,
-					if (transitData.routeId.length < 10) 35f else 24f,
-					transitData.routeId,
-					transitData.direction,
-					transitData.stopName
-				)
-				is ExoTrainItem -> StopTimesHeaderDisplayModel(
-					R.color.orange,
-					if (transitData.routeName.length < 10) 35f else 24f,
-					//FIXME use a string resource here...
-					"Train ${transitData.routeName}",
-					transitData.direction,
-					transitData.stopName
-				)
-				is StmBusItem -> {
-					StopTimesHeaderDisplayModel(
-						R.color.basic_blue,
-						if (transitData.routeId.length < 10) 35f else 24f,
-						transitData.routeId,
-						//remove anything inside parenthesis to reduce text...
-						transitData.lastStop.replace(Regex("\\(.*\\)"), ""),
-						transitData.stopName
-					)
-				}
-			}
-		}
-		viewModelScope.launch(Dispatchers.Default) {
-			while(true){
-				when(val transitTime = getTransitTime.invoke(Time.now(), transitData)){
-					is Result.Error -> {
-						TODO()
-					}
-
-					is Result.Success<List<Time>> -> {
-						_arrivalTimes.update { 
-							transitTime.data.map{
-								val timeRemaining = it.timeRemaining()
-								val timeLeftTextDisplay = timeRemaining?.let {
-									//FIXMe instead of checking hour, check if smaller than an hour
-									if (timeRemaining.toHours().toInt() == 0) timeRemaining.toMinutes().toString()
-									else "" //empty string that will be replaced by the resource value
-								} ?: "Passed bus???"
-								val urgency = if (timeRemaining == null || timeRemaining < Duration.ofMinutes(4))
-								Urgency.IMMINENT
-								else if (timeRemaining < Duration.ofMinutes(15)) Urgency.SOON
-								else Urgency.DISTANT
-								StopTimesDisplayModel(
-									arrivalTime = it,
-									timeLeftTextDisplay = timeLeftTextDisplay,
-									urgency = urgency
-								)
-							}
-						}
-					}
-				}
-
-				delay(1000)
-			}
-		}
-	}
 }

@@ -5,18 +5,18 @@ import dev.mainhq.bus2go.data.data_source.local.database.exo.dao.CalendarDAO
 import dev.mainhq.bus2go.data.data_source.local.database.exo.dao.RoutesDAO
 import dev.mainhq.bus2go.data.data_source.local.database.exo.dao.StopTimesDAO
 import dev.mainhq.bus2go.data.data_source.local.database.exo.dao.TripsDAO
-import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.entity.DatabaseAgency
-import dev.mainhq.bus2go.domain.entity.RouteInfo
-import dev.mainhq.bus2go.domain.entity.ExoBusItem
+import dev.mainhq.bus2go.domain.entity.ExoTrainItem
 import dev.mainhq.bus2go.domain.entity.FavouriteTransitData
-import dev.mainhq.bus2go.domain.entity.FavouriteTransitData.ExoBusFavouriteItem
 import dev.mainhq.bus2go.domain.entity.FavouriteTransitDataWithTime
 import dev.mainhq.bus2go.domain.entity.FuzzyQuery
+import dev.mainhq.bus2go.domain.entity.RouteInfo
 import dev.mainhq.bus2go.domain.entity.Time
+import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.domain.entity.TransitType
 import dev.mainhq.bus2go.domain.entity.stm.DirectionInfo
+import dev.mainhq.bus2go.domain.exceptions.Bus2GoBaseException
 import dev.mainhq.bus2go.domain.repository.TransitRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -26,18 +26,17 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
 
-//TODO handle if the result is null for when user closed and deleted the database
-class ExoRepositoryImpl(
+class ExoTrainRepositoryImpl(
 	private val calendarDAO: CalendarDAO?,
 	private val routesDAO: RoutesDAO?,
 	private val stopTimesDAO: StopTimesDAO?,
 	private val tripsDAO: TripsDAO?,
 ): TransitRepository {
 
-	override val transitType = TransitType.EXO_BUS
+	override val transitType = TransitType.EXO_TRAIN
 	override val dbName = DatabaseAgency.EXO.toString()
 
-	override val databaseExpirationDate: Flow<Result<LocalDate>> = calendarDAO?.getExpirationDate()?.map {
+	override val databaseExpirationDate: Flow<Result<LocalDate>> = calendarDAO?.getExpirationDate()?.map{
 		Result.Success(it)
 	} ?: flowOf(Result.Error(null))
 
@@ -53,26 +52,27 @@ class ExoRepositoryImpl(
 
 	override suspend fun getStopNames(direction1: String, direction2: String?, routeId: String?)
 	: Result<Pair<List<String>, List<String>>> {
-		return stopTimesDAO?.let { dao ->
+		return stopTimesDAO?.let {
 			withContext(Dispatchers.IO) {
-				val job1 = async { dao.getStopNames(direction1) }
-				direction2?.let {
-					Result.Success( Pair(job1.await(), async { dao.getStopNames(it) }.await()) )
-				} ?: Result.Success(Pair(job1.await(), emptyList()))
+				//is actually routeId
+				val job1 = async { it.getTrainStopNames("trains-$direction1", 0) }
+				val job2 = async { it.getTrainStopNames("trains-$direction1", 1) }
+				Result.Success(Pair(job1.await(), job2.await()))
 			}
 		} ?: Result.Error(null)
 	}
 
 	override suspend fun getStopTimes(transitData: TransitData, curTime: Time): Result<List<Time>> {
-		transitData as ExoBusItem
+		transitData as ExoTrainItem
 		return stopTimesDAO?.let {
 			withContext(Dispatchers.IO){
 				Result.Success(
-					it.getStopTimes(
+					it.getTrainStopTimes(
+						transitData.routeId,
 						transitData.stopName,
-						curTime.getDayString(),
+						transitData.directionId,
 						curTime.getTimeString(),
-						transitData.direction,
+						curTime.getDayString(),
 						curTime.getTodayString()
 					)
 				)
@@ -80,8 +80,11 @@ class ExoRepositoryImpl(
 		} ?: Result.Error(null)
 	}
 
-	override suspend fun getOldStopTimes(transitData: TransitData, curTime: Time): Result<List<Time>> {
-		transitData as ExoBusItem
+	override suspend fun getOldStopTimes(
+		transitData: TransitData,
+		curTime: Time,
+	): Result<List<Time>> {
+		transitData as ExoTrainItem
 		return stopTimesDAO?.let{
 			withContext(Dispatchers.IO){
 				Result.Success(
@@ -96,19 +99,21 @@ class ExoRepositoryImpl(
 		} ?: Result.Error(null)
 	}
 
-	override suspend fun getFavouriteStopTime( favouriteTransitData: FavouriteTransitData, curTime: Time)
-	: Result<FavouriteTransitDataWithTime> {
-		favouriteTransitData as ExoBusFavouriteItem
+	override suspend fun getFavouriteStopTime(
+		favouriteTransitData: FavouriteTransitData,
+		curTime: Time,
+	): Result<FavouriteTransitDataWithTime> {
+		favouriteTransitData as FavouriteTransitData.ExoTrainFavouriteItem
 		return stopTimesDAO?.let {
 			withContext(Dispatchers.IO){
 				Result.Success(
 					FavouriteTransitDataWithTime(
 						favouriteTransitData,
-						it.getFavouriteBusStopTime(
+						it.getFavouriteTrainStopTime(favouriteTransitData.routeId,
 							favouriteTransitData.stopName,
-							curTime.getDayString(),
+							favouriteTransitData.directionId,
 							curTime.getTimeString(),
-							favouriteTransitData.direction,
+							curTime.getDayString(),
 							curTime.getTodayString()
 						)
 					)
@@ -118,11 +123,7 @@ class ExoRepositoryImpl(
 	}
 
 	override suspend fun getTripHeadsigns(routeId: String): Result<List<DirectionInfo>> {
-		return tripsDAO?.let {
-			withContext(Dispatchers.IO){
-				Result.Success(it.getBusTripHeadsigns(routeId).map { DirectionInfo.ExoBusDirectionInfo(it) })
-			}
-		} ?: Result.Error(null)
+		throw object: Bus2GoBaseException("Not implemented because not used yet") { }
 	}
 
 }

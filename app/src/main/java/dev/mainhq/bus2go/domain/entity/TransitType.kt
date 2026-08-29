@@ -8,6 +8,14 @@ enum class TransitType(private val str: String) {
 
 	override fun toString() = str
 
+	fun toDatabaseAgency(): DatabaseAgency {
+		return when(this) {
+			STM -> DatabaseAgency.STM
+			EXO_BUS -> DatabaseAgency.EXO
+			EXO_TRAIN -> DatabaseAgency.EXO
+		}
+	}
+
 	companion object {
 		/** @throws IllegalArgumentException When an invalid name is given to be searched for */
 		@Throws(IllegalArgumentException::class)

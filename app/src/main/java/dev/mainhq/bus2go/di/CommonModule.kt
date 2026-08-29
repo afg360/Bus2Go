@@ -34,6 +34,7 @@ import dev.mainhq.bus2go.domain.use_case.ScheduleDownloadDatabaseTask
 import dev.mainhq.bus2go.domain.use_case.settings.SaveAllNotifSettings
 import dev.mainhq.bus2go.domain.use_case.db_state.CheckDatabaseUpdateRequired
 import dev.mainhq.bus2go.domain.use_case.db_state.DeleteDatabase
+import dev.mainhq.bus2go.domain.use_case.db_state.GetDatabaseExpiryDate
 import dev.mainhq.bus2go.domain.use_case.db_state.IsFirstTimeAppLaunched
 import dev.mainhq.bus2go.domain.use_case.db_state.SetDatabaseExpirationDate
 import dev.mainhq.bus2go.domain.use_case.db_state.SetUpdateDbDialogLastAsToday
@@ -236,6 +237,14 @@ class CommonModule(applicationContext: Context) {
 	)
 
 	val getTransitTime = GetTransitTime(
+		listOf(
+			stmRepository,
+			exoRepository,
+			exoTrainRepository
+		)
+	)
+
+	val getDatabaseExpiryDate = GetDatabaseExpiryDate(
 		listOf(
 			stmRepository,
 			exoRepository,

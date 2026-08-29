@@ -4,6 +4,10 @@ import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.entity.DatabaseAgency
 import dev.mainhq.bus2go.domain.repository.AppStateRepository
 import dev.mainhq.bus2go.domain.repository.TransitRepository
+import io.ktor.util.reflect.instanceOf
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import java.time.LocalDate
 
 class CheckDatabaseUpdateRequired(
@@ -11,95 +15,42 @@ class CheckDatabaseUpdateRequired(
 	private val transitRepos: List<TransitRepository>,
 ) {
 
-	/** @return May be null if the time has already passed. Else the database is up to date at the moment */
-	suspend operator fun invoke(): Result<List<DatabaseAgency>> {
-		val minDatesForUpdate = transitRepos.map { it.dbName to it.getDatabaseExpirationDate() }
-		if (minDatesForUpdate.isEmpty()) {
-			return Result.Error(null, "None of the databases exist...")
-		}
-		else if (minDatesForUpdate.all { it.second is Result.Error }){
-			//FIXME deal with both throwables, not only one of them...
-			return Result.Error(null, "Query error on all databases")
-		}
-
-		return Result.Success(minDatesForUpdate.filter { it.second is Result.Success<LocalDate> }
-			.filter { (it.second as Result.Success<LocalDate>).data <= LocalDate.now() }
-			.map {
-				when(it.first.lowercase()) {
-					DatabaseAgency.STM.name.lowercase() -> DatabaseAgency.STM
-					DatabaseAgency.EXO.name.lowercase() -> DatabaseAgency.EXO
-					else -> throw IllegalStateException("Invalid data")
-				}
+	/** @return If any error or no [TransitRepository] available, returns a [Flow] of a [Result.Error]. Otherwise,
+	 * returns a [Result.Success] of a list of the [DatabaseAgency] to be updated (empty if no update required). */
+	operator fun invoke(): Flow<Result<List<DatabaseAgency>>> {
+		return combine(
+			transitRepos.map { repo -> repo.databaseExpirationDate.map { repo to it } }
+		) { pairs ->
+			if (pairs.isEmpty()) {
+				listOf(null to Result.Error(null, "None of the databases exist..."))
 			}
-		)
-
-		/*
-		//TODO do not store the result bcz of bug in commented thing, but need a way to differentiate
-		// for every dbs without relying on different classes in shit when we will get a ton of
-		// different ones in the future
-		return when(val minDate = getMinDateForUpdate.invoke()){
-			//if no db downloaded, an error is sent
-			is Result.Error -> minDate
-			//null if the time has passed already
-			is Result.Success<LocalDate?> -> {
-				if (minDate.data == null) {
-					Result.Success(null)
-				}
-				else {
-					if (minDate.data <= LocalDate.now()) {
-						Result.Success(null)
-					}
-					else {
-						minDate
-					}
-				}
-			}
-		}
-		 */
-		/*
-		val response = appStateRepository.getDatabaseExpirationDate()
-		when (response){
-			is Result.Error -> {
-				//if nothing was found in the file, query the database to check for the minimum date
-				return when(val minDate = getMinDateForUpdate.invoke()){
-					//if no db downloaded, an error is sent
-					is Result.Error -> minDate
-					//null if the time has passed already
-					is Result.Success<LocalDate?> -> {
-						if (minDate.data == null) {
-							Result.Success(null)
+			else {
+				pairs.filter {
+					when(val date = it.second) {
+						is Result.Success<LocalDate> -> {
+							date.data <= LocalDate.now()
 						}
-						else {
-							//FIXME this is wrong, since it only writes for one of the databases
-							// if both are used, but the first one installed or whatnot is not set,
-							// only one of them will be accurately depicted
-							// e.g. stm is expired, exo is still good, but exo was downloaded first
-							// -> will show as if all is up to date bcz exo expiry date will be shown
-							// could make it a query directly to db instead... but annoying to then test and shit...
-							//we write the value in the file if it is not null so that we don't have to query
-							// the db again
-							setDatabaseExpirationDate.invoke(minDate.data)
-							if (minDate.data <= LocalDate.now()) {
-								Result.Success(null)
-							}
-							else {
-								minDate
-							}
+						is Result.Error -> {
+							false
 						}
 					}
 				}
 			}
-			is Result.Success<LocalDate> -> {
-				return if (response.data <= LocalDate.now()) {
-					Result.Success(null)
-				}
-				else {
-					Result.Success(response.data)
-				}
+		}.map { list ->
+			if (list.isEmpty()) {
+				Result.Success(list)
+			}
+			if (list.any { it.first == null }) {
+				Result.Error(null, null)
+			}
+			else {
+				Result.Success(
+					list.map { pair ->
+						pair.first!!.transitType.toDatabaseAgency()
+					}
+				)
 			}
 		}
-
-		 */
 	}
 
 }

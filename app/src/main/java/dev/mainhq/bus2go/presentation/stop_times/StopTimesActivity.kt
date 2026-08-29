@@ -15,28 +15,46 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.google.android.material.datepicker.CalendarConstraints
+import com.google.android.material.datepicker.CompositeDateValidator
+import com.google.android.material.datepicker.DateValidatorPointBackward
+import com.google.android.material.datepicker.DateValidatorPointForward
+import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.presentation.base.BaseActivity
 import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.R
+import dev.mainhq.bus2go.databinding.MainActivityBinding
+import dev.mainhq.bus2go.databinding.StopTimesActivityBinding
+import dev.mainhq.bus2go.domain.entity.Time
 import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
+import dev.mainhq.bus2go.utils.launchViewModelCollectLatest
 import dev.mainhq.bus2go.utils.makeGone
 import dev.mainhq.bus2go.utils.makeInvisible
 import dev.mainhq.bus2go.utils.makeVisible
+import dev.mainhq.bus2go.utils.toEpochDay
+import dev.mainhq.bus2go.utils.toEpochMillis
+import dev.mainhq.bus2go.utils.toast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import kotlin.coroutines.coroutineContext
 
 
 class StopTimesActivity : BaseActivity() {
 
     private var fromAlarmCreation = false
 
+    private lateinit var binding: StopTimesActivityBinding
 
 	override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.stop_times_activity)
+        binding = StopTimesActivityBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         @Suppress("DEPRECATION")
         val transitData = (if (Build.VERSION.SDK_INT >= 33)
@@ -50,8 +68,9 @@ class StopTimesActivity : BaseActivity() {
                     if (modelClass.isAssignableFrom(StopTimesViewModel::class.java)){
                         @Suppress("UNCHECKED_CAST")
                         return StopTimesViewModel(
+                            transitData,
                             (this@StopTimesActivity.application as Bus2GoApplication).commonModule.getTransitTime,
-                            transitData
+                            (this@StopTimesActivity.application as Bus2GoApplication).commonModule.getDatabaseExpiryDate
                         ) as T
                     }
                     throw IllegalArgumentException("Gave wrong ViewModel class")
@@ -61,41 +80,78 @@ class StopTimesActivity : BaseActivity() {
 
         fromAlarmCreation = intent.getBooleanExtra("ALARMS", false)
 
-        lifecycleScope.launch(Dispatchers.Main) {
-            //FIXME there seems to be some delay when displaying the header...
-            val stopTimesHeaderDisplayModel = stopTimesViewModel.stopTimesHeaderDisplayModel.filterNotNull().first()
-            findViewById<MaterialTextView>(R.id.time_transit_route_id_text_view).also{
-                it.text = stopTimesHeaderDisplayModel.routeIdText
-                it.textSize = stopTimesHeaderDisplayModel.routeIdTextSize
-                it.setTextColor(resources.getColor(stopTimesHeaderDisplayModel.routeIdTextColor, null))
-            }
-            //FIXME use string resources to say "to blablabla"
-            findViewById<MaterialTextView>(R.id.time_direction_text_view).text = stopTimesHeaderDisplayModel.directionText
-            findViewById<MaterialTextView>(R.id.time_stop_name_text_view).text = stopTimesHeaderDisplayModel.stopNameText
+        val stopTimesHeaderDisplayModel = stopTimesViewModel.stopTimesHeaderDisplayModel
+        binding.timeTransitRouteIdTextView.apply {
+            text = stopTimesHeaderDisplayModel.routeIdText
+            textSize = stopTimesHeaderDisplayModel.routeIdTextSize
+            setTextColor(resources.getColor(stopTimesHeaderDisplayModel.routeIdTextColor, null))
+        }
+        binding.timeDirectionTextView.text = stopTimesHeaderDisplayModel.directionText
+        binding.timeStopNameTextView.text = stopTimesHeaderDisplayModel.stopNameText
+
+        val layoutManager = LinearLayoutManager(applicationContext).apply {
+            orientation = LinearLayoutManager.VERTICAL
+        }
+        val recyclerView: RecyclerView = binding.timeRecycleView.apply {
+            this.layoutManager = layoutManager
         }
 
-        val layoutManager = LinearLayoutManager(applicationContext)
-        layoutManager.orientation = LinearLayoutManager.VERTICAL
-        val recyclerView: RecyclerView = findViewById(R.id.time_recycle_view)
-        recyclerView.layoutManager = layoutManager
         val adapter = StopTimeListElemsAdapter(listOf(), fromAlarmCreation)
         recyclerView.adapter = adapter
 
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED){
-                stopTimesViewModel.arrivalTimes.filterNotNull().collect{ arrivalTimes ->
-                    val noTransitLeftTextView = findViewById<MaterialTextView>(R.id.no_available_transit_left_text_view)
-                    if (arrivalTimes.isEmpty()){
-                        adapter.update(listOf())
-                        recyclerView.makeGone()
-                        noTransitLeftTextView.makeVisible()
+        launchViewModelCollectLatest(stopTimesViewModel.chosenDate) {
+            //Aug. 01, 2028
+            binding.timeDatePickerTextView.text = it?.getDateOfYearString() ?: Time.now().getDateOfYearString()
+        }
+
+        lifecycleScope.launch(Dispatchers.Main) {
+            val maxCalendarDate = stopTimesViewModel.maxCalendarDate.filterNotNull().first().toEpochMillis()
+
+            binding.timeDatePickerLayout.setOnClickListener {
+                MaterialDatePicker.Builder.datePicker()
+                    .setTitleText("Choose a date")
+                    .setCalendarConstraints(
+                        CalendarConstraints.Builder()
+                            .setValidator(
+                                CompositeDateValidator.allOf(
+                                    listOf(
+                                        DateValidatorPointForward.from(
+                                            LocalDate.now().toEpochMillis()
+                                        ),
+                                        DateValidatorPointBackward.before(
+                                            maxCalendarDate
+                                        )
+                                    )
+                                )
+                            )
+                            .build()
+                    )
+                    .setPositiveButtonText("Confirm")
+                    .setNegativeButtonText("Cancel")
+                    .build().also { dialog ->
+                        dialog.addOnPositiveButtonClickListener {
+                            stopTimesViewModel.setChosenDate(it)
+                        }
+                        dialog.addOnNegativeButtonClickListener {
+                            dialog.dismiss()
+                        }
                     }
-                    else{
-                        adapter.update(arrivalTimes)
-                        recyclerView.makeVisible()
-                        noTransitLeftTextView.makeInvisible()
-                    }
-                }
+                    .show(supportFragmentManager, null)
+            }
+        }
+
+
+        launchViewModelCollectLatest(stopTimesViewModel.arrivalTimes) { arrivalTimes ->
+            val noTransitLeftTextView = binding.noAvailableTransitLeftTextView
+            if (arrivalTimes.isEmpty()){
+                adapter.update(listOf())
+                recyclerView.makeGone()
+                noTransitLeftTextView.makeVisible()
+            }
+            else{
+                adapter.update(arrivalTimes)
+                recyclerView.makeVisible()
+                noTransitLeftTextView.makeInvisible()
             }
         }
     }

@@ -51,9 +51,8 @@ class MainActivityViewModel(
 	val activityFragment = _activityFragment.asStateFlow()
 
 	//use a shared flow to have the same value shared among collectors
-	private val _resp = flow {
-		emit(checkDatabaseUpdateRequired.invoke())
-	}.shareIn(viewModelScope, started = SharingStarted.WhileSubscribed(5000))
+	private val _resp = checkDatabaseUpdateRequired.invoke()
+		.shareIn(viewModelScope, started = SharingStarted.WhileSubscribed(5000))
 
 	private val _wasUpdateDialogShownToday = wasUpdateDialogShownToday.invoke()
 		.shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), replay = 1)

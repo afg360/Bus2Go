@@ -27,8 +27,9 @@ class StopTimeListElemsAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: MutableList<Any>){
-        if (payloads.isEmpty())
+        if (payloads.isEmpty()) {
             onBindViewHolder(holder, position)
+        }
         else if (payloads[0] == TIME_DISPLAY_PAYLOAD) {
             displayTimeRemaining(position, timeData[position], holder)
         }
@@ -44,7 +45,7 @@ class StopTimeListElemsAdapter(
         //the list may shrink or may be refilled (i.e. "new day")
         if (this.timeData.size != timeData.size){
             this.timeData = timeData
-            notifyItemRangeChanged(0, timeData.size)
+            notifyDataSetChanged()
         }
         else {
             this.timeData = timeData

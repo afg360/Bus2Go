@@ -22,6 +22,9 @@ import dev.mainhq.bus2go.domain.entity.stm.DirectionInfo
 import dev.mainhq.bus2go.domain.repository.TransitRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
 
@@ -37,11 +40,9 @@ class StmRepositoryImpl(
 	override val transitType = TransitType.STM
 	override val dbName = DatabaseAgency.STM.toString()
 
-	override suspend fun getDatabaseExpirationDate(): Result<LocalDate> {
-		return feedInfoDAO?.let{
-			withContext(Dispatchers.IO){ Result.Success(it.getExpirationDate()) }
-		} ?: Result.Error(null)
-	}
+	override val databaseExpirationDate: Flow<Result<LocalDate>> = feedInfoDAO?.getExpirationDate()?.map {
+		Result.Success(it)
+	} ?: /* TODO get rid of this flow call perhaps... */ flowOf(Result.Error(null))
 
 	override suspend fun getRouteInfo(routeId: FuzzyQuery): Result<List<RouteInfo>> {
 		return routesDAO?.let{

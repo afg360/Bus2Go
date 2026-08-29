@@ -2,6 +2,7 @@ package dev.mainhq.bus2go.domain.entity
 
 import android.os.Parcel
 import android.os.Parcelable
+import dev.mainhq.bus2go.utils.toEpochDay
 import java.time.DayOfWeek
 import java.time.Duration
 import java.time.LocalDate
@@ -11,11 +12,7 @@ import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
 /** Allows to do operations more easily on time based formats */
-class Time(localDateTime: LocalDateTime) : Parcelable, Comparable<Time> {
-
-    private val localTime = localDateTime.toLocalTime()
-    /*private*/ val localDate = localDateTime.toLocalDate()
-
+class Time(private val localDateTime: LocalDateTime) : Parcelable, Comparable<Time> {
 
     constructor(localDate: LocalDate, localTime: LocalTime) : this(
         LocalDateTime.of(localDate, localTime)
@@ -56,7 +53,7 @@ class Time(localDateTime: LocalDateTime) : Parcelable, Comparable<Time> {
     operator fun minus(time : Time): Duration? {
         //Takes the sec arg first...
         if (this < time) return null
-        return Duration.between(LocalDateTime.of(time.localDate, time.localTime), LocalDateTime.of(this.localDate, this.localTime))
+        return Duration.between(time.localDateTime, localDateTime)
 //        //duration.seconds === all the time (hours + minutes) in seconds
 //        var mins = duration.seconds / 60
 //        val secs = duration.seconds - mins * 60
@@ -68,14 +65,12 @@ class Time(localDateTime: LocalDateTime) : Parcelable, Comparable<Time> {
     /** @return null if this < time. */
     fun minusDays(time: Time): Day? {
         if (this < time) return null
-        val duration = Duration.between(LocalDateTime.of(time.localDate, time.localTime), LocalDateTime.of(this.localDate, this.localTime))
+        val duration = Duration.between(time.localDateTime, localDateTime)
         //duration.seconds === all the time (hours + minutes) in seconds
-        var mins = duration.seconds / 60
-        val secs = duration.seconds - mins * 60
-        var hours = mins / 60
-        mins -= 60 * hours
-        var days = hours / 24
-        hours -= 24 * days
+        val mins = duration.toMinutes() % 60
+        val secs = duration.seconds % 60
+        val hours = duration.toHours() % 24
+        val days = duration.toDays()
         return Day(LocalTime.of(hours.toInt(), mins.toInt(), secs.toInt()), days)
     }
 
@@ -92,17 +87,33 @@ class Time(localDateTime: LocalDateTime) : Parcelable, Comparable<Time> {
     }
 
     override operator fun compareTo(other : Time): Int {
-        return LocalDateTime.of(this.localDate, this.localTime)
-            .compareTo(LocalDateTime.of(other.localDate, other.localTime))
+        return localDateTime.compareTo(other.localDateTime)
     }
 
     /**
      * Get a string representing the hour, minute and secs.
      * @return Format: HH:MM:SS ([DateTimeFormatter.ISO_TIME])
      **/
-    fun getTimeString(): String{
+    fun getTimeString(): String {
         //ignore nanosecs
-        return this.localTime.format(DateTimeFormatter.ISO_TIME).split(".")[0]
+        return localDateTime.format(DateTimeFormatter.ISO_TIME).split(".")[0]
+    }
+
+    /**
+     * Get a string representing the year, month and day.
+     * @return Format example: Aug. 01, 2023
+     **/
+    fun getDateOfYearString(): String {
+        //ignore nanosecs
+        return localDateTime.format(DateTimeFormatter.ofPattern("MMM dd, yyyy"))
+    }
+
+    /**
+     * Get a string represented by [dateTimeFormatter].
+     **/
+    private fun format(dateTimeFormatter: DateTimeFormatter): String {
+        //ignore nanosecs
+        return localDateTime.format(dateTimeFormatter)
     }
 
     /**
@@ -110,14 +121,14 @@ class Time(localDateTime: LocalDateTime) : Parcelable, Comparable<Time> {
      * @return Format: YYYYMMDD ([DateTimeFormatter.BASIC_ISO_DATE])
      **/
     fun getTodayString(): String {
-        return this.localDate.format(DateTimeFormatter.BASIC_ISO_DATE)
+        return localDateTime.format(DateTimeFormatter.BASIC_ISO_DATE)
     }
 
     /**
      * Get the 1 letter representation of the day in the week of this Time object.
      **/
     fun getDayString(): String {
-        return when (this.localDate.dayOfWeek) {
+        return when (localDateTime.dayOfWeek) {
             DayOfWeek.SUNDAY -> "d"
             DayOfWeek.MONDAY -> "m"
             DayOfWeek.TUESDAY -> "t"
@@ -130,7 +141,11 @@ class Time(localDateTime: LocalDateTime) : Parcelable, Comparable<Time> {
     }
 
     override fun toString(): String {
-        return "${this.localDate}, ${this.localTime}"
+        return "${localDateTime.toLocalDate()}, ${localDateTime.toLocalTime()}"
+    }
+
+    fun resetTime(): Time {
+        return Time(localDateTime.toLocalDate(), LocalTime.of(4, 0, 0))
     }
 
     override fun describeContents(): Int {
@@ -138,25 +153,25 @@ class Time(localDateTime: LocalDateTime) : Parcelable, Comparable<Time> {
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeInt(localDate.year)
-        parcel.writeInt(localDate.monthValue)
-        parcel.writeInt(localDate.dayOfMonth)
-        parcel.writeInt(localTime.hour)
-        parcel.writeInt(localTime.minute)
-        parcel.writeInt(localTime.second)
+        parcel.writeInt(localDateTime.year)
+        parcel.writeInt(localDateTime.monthValue)
+        parcel.writeInt(localDateTime.dayOfMonth)
+        parcel.writeInt(localDateTime.hour)
+        parcel.writeInt(localDateTime.minute)
+        parcel.writeInt(localDateTime.second)
     }
 
 
     override fun equals(other: Any?): Boolean {
         if (other is Time){
             val tmp : Time = other
-            return this.localDate == tmp.localDate && this.localTime == tmp.localTime
+            return localDateTime == tmp.localDateTime
         }
         return false
     }
 
     override fun hashCode(): Int {
-        return this.localDate.hashCode() + this.localTime.hashCode()
+        return localDateTime.hashCode() + this.localDateTime.hashCode()
     }
 
     companion object CREATOR : Parcelable.Creator<Time> {
@@ -197,7 +212,7 @@ class Time(localDateTime: LocalDateTime) : Parcelable, Comparable<Time> {
             val list : List<String> = time.split(":")
             try {
                 return if (list[0].toInt() >= 24){
-                    return Time(localDate.plusDays(1), LocalTime.of(list[0].toInt() % 24, list[1].toInt(), list[2].toInt()))
+                    Time(localDate.plusDays(1), LocalTime.of(list[0].toInt() % 24, list[1].toInt(), list[2].toInt()))
                 }
                 else Time(localDate, LocalTime.parse(time, DateTimeFormatter.ISO_LOCAL_TIME))
             }
@@ -211,6 +226,11 @@ class Time(localDateTime: LocalDateTime) : Parcelable, Comparable<Time> {
         fun fromUnix(unixTime : Long) : Time {
             //get Canada timeZone which is UTC - 5
             return Time(LocalDateTime.ofEpochSecond(unixTime, 0, ZoneOffset.ofHours(-5)))
+        }
+
+        fun fromMillis(millis : Long) : Time {
+            //get Canada timeZone which is UTC - 5
+            return Time(LocalDateTime.ofEpochSecond(millis / 1000, 0, ZoneOffset.ofHours(-5)))
         }
 
     }
