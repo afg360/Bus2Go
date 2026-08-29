@@ -116,6 +116,7 @@ class SettingsDownloadDatabasesFragment(): Fragment() {
 				true
 			},
 			notDownloadedOnClickListener = { dbState, linearProgressBar ->
+				dbState as DatabaseState
 				MaterialAlertDialogBuilder(requireContext())
 					.setTitle("Download ${dbState.db}?")
 					.setMessage("Are you sure to download the database for ${dbState.db}?")
@@ -147,7 +148,7 @@ class SettingsDownloadDatabasesFragment(): Fragment() {
 		private val onDownloadOnClickListener: (DatabaseAgency) -> Unit,
 		private val onDownloadCompletedOnClickListener: () -> Unit,
 		private val deleteDownloadedOnLongClickListener: (DatabaseState.DatabaseDownloaded) -> Boolean,
-		private val notDownloadedOnClickListener: (DatabaseState.DatabaseNotDownloaded, LinearProgressIndicator) -> Unit,
+		private val notDownloadedOnClickListener: (DatabaseState.NotDownloaded, LinearProgressIndicator) -> Unit,
 	): RecyclerView.Adapter<MyAdapter.ViewHolder>() {
 
 		fun setList(list: List<DatabaseState>) {
@@ -184,7 +185,7 @@ class SettingsDownloadDatabasesFragment(): Fragment() {
 					holder.itemView.setOnClickListener{ downloadedOnClickListener(data) }
 					holder.itemView.setOnLongClickListener { deleteDownloadedOnLongClickListener(data) }
 				}
-				is DatabaseState.DatabaseNotDownloaded -> {
+				is DatabaseState.DatabaseDownloadError, is DatabaseState.DatabaseNotDownloaded -> {
 					holder.progressBar.makeGone()
 					holder.databaseDownloadStateIcon.setImageResource(R.drawable.error_sign)
 					holder.databaseDownloadFileSize.makeGone()

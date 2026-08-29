@@ -47,10 +47,17 @@ class ObserveDownloadDatabaseTask(
 			) { pairs ->
 				pairs.map { (databaseState, notif) ->
 					notif?.let {
-						DatabaseState.DatabaseDownloading(
-							databaseState.db,
-							it
-						)
+						when(it) {
+							is NotificationType.DbUpdateError -> {
+								DatabaseState.DatabaseDownloadError(databaseState.db)
+							}
+							else -> {
+								DatabaseState.DatabaseDownloading(
+									databaseState.db,
+									it
+								)
+							}
+						}
 					} ?: databaseState
 				}
 			}
