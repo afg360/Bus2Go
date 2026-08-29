@@ -17,6 +17,7 @@ import dev.mainhq.bus2go.domain.repository.TransitRepository
 import dev.mainhq.bus2go.utils.toLocalDateString
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
@@ -148,20 +149,20 @@ class AppStateRepositoryImpl(
 	//TODO could instead have a private function that takes a map function, and the update database
 	// function be that map function that way when it is called it mutates as we wish the correct
 	// agency that is downloading
-	override val databases: Flow<List<DatabaseState>> = flow {
-		val list = mutableListOf<DatabaseState>()
+	override val databases: Flow<List<DatabaseState>> = combine(
+		flows = repos.map { repo ->
 		//Version number may exist, but during download some shit might have happened to cancel
 		// download of the actual database, need to check for that edge case
-		repos.forEach { repo ->
-			val repoName = DatabaseAgency.getEntry(repo.dbName)
-			when (val expirationDate = repo.getDatabaseExpirationDate()) {
+		val repoName = DatabaseAgency.getEntry(repo.dbName)
+		repo.databaseExpirationDate.map { expirationDate ->
+			when(expirationDate) {
 				is Result.Error -> {
 					//FIXMe doesnt work yet
 					// this part may happen if the file doesn't exist, or when the file was just extracted
 					// therefore need to check if the file exists in the dir
-					databasesDir.listFiles()?.find { it.name.matches("${repoName.toString().lowercase()}_data".toRegex()) }?.also {
-						list.add(DatabaseState.NeedAppRestart(repoName))
-					} ?: list.add(DatabaseState.DatabaseNotDownloaded(repoName))
+					databasesDir.listFiles()?.find { it.name.matches("${repoName.toString().lowercase()}_data".toRegex()) }?.let {
+						DatabaseState.NeedAppRestart(repoName)
+					} ?: DatabaseState.DatabaseNotDownloaded(repoName)
 				}
 
 				is Result.Success<LocalDate> -> {
@@ -170,9 +171,8 @@ class AppStateRepositoryImpl(
 							repoName
 						)]
 					if (sqliteVersion == null) {
-						list.add(DatabaseState.DatabaseNotDownloaded(repoName))
+						DatabaseState.DatabaseNotDownloaded(repoName)
 					} else {
-						list.add(
 							DatabaseState.DatabaseDownloaded(
 								DatabaseAgency.STM,
 								sqliteVersion,
@@ -183,14 +183,12 @@ class AppStateRepositoryImpl(
 									databasesDir,
 									"${repoName.toString().lowercase()}_data.db"
 								).length() / 1_000_000L
-							)
 						)
 					}
 				}
 			}
 		}
-		emit(list)
-	}
+	}) { it.toList() }
 
 	override val databaseWorkNameState = appStateDataStore.data.map { preferences ->
 		DatabaseAgency.entries.associateWith {

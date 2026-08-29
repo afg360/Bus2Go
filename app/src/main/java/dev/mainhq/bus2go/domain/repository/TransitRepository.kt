@@ -10,6 +10,7 @@ import dev.mainhq.bus2go.domain.entity.Time
 import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.domain.entity.TransitType
 import dev.mainhq.bus2go.domain.entity.stm.DirectionInfo
+import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 
 /**
@@ -20,7 +21,7 @@ interface TransitRepository {
 	val dbName: String
 
 	/** @return Latest calendar date before data not being up to date. **/
-	suspend fun getDatabaseExpirationDate(): Result<LocalDate>
+	val databaseExpirationDate: Flow<Result<LocalDate>>
 
 	/** Queries for buses and trains with a name matching with the query. */
 	suspend fun getRouteInfo(routeId: FuzzyQuery): Result<List<RouteInfo>>

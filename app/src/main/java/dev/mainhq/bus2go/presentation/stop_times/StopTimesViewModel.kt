@@ -9,14 +9,21 @@ import dev.mainhq.bus2go.domain.entity.StmBusItem
 import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.domain.use_case.transit.GetTransitTime
 import dev.mainhq.bus2go.domain.entity.Time
+import dev.mainhq.bus2go.domain.use_case.db_state.GetDatabaseExpiryDate
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import java.time.LocalDate
+import kotlin.invoke
 
 class StopTimesViewModel(
+	private val transitData: TransitData,
 	private val getTransitTime: GetTransitTime,
-	private val transitData: TransitData
+	private val getDatabaseExpiryDate: GetDatabaseExpiryDate
 ): ViewModel() {
 
 	val stopTimesHeaderDisplayModel = when(transitData){
@@ -54,6 +61,15 @@ class StopTimesViewModel(
 			SharingStarted.WhileSubscribed(5000),
 			emptyList()
 		)
+
+	//represents the day the data will expire
+	val maxCalendarDate = getDatabaseExpiryDate.invoke(transitData)
+		.stateIn(
+			viewModelScope,
+			SharingStarted.WhileSubscribed(5000),
+			null
+		)
+
 
 	//TODO caches the last time for use in the last 5 min just in case
 	private val _lastTime: MutableStateFlow<Time?> = MutableStateFlow(null)

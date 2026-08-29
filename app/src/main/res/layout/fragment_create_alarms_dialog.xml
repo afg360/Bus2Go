@@ -52,7 +52,7 @@
                     android:text="Choose days"
                     android:textAlignment="center"
                     android:textSize="30sp"
-                    android:drawableStart="@drawable/date_range"
+                    android:drawableStart="@drawable/calendar"
                     />
                 <include layout="@layout/day_of_the_week_layout"/>
                 <com.google.android.material.divider.MaterialDivider

@@ -20,6 +20,9 @@ import dev.mainhq.bus2go.domain.exceptions.Bus2GoBaseException
 import dev.mainhq.bus2go.domain.repository.TransitRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
 
@@ -33,9 +36,9 @@ class ExoTrainRepositoryImpl(
 	override val transitType = TransitType.EXO_TRAIN
 	override val dbName = DatabaseAgency.EXO.toString()
 
-	override suspend fun getDatabaseExpirationDate(): Result<LocalDate> {
-		return calendarDAO?.let{ Result.Success(it.getExpirationDate()) } ?: Result.Error(null)
-	}
+	override val databaseExpirationDate: Flow<Result<LocalDate>> = calendarDAO?.getExpirationDate()?.map{
+		Result.Success(it)
+	} ?: flowOf(Result.Error(null))
 
 	override suspend fun getRouteInfo(routeId: FuzzyQuery): Result<List<RouteInfo>> {
 		return routesDAO?.let{

@@ -4,6 +4,7 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 
+
 /** Entity to interface with data coming from dataStore */
 sealed class TransitData: Parcelable {
 	abstract val routeId : String
@@ -14,7 +15,17 @@ sealed class TransitData: Parcelable {
 	fun compareMainAttr(other: TransitData): Boolean {
 		return routeId == other.routeId && stopName == other.stopName && direction == other.direction
 	}
+
+	val transitType: TransitType
+		get() {
+			return when(this) {
+				is StmBusItem -> TransitType.STM
+				is ExoBusItem -> TransitType.EXO_BUS
+				is ExoTrainItem -> TransitType.EXO_TRAIN
+			}
+		}
 }
+
 
 fun <T: FavouriteTransitData, R: TransitData> Iterable<T>.compareTransitData(other: R): Boolean {
 	this.forEach {
@@ -26,7 +37,7 @@ fun <T: FavouriteTransitData, R: TransitData> Iterable<T>.compareTransitData(oth
 }
 
 /**
- * @return The FavouriteTransitData in the iterable equivalent to the input TransitData
+ * @return The FavouriteTransitData in the [Iterable] equivalent to the input [TransitData].
  * */
 fun <T: FavouriteTransitData, R: TransitData> Iterable<T>.getSameFavouriteItem(other: R): T? {
 	this.forEach {

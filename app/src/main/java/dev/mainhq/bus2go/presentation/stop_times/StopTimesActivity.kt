@@ -15,6 +15,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.google.android.material.datepicker.CalendarConstraints
+import com.google.android.material.datepicker.CompositeDateValidator
+import com.google.android.material.datepicker.DateValidatorPointBackward
+import com.google.android.material.datepicker.DateValidatorPointForward
+import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.presentation.base.BaseActivity
 import dev.mainhq.bus2go.Bus2GoApplication
@@ -27,10 +32,15 @@ import dev.mainhq.bus2go.utils.launchViewModelCollectLatest
 import dev.mainhq.bus2go.utils.makeGone
 import dev.mainhq.bus2go.utils.makeInvisible
 import dev.mainhq.bus2go.utils.makeVisible
+import dev.mainhq.bus2go.utils.toEpochMillis
+import dev.mainhq.bus2go.utils.toast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import kotlin.coroutines.coroutineContext
 
 
 class StopTimesActivity : BaseActivity() {
@@ -56,8 +66,9 @@ class StopTimesActivity : BaseActivity() {
                     if (modelClass.isAssignableFrom(StopTimesViewModel::class.java)){
                         @Suppress("UNCHECKED_CAST")
                         return StopTimesViewModel(
+                            transitData,
                             (this@StopTimesActivity.application as Bus2GoApplication).commonModule.getTransitTime,
-                            transitData
+                            (this@StopTimesActivity.application as Bus2GoApplication).commonModule.getDatabaseExpiryDate
                         ) as T
                     }
                     throw IllegalArgumentException("Gave wrong ViewModel class")
@@ -87,7 +98,37 @@ class StopTimesActivity : BaseActivity() {
         recyclerView.adapter = adapter
 
         //TODO line/logic below
-        // binding.timeDatePickerTextView.text = LocalDateTime.now()
+        binding.timeDatePickerTextView.text =
+            //Aug. 01, 2028
+            LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMM dd, yyyy"))
+
+        lifecycleScope.launch(Dispatchers.Main) {
+            val maxCalendarDate = stopTimesViewModel.maxCalendarDate.filterNotNull().first().toEpochMillis()
+
+            binding.timeDatePickerLayout.setOnClickListener {
+                MaterialDatePicker.Builder.datePicker()
+                    .setTitleText("Choose a date")
+                    .setCalendarConstraints(
+                        CalendarConstraints.Builder()
+                            .setValidator(
+                                CompositeDateValidator.allOf(
+                                    listOf(
+                                        DateValidatorPointForward.from(
+                                            LocalDate.now().toEpochMillis()
+                                        ),
+                                        DateValidatorPointBackward.before(
+                                            maxCalendarDate
+                                        )
+                                    )
+                                )
+                            )
+                            .build()
+                    )
+                    .build()
+                    .show(supportFragmentManager, null)
+            }
+        }
+
 
         launchViewModelCollectLatest(stopTimesViewModel.arrivalTimes) { arrivalTimes ->
             val noTransitLeftTextView = binding.noAvailableTransitLeftTextView

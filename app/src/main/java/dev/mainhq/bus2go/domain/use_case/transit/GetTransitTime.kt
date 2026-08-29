@@ -37,8 +37,8 @@ class GetTransitTime(
 			while(running) {
 				when(val transitTime = transitRepos.queryRepos(transitType).getStopTimes(transitData, Time.now())) {
 					is Result.Error -> {
-						//TODO show some sort of error
 						running = false
+						//FIXME show some sort of error
 						emit(
 							listOf(
 								StopTimesDisplayModel(
