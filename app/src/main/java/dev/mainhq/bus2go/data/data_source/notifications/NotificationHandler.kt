@@ -6,13 +6,13 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.domain.entity.DatabaseAgency
+import dev.mainhq.bus2go.utils.toast
 
 class NotificationHandler(private val appContext: Context) {
 
@@ -105,7 +105,7 @@ class NotificationHandler(private val appContext: Context) {
 			)
 			.build()
 			.also { postNotif(appUpdateNotifId, it) }
-		Toast.makeText(appContext, "Update Successful. Go to notifs", Toast.LENGTH_SHORT).show()
+		appContext.toast("Update Successful. Go to notifs")
 	}
 
 	fun notifyAppUpdateFailed(){
@@ -119,7 +119,7 @@ class NotificationHandler(private val appContext: Context) {
 		).setOngoing(false).setProgress(0, 0, false)
 			.build()
 			.also { postNotif(appUpdateNotifId, it) }
-		Toast.makeText(appContext, "App Update Error", Toast.LENGTH_SHORT).show()
+		appContext.toast("App Update Error")
 	}
 
 	/* ---------------------- Database Update Notifications ------------------------- */
@@ -195,11 +195,11 @@ class NotificationHandler(private val appContext: Context) {
 			.setContentIntent(pendingIntent)
 			.build()
 			.also { postNotif(database.ordinal + baseDbUpdateNotifId, it) }
-		Toast.makeText(appContext, "Update Successful. Restart App", Toast.LENGTH_SHORT).show()
+		appContext.toast("Update Successful. Restart App")
 	}
 
 	//TODO
-	fun notifyDbDownloadFailed(database: DatabaseAgency){
+	fun notifyDbDownloadFailed(message: String?, database: DatabaseAgency){
 		createNotificationBuilder(
 			channelId = DB_UPDATES,
 			title = "Error trying to download database",
@@ -209,7 +209,12 @@ class NotificationHandler(private val appContext: Context) {
 		).setOngoing(false).setProgress(0, 0, false)
 			.build()
 			.also { postNotif(database.ordinal + baseDbUpdateNotifId, it) }
-		Toast.makeText(appContext, "Database Download Error", Toast.LENGTH_SHORT).show()
+		if (message == null) {
+			appContext.toast("Database Download Error")
+		}
+		else {
+			appContext.toast(message)
+		}
 	}
 
 	//TODO other possible notifications...?

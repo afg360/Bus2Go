@@ -17,6 +17,7 @@ import dev.mainhq.bus2go.domain.entity.DatabaseAgency
 import dev.mainhq.bus2go.domain.entity.NotificationType
 import dev.mainhq.bus2go.domain.entity.Progress
 import dev.mainhq.bus2go.domain.exceptions.NetworkException
+import dev.mainhq.bus2go.utils.findCause
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -84,7 +85,7 @@ class DatabaseDownloadManagerWorker(
 			catch (e: Exception) {
 				Log.e("DB_WORKER", "An exception occurred...\n ${e.message}")
 				withContext(Dispatchers.Main){
-					notificationsRepository.notifyDbUpdates(NotificationType.DbUpdateError(), databaseAgency)
+					notificationsRepository.notifyDbUpdates(NotificationType.DbUpdateError(e.message), databaseAgency)
 				}
 				Result.failure()
 			}

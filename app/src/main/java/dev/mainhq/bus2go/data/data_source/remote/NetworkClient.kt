@@ -59,8 +59,8 @@ object NetworkClient {
 	}
 
 	/**
-	 * @return A Result.Success if no exception AND no http error occurred. Otherwise returns a
-	 * Result.Error
+	 * @return A Result.Success if no exception AND no http error occurred. Otherwise, returns a
+	 * [Result.Error]
 	 * @throws IllegalArgumentException
 	 * @throws ConnectTimeoutException
 	 * @throws UnknownHostException
@@ -108,7 +108,7 @@ object NetworkClient {
 	/** A helper function dealing with formatting correctly the network call and doing basic checks */
 	suspend fun <T> call(
 		url: Url,
-		onError: () -> Result<T>,
+		onError: (Throwable?) -> Result<T>,
 		onSuccess: suspend (Result.Success<ByteReadChannel>) -> T,
 		networkMonitor: NetworkMonitor,
 		logger: Logger?,
@@ -124,7 +124,7 @@ object NetworkClient {
 			//if we receive an Error, then the url is wrong
 			logger?.debug(tag, url.toString())
 			return when(val res = get(url, isLocal)){
-				is Result.Error -> onError()
+				is Result.Error -> onError(res.throwable)
 				is Result.Success<ByteReadChannel> -> Result.Success(onSuccess(res))
 			}
 		}

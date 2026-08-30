@@ -51,7 +51,7 @@ class SettingsMainFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentSettingsMainBinding.inflate(layoutInflater)
         return binding.root
     }
@@ -157,9 +157,7 @@ class SettingsMainFragment : Fragment() {
                         .setTitle("Delete Server Entry?")
                         .setMessage("Are you sure you want to delete the server?")
                         .setPositiveButton("Yes") { innerDialogInterface, _ ->
-                            viewModel.setDialogIsSelfHosted(true)
-                            viewModel.setDialogInput("")
-                            viewModel.submitDialogFields()
+                            viewModel.deleteServerEntry()
                             innerDialogInterface.dismiss()
                             dialogInterface.dismiss()
                         }

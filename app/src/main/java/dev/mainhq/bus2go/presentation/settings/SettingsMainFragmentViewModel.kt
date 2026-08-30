@@ -161,6 +161,13 @@ class SettingsMainFragmentViewModel(
 		}
 	}
 
+	fun deleteServerEntry() {
+		viewModelScope.launch {
+			settingsRepository.setBus2GoServer(ServerChoice("", _dialogIsSelfHosted.value))
+			//TODO delete selfsigned certificate
+		}
+	}
+
 	fun acceptSelfSignedCert() {
 		viewModelScope.launch {
 			acceptSelfSignedCertificate.invoke(_warnUser.first().cert)

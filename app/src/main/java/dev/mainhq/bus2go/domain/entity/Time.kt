@@ -230,7 +230,7 @@ class Time(private val localDateTime: LocalDateTime) : Parcelable, Comparable<Ti
 
         fun fromMillis(millis : Long) : Time {
             //get Canada timeZone which is UTC - 5
-            return Time(LocalDateTime.ofEpochSecond(millis / 1000, 0, ZoneOffset.ofHours(-5)))
+            return Time(LocalDateTime.ofEpochSecond(millis / 1000, 0, ZoneOffset.ofHours(0)))
         }
 
     }

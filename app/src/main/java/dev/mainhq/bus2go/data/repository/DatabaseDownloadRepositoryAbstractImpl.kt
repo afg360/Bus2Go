@@ -80,7 +80,7 @@ abstract class DatabaseDownloadRepositoryAbstractImpl: DatabaseDownloadRepositor
 				port = defaultPort,
 				pathSegments = listOf("api", "download", API_VERSION, databaseAgency.name.lowercase(), "version")
 			).build(),
-			onError = { Result.Error(null, "Wrong call to api...?") },
+			onError = { Result.Error(it, "Wrong call to api...?") },
 			onSuccess = { res ->
 				Json.decodeFromString<JsonObject>(res.data.readRemaining().readText())["version"]
 					?.jsonPrimitive?.int ?: -1

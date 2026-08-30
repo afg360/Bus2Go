@@ -1,5 +1,7 @@
 package dev.mainhq.bus2go.data.data_source.local
 
+import dev.mainhq.bus2go.domain.entity.Time
+import dev.mainhq.bus2go.utils.toTime
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.io.File
@@ -51,12 +53,12 @@ class LocalKeyStore(
 
 	fun isExpired(cert: X509Certificate): Boolean {
 		//check if the dates are respected
-		return cert.notAfter < Date.from(Instant.now())
+		return cert.notAfter.toInstant().toTime() < Time.now()
 	}
 
 	fun isTrusted(cert: X509Certificate): Boolean {
 		//need to compare the contents
-		return memory.get(CERT_ENTRY)?.encoded?.contentEquals(cert.encoded) ?: false
+		return memory[CERT_ENTRY]?.encoded?.contentEquals(cert.encoded) ?: false
 	}
 
 }

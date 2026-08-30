@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import dev.mainhq.bus2go.domain.entity.Time
 import dev.mainhq.bus2go.domain.entity.TransitType
 import dev.mainhq.bus2go.domain.repository.FavouritesRepository
 import dev.mainhq.bus2go.domain.repository.TransitRepository
@@ -16,6 +17,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.time.Instant
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlin.coroutines.CoroutineContext
@@ -44,6 +46,10 @@ fun LocalDate.toLocalDateString(): String {
 /** @return A [String] of the form Jan 01, 1970. */
 fun LocalDate.cleanString(): String {
 	return format(DateTimeFormatter.ofPattern("MMM dd, uuuu"))
+}
+
+fun Instant.toTime(): Time {
+	return Time.fromMillis(this.toEpochMilli())
 }
 
 fun View.makeVisible(){
