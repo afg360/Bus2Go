@@ -6,6 +6,7 @@ import androidx.work.WorkInfo
 import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.entity.DatabaseAgency
 import dev.mainhq.bus2go.domain.entity.NotificationType
+import dev.mainhq.bus2go.domain.entity.Time
 import dev.mainhq.bus2go.domain.repository.SettingsRepository
 import dev.mainhq.bus2go.domain.use_case.ObserveDownloadDatabaseTask
 import dev.mainhq.bus2go.domain.use_case.ScheduleDownloadDatabaseTask
@@ -97,13 +98,13 @@ class MainActivityViewModel(
 
 	fun setUpdateDbExpirationDate(days: Int){
 		viewModelScope.launch {
-			setDatabaseExpirationDate.invoke(LocalDate.now().plusDays(days.toLong()))
+			setDatabaseExpirationDate.invoke(Time(LocalDate.now().plusDays(days.toLong())))
 		}
 	}
 
-	fun setUpdateDbExpirationDate(unixDay: Long){
+	fun setUpdateDbExpirationDate(unixMillis: Long){
 		viewModelScope.launch {
-			setDatabaseExpirationDate.invoke(LocalDate.ofEpochDay(unixDay))
+			setDatabaseExpirationDate.invoke(Time.fromMillis(unixMillis))
 			//FIXME setup the app theme?
 		}
 	}

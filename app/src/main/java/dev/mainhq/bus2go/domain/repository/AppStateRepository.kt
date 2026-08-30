@@ -3,7 +3,7 @@ package dev.mainhq.bus2go.domain.repository
 import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.entity.DatabaseState
 import dev.mainhq.bus2go.domain.entity.DatabaseAgency
-import dev.mainhq.bus2go.domain.entity.Progress
+import dev.mainhq.bus2go.domain.entity.Time
 import kotlinx.coroutines.flow.Flow
 import java.security.cert.X509Certificate
 import java.time.LocalDate
@@ -16,7 +16,7 @@ interface AppStateRepository {
 	 * Could also represent the date when the user would like to next receive some sort of notification
 	 **/
 	suspend fun getNextDatabaseExpirationNotifDate(): Result<LocalDate>
-	suspend fun setNextDatabaseExpirationNotifDate(localDate: LocalDate)
+	suspend fun setNextDatabaseExpirationNotifDate(time: Time)
 
 	/** Gives a list of garbage files downloaded by the application (old databases, part files, etc.) */
 	suspend fun getGarbageFiles(): List<String>
@@ -35,7 +35,7 @@ interface AppStateRepository {
 
 	/** Gets whether or not the dialog for updating databases was shown today */
 	fun getDbUpdateDialogLastShownDate(): Flow<Result<LocalDate>>
-	suspend fun setUpdateDbDialogLastShownDate(date: LocalDate)
+	suspend fun setUpdateDbDialogLastShownDate(time: Time)
 
 	/** Gets the version of the saved local input agency database */
 	suspend fun getDatabaseVersion(databaseAgency: DatabaseAgency): Int

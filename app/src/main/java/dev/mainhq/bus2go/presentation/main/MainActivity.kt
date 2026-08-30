@@ -204,7 +204,7 @@ class MainActivity : BaseActivity() {
                             .setNegativeButtonText("Cancel")
                             .build()
                         datePicker.addOnPositiveButtonClickListener {
-                            mainActivityViewModel.setUpdateDbExpirationDate(it.toEpochDay())
+                            mainActivityViewModel.setUpdateDbExpirationDate(it)
                             dialogInterface.dismiss()
                         }
                         datePicker.addOnNegativeButtonClickListener {

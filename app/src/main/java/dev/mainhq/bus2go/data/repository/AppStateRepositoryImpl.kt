@@ -5,21 +5,18 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import dev.mainhq.bus2go.data.data_source.local.LocalKeyStore
-import dev.mainhq.bus2go.data.data_source.local.database.exo.AppDatabaseExo
-import dev.mainhq.bus2go.data.data_source.local.database.stm.AppDatabaseSTM
 import dev.mainhq.bus2go.data.data_source.local.datastore.app_state.AppStateDataStoreKeys
 import dev.mainhq.bus2go.data.repository.DatabaseDownloadRepositoryAbstractImpl.Companion.COMPRESSION_EXT
 import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.entity.DatabaseState
 import dev.mainhq.bus2go.domain.entity.DatabaseAgency
+import dev.mainhq.bus2go.domain.entity.Time
 import dev.mainhq.bus2go.domain.repository.AppStateRepository
 import dev.mainhq.bus2go.domain.repository.TransitRepository
-import dev.mainhq.bus2go.utils.toLocalDateString
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -44,10 +41,10 @@ class AppStateRepositoryImpl(
 		}
 	}
 
-	override suspend fun setNextDatabaseExpirationNotifDate(localDate: LocalDate) {
+	override suspend fun setNextDatabaseExpirationNotifDate(time: Time) {
 		withContext(Dispatchers.IO) {
 			appStateDataStore.edit { mutablePreferences ->
-				mutablePreferences[AppStateDataStoreKeys.NEXT_DATABASE_EXPIRATION_NOTIF_DATE] = localDate.toLocalDateString()
+				mutablePreferences[AppStateDataStoreKeys.NEXT_DATABASE_EXPIRATION_NOTIF_DATE] = time.getTodayString()
 			}
 		}
 	}
@@ -113,10 +110,10 @@ class AppStateRepositoryImpl(
 		}
 	}
 
-	override suspend fun setUpdateDbDialogLastShownDate(date: LocalDate) {
+	override suspend fun setUpdateDbDialogLastShownDate(time: Time) {
 		withContext(Dispatchers.IO){
 			appStateDataStore.edit { mutablePreferences ->
-				mutablePreferences[AppStateDataStoreKeys.DATABASES_DIALOG_LAST_SHOWN_DATE] = date.toLocalDateString()
+				mutablePreferences[AppStateDataStoreKeys.DATABASES_DIALOG_LAST_SHOWN_DATE] = time.getTodayString()
 			}
 		}
 	}

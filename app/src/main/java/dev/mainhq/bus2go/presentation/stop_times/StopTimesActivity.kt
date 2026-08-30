@@ -6,25 +6,17 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
 import android.os.Build
-import android.view.View
-import android.view.View.INVISIBLE
-import android.view.View.VISIBLE
 import androidx.activity.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.CompositeDateValidator
 import com.google.android.material.datepicker.DateValidatorPointBackward
 import com.google.android.material.datepicker.DateValidatorPointForward
 import com.google.android.material.datepicker.MaterialDatePicker
-import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.presentation.base.BaseActivity
 import dev.mainhq.bus2go.Bus2GoApplication
-import dev.mainhq.bus2go.R
-import dev.mainhq.bus2go.databinding.MainActivityBinding
 import dev.mainhq.bus2go.databinding.StopTimesActivityBinding
 import dev.mainhq.bus2go.domain.entity.Time
 import dev.mainhq.bus2go.domain.entity.TransitData
@@ -33,16 +25,11 @@ import dev.mainhq.bus2go.utils.launchViewModelCollectLatest
 import dev.mainhq.bus2go.utils.makeGone
 import dev.mainhq.bus2go.utils.makeInvisible
 import dev.mainhq.bus2go.utils.makeVisible
-import dev.mainhq.bus2go.utils.toEpochDay
 import dev.mainhq.bus2go.utils.toEpochMillis
-import dev.mainhq.bus2go.utils.toast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import kotlin.coroutines.coroutineContext
 
 
 class StopTimesActivity : BaseActivity() {

@@ -2,7 +2,6 @@ package dev.mainhq.bus2go.domain.entity
 
 import android.os.Parcel
 import android.os.Parcelable
-import dev.mainhq.bus2go.utils.toEpochDay
 import java.time.DayOfWeek
 import java.time.Duration
 import java.time.LocalDate
@@ -106,14 +105,6 @@ class Time(private val localDateTime: LocalDateTime) : Parcelable, Comparable<Ti
     fun getDateOfYearString(): String {
         //ignore nanosecs
         return localDateTime.format(DateTimeFormatter.ofPattern("MMM dd, yyyy"))
-    }
-
-    /**
-     * Get a string represented by [dateTimeFormatter].
-     **/
-    private fun format(dateTimeFormatter: DateTimeFormatter): String {
-        //ignore nanosecs
-        return localDateTime.format(dateTimeFormatter)
     }
 
     /**
@@ -223,13 +214,7 @@ class Time(private val localDateTime: LocalDateTime) : Parcelable, Comparable<Ti
 
         fun now(): Time = Time(LocalDateTime.now())
 
-        fun fromUnix(unixTime : Long) : Time {
-            //get Canada timeZone which is UTC - 5
-            return Time(LocalDateTime.ofEpochSecond(unixTime, 0, ZoneOffset.ofHours(-5)))
-        }
-
         fun fromMillis(millis : Long) : Time {
-            //get Canada timeZone which is UTC - 5
             return Time(LocalDateTime.ofEpochSecond(millis / 1000, 0, ZoneOffset.ofHours(0)))
         }
 

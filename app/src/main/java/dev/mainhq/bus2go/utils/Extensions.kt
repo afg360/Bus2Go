@@ -38,11 +38,6 @@ fun LocalDate.isExpired(): Boolean {
 	return this < LocalDate.now()
 }
 
-/** @return A [String] of the form YYYYMMDD. */
-fun LocalDate.toLocalDateString(): String {
-	return format(DateTimeFormatter.BASIC_ISO_DATE)
-}
-
 /** @return A [String] of the form Jan 01, 1970. */
 fun LocalDate.cleanString(): String {
 	return format(DateTimeFormatter.ofPattern("MMM dd, uuuu"))
