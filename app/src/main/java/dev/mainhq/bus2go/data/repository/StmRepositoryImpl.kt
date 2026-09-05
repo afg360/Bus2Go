@@ -16,6 +16,7 @@ import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.domain.entity.FavouriteTransitDataWithTime
 import dev.mainhq.bus2go.domain.entity.RouteInfo
 import dev.mainhq.bus2go.domain.entity.FuzzyQuery
+import dev.mainhq.bus2go.domain.entity.StmBusItem
 import dev.mainhq.bus2go.domain.entity.Time
 import dev.mainhq.bus2go.domain.entity.TransitType
 import dev.mainhq.bus2go.domain.entity.stm.DirectionInfo
@@ -67,6 +68,9 @@ class StmRepositoryImpl(
 	}
 
 	override suspend fun getStopTimes(transitData: TransitData, curTime: Time): Result<List<Time>> {
+		val headsign = if (transitData.routeId.toInt() <= 5) (transitData as StmBusItem).lastStop
+		else transitData.direction
+
 		return stopsInfoDAO?.let{
 			withContext(Dispatchers.IO) {
 				Result.Success(
@@ -74,7 +78,7 @@ class StmRepositoryImpl(
 						transitData.stopName,
 						curTime.getDayString(),
 						curTime.getTimeString(),
-						transitData.direction,
+						headsign,
 						transitData.routeId.toInt(),
 						curTime.getTodayString()
 					)

@@ -34,7 +34,7 @@ class GetStopNames(
 				return when(val directions = repo.getTripHeadsigns(routeInfo.routeId)){
 					is Result.Error -> directions
 					is Result.Success<List<DirectionInfo>> -> {
-						return if (directions.data.isEmpty()) {
+						if (directions.data.isEmpty()) {
 							Result.Error(DirectionsMissingException("The route $routeInfo doesn't have any directions to it..."))
 						}
 						else if (directions.data.size == 1) {
@@ -60,21 +60,16 @@ class GetStopNames(
 			is StmBusRouteInfo -> {
 				//busNum <= 5 are skipped, bcz these are metros
 				try {
-					if (routeInfo.routeId.toInt() > 5) {
-						val repo = transitRepos.queryRepos(TransitType.STM)
-						return when(val directions = repo.getTripHeadsigns(routeInfo.routeId)){
-							is Result.Success -> {
-								repo.getStopNames(
-									directions.data.first().tripHeadSign,
-									directions.data.last().tripHeadSign,
-									routeInfo.routeId
-								)
-							}
-							is Result.Error -> directions
+					val repo = transitRepos.queryRepos(TransitType.STM)
+					return when(val directions = repo.getTripHeadsigns(routeInfo.routeId)){
+						is Result.Success -> {
+							repo.getStopNames(
+								directions.data.first().tripHeadSign,
+								directions.data.last().tripHeadSign,
+								routeInfo.routeId
+							)
 						}
-					}
-					else {
-						return Result.Success(Pair(listOf(), listOf()))
+						is Result.Error -> directions
 					}
 				}
 				catch (nfm: NumberFormatException){

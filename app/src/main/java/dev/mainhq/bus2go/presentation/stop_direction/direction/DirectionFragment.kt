@@ -81,7 +81,7 @@ class DirectionFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentChooseDirectionBinding.inflate(inflater, container, false)
         return binding.root
     }
