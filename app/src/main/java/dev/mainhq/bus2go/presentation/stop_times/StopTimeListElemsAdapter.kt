@@ -55,11 +55,11 @@ class StopTimeListElemsAdapter(
 
     private fun displayTimeRemaining(position: Int, stopTimesDisplayModel: StopTimesDisplayModel, holder: ViewHolder){
         if (position < 3 && !fromAlarmCreation){
-            if (stopTimesDisplayModel.timeLeftTextDisplay.isEmpty())
-                holder.timeLeftTextView.text =
-                    holder.itemView.context.getString(R.string.in_more_than_an_hour)
-            else holder.timeLeftTextView.text =
-                holder.itemView.context.getString(R.string.in_min, stopTimesDisplayModel.timeLeftTextDisplay)
+            if (stopTimesDisplayModel.timeLeftTextDisplay == "In >> 1h")
+                holder.timeLeftTextView.text = holder.itemView.context.getString(R.string.in_more_than_an_hour)
+            else if (stopTimesDisplayModel.timeLeftTextDisplay.isEmpty())
+                holder.timeLeftTextView.text = ""
+            else holder.timeLeftTextView.text = holder.itemView.context.getString(R.string.in_min, stopTimesDisplayModel.timeLeftTextDisplay)
 
             when (stopTimesDisplayModel.urgency){
                 Urgency.IMMINENT -> holder.timeLeftTextView.setTextColor(

@@ -114,6 +114,17 @@
                     />
             </LinearLayout>
             <!-- TODO some calendar icon on the right of the text -->
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:id="@+id/time_circular_loading_indicator"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:indeterminate="true"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/time_date_picker_layout"
+                tools:visibility="visible"
+                />
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/no_available_transit_left_text_view"
                 android:layout_width="match_parent"
@@ -122,13 +133,13 @@
                 android:textAlignment="center"
                 android:text="No available transit left for today"
                 android:textSize="15pt"
-                app:layout_constraintTop_toBottomOf="@id/time_date_picker_layout"
+                app:layout_constraintTop_toBottomOf="@id/time_circular_loading_indicator"
                 />
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/time_recycle_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/time_date_picker_layout"
+                app:layout_constraintTop_toBottomOf="@id/time_circular_loading_indicator"
                 />
         </androidx.constraintlayout.widget.ConstraintLayout>
 

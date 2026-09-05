@@ -98,6 +98,7 @@ android {
         
     }
     
+    //TODO add lint option to fail build if unused imports ONLY FOR RELEASE BUILDS
     lint {
     }
     

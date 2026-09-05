@@ -64,6 +64,7 @@ class StopFragment : Fragment(R.layout.fragment_choose_stop) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+		//TODO retrieve the StopName and the direction, and display it in the view
         val adapter = StopListElemsAdapter(
             viewModel.stopNames.value,
             viewModel.favourites.value.flatMap { it.value },
@@ -89,8 +90,8 @@ class StopFragment : Fragment(R.layout.fragment_choose_stop) {
                 startActivity(intent)
             }
         )
-        binding.stopRecycleView.layoutManager = LinearLayoutManager(requireContext())
-        binding.stopRecycleView.adapter = adapter
+        binding.chooseStopRecycleView.layoutManager = LinearLayoutManager(requireContext())
+        binding.chooseStopRecycleView.adapter = adapter
 
         launchViewModelCollectLatest(viewModel.stopNames){
             adapter.updateTransitData(it)

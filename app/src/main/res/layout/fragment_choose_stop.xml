@@ -19,7 +19,7 @@
             <!-- TODO Need some sort of title/search view to make it more pretty -->
             
             <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/chooseStopTitleTextView"
+                android:id="@+id/choose_stop_title_text_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="20dp"
@@ -27,16 +27,16 @@
                 android:text="Choose one of the available stops"
                 android:textAlignment="center"
                 android:textSize="20sp"
-                app:layout_constraintBottom_toTopOf="@+id/stop_recycle_view"
+                app:layout_constraintBottom_toTopOf="@+id/choose_stop_recycle_view"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/stop_recycle_view"
+                android:id="@+id/choose_stop_recycle_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@+id/chooseStopTitleTextView"
+                app:layout_constraintTop_toBottomOf="@+id/choose_stop_title_text_view"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />

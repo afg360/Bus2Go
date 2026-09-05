@@ -10,11 +10,13 @@ import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.domain.use_case.transit.GetTransitTime
 import dev.mainhq.bus2go.domain.entity.Time
 import dev.mainhq.bus2go.domain.use_case.db_state.GetDatabaseExpiryDate
+import dev.mainhq.bus2go.presentation.core.UiState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 
@@ -62,7 +64,7 @@ class StopTimesViewModel(
 			.stateIn(
 				viewModelScope,
 				SharingStarted.WhileSubscribed(5000),
-				emptyList()
+				UiState.Loading
 			)
 	}
 

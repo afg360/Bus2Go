@@ -20,12 +20,14 @@ import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.databinding.StopTimesActivityBinding
 import dev.mainhq.bus2go.domain.entity.Time
 import dev.mainhq.bus2go.domain.entity.TransitData
+import dev.mainhq.bus2go.presentation.core.UiState
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
 import dev.mainhq.bus2go.utils.launchViewModelCollectLatest
 import dev.mainhq.bus2go.utils.makeGone
 import dev.mainhq.bus2go.utils.makeInvisible
 import dev.mainhq.bus2go.utils.makeVisible
 import dev.mainhq.bus2go.utils.toEpochMillis
+import dev.mainhq.bus2go.utils.toast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -130,15 +132,32 @@ class StopTimesActivity : BaseActivity() {
 
         launchViewModelCollectLatest(stopTimesViewModel.arrivalTimes) { arrivalTimes ->
             val noTransitLeftTextView = binding.noAvailableTransitLeftTextView
-            if (arrivalTimes.isEmpty()){
-                adapter.update(listOf())
-                recyclerView.makeGone()
-                noTransitLeftTextView.makeVisible()
-            }
-            else{
-                adapter.update(arrivalTimes)
-                recyclerView.makeVisible()
-                noTransitLeftTextView.makeInvisible()
+            when(arrivalTimes) {
+                UiState.Init -> {}
+                UiState.Loading -> {
+                    binding.timeCircularLoadingIndicator.makeVisible()
+                    recyclerView.makeGone()
+                    noTransitLeftTextView.makeGone()
+                }
+                is UiState.Success<List<StopTimesDisplayModel>> -> {
+                    binding.timeCircularLoadingIndicator.makeGone()
+                    if (arrivalTimes.data.isEmpty()){
+                        adapter.update(listOf())
+                        recyclerView.makeGone()
+                        noTransitLeftTextView.makeVisible()
+                    }
+                    else{
+                        adapter.update(arrivalTimes.data)
+                        recyclerView.makeVisible()
+                        noTransitLeftTextView.makeInvisible()
+                    }
+                }
+                is UiState.Error -> {
+                    binding.timeCircularLoadingIndicator.makeGone()
+                    recyclerView.makeGone()
+                    noTransitLeftTextView.makeGone()
+                    toast(arrivalTimes.message)
+                }
             }
         }
     }
