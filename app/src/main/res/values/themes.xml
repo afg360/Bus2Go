@@ -10,8 +10,10 @@
         <item name="android:windowLightStatusBar">true</item>
         <!-- Colors navigation bar (i.e. bar with buttons for navigation -->
         <item name="android:navigationBarColor">@android:color/transparent</item>
+        
         <item name="colorAccent">@color/basic_blue</item>
-        <item name="fontFamily">@font/goli_regular</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/bus2go_dark_ic_launcher_foreground</item>
+<!--        <item name="fontFamily">@font/goli_regular</item>-->
     </style>
     
 </resources>

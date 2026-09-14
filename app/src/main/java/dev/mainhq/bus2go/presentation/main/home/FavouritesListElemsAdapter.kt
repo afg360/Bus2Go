@@ -64,8 +64,7 @@ class FavouritesListElemsAdapter(
         val info = list[position]
         setTimeLeft(holder, position)
 
-        holder.stopNameTextView.text = info.stopNameText
-        if (info.toTruncate){
+        if (info.isDirectionTextTruncated){
             holder.directionTextView.text = "${info.directionText.substring(0, FavouritesDisplayModel.DIRECTION_STR_LIMIT)}..."
             holder.directionTextView.setOnClickListener {
                 if (holder.directionTextView.text.contains("...")) {
@@ -79,8 +78,23 @@ class FavouritesListElemsAdapter(
         else {
             holder.directionTextView.text = info.directionText
         }
-        holder.tripHeadsignTextView.text = info.tripHeadsignText
 
+        if (info.isStopNameTextTruncated) {
+            holder.stopNameTextView.text = "${info.stopNameText.substring(0, FavouritesDisplayModel.DIRECTION_STR_LIMIT)}..."
+            holder.stopNameTextView.setOnClickListener {
+                if (holder.stopNameTextView.text.contains("...")) {
+                    holder.stopNameTextView.text = info.stopNameText
+                }
+                else {
+                    holder.stopNameTextView.text = "${info.stopNameText.substring(0, FavouritesDisplayModel.DIRECTION_STR_LIMIT)}..."
+                }
+            }
+        }
+        else {
+            holder.stopNameTextView.text = info.stopNameText
+        }
+
+        holder.tripHeadsignTextView.text = info.tripHeadsignText
         holder.tripHeadsignTextView.setTextColor(holder.itemView.resources.getColor(info.dataDisplayColor, null))
 
         if (selectedMode) {

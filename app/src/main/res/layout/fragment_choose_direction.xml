@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".presentation.stop_direction.direction.DirectionFragment">
+    tools:context=".presentation.stop_direction.direction.DirectionFragment"
+    >
     
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"

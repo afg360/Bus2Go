@@ -24,8 +24,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.Duration
-import java.time.LocalTime
-import kotlin.time.toDuration
 
 class FavouritesViewModel(
 	getFavouritesWithTimeData: GetFavouritesWithTimeData,
@@ -75,9 +73,10 @@ class FavouritesViewModel(
 								FavouritesDisplayModel(
 									favouriteTransitData = it.favouriteTransitData,
 									directionText = "To ${it.favouriteTransitData.direction}",
-									toTruncate = it.favouriteTransitData.direction.length > FavouritesDisplayModel.DIRECTION_STR_LIMIT,
+									isDirectionTextTruncated = it.favouriteTransitData.direction.length > FavouritesDisplayModel.DIRECTION_STR_LIMIT,
 									tripHeadsignText = it.favouriteTransitData.routeId,
 									stopNameText = it.favouriteTransitData.stopName,
+									isStopNameTextTruncated = it.favouriteTransitData.stopName.length > FavouritesDisplayModel.DIRECTION_STR_LIMIT,
 									arrivalTimeText = it.arrivalTime.getTimeString(),
 									timeRemainingText = getTimeRemaining(timeRemaining),
 									dataDisplayColor = R.color.basic_purple,
@@ -89,9 +88,10 @@ class FavouritesViewModel(
 								FavouritesDisplayModel(
 									favouriteTransitData = it.favouriteTransitData,
 									directionText = "To ${it.favouriteTransitData.direction}",
-									toTruncate = it.favouriteTransitData.direction.length > FavouritesDisplayModel.DIRECTION_STR_LIMIT,
+									isDirectionTextTruncated = it.favouriteTransitData.direction.length > FavouritesDisplayModel.DIRECTION_STR_LIMIT,
 									tripHeadsignText = it.favouriteTransitData.routeName,
 									stopNameText = it.favouriteTransitData.stopName,
+									isStopNameTextTruncated = it.favouriteTransitData.stopName.length > FavouritesDisplayModel.DIRECTION_STR_LIMIT,
 									arrivalTimeText = it.arrivalTime.getTimeString(),
 									timeRemainingText = getTimeRemaining(timeRemaining),
 									dataDisplayColor = R.color.orange,
@@ -103,9 +103,10 @@ class FavouritesViewModel(
 								FavouritesDisplayModel(
 									favouriteTransitData = it.favouriteTransitData,
 									directionText = "To ${it.favouriteTransitData.lastStop}",
-									toTruncate = it.favouriteTransitData.lastStop.length > FavouritesDisplayModel.DIRECTION_STR_LIMIT,
+									isDirectionTextTruncated = it.favouriteTransitData.lastStop.length > FavouritesDisplayModel.DIRECTION_STR_LIMIT,
 									tripHeadsignText = it.favouriteTransitData.routeId,
 									stopNameText = it.favouriteTransitData.stopName,
+									isStopNameTextTruncated = it.favouriteTransitData.stopName.length > FavouritesDisplayModel.DIRECTION_STR_LIMIT,
 									arrivalTimeText = it.arrivalTime.getTimeString(),
 									timeRemainingText = getTimeRemaining(timeRemaining),
 									dataDisplayColor = if (it.favouriteTransitData.routeId.toInt() in 400..499) {
@@ -123,9 +124,10 @@ class FavouritesViewModel(
 								FavouritesDisplayModel(
 									favouriteTransitData = it.favouriteTransitData,
 									directionText = it.favouriteTransitData.direction,
-									toTruncate = it.favouriteTransitData.direction.length > FavouritesDisplayModel.DIRECTION_STR_LIMIT,
+									isDirectionTextTruncated = it.favouriteTransitData.direction.length > FavouritesDisplayModel.DIRECTION_STR_LIMIT,
 									tripHeadsignText = it.favouriteTransitData.routeId,
 									stopNameText = it.favouriteTransitData.stopName,
+									isStopNameTextTruncated = it.favouriteTransitData.stopName.length > FavouritesDisplayModel.DIRECTION_STR_LIMIT,
 									arrivalTimeText = null,
 									timeRemainingText = "None left",
 									dataDisplayColor = R.color.basic_purple,
@@ -137,10 +139,10 @@ class FavouritesViewModel(
 								FavouritesDisplayModel(
 									favouriteTransitData = it.favouriteTransitData,
 									directionText = "To ${it.favouriteTransitData.direction}",
-									toTruncate = it.favouriteTransitData.direction.length
-											> FavouritesDisplayModel.DIRECTION_STR_LIMIT,
+									isDirectionTextTruncated = it.favouriteTransitData.direction.length > FavouritesDisplayModel.DIRECTION_STR_LIMIT,
 									tripHeadsignText = it.favouriteTransitData.routeName,
 									stopNameText = it.favouriteTransitData.stopName,
+									isStopNameTextTruncated = it.favouriteTransitData.stopName.length > FavouritesDisplayModel.DIRECTION_STR_LIMIT,
 									arrivalTimeText = null,
 									//FIXME use a ressource string that is injected into the class...
 									timeRemainingText = "None left",
@@ -153,10 +155,10 @@ class FavouritesViewModel(
 								FavouritesDisplayModel(
 									favouriteTransitData = it.favouriteTransitData,
 									directionText = it.favouriteTransitData.lastStop,
-									toTruncate = it.favouriteTransitData.lastStop.length
-											> FavouritesDisplayModel.DIRECTION_STR_LIMIT,
+									isDirectionTextTruncated = it.favouriteTransitData.lastStop.length > FavouritesDisplayModel.DIRECTION_STR_LIMIT,
 									tripHeadsignText = it.favouriteTransitData.routeId,
 									stopNameText = it.favouriteTransitData.stopName,
+									isStopNameTextTruncated = it.favouriteTransitData.stopName.length > FavouritesDisplayModel.DIRECTION_STR_LIMIT,
 									arrivalTimeText = null,
 									timeRemainingText = "None left",
 									dataDisplayColor = if (it.favouriteTransitData.routeId.toInt() in 400..499) {
