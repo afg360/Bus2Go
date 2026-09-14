@@ -14,7 +14,7 @@ class Converters {
     */
     @TypeConverter
     fun toTime(str : String?): Time? {
-        return str?.let{ Time.fromString(it) }
+        return str?.let{ Time.fromTimeString(it) }
     }
 
     @TypeConverter

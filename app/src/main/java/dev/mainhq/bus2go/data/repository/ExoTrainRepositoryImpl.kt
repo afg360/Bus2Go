@@ -67,13 +67,14 @@ class ExoTrainRepositoryImpl(
 		return stopTimesDAO?.let {
 			withContext(Dispatchers.IO){
 				Result.Success(
+					//TODO replace the curtime calls...
 					it.getTrainStopTimes(
 						transitData.routeId,
 						transitData.stopName,
 						transitData.directionId,
-						curTime.getTimeString(),
-						curTime.getDayString(),
-						curTime.getTodayString()
+						curTime.getQueryTimeString(),
+						curTime.getQueryDayString(),
+						curTime.getQueryTodayString()
 					)
 				)
 			}
@@ -90,8 +91,8 @@ class ExoTrainRepositoryImpl(
 				Result.Success(
 					it.getOldStopTimes(
 						transitData.stopName,
-						curTime.getDayString(),
-						curTime.getTimeString(),
+						curTime.getQueryDayString(),
+						curTime.getQueryTimeString(),
 						transitData.direction
 					)
 				)
@@ -112,9 +113,9 @@ class ExoTrainRepositoryImpl(
 						it.getFavouriteTrainStopTime(favouriteTransitData.routeId,
 							favouriteTransitData.stopName,
 							favouriteTransitData.directionId,
-							curTime.getTimeString(),
-							curTime.getDayString(),
-							curTime.getTodayString()
+							curTime.getQueryTimeString(),
+							curTime.getQueryDayString(),
+							curTime.getQueryTodayString()
 						)
 					)
 				)

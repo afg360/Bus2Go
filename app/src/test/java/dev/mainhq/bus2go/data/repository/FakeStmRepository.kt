@@ -8,7 +8,7 @@ import dev.mainhq.bus2go.domain.entity.Time
 import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.domain.entity.stm.CalendarDates
 import dev.mainhq.bus2go.domain.entity.stm.DirectionInfo
-import dev.mainhq.bus2go.domain.repository.StmRepository
+//import dev.mainhq.bus2go.domain.repository.StmRepository
 import dev.mainhq.bus2go.domain.entity.FuzzyQuery
 import java.time.LocalDate
 import java.time.LocalTime

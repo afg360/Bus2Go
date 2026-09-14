@@ -13,7 +13,11 @@ sealed class UrlChecker {
 			//may be an ip address
 			if (elems.size == 4){
 				//check if it is a domain name
-				if (string.length > 15) {
+				if (string.matches("(\\d?\\d?\\d\\.){3}\\d?\\d?\\d".toRegex())) {
+					//TODO first check if each elem is between 0 and 255
+					return IpAddress(string)
+				}
+				else if (string.length > 15) {
 					//in all elems there must be @ least 1 letter
 					return if (elems.last().length >= 2 && elems.all{elem -> elem.any { it.isLetter()} } )
 						DomainName(string)

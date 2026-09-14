@@ -2,10 +2,8 @@ package dev.mainhq.bus2go.presentation.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.work.WorkInfo
 import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.entity.DatabaseAgency
-import dev.mainhq.bus2go.domain.entity.NotificationType
 import dev.mainhq.bus2go.domain.entity.Time
 import dev.mainhq.bus2go.domain.repository.SettingsRepository
 import dev.mainhq.bus2go.domain.use_case.ObserveDownloadDatabaseTask
@@ -17,7 +15,6 @@ import dev.mainhq.bus2go.domain.use_case.db_state.WasUpdateDialogShownToday
 import dev.mainhq.bus2go.domain.use_case.settings.CheckIsBus2GoServer
 import dev.mainhq.bus2go.presentation.config.ServerType
 import dev.mainhq.bus2go.presentation.core.UiState
-import dev.mainhq.bus2go.presentation.core.UiState.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -26,13 +23,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDate
+import java.time.LocalDateTime
 
 class MainActivityViewModel(
 	private val checkDatabaseUpdateRequired: CheckDatabaseUpdateRequired,
@@ -98,7 +94,7 @@ class MainActivityViewModel(
 
 	fun setUpdateDbExpirationDate(days: Int){
 		viewModelScope.launch {
-			setDatabaseExpirationDate.invoke(Time(LocalDate.now().plusDays(days.toLong())))
+			setDatabaseExpirationDate.invoke(Time(LocalDateTime.now().plusDays(days.toLong())))
 		}
 	}
 

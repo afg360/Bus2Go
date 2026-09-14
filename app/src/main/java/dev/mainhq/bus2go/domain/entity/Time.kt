@@ -1,7 +1,5 @@
 package dev.mainhq.bus2go.domain.entity
 
-import android.os.Parcel
-import android.os.Parcelable
 import java.time.DayOfWeek
 import java.time.Duration
 import java.time.LocalDate
@@ -11,38 +9,13 @@ import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
 /** Allows to do operations more easily on time based formats */
-class Time(private val localDateTime: LocalDateTime) : Parcelable, Comparable<Time> {
+class Time(private val localDateTime: LocalDateTime) : Comparable<Time> {
 
-    constructor(localDate: LocalDate, localTime: LocalTime) : this(
+    //Only used for when we query databases
+    private val isAfterMidnight = localDateTime.hour < 4
+
+	private constructor(localDate: LocalDate, localTime: LocalTime) : this(
         LocalDateTime.of(localDate, localTime)
-    )
-
-    constructor(parcel: Parcel) : this(
-        LocalDate.of(
-            parcel.readInt(),
-            parcel.readInt(),
-            parcel.readInt()
-        ),
-        LocalTime.of(
-            parcel.readInt(),
-            parcel.readInt(),
-            parcel.readInt()
-        )
-    )
-
-    /**
-     * Create a Time object based on today (deals with 3am thingy)
-     **/
-    constructor(localTime: LocalTime) : this(
-        LocalDateTime.of(LocalDate.now(), localTime)
-    )
-
-    constructor(localDate: LocalDate) : this(
-        LocalDateTime.of(localDate, LocalTime.now())
-    )
-
-    constructor(years: Int, months: Int, days: Int, hours: Int, mins: Int, secs: Int): this(
-        LocalDateTime.of(years, months, days, hours, mins, secs)
     )
 
     /**
@@ -51,34 +24,15 @@ class Time(private val localDateTime: LocalDateTime) : Parcelable, Comparable<Ti
      **/
     operator fun minus(time : Time): Duration? {
         //Takes the sec arg first...
-        if (this < time) return null
-        return Duration.between(time.localDateTime, localDateTime)
-//        //duration.seconds === all the time (hours + minutes) in seconds
-//        var mins = duration.seconds / 60
-//        val secs = duration.seconds - mins * 60
-//        val hours = (mins / 60) % 24 //FIXME added the % 24 as a hack
-//        mins -= 60 * hours
-//        return LocalTime.of(hours.toInt(), mins.toInt(), secs.toInt())
-    }
+        val time2 = if (this.isAfterMidnight) this.localDateTime.plusDays(1)
+        else this.localDateTime
 
-    /** @return null if this < time. */
-    fun minusDays(time: Time): Day? {
-        if (this < time) return null
-        val duration = Duration.between(time.localDateTime, localDateTime)
-        //duration.seconds === all the time (hours + minutes) in seconds
-        val mins = duration.toMinutes() % 60
-        val secs = duration.seconds % 60
-        val hours = duration.toHours() % 24
-        val days = duration.toDays()
-        return Day(LocalTime.of(hours.toInt(), mins.toInt(), secs.toInt()), days)
-    }
+        val time1 = if (time.isAfterMidnight) time.localDateTime.plusDays(1)
+        else time.localDateTime
 
-    data class Day (val time: LocalTime, val days: Long){
-        operator fun compareTo(other: Day): Int {
-            val diff = this.days - other.days
-            return if (diff != 0L) (this.days - diff).toInt()
-            else this.time.compareTo(other.time)
-        }
+        return if (time2 < time1) null
+        //first arg is start (meaning that in a foo - bar, it would be bar), and second 1 is end
+        else Duration.between(time1, time2)
     }
 
     fun timeRemaining(): Duration? {
@@ -90,11 +44,21 @@ class Time(private val localDateTime: LocalDateTime) : Parcelable, Comparable<Ti
     }
 
     /**
+     * Get a string representing the hour, minute and secs. Only to be used when querying databases.
+     * @return Format: HH:MM:SS ([DateTimeFormatter.ISO_TIME])
+     **/
+    fun getQueryTimeString(): String {
+        return if (isAfterMidnight) {
+            "${localDateTime.hour + 24}:${getTimeString().substringAfter(":")}"
+        }
+        else getTimeString()
+    }
+
+    /**
      * Get a string representing the hour, minute and secs.
      * @return Format: HH:MM:SS ([DateTimeFormatter.ISO_TIME])
      **/
     fun getTimeString(): String {
-        //ignore nanosecs
         return localDateTime.format(DateTimeFormatter.ISO_TIME).split(".")[0]
     }
 
@@ -104,21 +68,36 @@ class Time(private val localDateTime: LocalDateTime) : Parcelable, Comparable<Ti
      **/
     fun getDateOfYearString(): String {
         //ignore nanosecs
-        return localDateTime.format(DateTimeFormatter.ofPattern("MMM dd, yyyy"))
+        return if (isAfterMidnight) {
+            localDateTime.plusDays(1).format(DateTimeFormatter.ofPattern("MMM dd, yyyy"))
+        }
+        else localDateTime.format(DateTimeFormatter.ofPattern("MMM dd, yyyy"))
     }
+
 
     /**
      * Get a string representing the year, month and day.
      * @return Format: YYYYMMDD ([DateTimeFormatter.BASIC_ISO_DATE])
      **/
     fun getTodayString(): String {
+        return if (isAfterMidnight) {
+            localDateTime.plusDays(1).format(DateTimeFormatter.BASIC_ISO_DATE)
+        }
+        else localDateTime.format(DateTimeFormatter.BASIC_ISO_DATE)
+    }
+
+    /**
+     * Get a string representing the year, month and day. Only to be used when querying databases
+     * @return Format: YYYYMMDD ([DateTimeFormatter.BASIC_ISO_DATE])
+     **/
+    fun getQueryTodayString(): String {
         return localDateTime.format(DateTimeFormatter.BASIC_ISO_DATE)
     }
 
     /**
      * Get the 1 letter representation of the day in the week of this Time object.
      **/
-    fun getDayString(): String {
+    fun getQueryDayString(): String {
         return when (localDateTime.dayOfWeek) {
             DayOfWeek.SUNDAY -> "d"
             DayOfWeek.MONDAY -> "m"
@@ -132,78 +111,41 @@ class Time(private val localDateTime: LocalDateTime) : Parcelable, Comparable<Ti
     }
 
     override fun toString(): String {
-        return "${localDateTime.toLocalDate()}, ${localDateTime.toLocalTime()}"
+        return localDateTime.toString()
     }
 
     fun resetTime(): Time {
         return Time(localDateTime.toLocalDate(), LocalTime.of(4, 0, 0))
     }
 
-    override fun describeContents(): Int {
-        return 0
-    }
-
-    override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeInt(localDateTime.year)
-        parcel.writeInt(localDateTime.monthValue)
-        parcel.writeInt(localDateTime.dayOfMonth)
-        parcel.writeInt(localDateTime.hour)
-        parcel.writeInt(localDateTime.minute)
-        parcel.writeInt(localDateTime.second)
-    }
-
-
     override fun equals(other: Any?): Boolean {
         if (other is Time){
             val tmp : Time = other
-            return localDateTime == tmp.localDateTime
+            return localDateTime == tmp.localDateTime && isAfterMidnight == tmp.isAfterMidnight
         }
         return false
     }
 
     override fun hashCode(): Int {
-        return localDateTime.hashCode() + this.localDateTime.hashCode()
+        return localDateTime.hashCode()
     }
 
-    companion object CREATOR : Parcelable.Creator<Time> {
-        override fun createFromParcel(parcel: Parcel): Time {
-            return Time(parcel)
-        }
-
-        override fun newArray(size: Int): Array<Time?> {
-            return arrayOfNulls(size)
-        }
+    companion object {
 
         /**
-         * Create a new time object from a String. Used inside Room Data Types converters
-         * @throws java.time.format.DateTimeParseException
-         **/
-        //TODO only in strings we need to consider when time is greater than 24h since only in the strings it happens...
-        fun fromString(time : String, date : String): Time {
-            val localDate = LocalDate.parse(date, DateTimeFormatter.BASIC_ISO_DATE)
-            val list : List<String> = time.split(":")
-            try {
-                return if (list[0].toInt() >= 24){
-                    return Time(localDate.plusDays(1), LocalTime.of(list[0].toInt() % 24, list[1].toInt(), list[2].toInt()))
-                }
-                else Time(localDate, LocalTime.parse(time, DateTimeFormatter.ISO_LOCAL_TIME))
-            }
-            catch (ie : IndexOutOfBoundsException){
-                throw IllegalArgumentException("The input str must be of the form HH:MM:SS")
-            }
-        }
-
-        /**
-         * Creates a new Time object from some LocalTime string. The LocalDate will be set to now.
+         * Creates a new Time object from some [LocalTime] string. The date will be set to today.
          * @param time Must be of format HH:MM:SS
-         * @throws IllegalArgumentException
+         * @throws IllegalArgumentException if wrong input format for [time].
          **/
-        fun fromString(time : String): Time {
+        fun fromTimeString(time : String): Time {
             val localDate = LocalDate.now()
             val list : List<String> = time.split(":")
             try {
-                return if (list[0].toInt() >= 24){
-                    Time(localDate.plusDays(1), LocalTime.of(list[0].toInt() % 24, list[1].toInt(), list[2].toInt()))
+                return if (list[0].toInt() > 23){
+                    Time(localDate, LocalTime.of(list[0].toInt() % 24, list[1].toInt(), list[2].toInt()))
+                }
+                else if (list[0].toInt() < 4) {
+                    Time(localDate.minusDays(1), LocalTime.parse(time, DateTimeFormatter.ISO_LOCAL_TIME))
                 }
                 else Time(localDate, LocalTime.parse(time, DateTimeFormatter.ISO_LOCAL_TIME))
             }
@@ -212,10 +154,19 @@ class Time(private val localDateTime: LocalDateTime) : Parcelable, Comparable<Ti
             }
         }
 
-        fun now(): Time = Time(LocalDateTime.now())
+
+        fun now(): Time {
+            val dateTime = LocalDateTime.now()
+            return if (dateTime.hour < 4) Time(dateTime.minusDays(1))
+            else Time(dateTime)
+        }
 
         fun fromMillis(millis : Long) : Time {
-            return Time(LocalDateTime.ofEpochSecond(millis / 1000, 0, ZoneOffset.ofHours(0)))
+            val dateTime = LocalDateTime.ofEpochSecond(millis / 1000, 0, ZoneOffset.ofHours(0))
+            return if (dateTime.hour < 4) {
+                Time(dateTime.minusDays(1))
+            }
+            else Time(dateTime)
         }
 
     }

@@ -2,10 +2,8 @@ package dev.mainhq.bus2go.domain.entity
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
-import kotlinx.serialization.Serializable
 
-
-//breaks pure clean architecture..
+//breaks pure clean architecture...
 /**
  * Entities used for getting route information for buses. When passing from search
  * to direction choice activity

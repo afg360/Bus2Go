@@ -70,10 +70,10 @@ class ExoRepositoryImpl(
 				Result.Success(
 					it.getStopTimes(
 						transitData.stopName,
-						curTime.getDayString(),
-						curTime.getTimeString(),
+						curTime.getQueryDayString(),
+						curTime.getQueryTimeString(),
 						transitData.direction,
-						curTime.getTodayString()
+						curTime.getQueryTodayString()
 					)
 				)
 			}
@@ -87,7 +87,7 @@ class ExoRepositoryImpl(
 				Result.Success(
 					it.getOldStopTimes(
 						transitData.stopName,
-						curTime.getDayString(),
+						curTime.getQueryDayString(),
 						curTime.getTimeString(),
 						transitData.direction
 					)
@@ -106,10 +106,10 @@ class ExoRepositoryImpl(
 						favouriteTransitData,
 						it.getFavouriteBusStopTime(
 							favouriteTransitData.stopName,
-							curTime.getDayString(),
+							curTime.getQueryDayString(),
 							curTime.getTimeString(),
 							favouriteTransitData.direction,
-							curTime.getTodayString()
+							curTime.getQueryTodayString()
 						)
 					)
 				)

@@ -76,11 +76,11 @@ class StmRepositoryImpl(
 				Result.Success(
 					it.getStopTimes(
 						transitData.stopName,
-						curTime.getDayString(),
-						curTime.getTimeString(),
+						curTime.getQueryDayString(),
+						curTime.getQueryTimeString(),
 						headsign,
 						transitData.routeId.toInt(),
-						curTime.getTodayString()
+						curTime.getQueryTodayString()
 					)
 				)
 			}
@@ -93,8 +93,8 @@ class StmRepositoryImpl(
 				Result.Success(
 					it.getOldTimes(
 						transitData.stopName,
-						curTime.getDayString(),
-						curTime.getTimeString(),
+						curTime.getQueryDayString(),
+						curTime.getQueryTimeString(),
 						transitData.direction,
 						transitData.routeId
 					)
@@ -114,11 +114,11 @@ class StmRepositoryImpl(
 						favouriteTransitData,
 						it.getFavouriteStopTime(
 							stmFavouriteBusItemDto.stopName,
-							curTime.getDayString(),
-							curTime.getTimeString(),
+							curTime.getQueryDayString(),
+							curTime.getQueryTimeString(),
 							stmFavouriteBusItemDto.direction,
 							stmFavouriteBusItemDto.routeId.toInt(),
-							curTime.getTodayString()
+							curTime.getQueryTodayString()
 						)
 					)
 				)
