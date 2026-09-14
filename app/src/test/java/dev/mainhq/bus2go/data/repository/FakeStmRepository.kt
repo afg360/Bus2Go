@@ -1,6 +1,8 @@
 package dev.mainhq.bus2go.data.repository
 
 import dev.mainhq.bus2go.domain.core.Result
+import dev.mainhq.bus2go.domain.entity.FavouriteTransitData
+import dev.mainhq.bus2go.domain.entity.FavouriteTransitDataWithTime
 import dev.mainhq.bus2go.domain.entity.RouteInfo
 import dev.mainhq.bus2go.domain.entity.StmBusItem
 import dev.mainhq.bus2go.domain.entity.StmBusRouteInfo
@@ -8,12 +10,14 @@ import dev.mainhq.bus2go.domain.entity.Time
 import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.domain.entity.stm.CalendarDates
 import dev.mainhq.bus2go.domain.entity.stm.DirectionInfo
-//import dev.mainhq.bus2go.domain.repository.StmRepository
 import dev.mainhq.bus2go.domain.entity.FuzzyQuery
+import dev.mainhq.bus2go.domain.entity.TransitType
+import dev.mainhq.bus2go.domain.repository.TransitRepository
+import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 import java.time.LocalTime
 
-//class FakeStmRepository: StmRepository {
+//class FakeStmRepository(): TransitRepository {
 //
 //	private val stmRouteIds = listOf(
 //		230.toString(),
@@ -93,12 +97,49 @@ import java.time.LocalTime
 //		throw IllegalStateException("Not implemented")
 //	}
 //
+//	override val transitType: TransitType
+//		get() = TODO("Not yet implemented")
+//	override val dbName: String
+//		get() = TODO("Not yet implemented")
+//	override val databaseExpirationDate: Flow<Result<LocalDate>>
+//		get() = TODO("Not yet implemented")
+//
+//	override suspend fun getRouteInfo(routeId: FuzzyQuery): Result<List<RouteInfo>> {
+//		TODO("Not yet implemented")
+//	}
+//
+//	override suspend fun getStopNames(
+//		direction1: String,
+//		direction2: String?,
+//		routeId: String?,
+//	): Result<Pair<List<String>, List<String>>> {
+//		TODO("Not yet implemented")
+//	}
+//
 //	override suspend fun getStopTimes(stmTransitData: TransitData, curTime: Time): Result<List<Time>> {
 //		return Result.Success(stopTimes[stmTransitData]
 //			?.filter { it > curTime }
 //			?.map { Time((it - curTime)!!) }
 //			?: listOf()
 //		)
+//	}
+//
+//	override suspend fun getOldStopTimes(
+//		transitData: TransitData,
+//		curTime: Time,
+//	): Result<List<Time>> {
+//		TODO("Not yet implemented")
+//	}
+//
+//	override suspend fun getFavouriteStopTime(
+//		favouriteTransitData: FavouriteTransitData,
+//		curTime: Time,
+//	): Result<FavouriteTransitDataWithTime> {
+//		TODO("Not yet implemented")
+//	}
+//
+//	override suspend fun getTripHeadsigns(routeId: String): Result<List<DirectionInfo>> {
+//		TODO("Not yet implemented")
 //	}
 //
 //	/*

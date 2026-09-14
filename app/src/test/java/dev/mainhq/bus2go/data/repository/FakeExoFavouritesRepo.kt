@@ -4,70 +4,70 @@ import dev.mainhq.bus2go.domain.entity.FavouriteTransitData
 import dev.mainhq.bus2go.domain.entity.FavouriteTransitData.ExoBusFavouriteItem
 import dev.mainhq.bus2go.domain.entity.FavouriteTransitData.ExoTrainFavouriteItem
 import dev.mainhq.bus2go.domain.entity.Tag
-//import dev.mainhq.bus2go.domain.repository.ExoFavouritesRepository
+import dev.mainhq.bus2go.domain.entity.TransitType
+import dev.mainhq.bus2go.domain.repository.FavouritesRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.transform
+import kotlinx.coroutines.flow.update
 import java.util.UUID
 
-//class FakeExoFavouritesRepo: ExoFavouritesRepository {
-//	val exoBusItems = (1..10).map {
-//		ExoBusFavouriteItem(
-//			UUID.randomUUID(),
-//			it.toString(),
-//			"Exo Bus $it",
-//			"foo",
-//			tags = listOf(Tag("Exo", 0x000)),
-//			"lastStop"
-//		)
-//	}.toMutableList()
-//
-//	val exoTrainItems = (1..5).map {
-//		ExoTrainFavouriteItem(
-//			UUID.randomUUID(),
-//			it.toString(),
-//			"Stm Bus $it",
-//			"foo",
-//			tags = listOf(Tag("Train", 0xFFF)),
-//			it,
-//			"lastStop",
-//			1
-//		)
-//	}.toMutableList()
-//
-//	val tags = mutableListOf(
-//		Tag("Train", 0xFFF),
-//		Tag("Exo", 0x000),
-//	)
-//
-//	override fun getExoBusFavourites(): Flow<List<ExoBusFavouriteItem>> {
-//		return flow { emit(exoBusItems) }
-//	}
-//
-//	override fun getExoTrainFavourites(): Flow<List<ExoTrainFavouriteItem>> {
-//		return flow { emit(exoTrainItems) }
-//	}
-//
-//	override suspend fun removeExoBusFavourite(data: ExoBusFavouriteItem) {
-//		exoBusItems.remove(data)
-//	}
-//
-//	override suspend fun removeExoTrainFavourite(data: ExoTrainFavouriteItem) {
-//		exoTrainItems.remove(data)
-//	}
-//
-//	override suspend fun addExoBusFavourite(data: ExoBusFavouriteItem) {
-//		exoBusItems.add(data)
-//	}
-//
-//	override suspend fun addExoTrainFavourite(data: ExoTrainFavouriteItem) {
-//		exoTrainItems.add(data)
-//	}
-//
-//	override suspend fun setTag(tag: Tag, items: List<FavouriteTransitData>) {
-//		TODO("Not Implemented")
-//	}
-//
-//	override suspend fun getTags(): List<Tag> {
-//		return tags
-//	}
-//}
+class FakeExoFavouritesRepo(): FavouritesRepository {
+	override val transitType = TransitType.EXO_BUS
+
+	private val tags = mutableListOf(Tag("Exo", 0x000))
+
+	override val favourites = MutableStateFlow(
+		(1..10).map {
+			ExoBusFavouriteItem(
+				UUID.randomUUID(),
+				it.toString(),
+				"Exo Bus $it",
+				"foo",
+				tags,
+				"lastStop"
+			)
+		}
+	)
+
+	override suspend fun removeFavourite(data: FavouriteTransitData) {
+		favourites.update { list ->
+			list.toMutableList().apply {
+				remove(data as ExoBusFavouriteItem)
+			}
+		}
+	}
+
+	override suspend fun addFavourite(data: FavouriteTransitData) {
+		favourites.update { list ->
+			list.toMutableList().apply {
+				//assert it is an ExoBusFavouriteItem
+				add(data as ExoBusFavouriteItem)
+			}
+		}
+	}
+
+	override suspend fun setTag(tag: Tag, items: List<FavouriteTransitData>) {
+		if (!tags.contains(tag)) {
+			tags += tag
+		}
+		favourites.update { list ->
+			list.map {
+				if (items.contains(it)) {
+					ExoBusFavouriteItem(
+						it.id,
+						it.routeId,
+						it.stopName,
+						it.direction,
+						it.tags + tag,
+						it.routeLongName
+					)
+				}
+				else it
+			}
+		}
+	}
+
+	override suspend fun getTags() = tags
+}

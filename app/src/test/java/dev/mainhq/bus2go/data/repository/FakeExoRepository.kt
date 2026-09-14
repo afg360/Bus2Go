@@ -5,16 +5,26 @@ import dev.mainhq.bus2go.domain.entity.ExoBusItem
 import dev.mainhq.bus2go.domain.entity.ExoBusRouteInfo
 import dev.mainhq.bus2go.domain.entity.ExoTrainItem
 import dev.mainhq.bus2go.domain.entity.ExoTrainRouteInfo
+import dev.mainhq.bus2go.domain.entity.FavouriteTransitData
+import dev.mainhq.bus2go.domain.entity.FavouriteTransitDataWithTime
 import dev.mainhq.bus2go.domain.entity.RouteInfo
 import dev.mainhq.bus2go.domain.entity.Time
 import dev.mainhq.bus2go.domain.entity.TransitData
-//import dev.mainhq.bus2go.domain.repository.ExoRepository
 import dev.mainhq.bus2go.domain.entity.FuzzyQuery
+import dev.mainhq.bus2go.domain.entity.TransitType
 import dev.mainhq.bus2go.domain.entity.stm.DirectionInfo
+import dev.mainhq.bus2go.domain.repository.TransitRepository
+import kotlinx.coroutines.flow.MutableStateFlow
 import java.time.LocalDate
 import java.time.LocalTime
 
-//class FakeExoRepository: ExoRepository {
+//class FakeExoBusRepository(): TransitRepository {
+//
+//	override val transitType = TransitType.EXO_BUS
+//
+//	override val dbName = "ExoBus_data"
+//
+//	override val databaseExpirationDate = MutableStateFlow(Result.Success(LocalDate.now()))
 //
 //	private val exoBusRouteIds = listOf(
 //		230.toString(),
@@ -69,10 +79,6 @@ import java.time.LocalTime
 //		}
 //	}
 //
-//	override suspend fun getMaxEndDate(): Result<LocalDate> {
-//		return Result.Success(LocalDate.now())
-//	}
-//
 //
 //	override suspend fun getRouteInfo(routeId: FuzzyQuery): Result<List<RouteInfo>> {
 //		//create a list of arbitrary routeInfos
@@ -80,6 +86,21 @@ import java.time.LocalTime
 //		return Result.Success((exoBusRouteInfo + exoTrainRouteInfo).filter {
 //			it.routeId.contains(routeId.query) || it.routeName.contains(routeId.query)
 //		})
+//	}
+//
+//	override suspend fun getStopNames(
+//		direction1: String,
+//		direction2: String?,
+//		routeId: String?,
+//	): Result<Pair<List<String>, List<String>>> {
+//		TODO("Not yet implemented")
+//	}
+//
+//	override suspend fun getStopTimes(
+//		transitData: TransitData,
+//		curTime: Time,
+//	): Result<List<Time>> {
+//		TODO("Not yet implemented")
 //	}
 //
 //	override suspend fun getBusStopNames(direction1: String, direction2: String?): Result<Pair<List<String>, List<String>>> {
@@ -102,6 +123,17 @@ import java.time.LocalTime
 //
 //	override suspend fun getOldStopTimes(exoTransitData: TransitData, curTime: Time): Result<List<Time>> {
 //		throw IllegalStateException("Not implemented")
+//	}
+//
+//	override suspend fun getFavouriteStopTime(
+//		favouriteTransitData: FavouriteTransitData,
+//		curTime: Time,
+//	): Result<FavouriteTransitDataWithTime> {
+//		TODO("Not yet implemented")
+//	}
+//
+//	override suspend fun getTripHeadsigns(routeId: String): Result<List<DirectionInfo>> {
+//		TODO("Not yet implemented")
 //	}
 //
 //	override suspend fun getFavouriteBusStopTime(
