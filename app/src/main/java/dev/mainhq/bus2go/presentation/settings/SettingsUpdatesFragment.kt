@@ -88,11 +88,6 @@ class SettingsUpdatesFragment: Fragment() {
 			binding.settingsAppAutoUpdatesToggleSwitchView.isChecked = it
 		}
 
-		/* Manual Database Downloads/Updates */
-		binding.settingsDatabaseManualDownloadView.setOnClickListener {
-			sharedViewModel.setFragment(FragmentUsed.DATABASE_DOWNLOADS)
-		}
-
 		/* Database Updates */
 		binding.settingsDatabaseUpdatesView.setOnClickListener {
 			viewModel.toggleIsDbUpdatesNotifOn()

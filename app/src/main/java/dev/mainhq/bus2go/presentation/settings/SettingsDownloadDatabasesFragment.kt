@@ -62,7 +62,7 @@ class SettingsDownloadDatabasesFragment(): Fragment() {
 			this,
 			object: OnBackPressedCallback(true){
 				override fun handleOnBackPressed() {
-					sharedViewModel.setFragment(FragmentUsed.UPDATES)
+					sharedViewModel.setFragment(FragmentUsed.MAIN)
 					isEnabled = false
 				}
 			})

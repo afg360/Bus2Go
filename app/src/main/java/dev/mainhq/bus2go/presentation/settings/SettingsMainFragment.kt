@@ -235,6 +235,11 @@ class SettingsMainFragment : Fragment() {
             sharedViewModel.setFragment(FragmentUsed.UPDATES)
         }
 
+        /* Manual Database Downloads/Updates */
+        binding.settingsDatabaseManualDownloadView.setOnClickListener {
+            sharedViewModel.setFragment(FragmentUsed.DATABASE_DOWNLOADS)
+        }
+
         /* Real Time Data Updates */
         //TODO
         // launchViewModelCollectLatest()

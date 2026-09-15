@@ -167,19 +167,6 @@
             android:layout_marginStart="70dp"
             />
         
-        <!-- Manual Download -->
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/settings_database_manual_download_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackground"
-            android:text="Manual Download"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:paddingHorizontal="70dp"
-            android:paddingVertical="15dp"
-            />
-        
         <!-- Database Updates Notifications -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/settings_database_updates_view"

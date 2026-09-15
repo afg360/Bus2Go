@@ -12,8 +12,8 @@ import dev.mainhq.bus2go.presentation.main.home.Urgency
 //TODO
 //could add view/onTouchListener to handle touch holding, etc.
 class StopTimeListElemsAdapter(
-	private var timeData: List<StopTimesDisplayModel>,
-	private val fromAlarmCreation : Boolean
+    private var timeData: List<StopTimesDisplayModel>,
+    private val fromAlarmCreation: Boolean
 ) : RecyclerView.Adapter<StopTimeListElemsAdapter.ViewHolder>() {
 
     companion object {

@@ -69,8 +69,8 @@ class StopTimesViewModel(
 
 	fun setChosenDate(millis: Long) {
 		_chosenDate.update {
-			//FIXME somehow millis is selectedDate - 1, so add a day
-			val chosenDate = Time.fromMillis(millis).resetTime()
+			//Need to add a day, since time selected is at midnight, which would go to the day before
+			val chosenDate = Time.fromMillis(millis + 24 * 60 * 60 * 1000).resetTime()
 			if (chosenDate == Time.now().resetTime()) null
 			else chosenDate
 		}

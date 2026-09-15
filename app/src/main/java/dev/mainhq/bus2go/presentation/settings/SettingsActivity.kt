@@ -50,7 +50,7 @@ class SettingsActivity() : BaseActivity() {
                             viewModel.setFragment(FragmentUsed.MAIN)
                         }
                         FragmentUsed.DATABASE_DOWNLOADS -> {
-                            viewModel.setFragment(FragmentUsed.UPDATES)
+                            viewModel.setFragment(FragmentUsed.MAIN)
                         }
 					}
                     true

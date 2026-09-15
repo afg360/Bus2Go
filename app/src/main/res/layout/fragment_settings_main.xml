@@ -155,7 +155,7 @@
             android:textSize="18sp"
             android:textStyle="bold"
             android:paddingHorizontal="70dp"
-            android:paddingVertical="15dp"
+            android:paddingVertical="30dp"
             />
         
         <!-- Data Syncing Updates (replaces fragment), depends on Config Server -->
@@ -193,6 +193,19 @@
                 />
         
         </androidx.constraintlayout.widget.ConstraintLayout>
+        
+        <!-- Manual Download -->
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/settings_database_manual_download_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:text="Manual Download"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:paddingHorizontal="70dp"
+            android:paddingVertical="30dp"
+            />
     
         <!-- Data Real-Time Data Updates (Coming Soon), depends on Config Server  -->
         <androidx.constraintlayout.widget.ConstraintLayout
