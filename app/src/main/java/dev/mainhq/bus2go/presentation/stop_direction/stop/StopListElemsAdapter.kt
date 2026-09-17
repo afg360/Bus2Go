@@ -3,7 +3,7 @@ package dev.mainhq.bus2go.presentation.stop_direction.stop
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
+import androidx.appcompat.widget.AppCompatImageButton
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.R
@@ -45,8 +45,8 @@ class StopListElemsAdapter (
         holder.favouriteSelectedView.setOnClickListener {
             toggleFavouritesClickListener(it, data)
         }
-        holder.stopNameTextView.setOnClickListener { onClickListener(data) }
         setFavouriteButton(holder, position)
+        holder.itemView.setOnClickListener { onClickListener(data) }
     }
 
     companion object {
@@ -88,7 +88,7 @@ class StopListElemsAdapter (
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         //TODO INSTEAD ADD A COLUMN IN DATABASE TO SET AS FAVOURITE A CERTAIN STOP, AND AFFICHER ONLY THE NEXT STOP
         val stopNameTextView: MaterialTextView = view.findViewById(R.id.stop)
-        val favouriteSelectedView: ImageView = view.findViewById(R.id.favourite_star_selection)
+        val favouriteSelectedView: AppCompatImageButton = view.findViewById(R.id.favourite_star_selection)
 
         init {
             favouriteSelectedView.setBackgroundResource(R.drawable.favourite_drawable_off)
