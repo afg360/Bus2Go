@@ -7,11 +7,9 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.domain.entity.ExoBusItem
 import dev.mainhq.bus2go.domain.entity.ExoBusRouteInfo
@@ -32,12 +30,10 @@ import kotlin.IllegalStateException
 import dev.mainhq.bus2go.utils.launchViewModelCollectLatest
 import dev.mainhq.bus2go.utils.makeGone
 import dev.mainhq.bus2go.utils.makeVisible
+import dev.mainhq.bus2go.utils.toast
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 
-//TODO
-//change appbainvoke()r to be only a back button
-//TODO may make it a swappable ui instead of choosing button0 or 1
 class DirectionFragment : Fragment() {
     private val viewModel: DirectionFragmentViewModel by activityViewModels{
         object : ViewModelProvider.Factory {
@@ -91,18 +87,20 @@ class DirectionFragment : Fragment() {
 		//TODO set a loading screen first before displaying the correct buttons
 
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
-            binding.chooseBusNum.setTextColor(resources.getColor(viewModel.textColour.filterNotNull().first(), null))
             viewModel.cardViewColour.filterNotNull().first().also{
                 //DO NOT USE setBackgroundColor SINCE IT IS GOING TO FUCK UP MaterialCardView style
-                binding.topRouteCardView.setCardBackgroundColor(resources.getColor(it, null))
-                binding.bottomRouteCardView.setCardBackgroundColor(resources.getColor(it, null))
+                //TODO add a tiny bit of a tint of the main color to give it a material look
+                binding.chooseBusBadgeCard.strokeColor = resources.getColor(it, null)
+                binding.chooseBusNum.setTextColor(resources.getColor(it, null))
+                binding.topRouteCardView.strokeColor = resources.getColor(it, null)
+                binding.bottomRouteCardView.strokeColor = resources.getColor(it, null)
             }
         }
 
         launchViewModelCollectLatest(viewModel.routeInfo){
             when(it){
-                is UiState.Error -> TODO()
-                UiState.Init -> TODO()
+                is UiState.Error -> toast(it.message)
+                UiState.Init -> {}
                 UiState.Loading -> {}
                 is UiState.Success<RouteInfo> -> {
                     binding.chooseBusNum.text = it.data.routeId
@@ -111,163 +109,156 @@ class DirectionFragment : Fragment() {
             }
         }
 
-        //viewLifecycleOwner.launchViewModelCollect()
+        launchViewModelCollectLatest(viewModel.routeInfo) {
+            val isUnidirectional = viewModel.isUnidirectional.filterNotNull().first()
 
-        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                val isUnidirectional = viewModel.isUnidirectional.filterNotNull().first()
+            if (it is UiState.Success<RouteInfo>) {
+                when(it.data){
+                    is ExoBusRouteInfo -> {
+                        val topDirData = viewModel.topDirection.filterNotNull().first() as List<ExoBusItem>
+                        assert(topDirData.isNotEmpty())
 
-                //we are using collect since routeInfo may still be loading...
-                viewModel.routeInfo.collect {
-                    if (it is UiState.Success<RouteInfo>) {
-                        when(it.data){
-                            is ExoBusRouteInfo -> {
-                                val topDirData = viewModel.topDirection.filterNotNull().first() as List<ExoBusItem>
-                                assert(topDirData.isNotEmpty())
+                        if (isUnidirectional) {
+                            Toast.makeText(
+                                this@DirectionFragment.requireContext(),
+                                "This bus line only contains 1 direction",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            sharedStopViewModel.setTransitData(topDirData)
+                            sharedActivityViewModel.setAnimationDirection(
+                                //ActivityFragment.Stops(AnimationDirection.TO_TOP)
+                                AnimationDirection.TO_TOP
+                            )
+                        }
+                        else {
+                            val bottomDirData = viewModel.bottomDirection.filterNotNull()
+                                .first() as List<ExoBusItem>
+                            assert(bottomDirData.isNotEmpty())
 
-                                if (isUnidirectional) {
-                                    Toast.makeText(
-                                        this@DirectionFragment.requireContext(),
-                                        "This bus line only contains 1 direction",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                    sharedStopViewModel.setTransitData(topDirData)
-                                    sharedActivityViewModel.setAnimationDirection(
-                                        //ActivityFragment.Stops(AnimationDirection.TO_TOP)
-                                        AnimationDirection.TO_TOP
-                                    )
-                                }
-                                else {
-                                    val bottomDirData = viewModel.bottomDirection.filterNotNull()
-                                        .first() as List<ExoBusItem>
-                                    assert(bottomDirData.isNotEmpty())
+                            binding.topRouteDirection.visibility = View.GONE
+                            binding.topRouteDescription.text = getString(
+                                R.string.from_to,
+                                topDirData.first().stopName,
+                                topDirData.last().stopName
+                            )
 
-                                    binding.topRouteDirection.visibility = View.GONE
-                                    binding.topRouteDescription.text = getString(
-                                        R.string.from_to,
-                                        topDirData.first().stopName,
-                                        topDirData.last().stopName
-                                    )
-
-                                    binding.bottomRouteDirection.visibility = View.GONE
-                                    binding.bottomRouteDescription.text = getString(
-                                        R.string.from_to,
-                                        bottomDirData.first().stopName,
-                                        bottomDirData.last().stopName
-                                    )
-                                    binding.topRouteCardView.setOnClickListener {
-                                        sharedStopViewModel.setTransitData(topDirData)
-                                        sharedActivityViewModel.setAnimationDirection(
-                                            //ActivityFragment.Stops(AnimationDirection.TO_TOP)
-                                            AnimationDirection.TO_TOP
-                                        )
-                                    }
-                                    binding.bottomRouteCardView.setOnClickListener {
-                                        sharedStopViewModel.setTransitData(bottomDirData)
-                                        sharedActivityViewModel.setAnimationDirection(
-                                            //ActivityFragment.Stops(AnimationDirection.TO_BOTTOM)
-                                            AnimationDirection.TO_BOTTOM
-                                        )
-                                    }
-                                }
+                            binding.bottomRouteDirection.visibility = View.GONE
+                            binding.bottomRouteDescription.text = getString(
+                                R.string.from_to,
+                                bottomDirData.first().stopName,
+                                bottomDirData.last().stopName
+                            )
+                            binding.topRouteCardView.setOnClickListener {
+                                sharedStopViewModel.setTransitData(topDirData)
+                                sharedActivityViewModel.setAnimationDirection(
+                                    //ActivityFragment.Stops(AnimationDirection.TO_TOP)
+                                    AnimationDirection.TO_TOP
+                                )
                             }
-                            is ExoTrainRouteInfo -> {
-                                val topDirData = viewModel.topDirection.filterNotNull().first() as List<ExoTrainItem>
-                                if (!isUnidirectional) {
-                                    val bottomDirData = viewModel.bottomDirection.filterNotNull()
-                                        .first() as List<ExoTrainItem>
-
-                                    binding.topRouteDirection.makeGone()
-                                    binding.topRouteDescription.text = getString(
-                                        R.string.from_to,
-                                        topDirData.first().stopName,
-                                        topDirData.last().stopName
-                                    )
-                                    binding.topRouteCardView.setOnClickListener {
-                                        sharedStopViewModel.setTransitData(topDirData)
-                                        sharedActivityViewModel.setAnimationDirection(
-                                            //ActivityFragment.Stops(AnimationDirection.TO_TOP)
-                                            AnimationDirection.TO_TOP
-                                        )
-                                    }
-
-                                    binding.bottomRouteDirection.makeGone()
-                                    binding.bottomRouteDescription.text = getString(
-                                        R.string.from_to,
-                                        bottomDirData.first().stopName,
-                                        bottomDirData.last().stopName
-                                    )
-                                    binding.bottomRouteCardView.setOnClickListener {
-                                        sharedStopViewModel.setTransitData(bottomDirData)
-                                        sharedActivityViewModel.setAnimationDirection(
-                                            AnimationDirection.TO_BOTTOM
-                                        )
-                                    }
-                                }
-                                else throw IllegalStateException("Unexpected data: ExoTrain being unidirectional...")
-                            }
-                            is StmBusRouteInfo -> {
-                                var topDirData =
-                                    viewModel.topDirection.filterNotNull().first() as List<StmBusItem>
-                                if (!isUnidirectional) {
-                                    var bottomDirData = viewModel.bottomDirection.filterNotNull()
-                                        .first() as List<StmBusItem>
-
-                                    binding.topRouteDirection.makeVisible()
-                                    binding.bottomRouteDirection.makeVisible()
-
-                                    //top thing must always be East or South
-                                    if (topDirData.first().direction.lowercase() == "est") {
-                                        binding.topRouteDirection.text = getString(R.string.west)
-                                        binding.bottomRouteDirection.text = getString(R.string.east)
-                                        val tmpData = topDirData
-                                        topDirData = bottomDirData
-                                        bottomDirData = tmpData
-                                    }
-                                    else if (topDirData.first().direction.lowercase() == "ouest") {
-                                        binding.topRouteDirection.text = getString(R.string.west)
-                                        binding.bottomRouteDirection.text = getString(R.string.east)
-                                    }
-                                    else if (topDirData.first().direction.lowercase() == "north") {
-                                        binding.topRouteDirection.text  = getString(R.string.north)
-                                        binding.bottomRouteDirection.text = getString(R.string.south)
-                                    }
-                                    else {
-                                        binding.topRouteDirection.text = getString(R.string.north)
-                                        binding.bottomRouteDirection.text = getString(R.string.south)
-                                        val tmpData = topDirData
-                                        topDirData = bottomDirData
-                                        bottomDirData = tmpData
-                                    }
-                                    binding.topRouteDescription.text = getString(
-                                        R.string.from_to,
-                                        topDirData.first().stopName,
-                                        topDirData.last().stopName
-                                    )
-                                    binding.topRouteCardView.setOnClickListener {
-                                        sharedStopViewModel.setTransitData(topDirData)
-                                        sharedActivityViewModel.setAnimationDirection(
-                                            //ActivityFragment.Stops(AnimationDirection.TO_TOP)
-                                            AnimationDirection.TO_TOP
-                                        )
-                                    }
-
-                                    binding.bottomRouteDescription.text = getString(
-                                        R.string.from_to,
-                                        bottomDirData.first().stopName,
-                                        bottomDirData.last().stopName
-                                    )
-                                    binding.bottomRouteCardView.setOnClickListener {
-                                        sharedStopViewModel.setTransitData(bottomDirData)
-                                        sharedActivityViewModel.setAnimationDirection(
-                                            //ActivityFragment.Stops(AnimationDirection.TO_BOTTOM)
-                                            AnimationDirection.TO_BOTTOM
-                                        )
-                                    }
-                                }
-                                else throw IllegalStateException("Unexpected data: StmBus being unidirectional...")
+                            binding.bottomRouteCardView.setOnClickListener {
+                                sharedStopViewModel.setTransitData(bottomDirData)
+                                sharedActivityViewModel.setAnimationDirection(
+                                    //ActivityFragment.Stops(AnimationDirection.TO_BOTTOM)
+                                    AnimationDirection.TO_BOTTOM
+                                )
                             }
                         }
+                    }
+                    is ExoTrainRouteInfo -> {
+                        val topDirData = viewModel.topDirection.filterNotNull().first() as List<ExoTrainItem>
+                        if (!isUnidirectional) {
+                            val bottomDirData = viewModel.bottomDirection.filterNotNull()
+                                .first() as List<ExoTrainItem>
+
+                            binding.topRouteDirection.makeGone()
+                            binding.topRouteDescription.text = getString(
+                                R.string.from_to,
+                                topDirData.first().stopName,
+                                topDirData.last().stopName
+                            )
+                            binding.topRouteCardView.setOnClickListener {
+                                sharedStopViewModel.setTransitData(topDirData)
+                                sharedActivityViewModel.setAnimationDirection(
+                                    //ActivityFragment.Stops(AnimationDirection.TO_TOP)
+                                    AnimationDirection.TO_TOP
+                                )
+                            }
+
+                            binding.bottomRouteDirection.makeGone()
+                            binding.bottomRouteDescription.text = getString(
+                                R.string.from_to,
+                                bottomDirData.first().stopName,
+                                bottomDirData.last().stopName
+                            )
+                            binding.bottomRouteCardView.setOnClickListener {
+                                sharedStopViewModel.setTransitData(bottomDirData)
+                                sharedActivityViewModel.setAnimationDirection(
+                                    AnimationDirection.TO_BOTTOM
+                                )
+                            }
+                        }
+                        else throw IllegalStateException("Unexpected data: ExoTrain being unidirectional...")
+                    }
+                    is StmBusRouteInfo -> {
+                        var topDirData =
+                            viewModel.topDirection.filterNotNull().first() as List<StmBusItem>
+                        if (!isUnidirectional) {
+                            var bottomDirData = viewModel.bottomDirection.filterNotNull()
+                                .first() as List<StmBusItem>
+
+                            binding.topRouteDirection.makeVisible()
+                            binding.bottomRouteDirection.makeVisible()
+
+                            //top thing must always be East or South
+                            if (topDirData.first().direction.lowercase() == "est") {
+                                binding.topRouteDirection.text = getString(R.string.west)
+                                binding.bottomRouteDirection.text = getString(R.string.east)
+                                val tmpData = topDirData
+                                topDirData = bottomDirData
+                                bottomDirData = tmpData
+                            }
+                            else if (topDirData.first().direction.lowercase() == "ouest") {
+                                binding.topRouteDirection.text = getString(R.string.west)
+                                binding.bottomRouteDirection.text = getString(R.string.east)
+                            }
+                            else if (topDirData.first().direction.lowercase() == "north") {
+                                binding.topRouteDirection.text  = getString(R.string.north)
+                                binding.bottomRouteDirection.text = getString(R.string.south)
+                            }
+                            else {
+                                binding.topRouteDirection.text = getString(R.string.north)
+                                binding.bottomRouteDirection.text = getString(R.string.south)
+                                val tmpData = topDirData
+                                topDirData = bottomDirData
+                                bottomDirData = tmpData
+                            }
+                            binding.topRouteDescription.text = getString(
+                                R.string.from_to,
+                                topDirData.first().stopName,
+                                topDirData.last().stopName
+                            )
+                            binding.topRouteCardView.setOnClickListener {
+                                sharedStopViewModel.setTransitData(topDirData)
+                                sharedActivityViewModel.setAnimationDirection(
+                                    //ActivityFragment.Stops(AnimationDirection.TO_TOP)
+                                    AnimationDirection.TO_TOP
+                                )
+                            }
+
+                            binding.bottomRouteDescription.text = getString(
+                                R.string.from_to,
+                                bottomDirData.first().stopName,
+                                bottomDirData.last().stopName
+                            )
+                            binding.bottomRouteCardView.setOnClickListener {
+                                sharedStopViewModel.setTransitData(bottomDirData)
+                                sharedActivityViewModel.setAnimationDirection(
+                                    //ActivityFragment.Stops(AnimationDirection.TO_BOTTOM)
+                                    AnimationDirection.TO_BOTTOM
+                                )
+                            }
+                        }
+                        else throw IllegalStateException("Unexpected data: StmBus being unidirectional...")
                     }
                 }
             }
