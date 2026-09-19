@@ -2,6 +2,7 @@
     <!-- TODO These colors suck for day mode -->
     <style name="MaterialTheme.Bus2Go" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorPrimary">@color/dark_blue</item>
+        <item name="colorError">@color/on_error_red</item>
         <item name="editTextColor">@color/dark</item>
         
         <!-- Colors status bar -->

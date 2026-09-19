@@ -8,6 +8,7 @@
     <color name="light_grey">#AAAAAAAA</color>
     <color name="grey">#88888888</color>
     <color name="red">#FFFF0072</color>
+    <color name="on_error_red">#FFF5275B</color>
     <color name="scarlet_red">#FFFF2400</color>
     <color name="yellow">#FFF8DD25</color>
     <color name="orange">#FFD45F09</color>

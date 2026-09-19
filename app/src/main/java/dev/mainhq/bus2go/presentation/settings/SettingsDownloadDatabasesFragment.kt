@@ -22,11 +22,11 @@ import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.domain.entity.DatabaseAgency
 import dev.mainhq.bus2go.domain.entity.DatabaseState
 import dev.mainhq.bus2go.domain.entity.NotificationType
-import dev.mainhq.bus2go.domain.entity.Progress
 import dev.mainhq.bus2go.utils.cleanString
 import dev.mainhq.bus2go.utils.isExpired
 import dev.mainhq.bus2go.utils.launchViewModelCollectLatest
 import dev.mainhq.bus2go.utils.makeGone
+import dev.mainhq.bus2go.utils.makeInvisible
 import dev.mainhq.bus2go.utils.makeVisible
 import dev.mainhq.bus2go.utils.toast
 
@@ -65,7 +65,8 @@ class SettingsDownloadDatabasesFragment(): Fragment() {
 					sharedViewModel.setFragment(FragmentUsed.MAIN)
 					isEnabled = false
 				}
-			})
+			}
+		)
 
 		val linearLayoutManager = LinearLayoutManager(view.context)
 		linearLayoutManager.orientation = LinearLayoutManager.VERTICAL
@@ -135,6 +136,7 @@ class SettingsDownloadDatabasesFragment(): Fragment() {
 		)
 
 		(view as RecyclerView).adapter = adapter
+		view.setPadding(0, 20, 0, 0)
 		view.layoutManager = linearLayoutManager
 
 		launchViewModelCollectLatest(viewModel.databases) {
@@ -187,6 +189,7 @@ class SettingsDownloadDatabasesFragment(): Fragment() {
 				}
 				is DatabaseState.DatabaseDownloadError, is DatabaseState.DatabaseNotDownloaded -> {
 					holder.progressBar.makeGone()
+					holder.databaseDownloadStateIcon.makeVisible()
 					holder.databaseDownloadStateIcon.setImageResource(R.drawable.error_sign)
 					holder.databaseDownloadFileSize.makeGone()
 					holder.databaseDownloadExpirationDate.text = "Not installed"
@@ -197,7 +200,7 @@ class SettingsDownloadDatabasesFragment(): Fragment() {
 				}
 
 				is DatabaseState.DatabaseDownloading -> {
-					holder.databaseDownloadStateIcon.makeGone()
+					holder.databaseDownloadStateIcon.makeInvisible()
 					holder.databaseDownloadFileSize.makeGone()
 					holder.progressBar.makeVisible()
 					holder.itemView.setOnClickListener {

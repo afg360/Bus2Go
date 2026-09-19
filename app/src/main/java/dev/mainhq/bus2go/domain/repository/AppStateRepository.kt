@@ -24,9 +24,7 @@ interface AppStateRepository {
 	//FIXME change from DbToDownload to some other enum name
 	/**
 	 * @return Whether the version of the database file of the given data exists.
-	 * @throws IllegalArgumentException When giving ALL instead of a single db type.
 	 * */
-	@Throws(IllegalArgumentException::class)
 	suspend fun doesUpToDateCompressedDbExist(db: DatabaseAgency, version: Int): String?
 
 	/** @throws IllegalArgumentException When the given file does not exist */
