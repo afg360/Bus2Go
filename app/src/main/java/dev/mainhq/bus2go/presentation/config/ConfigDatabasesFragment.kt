@@ -38,7 +38,8 @@ class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
 				return (this@ConfigDatabasesFragment.requireActivity().application as Bus2GoApplication).let {
 					ConfigDatabasesFragmentViewModel(
 						it.commonModule.observeDownloadDatabaseTask,
-						it.commonModule.scheduleDownloadDatabaseTask
+						it.commonModule.scheduleDownloadDatabaseTask,
+						it.commonModule.cancelDownloadDatabaseTask
 					) as T
 				}
 			}
@@ -65,15 +66,30 @@ class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
 		binding.configDownloadDatabaseRecyclerView.layoutManager = linearLayoutManager
 		val adapter = SettingsDownloadDatabasesFragment.MyAdapter(
 			viewModel.databases.value,
-			downloadedOnClickListener = { },
-			onDownloadOnClickListener = {
+			onDownloadedClickListener = { },
+			onDownloadClickListener = {
 				requireContext().toast("Downloading database $it...")
 			},
-			onDownloadCompletedOnClickListener = {
+			onDownloadLongClickListener = {
+				MaterialAlertDialogBuilder(requireContext())
+					.setTitle("Are you sure to stop the download of ${it}?")
+					.setPositiveButton("Yes") { dialogInterface, _ ->
+						viewModel.cancelDatabaseDownload(it)
+						requireContext().toast("Download is being cancelled")
+					}
+					.setNegativeButton("No") { dialogInterface, _ ->
+						dialogInterface.dismiss()
+					}
+					.setOnCancelListener { dialogInterface ->
+						dialogInterface.dismiss()
+					}
+					.show()
+			},
+			onDownloadCompletedClickListener = {
 				requireContext().toast("Please restart the app")
 			},
-			deleteDownloadedOnLongClickListener = { false },
-			notDownloadedOnClickListener = { dbState, linearProgressBar ->
+			deleteDownloadedLongClickListener = { false },
+			onNotDownloadedClickListener = { dbState, linearProgressBar ->
 				dbState as DatabaseState
 				MaterialAlertDialogBuilder(requireContext())
 					.setTitle("Download ${dbState.db}?")

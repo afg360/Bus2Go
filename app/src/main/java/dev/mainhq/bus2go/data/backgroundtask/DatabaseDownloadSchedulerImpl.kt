@@ -8,11 +8,8 @@ import androidx.work.WorkManager
 import androidx.work.workDataOf
 import dev.mainhq.bus2go.data.worker.DatabaseDownloadManagerWorker
 import dev.mainhq.bus2go.domain.backgroundtask.DatabaseDownloadScheduler
-import dev.mainhq.bus2go.domain.entity.DatabaseAgency
 import dev.mainhq.bus2go.domain.entity.NotificationType
-import dev.mainhq.bus2go.domain.repository.AppStateRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import java.util.UUID
 import java.util.concurrent.TimeUnit
@@ -40,11 +37,15 @@ class DatabaseDownloadSchedulerImpl(
 			//.setConstraints(Constraints(requiredNetworkType = NetworkType.CONNECTED))
 			.build()
 		workManager.enqueueUniqueWork(
-uniqueWorkName(key),
+			uniqueWorkName(key),
 			ExistingWorkPolicy.KEEP,
 			workRequest
 		)
 		return workRequest.id
+	}
+
+	override suspend fun cancelDatabaseDownloadTask(databaseAgencyName: String) {
+		workManager.cancelUniqueWork(uniqueWorkName(databaseAgencyName))
 	}
 
 	override fun observeWork(databaseAgencyName: String) : Flow<NotificationType.DbOperation?> =
@@ -74,7 +75,7 @@ uniqueWorkName(key),
 						WorkInfo.State.SUCCEEDED -> NotificationType.DbUpdateDone
 						WorkInfo.State.FAILED -> NotificationType.DbUpdateError()
 						WorkInfo.State.BLOCKED -> NotificationType.DbEnqueued
-						WorkInfo.State.CANCELLED -> NotificationType.DbUpdateError()
+						WorkInfo.State.CANCELLED -> NotificationType.DbUpdateCancelled
 					}
 				}
 			}

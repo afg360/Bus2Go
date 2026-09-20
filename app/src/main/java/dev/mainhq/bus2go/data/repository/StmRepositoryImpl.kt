@@ -42,7 +42,10 @@ class StmRepositoryImpl(
 	override val dbName = DatabaseAgency.STM.toString()
 
 	override val databaseExpirationDate: Flow<Result<LocalDate>> = feedInfoDAO?.getExpirationDate()?.map {
-		Result.Success(it)
+		it?.let {
+			Result.Success(it)
+		} ?: Result.Error(null)
+
 	} ?: /* TODO get rid of this flow call perhaps... */ flowOf(Result.Error(null))
 
 	override suspend fun getRouteInfo(routeId: FuzzyQuery): Result<List<RouteInfo>> {

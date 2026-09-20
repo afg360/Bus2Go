@@ -11,5 +11,8 @@ interface DatabaseDownloadScheduler {
 	suspend fun scheduleDatabaseDownloadTask(databaseAgencyName: String): UUID
 
 	/** @param databaseAgencyName Must be the name of the dbAgency in all CAPS */
+	suspend fun cancelDatabaseDownloadTask(databaseAgencyName: String)
+
+	/** @param databaseAgencyName Must be the name of the dbAgency in all CAPS */
 	fun observeWork(databaseAgencyName: String ): Flow<NotificationType.DbOperation?>
 }

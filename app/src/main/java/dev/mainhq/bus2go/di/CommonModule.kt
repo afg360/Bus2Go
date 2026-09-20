@@ -28,6 +28,7 @@ import dev.mainhq.bus2go.data.repository.StmFavouritesRepositoryImpl
 import dev.mainhq.bus2go.data.repository.StmRepositoryImpl
 import dev.mainhq.bus2go.domain.entity.DatabaseAgency
 import dev.mainhq.bus2go.domain.use_case.AcceptSelfSignedCertificate
+import dev.mainhq.bus2go.domain.use_case.CancelDownloadDatabaseTask
 import dev.mainhq.bus2go.domain.use_case.CleanUpGarbageFiles
 import dev.mainhq.bus2go.domain.use_case.ObserveDownloadDatabaseTask
 import dev.mainhq.bus2go.domain.use_case.ScheduleDownloadDatabaseTask
@@ -57,7 +58,12 @@ class CommonModule(applicationContext: Context) {
 	private val databaseDownloadScheduler = DatabaseDownloadSchedulerImpl(
 		WorkManager.getInstance(applicationContext)
 	)
+
 	val scheduleDownloadDatabaseTask = ScheduleDownloadDatabaseTask(
+		databaseDownloadScheduler,
+	)
+
+	val cancelDownloadDatabaseTask = CancelDownloadDatabaseTask(
 		databaseDownloadScheduler,
 	)
 

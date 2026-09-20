@@ -19,9 +19,11 @@ import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.R
+import dev.mainhq.bus2go.databinding.FragmentSettingsDownloadDatabaseBinding
 import dev.mainhq.bus2go.domain.entity.DatabaseAgency
 import dev.mainhq.bus2go.domain.entity.DatabaseState
 import dev.mainhq.bus2go.domain.entity.NotificationType
+import dev.mainhq.bus2go.presentation.core.UiState
 import dev.mainhq.bus2go.utils.cleanString
 import dev.mainhq.bus2go.utils.isExpired
 import dev.mainhq.bus2go.utils.launchViewModelCollectLatest
@@ -38,21 +40,28 @@ class SettingsDownloadDatabasesFragment(): Fragment() {
 		object : ViewModelProvider.Factory {
 			override fun <T : ViewModel> create(modelClass: Class<T>): T {
 				@Suppress("UNCHECKED_CAST")
-				return SettingsDownloadDatabasesFragmentViewModel(
-					(requireActivity().application as Bus2GoApplication).commonModule.observeDownloadDatabaseTask,
-					(requireActivity().application as Bus2GoApplication).commonModule.scheduleDownloadDatabaseTask,
-					(requireActivity().application as Bus2GoApplication).commonModule.deleteDatabase
-				) as T
+				return (requireActivity().application as Bus2GoApplication).let {
+					SettingsDownloadDatabasesFragmentViewModel(
+						it.commonModule.observeDownloadDatabaseTask,
+						it.commonModule.scheduleDownloadDatabaseTask,
+						it.commonModule.cancelDownloadDatabaseTask,
+						it.commonModule.deleteDatabase
+					) as T
+				}
 			}
 		}
 	}
+
+	private var _binding: FragmentSettingsDownloadDatabaseBinding? = null
+	private val binding get() = _binding!!
 
 	override fun onCreateView(
 		inflater: LayoutInflater,
 		container: ViewGroup?,
 		savedInstanceState: Bundle?
 	): View {
-		return RecyclerView(requireContext())
+		_binding = FragmentSettingsDownloadDatabaseBinding.inflate(inflater)
+		return binding.root
 	}
 
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -71,8 +80,8 @@ class SettingsDownloadDatabasesFragment(): Fragment() {
 		val linearLayoutManager = LinearLayoutManager(view.context)
 		linearLayoutManager.orientation = LinearLayoutManager.VERTICAL
 		val adapter = MyAdapter(
-			viewModel.databases.value,
-			downloadedOnClickListener = {
+			emptyList(),
+			onDownloadedClickListener = {
 				if (it.isExpired()) {
 					MaterialAlertDialogBuilder(requireContext())
 						.setTitle("Update ${it.db}?")
@@ -94,13 +103,28 @@ class SettingsDownloadDatabasesFragment(): Fragment() {
 					Toast.makeText(requireContext(), "Database is up to date", Toast.LENGTH_SHORT).show()
 				}
 			},
-			onDownloadOnClickListener = {
+			onDownloadClickListener = {
 				requireContext().toast("Downloading database ${it}...")
 			},
-			onDownloadCompletedOnClickListener = {
+			onDownloadLongClickListener = {
+				MaterialAlertDialogBuilder(requireContext())
+					.setTitle("Are you sure to stop the download of ${it}?")
+					.setPositiveButton("Yes") { dialogInterface, _ ->
+						viewModel.cancelDownload(it)
+						requireContext().toast("Download is being cancelled")
+					}
+					.setNegativeButton("No") { dialogInterface, _ ->
+						dialogInterface.dismiss()
+					}
+					.setOnCancelListener { dialogInterface ->
+						dialogInterface.dismiss()
+					}
+					.show()
+			},
+			onDownloadCompletedClickListener = {
 				requireContext().toast("Please restart the app")
 			},
-			deleteDownloadedOnLongClickListener = {
+			deleteDownloadedLongClickListener = {
 				MaterialAlertDialogBuilder(requireContext())
 					.setTitle("Delete ${it.db}?")
 					.setMessage("Do you really want to download the ${it.db} database? This action cannot be undone.")
@@ -116,7 +140,7 @@ class SettingsDownloadDatabasesFragment(): Fragment() {
 					.show()
 				true
 			},
-			notDownloadedOnClickListener = { dbState, linearProgressBar ->
+			onNotDownloadedClickListener = { dbState, linearProgressBar ->
 				dbState as DatabaseState
 				MaterialAlertDialogBuilder(requireContext())
 					.setTitle("Download ${dbState.db}?")
@@ -135,22 +159,37 @@ class SettingsDownloadDatabasesFragment(): Fragment() {
 			}
 		)
 
-		(view as RecyclerView).adapter = adapter
-		view.setPadding(0, 20, 0, 0)
-		view.layoutManager = linearLayoutManager
+		binding.settingsDownloadDatabaseRecyclerView.adapter = adapter
+		binding.settingsDownloadDatabaseRecyclerView.layoutManager = linearLayoutManager
 
 		launchViewModelCollectLatest(viewModel.databases) {
-			adapter.setList(it)
+			when(it) {
+				UiState.Init -> {
+					binding.settingsDownloadDatabaseRecyclerView.makeGone()
+					binding.settingsDownloadDatabaseCircularLoadingIndicator.makeVisible()
+				}
+				UiState.Loading -> {
+					binding.settingsDownloadDatabaseRecyclerView.makeGone()
+					binding.settingsDownloadDatabaseCircularLoadingIndicator.makeVisible()
+				}
+				is UiState.Success<List<DatabaseState>> -> {
+					binding.settingsDownloadDatabaseRecyclerView.makeVisible()
+					binding.settingsDownloadDatabaseCircularLoadingIndicator.makeGone()
+					adapter.setList(it.data)
+				}
+				is UiState.Error -> {}
+			}
 		}
 	}
 
 	class MyAdapter(
 		private var list: List<DatabaseState>,
-		private val downloadedOnClickListener: (DatabaseState.DatabaseDownloaded) -> Unit,
-		private val onDownloadOnClickListener: (DatabaseAgency) -> Unit,
-		private val onDownloadCompletedOnClickListener: () -> Unit,
-		private val deleteDownloadedOnLongClickListener: (DatabaseState.DatabaseDownloaded) -> Boolean,
-		private val notDownloadedOnClickListener: (DatabaseState.NotDownloaded, LinearProgressIndicator) -> Unit,
+		private val onDownloadedClickListener: (DatabaseState.DatabaseDownloaded) -> Unit,
+		private val onDownloadClickListener: (DatabaseAgency) -> Unit,
+		private val onDownloadLongClickListener: (DatabaseAgency) -> Unit,
+		private val onDownloadCompletedClickListener: () -> Unit,
+		private val deleteDownloadedLongClickListener: (DatabaseState.DatabaseDownloaded) -> Boolean,
+		private val onNotDownloadedClickListener: (DatabaseState.NotDownloaded, LinearProgressIndicator) -> Unit,
 	): RecyclerView.Adapter<MyAdapter.ViewHolder>() {
 
 		fun setList(list: List<DatabaseState>) {
@@ -184,8 +223,8 @@ class SettingsDownloadDatabasesFragment(): Fragment() {
 					holder.databaseDownloadFileSize.makeVisible()
 					holder.databaseDownloadFileSize.text = "${data.fileSize} MB"
 					holder.databaseDownloadExpirationDate.makeVisible()
-					holder.itemView.setOnClickListener{ downloadedOnClickListener(data) }
-					holder.itemView.setOnLongClickListener { deleteDownloadedOnLongClickListener(data) }
+					holder.itemView.setOnClickListener{ onDownloadedClickListener(data) }
+					holder.itemView.setOnLongClickListener { deleteDownloadedLongClickListener(data) }
 				}
 				is DatabaseState.DatabaseDownloadError, is DatabaseState.DatabaseNotDownloaded -> {
 					holder.progressBar.makeGone()
@@ -194,9 +233,9 @@ class SettingsDownloadDatabasesFragment(): Fragment() {
 					holder.databaseDownloadFileSize.makeGone()
 					holder.databaseDownloadExpirationDate.text = "Not installed"
 					holder.itemView.setOnClickListener {
-						//if user agrees to download the database
-						notDownloadedOnClickListener(data, holder.progressBar)
+						onNotDownloadedClickListener(data, holder.progressBar)
 					}
+					holder.itemView.setOnLongClickListener { false }
 				}
 
 				is DatabaseState.DatabaseDownloading -> {
@@ -204,7 +243,11 @@ class SettingsDownloadDatabasesFragment(): Fragment() {
 					holder.databaseDownloadFileSize.makeGone()
 					holder.progressBar.makeVisible()
 					holder.itemView.setOnClickListener {
-						onDownloadOnClickListener(data.db)
+						onDownloadClickListener(data.db)
+					}
+					holder.itemView.setOnLongClickListener {
+						onDownloadLongClickListener(data.db)
+						true
 					}
 					when(val progress = data.currentProgress) {
 						is NotificationType.DbDownloading -> {
@@ -228,7 +271,8 @@ class SettingsDownloadDatabasesFragment(): Fragment() {
 							holder.databaseDownloadStateIcon.makeVisible()
 							holder.databaseDownloadStateIcon.setImageResource(R.drawable.baseline_update)
 							holder.databaseDownloadExpirationDate.text = "Restart app to see changes"
-							holder.itemView.setOnClickListener { onDownloadCompletedOnClickListener() }
+							holder.itemView.setOnClickListener { onDownloadCompletedClickListener() }
+							holder.itemView.setOnLongClickListener { false }
 						}
 
 						is NotificationType.DbUpdateError -> {
@@ -236,12 +280,10 @@ class SettingsDownloadDatabasesFragment(): Fragment() {
 							holder.databaseDownloadStateIcon.makeVisible()
 							holder.databaseDownloadStateIcon.setImageResource(R.drawable.error_sign)
 							holder.databaseDownloadExpirationDate.text = "Error trying to download shit"
+							holder.itemView.setOnLongClickListener { false }
 						}
 						else -> {}
 					}
-					//TODO add a cancel download button
-//					holder.itemView.setOnClickListener {
-//					}
 				}
 
 				is DatabaseState.NeedAppRestart -> {
@@ -249,7 +291,8 @@ class SettingsDownloadDatabasesFragment(): Fragment() {
 					holder.databaseDownloadStateIcon.makeVisible()
 					holder.databaseDownloadStateIcon.setImageResource(R.drawable.baseline_update)
 					holder.databaseDownloadExpirationDate.text = "Restart app to see changes"
-					holder.itemView.setOnClickListener { onDownloadCompletedOnClickListener() }
+					holder.itemView.setOnClickListener { onDownloadCompletedClickListener() }
+					holder.itemView.setOnLongClickListener { false }
 				}
 			}
 		}

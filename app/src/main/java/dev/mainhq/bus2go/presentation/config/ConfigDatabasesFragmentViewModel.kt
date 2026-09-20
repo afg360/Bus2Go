@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.mainhq.bus2go.domain.entity.DatabaseAgency
 import dev.mainhq.bus2go.domain.entity.DatabaseState
+import dev.mainhq.bus2go.domain.use_case.CancelDownloadDatabaseTask
 import dev.mainhq.bus2go.domain.use_case.ObserveDownloadDatabaseTask
 import dev.mainhq.bus2go.domain.use_case.ScheduleDownloadDatabaseTask
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -16,7 +17,8 @@ import kotlinx.coroutines.launch
 
 class ConfigDatabasesFragmentViewModel(
 	observeDownloadDatabaseTask: ObserveDownloadDatabaseTask,
-	private val scheduleDownloadDatabaseTask: ScheduleDownloadDatabaseTask
+	private val scheduleDownloadDatabaseTask: ScheduleDownloadDatabaseTask,
+	private val cancelDownloadDatabaseTask: CancelDownloadDatabaseTask
 ): ViewModel() {
 
 	@OptIn(ExperimentalCoroutinesApi::class)
@@ -28,7 +30,13 @@ class ConfigDatabasesFragmentViewModel(
 
 	fun downloadDatabase(databaseAgency: DatabaseAgency){
 		viewModelScope.launch {
-			scheduleDownloadDatabaseTask.invoke(listOf(databaseAgency))
+			scheduleDownloadDatabaseTask.invoke(databaseAgency)
+		}
+	}
+
+	fun cancelDatabaseDownload(databaseAgency: DatabaseAgency){
+		viewModelScope.launch {
+			cancelDownloadDatabaseTask.invoke(databaseAgency)
 		}
 	}
 }

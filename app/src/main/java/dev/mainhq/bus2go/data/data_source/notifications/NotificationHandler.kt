@@ -198,6 +198,18 @@ class NotificationHandler(private val appContext: Context) {
 		appContext.toast("Update Successful. Restart App")
 	}
 
+	fun notifyDbDownloadCancelled(database: DatabaseAgency) {
+		createNotificationBuilder(
+			channelId = DB_UPDATES,
+			title = "Database download cancelled",
+			description = "Database download was cancelled manually",
+			icon = R.drawable.error_sign, //TODO change
+			priority = NotificationCompat.PRIORITY_DEFAULT
+		).setOngoing(false).setProgress(0, 0, false)
+			.build()
+			.also { postNotif(database.ordinal + baseDbUpdateNotifId, it) }
+	}
+
 	//TODO
 	fun notifyDbDownloadFailed(message: String?, database: DatabaseAgency){
 		createNotificationBuilder(
