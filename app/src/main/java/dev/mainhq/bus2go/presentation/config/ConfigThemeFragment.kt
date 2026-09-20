@@ -47,9 +47,9 @@ class ConfigThemeFragment: Fragment(R.layout.fragment_config_theme) {
 			else switch.text = "Light"
 		}
 
-		view.findViewById<MaterialButton>(R.id.configSelectThemeContinueButton).setOnClickListener {
+		sharedViewModel.setButtonState(ConfigButtonState.Next{
 			sharedViewModel.setFragment(nextFrag)
-		}
+		})
 
 		requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object: OnBackPressedCallback(true){
 			override fun handleOnBackPressed() {

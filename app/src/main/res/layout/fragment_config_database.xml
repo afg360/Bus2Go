@@ -56,18 +56,5 @@
         app:layout_constraintStart_toStartOf="@id/configStmDatabaseCheckBox"
         />
     
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/configDownloadDatabaseContinueButton"
-        android:layout_width="150dp"
-        android:layout_height="wrap_content"
-        android:text="@string/config_continue"
-        android:layout_marginBottom="200dp"
-        android:textColor="@color/black"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        />
-    
     
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -57,10 +57,9 @@ class ConfigNotificationsFragment: Fragment(R.layout.fragment_config_notificatio
 		inflater: LayoutInflater,
 		container: ViewGroup?,
 		savedInstanceState: Bundle?
-	): View? {
+	): View {
 		_binding = FragmentConfigNotificationsBinding.inflate(layoutInflater)
 		return binding.root
-		//return super.onCreateView(inflater, container, savedInstanceState)
 	}
 
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -74,7 +73,7 @@ class ConfigNotificationsFragment: Fragment(R.layout.fragment_config_notificatio
 			binding.configNotificationSwitchDbUpdates.isChecked = it
 		}
 
-		binding.configNotificationConfirmButton.setOnClickListener {
+		sharedViewModel.setButtonState(ConfigButtonState.Next("Start!") {
 			if (viewModel.isAnyNotifSet()){
 				//must be sure app has post notification permissions
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -88,9 +87,7 @@ class ConfigNotificationsFragment: Fragment(R.layout.fragment_config_notificatio
 				}
 			}
 			viewModel.saveSettings()
-			sharedViewModel.triggerEvent(true)
-		}
-
+		})
 
 		binding.configNotificationSwitchAppUpdates.setOnCheckedChangeListener { _, boolean ->
 			viewModel.setAppUpdateNotifs(boolean)

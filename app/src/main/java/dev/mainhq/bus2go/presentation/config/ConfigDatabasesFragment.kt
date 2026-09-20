@@ -46,7 +46,7 @@ class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
 		inflater: LayoutInflater,
 		container: ViewGroup?,
 		savedInstanceState: Bundle?
-	): View? {
+	): View {
 		_binding = FragmentConfigDatabaseBinding.inflate(inflater)
 		return binding.root
 	}
@@ -65,13 +65,12 @@ class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
 			it.setOnCheckedChangeListener { _, _ -> viewModel.toggleExo() }
 		}
 
-
 		launchViewModelCollectLatest(viewModel.dbToDownload){
-			binding.configDownloadDatabaseContinueButton.text = if (it.isEmpty()) {
-				"Skip"
+			if (it.isEmpty()) {
+				sharedViewModel.setButtonState(ConfigButtonState.Skip{})
 			}
 			else {
-				"Continue"
+				sharedViewModel.setButtonState(ConfigButtonState.Next{})
 			}
 		}
 		requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object: OnBackPressedCallback(true){
@@ -81,40 +80,26 @@ class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
 			}
 		})
 
-		binding.configDownloadDatabaseContinueButton.setOnClickListener {
-			//if none checked, display the skip, and create a dialog for a skip
-			if (binding.configDownloadDatabaseContinueButton.text == "Continue") {
-				//TODO let the user know how much data it may take...
-				MaterialAlertDialogBuilder(requireContext())
-					.setTitle("Confirm")
-					//list packages
-					.setMessage("Are you sure to download the selected packages for download?")
-					.setPositiveButton("Yes"){ dialogInterface, _ ->
-						Log.d("DATABASE-CONFIG", "Initiating download of data")
-						viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
-							dialogInterface.dismiss()
-							//AppThemeState.turnOffDbUpdateChecking()
-							viewModel.scheduleDownloadWork()
-							sharedViewModel.setFragment(nextFrag)
-						}
-					}
-					.setNegativeButton("Cancel"){ dialogInterface, _ -> /*close the dialog*/ dialogInterface.dismiss() }
-					.show()
-			}
-			else {
-				MaterialAlertDialogBuilder(requireContext())
-					.setTitle("Are you sure?")
-					.setMessage("You won't be able to properly use the app without a database installed (you can always download one later)")
-					.setPositiveButton("Yes, skip") { dialogInterface, _ ->
-						dialogInterface.dismiss()
-						sharedViewModel.setFragment(nextFrag)
-					}
-					.setNegativeButton("Cancel"){ dialogInterface, _ ->
-						dialogInterface.dismiss()
-					}
-					.show()
-			}
-		}
+//		binding.configDownloadDatabaseContinueButton.setOnClickListener {
+//			//if none checked, display the skip, and create a dialog for a skip
+//			if (binding.configDownloadDatabaseContinueButton.text == "Continue") {
+//				//TODO let the user know how much data it may take...
+//				MaterialAlertDialogBuilder(requireContext())
+//					.setTitle("Confirm")
+//					//list packages
+//					.setMessage("Are you sure to download the selected packages for download?")
+//					.setPositiveButton("Yes"){ dialogInterface, _ ->
+//						Log.d("DATABASE-CONFIG", "Initiating download of data")
+//						viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+//							dialogInterface.dismiss()
+//							//AppThemeState.turnOffDbUpdateChecking()
+//							viewModel.scheduleDownloadWork()
+//							sharedViewModel.setFragment(nextFrag)
+//						}
+//					}
+//					.setNegativeButton("Cancel"){ dialogInterface, _ -> dialogInterface.dismiss() }
+//					.show()
+//			}
 	}
 
 	override fun onDestroyView() {

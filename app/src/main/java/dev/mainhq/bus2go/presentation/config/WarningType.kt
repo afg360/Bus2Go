@@ -4,7 +4,7 @@ import okhttp3.CertificatePinner.Companion.sha256Hash
 import java.security.cert.X509Certificate
 
 sealed class WarningType() {
-	object QuerySelfHosted: WarningType()
+	data object QuerySelfHosted: WarningType()
 	data class AcceptSelfSignedCertificate(
 		val cert: X509Certificate
 	): WarningType() {

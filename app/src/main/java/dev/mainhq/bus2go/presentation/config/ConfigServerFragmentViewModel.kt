@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-
+import java.security.cert.X509Certificate
 
 class ConfigServerFragmentViewModel(
 	private val settingsRepository: SettingsRepository,
@@ -30,10 +30,6 @@ class ConfigServerFragmentViewModel(
 	private val acceptSelfSignedCertificate: AcceptSelfSignedCertificate
 ): ViewModel(), SettingsSavableViewModel {
 
-	private val _buttonText = MutableStateFlow("Skip")
-	val buttonText = _buttonText.asStateFlow()
-
-	//store 1 element
 	private val _textInputText: MutableStateFlow<UiState<String>> = MutableStateFlow(UiState.Init)
 	val textInputText = _textInputText.asStateFlow()
 
@@ -46,21 +42,18 @@ class ConfigServerFragmentViewModel(
 		_serverResponse.update { UiState.Init }
 		val config = UrlChecker.check(potentialUrl)
 		if (config == null) {
-			_buttonText.update { "Skip" }
 			_textInputText.update { UiState.Error("") }
 		}
 		else if (config.data.isEmpty()) {
-			_buttonText.update { "Skip" }
 			_textInputText.update { UiState.Success("") }
 		}
 		else {
-			_buttonText.update { "Continue" }
 			_textInputText.update { UiState.Success(config.data) }
 		}
 	}
 
-
-	private val _warnUser: MutableSharedFlow<WarningType> = MutableSharedFlow(replay = 1)
+	private val _certificate: MutableStateFlow<X509Certificate?> = MutableStateFlow(null)
+	private val _warnUser: MutableSharedFlow<WarningType> = MutableSharedFlow()
 	val warnUser = _warnUser.asSharedFlow()
 
 	/** Called when the user clicks on Continue after having written a potential bsu2go server */
@@ -74,14 +67,12 @@ class ConfigServerFragmentViewModel(
 				_serverResponse.update { UiState.Error("Invalid URL") }
 			}
 
-			val inputTextString = (_textInputText.value as UiState.Success).data
 			when(_serverType.value) {
 				ServerType.SELF_HOSTED -> {
 					_warnUser.emit(WarningType.QuerySelfHosted)
 				}
 				ServerType.WEB -> {
-					val result = checkIsBus2GoServer.invoke(inputTextString, _serverType.value)
-					_checkIsBus2Go(inputTextString, result)
+					checkIsBus2Go()
 				}
 			}
 
@@ -97,58 +88,43 @@ class ConfigServerFragmentViewModel(
 			when (val result = checkIsBus2GoServer.invoke(inputTextString, _serverType.value)) {
 				is Result.Error -> {
 					if (result.throwable?.findCause<UnpinnedCertificateException>() != null) {
-						_warnUser.emit(WarningType.AcceptSelfSignedCertificate(result.throwable.findCause<UnpinnedCertificateException>()!!.certificate))
+						val certificate = result.throwable.findCause<UnpinnedCertificateException>()!!.certificate
+						_certificate.update { certificate }
+						_warnUser.emit(WarningType.AcceptSelfSignedCertificate(certificate))
 					}
 					else if (result.throwable?.findCause<ExpiredCertificateException>() != null) {
+						_certificate.update { null }
 						_serverResponse.update { UiState.Error("Server SSL certificate is expired") }
 					}
 					else {
 						//TODO put "Skip option"
+						_certificate.update { null }
 						_serverResponse.update { UiState.Error("Unexpected Error occurred") }
 					}
 				}
-				else -> _checkIsBus2Go(inputTextString, result)
+				is Result.Success<Boolean> -> {
+					//if message is null from server success, then show invalid
+					val serverChoice = ServerChoice(inputTextString, true)
+					if (result.data) {
+						viewModelScope.launch {
+							settingsRepository.setBus2GoServer(serverChoice)
+						}
+					}
+					_serverResponse.update { UiState.Success(result.data) }
+				}
 			}
 		}
 	}
 
 	fun acceptCert() {
 		viewModelScope.launch {
-			when(val throwable = _warnUser.first()) {
-				WarningType.QuerySelfHosted -> throw Exception("Wtf")
-				is WarningType.AcceptSelfSignedCertificate -> {
-					acceptSelfSignedCertificate.invoke(throwable.cert)
-				}
+			val cert = _certificate.value
+			if (cert != null) {
+				acceptSelfSignedCertificate.invoke(cert)
+				checkIsBus2Go()
 			}
-			checkIsBus2Go()
-		}
-	}
-
-	/**
-	 * @param result The output from a CheckIsBus2Go call to check if we have a valid Bus2Go server.
-	 * */
-	private fun _checkIsBus2Go(inputTextString: String, result: Result<Boolean>) {
-		//if message is null from server success, then show invalid
-		when (result) {
-			is Result.Error -> {
-				_buttonText.update { "Skip" }
-				_serverResponse.value =
-					if (result.message != null) UiState.Error(result.message)
-					else UiState.Error("")
-			}
-
-			is Result.Success<Boolean> -> {
-				if (result.data){
-					_buttonText.update { "Continue" }
-					//FIXME need to pass down a correct ServerChoice
-					viewModelScope.launch {
-						settingsRepository.setBus2GoServer(ServerChoice(inputTextString, true))
-					}
-				}
-				else {
-					_buttonText.update { "Skip" }
-				}
-				_serverResponse.update { UiState.Success(result.data) }
+			else {
+				_textInputText.update { UiState.Error("Wtf") }
 			}
 		}
 	}

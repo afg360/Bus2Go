@@ -52,17 +52,4 @@
         
     </LinearLayout>
     
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/config_notification_confirm_button"
-        android:layout_width="150dp"
-        android:layout_height="wrap_content"
-        android:text="Start!"
-        android:textSize="20sp"
-        android:textColor="@color/black"
-        android:layout_marginBottom="200dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        />
-
 </androidx.constraintlayout.widget.ConstraintLayout>
