@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.card.MaterialCardView
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.textview.MaterialTextView
@@ -66,6 +67,7 @@ class FavouritesListElemsAdapter(
         val info = list[position]
         setTimeLeft(holder, position)
 
+        holder.cardView.strokeColor = holder.cardView.getMaterialColor(info.dataDisplayColor)
         if (info.isDirectionTextTruncated){
             holder.directionTextView.text = "${info.directionText.substring(0, FavouritesDisplayModel.DIRECTION_STR_LIMIT)}..."
             holder.directionTextView.setOnClickListener {
@@ -184,6 +186,7 @@ class FavouritesListElemsAdapter(
     }
 
     class ViewHolder(view : View) : RecyclerView.ViewHolder(view){
+        val cardView : MaterialCardView = view.findViewById(R.id.favourites_card_view)
         var checkBoxView : MaterialCheckBox = view.findViewById(R.id.favourites_check_box)
         /** Will consist of the routeLongName for exo data */
         val tripHeadsignTextView : MaterialTextView = view.findViewById(R.id.favouritesTripheadsignTextView)
