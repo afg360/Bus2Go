@@ -7,6 +7,7 @@
     tools:context=".presentation.config.ConfigActivity"
     >
     
+    
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/config_download_database_title_textView"
         android:layout_width="match_parent"
@@ -19,6 +20,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         />
+    
     
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/config_download_database_description_textView"
@@ -33,28 +35,14 @@
         app:layout_constraintEnd_toEndOf="parent"
         />
     
-    <com.google.android.material.checkbox.MaterialCheckBox
-        android:id="@+id/configStmDatabaseCheckBox"
-        android:layout_width="wrap_content"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/config_download_database_recycler_view"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="STM data (recommended)"
-        android:layout_marginTop="20dp"
-        android:layout_marginEnd="50dp"
+        android:layout_marginTop="50dp"
         app:layout_constraintTop_toBottomOf="@id/config_download_database_description_textView"
-        app:layout_constraintEnd_toEndOf="parent"
         />
     
-    <!-- Could have this as the main, but then have collapsed choice for each individual -->
-    <com.google.android.material.checkbox.MaterialCheckBox
-        android:id="@+id/configExoDatabaseCheckBox"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Exo data (includes trains)"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="50dp"
-        app:layout_constraintTop_toBottomOf="@id/configStmDatabaseCheckBox"
-        app:layout_constraintStart_toStartOf="@id/configStmDatabaseCheckBox"
-        />
     
     
 </androidx.constraintlayout.widget.ConstraintLayout>

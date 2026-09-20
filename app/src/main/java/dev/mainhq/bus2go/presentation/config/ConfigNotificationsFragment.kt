@@ -1,6 +1,7 @@
 package dev.mainhq.bus2go.presentation.config
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -17,13 +18,14 @@ import androidx.lifecycle.ViewModelProvider
 import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.databinding.FragmentConfigNotificationsBinding
+import dev.mainhq.bus2go.presentation.main.MainActivity
 import dev.mainhq.bus2go.utils.launchViewModelCollectLatest
 
 //TODO display in the fragment: You are almost all set!
 
 class ConfigNotificationsFragment: Fragment(R.layout.fragment_config_notifications) {
 
-	//private val prevFrag = FragmentUsed.DATABASES
+	private val prevFrag = FragmentUsed.DATABASES
 
 	private val sharedViewModel: ConfigSharedViewModel by activityViewModels()
 	private val viewModel: ConfigNotificationsFragmentViewModel by activityViewModels{
@@ -87,6 +89,8 @@ class ConfigNotificationsFragment: Fragment(R.layout.fragment_config_notificatio
 				}
 			}
 			viewModel.saveSettings()
+			startActivity(Intent(requireContext(), MainActivity::class.java))
+			requireActivity().finish()
 		})
 
 		binding.configNotificationSwitchAppUpdates.setOnCheckedChangeListener { _, boolean ->
@@ -99,7 +103,7 @@ class ConfigNotificationsFragment: Fragment(R.layout.fragment_config_notificatio
 
 		requireActivity().onBackPressedDispatcher.addCallback(object: OnBackPressedCallback(true) {
 			override fun handleOnBackPressed() {
-				//sharedViewModel.setFragment(prevFrag)
+				sharedViewModel.setFragment(prevFrag)
 				//isEnabled = false
 			}
 		})

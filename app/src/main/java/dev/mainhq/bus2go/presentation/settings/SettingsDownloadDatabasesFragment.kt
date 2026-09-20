@@ -144,7 +144,7 @@ class SettingsDownloadDatabasesFragment(): Fragment() {
 		}
 	}
 
-	private class MyAdapter(
+	class MyAdapter(
 		private var list: List<DatabaseState>,
 		private val downloadedOnClickListener: (DatabaseState.DatabaseDownloaded) -> Unit,
 		private val onDownloadOnClickListener: (DatabaseAgency) -> Unit,

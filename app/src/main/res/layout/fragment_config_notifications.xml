@@ -22,7 +22,7 @@
         app:layout_constraintTop_toTopOf="parent"
         />
     
-    <LinearLayout
+    <androidx.appcompat.widget.LinearLayoutCompat
         android:id="@+id/config_notifications_linear_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -36,20 +36,26 @@
             android:id="@+id/config_notification_switch_app_updates"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:foreground="?attr/selectableItemBackground"
             android:text="App Update Notifications"
+            android:paddingVertical="20dp"
             android:paddingHorizontal="20dp"
-            android:textSize="24sp"
+            android:textSize="18sp"
+            android:textStyle="bold"
             />
         
         <com.google.android.material.materialswitch.MaterialSwitch
             android:id="@+id/config_notification_switch_db_updates"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:foreground="?attr/selectableItemBackground"
             android:text="Database Update Notifications"
+            android:paddingVertical="20dp"
             android:paddingHorizontal="20dp"
-            android:textSize="24sp"
+            android:textSize="18sp"
+            android:textStyle="bold"
             />
         
-    </LinearLayout>
+    </androidx.appcompat.widget.LinearLayoutCompat>
     
 </androidx.constraintlayout.widget.ConstraintLayout>
