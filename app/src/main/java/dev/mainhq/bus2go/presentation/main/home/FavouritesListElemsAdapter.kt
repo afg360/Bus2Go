@@ -9,8 +9,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.textview.MaterialTextView
+import com.google.android.material.R as MaterialRes
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.domain.entity.FavouriteTransitData
+import dev.mainhq.bus2go.utils.getMaterialColor
 import dev.mainhq.bus2go.utils.makeGone
 import dev.mainhq.bus2go.utils.makeVisible
 import dev.mainhq.bus2go.utils.swap
@@ -95,7 +97,7 @@ class FavouritesListElemsAdapter(
         }
 
         holder.tripHeadsignTextView.text = info.tripHeadsignText
-        holder.tripHeadsignTextView.setTextColor(holder.itemView.resources.getColor(info.dataDisplayColor, null))
+        holder.tripHeadsignTextView.setTextColor(holder.itemView.getMaterialColor(info.dataDisplayColor))
 
         if (selectedMode) {
             holder.checkBoxView.makeVisible()
@@ -124,7 +126,7 @@ class FavouritesListElemsAdapter(
         holder.timeRemainingTextView.text = info.timeRemainingText
         if (info.arrivalTimeText == null) {
             holder.timeRemainingTextView.textSize = 20F
-            holder.timeRemainingTextView.setTextColor(holder.itemView.resources.getColor(R.color.light_grey, null))
+            holder.timeRemainingTextView.setTextColor(holder.itemView.getMaterialColor(MaterialRes.attr.colorOnSecondaryContainer))
             holder.arrivalTimeTextView.makeGone()
         }
         else {
@@ -132,6 +134,7 @@ class FavouritesListElemsAdapter(
             holder.arrivalTimeTextView.text = info.arrivalTimeText
             holder.arrivalTimeTextView.makeVisible()
             when (info.urgency){
+                //TODO switch to material style colors
                 Urgency.IMMINENT -> holder.timeRemainingTextView.setTextColor(holder.itemView.resources.getColor(
 					R.color.red, null))
                 Urgency.SOON -> holder.timeRemainingTextView.setTextColor(holder.itemView.resources.getColor(

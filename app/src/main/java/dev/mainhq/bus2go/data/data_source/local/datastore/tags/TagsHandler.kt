@@ -1,7 +1,9 @@
 package dev.mainhq.bus2go.data.data_source.local.datastore.tags
 
+import com.google.android.material.R as MaterialRes
 import android.content.Context
 import dev.mainhq.bus2go.R
+import dev.mainhq.bus2go.utils.getMaterialColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -38,10 +40,11 @@ class TagsHandler private constructor(private val applicationContext: Context) {
 					try {
 						if (!file.exists()) {
 							file.createNewFile()
+
 							file.writeText(
-								"Stm,${applicationContext.resources.getColor(R.color.basic_blue, null).toString(16)}\n" +
-										"Exo,${applicationContext.resources.getColor(R.color.basic_purple, null).toString(16)}\n" +
-										"Train,${applicationContext.resources.getColor(R.color.orange, null).toString(16)}\n")
+								"Stm,${applicationContext.getMaterialColor(MaterialRes.attr.colorPrimaryContainer).toString(16)}\n" +
+										"Exo,${applicationContext.getMaterialColor(R.attr.colorCustomColor1Container).toString(16)}\n" +
+										"Train,${applicationContext.getMaterialColor(R.attr.colorCustomColor2Container).toString(16)}\n")
 						}
 						true
 					}

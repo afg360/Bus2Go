@@ -16,7 +16,7 @@
         android:roundIcon="@mipmap/bus2go_dark_ic_launcher_round"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/MaterialTheme.Bus2Go"
+        android:theme="@style/Bus2Go.MaterialTheme"
         tools:targetApi="31"
         >
         <!-- Used for FileProvider class, to install the downloaded update apk -->
@@ -58,10 +58,6 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
-        </activity>
-        <activity
-            android:name=".presentation.search_transit.SearchTransit"
-            android:exported="false">
         </activity>
         <activity
             android:name=".presentation.settings.SettingsActivity"

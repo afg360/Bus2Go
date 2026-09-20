@@ -6,11 +6,11 @@
     android:id="@+id/timeElem"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:foreground="?attr/selectableItemBackground"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent"
     android:paddingTop="5dp"
-    android:background="?attr/selectableItemBackground"
     >
     
     <androidx.appcompat.widget.AppCompatImageButton
@@ -33,7 +33,7 @@
         android:padding="2dp"
         android:text="STOP"
         android:textAlignment="textEnd"
-        android:textColor="@color/basic_blue"
+        android:textColor="?attr/colorPrimary"
         android:textSize="23sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

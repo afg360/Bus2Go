@@ -24,6 +24,7 @@ import dev.mainhq.bus2go.presentation.core.UiState
 import dev.mainhq.bus2go.presentation.stop_direction.AnimationDirection
 import dev.mainhq.bus2go.presentation.stop_direction.StopDirectionViewModel
 import dev.mainhq.bus2go.presentation.stop_direction.stop.StopFragmentViewModel
+import dev.mainhq.bus2go.utils.getMaterialColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.IllegalStateException
@@ -90,10 +91,10 @@ class DirectionFragment : Fragment() {
             viewModel.cardViewColour.filterNotNull().first().also{
                 //DO NOT USE setBackgroundColor SINCE IT IS GOING TO FUCK UP MaterialCardView style
                 //TODO add a tiny bit of a tint of the main color to give it a material look
-                binding.chooseBusBadgeCard.strokeColor = resources.getColor(it, null)
-                binding.chooseBusNum.setTextColor(resources.getColor(it, null))
-                binding.topRouteCardView.strokeColor = resources.getColor(it, null)
-                binding.bottomRouteCardView.strokeColor = resources.getColor(it, null)
+                binding.chooseBusBadgeCard.strokeColor = getMaterialColor(it)
+                binding.chooseBusNum.setTextColor(getMaterialColor(it))
+                binding.topRouteCardView.strokeColor = getMaterialColor(it)
+                binding.bottomRouteCardView.strokeColor = getMaterialColor(it)
             }
         }
 

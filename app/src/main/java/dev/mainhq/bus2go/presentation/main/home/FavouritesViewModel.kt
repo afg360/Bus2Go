@@ -2,6 +2,7 @@ package dev.mainhq.bus2go.presentation.main.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.material.R as MaterialRes
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.entity.FavouriteTransitData
@@ -79,7 +80,7 @@ class FavouritesViewModel(
 									isStopNameTextTruncated = it.favouriteTransitData.stopName.length > FavouritesDisplayModel.DIRECTION_STR_LIMIT,
 									arrivalTimeText = it.arrivalTime.getTimeString(),
 									timeRemainingText = getTimeRemaining(timeRemaining),
-									dataDisplayColor = R.color.basic_purple,
+									dataDisplayColor = R.attr.colorCustomColor1,
 									urgency = isUrgent
 								)
 							}
@@ -94,7 +95,7 @@ class FavouritesViewModel(
 									isStopNameTextTruncated = it.favouriteTransitData.stopName.length > FavouritesDisplayModel.DIRECTION_STR_LIMIT,
 									arrivalTimeText = it.arrivalTime.getTimeString(),
 									timeRemainingText = getTimeRemaining(timeRemaining),
-									dataDisplayColor = R.color.orange,
+									dataDisplayColor = R.attr.colorCustomColor2,
 									urgency = isUrgent
 								)
 							}
@@ -110,9 +111,9 @@ class FavouritesViewModel(
 									arrivalTimeText = it.arrivalTime.getTimeString(),
 									timeRemainingText = getTimeRemaining(timeRemaining),
 									dataDisplayColor = if (it.favouriteTransitData.routeId.toInt() in 400..499) {
-										R.color.basic_green
+										R.attr.colorCustomColor3
 									} else {
-										R.color.basic_blue
+										MaterialRes.attr.colorPrimary
 									},
 									urgency = isUrgent
 								)
@@ -130,7 +131,7 @@ class FavouritesViewModel(
 									isStopNameTextTruncated = it.favouriteTransitData.stopName.length > FavouritesDisplayModel.DIRECTION_STR_LIMIT,
 									arrivalTimeText = null,
 									timeRemainingText = "None left",
-									dataDisplayColor = R.color.basic_purple,
+									dataDisplayColor = R.attr.colorCustomColor1,
 									urgency = Urgency.DISTANT
 								)
 							}
@@ -146,7 +147,7 @@ class FavouritesViewModel(
 									arrivalTimeText = null,
 									//FIXME use a ressource string that is injected into the class...
 									timeRemainingText = "None left",
-									dataDisplayColor = R.color.orange,
+									dataDisplayColor = R.attr.colorCustomColor2,
 									urgency = Urgency.DISTANT
 								)
 							}
@@ -162,9 +163,9 @@ class FavouritesViewModel(
 									arrivalTimeText = null,
 									timeRemainingText = "None left",
 									dataDisplayColor = if (it.favouriteTransitData.routeId.toInt() in 400..499) {
-										R.color.basic_green
+										R.attr.colorCustomColor3
 									} else {
-										R.color.basic_blue
+										MaterialRes.attr.colorPrimary
 									},
 									urgency = Urgency.DISTANT
 								)

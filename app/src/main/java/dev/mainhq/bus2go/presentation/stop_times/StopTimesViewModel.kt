@@ -2,6 +2,7 @@ package dev.mainhq.bus2go.presentation.stop_times
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.material.R as MaterialRes
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.domain.entity.ExoBusItem
 import dev.mainhq.bus2go.domain.entity.ExoTrainItem
@@ -27,14 +28,14 @@ class StopTimesViewModel(
 
 	val stopTimesHeaderDisplayModel = when(transitData){
 		is ExoBusItem -> StopTimesHeaderDisplayModel(
-			R.color.basic_purple,
+			R.attr.colorCustomColor1,
 			if (transitData.routeId.length < 10) 35f else 24f,
 			transitData.routeId,
 			transitData.direction,
 			transitData.stopName
 		)
 		is ExoTrainItem -> StopTimesHeaderDisplayModel(
-			R.color.orange,
+			R.attr.colorCustomColor2,
 			if (transitData.routeName.length < 10) 35f else 24f,
 			//FIXME use a string resource here...
 			"Train ${transitData.routeName}",
@@ -43,7 +44,7 @@ class StopTimesViewModel(
 		)
 		is StmBusItem -> {
 			StopTimesHeaderDisplayModel(
-				R.color.basic_blue,
+				MaterialRes.attr.colorPrimary,
 				if (transitData.routeId.length < 10) 35f else 24f,
 				transitData.routeId,
 				//remove anything inside parenthesis to reduce text...

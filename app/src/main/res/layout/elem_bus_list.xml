@@ -6,10 +6,10 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="5dp"
+    android:foreground="?attr/selectableItemBackground"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent"
-    android:background="?attr/selectableItemBackground"
     >
 
         <com.google.android.material.textview.MaterialTextView
@@ -19,6 +19,7 @@
             android:gravity="start|center_vertical"
             android:text="Direction"
             android:textSize="22sp"
+            android:textColor="?attr/colorPrimary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -30,7 +31,7 @@
             android:gravity="center_vertical|end"
             android:textAlignment="textEnd"
             android:text="747"
-            android:textColor="@color/basic_blue"
+            android:textColor="?attr/colorPrimary"
             android:textSize="60sp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"

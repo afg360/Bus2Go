@@ -10,7 +10,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
@@ -40,6 +39,7 @@ import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
 import dev.mainhq.bus2go.utils.makeVisible
 import dev.mainhq.bus2go.utils.launchViewModelCollectLatest
 import dev.mainhq.bus2go.utils.makeGone
+import dev.mainhq.bus2go.utils.toast
 
 class HomeFragment: Fragment(R.layout.fragment_home) {
 
@@ -326,8 +326,8 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
                     }
                 }
                 UiState.Loading -> {}
-                is UiState.Error -> Toast.makeText(context, "Some Unknown Error Occurred...", Toast.LENGTH_SHORT).show()
-                UiState.Init -> Toast.makeText(context, "Some Error Occurred: Not Implemented", Toast.LENGTH_SHORT).show()
+                is UiState.Error -> toast("Some Unknown Error Occurred...")
+                UiState.Init -> toast("Some Error Occurred: Not Implemented")
             }
         }
 

@@ -4,10 +4,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.color.MaterialColors
+import com.google.android.material.R as MaterialRes
 import dev.mainhq.bus2go.R
 import com.google.android.material.textview.MaterialTextView
 import dev.mainhq.bus2go.presentation.main.home.Urgency
+import dev.mainhq.bus2go.utils.getMaterialColor
 
 //TODO
 //could add view/onTouchListener to handle touch holding, etc.
@@ -69,7 +70,7 @@ class StopTimeListElemsAdapter(
                     holder.itemView.resources.getColor(R.color.yellow, null)
                 )
                 Urgency.DISTANT -> holder.timeLeftTextView.setTextColor(
-                    MaterialColors.getColor(holder.itemView, android.R.attr.editTextColor)
+                    holder.itemView.getMaterialColor(MaterialRes.attr.editTextColor)
                 )
             }
         }

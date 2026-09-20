@@ -1,13 +1,16 @@
 package dev.mainhq.bus2go.utils
 
 import android.content.Context
+import android.graphics.Color
 import android.view.View
 import android.widget.Toast
+import androidx.annotation.AttrRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.google.android.material.color.MaterialColors
 import dev.mainhq.bus2go.domain.entity.Time
 import dev.mainhq.bus2go.domain.entity.TransitType
 import dev.mainhq.bus2go.domain.repository.FavouritesRepository
@@ -59,6 +62,13 @@ fun View.makeGone(){
 	this.visibility = View.GONE
 }
 
+fun View.getMaterialColor(@AttrRes materialColor: Int): Int {
+	return MaterialColors.getColor(
+		this,
+		materialColor,
+		Color.TRANSPARENT
+	)
+}
 
 fun <T> AppCompatActivity.launchViewModelCollectLatest(flow: Flow<T>, context: CoroutineContext = Dispatchers.Main, block: suspend (T) -> Unit): Job {
 	return lifecycleScope.launch(context) {
@@ -106,12 +116,28 @@ fun Context.toast(text: String) {
 	Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
 }
 
+fun Context.getMaterialColor(@AttrRes materialColor: Int): Int {
+	return MaterialColors.getColor(
+		this,
+		materialColor,
+		Color.TRANSPARENT
+	)
+}
+
 fun AppCompatActivity.toast(text: String) {
 	Toast.makeText(applicationContext, text, Toast.LENGTH_SHORT).show()
 }
 
 fun Fragment.toast(text: String) {
 	Toast.makeText(requireContext(), text, Toast.LENGTH_SHORT).show()
+}
+
+fun Fragment.getMaterialColor(@AttrRes materialColor: Int): Int {
+	return MaterialColors.getColor(
+		requireContext(),
+		materialColor,
+		Color.TRANSPARENT
+	)
 }
 
 /**

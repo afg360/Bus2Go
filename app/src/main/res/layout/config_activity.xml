@@ -10,7 +10,8 @@
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/configActivityFragmentContainer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        />
     
     <com.google.android.material.button.MaterialButton
         android:id="@+id/config_continue_button"
@@ -18,7 +19,6 @@
         android:layout_height="wrap_content"
         android:text="@string/config_continue"
         android:textSize="25sp"
-        android:textColor="@color/black"
         android:paddingVertical="9dp"
         android:layout_marginBottom="200dp"
         app:layout_constraintStart_toStartOf="parent"

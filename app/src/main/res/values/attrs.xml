@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="colorCustomColor1" format="color" />
+    <attr name="colorOnCustomColor1" format="color" />
+    <attr name="colorCustomColor1Container" format="color" />
+    <attr name="colorOnCustomColor1Container" format="color" />
+    <attr name="colorCustomColor2" format="color" />
+    <attr name="colorOnCustomColor2" format="color" />
+    <attr name="colorCustomColor2Container" format="color" />
+    <attr name="colorOnCustomColor2Container" format="color" />
+    <attr name="colorCustomColor3" format="color" />
+    <attr name="colorOnCustomColor3" format="color" />
+    <attr name="colorCustomColor3Container" format="color" />
+    <attr name="colorOnCustomColor3Container" format="color" />
+</resources>

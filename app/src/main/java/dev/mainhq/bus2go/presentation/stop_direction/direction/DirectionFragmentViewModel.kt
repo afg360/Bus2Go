@@ -2,6 +2,7 @@ package dev.mainhq.bus2go.presentation.stop_direction.direction
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.material.R as MaterialRes
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.entity.ExoBusItem
@@ -65,8 +66,8 @@ class DirectionFragmentViewModel(
 					_routeInfo.value = UiState.Success(routeInfo)
 					when(routeInfo){
 						is ExoBusRouteInfo -> {
-							_textColour.value = R.color.basic_purple
-							_cardViewColour.value = R.color.basic_purple
+							_textColour.value = R.attr.colorCustomColor1
+							_cardViewColour.value = R.attr.colorCustomColor1
 							//_cardViewColour.value = R.color.transparent_basic_purple
 							when(val headsigns = getDirections.invoke(routeInfo)){
 								is Result.Error -> {
@@ -110,8 +111,8 @@ class DirectionFragmentViewModel(
 						}
 
 						is ExoTrainRouteInfo -> {
-							_textColour.value = R.color.orange
-							_cardViewColour.value = R.color.orange
+							_textColour.value = R.attr.colorCustomColor2
+							_cardViewColour.value = R.attr.colorCustomColor2
 							//_cardViewColour.value = R.color.transparent_orange
 							_topDirection.value = stopNames.data.first.mapIndexed { index, item ->
 								ExoTrainItem(
@@ -142,8 +143,8 @@ class DirectionFragmentViewModel(
 						}
 
 						is StmBusRouteInfo -> {
-							_textColour.value = R.color.basic_blue
-							_cardViewColour.value = R.color.basic_blue
+							_textColour.value = MaterialRes.attr.colorPrimary
+							_cardViewColour.value = MaterialRes.attr.colorPrimary
 							//_cardViewColour.value = R.color.transparent_basic_blue
 							when(val directions = getDirections.invoke(routeInfo)){
 								is Result.Error -> {
