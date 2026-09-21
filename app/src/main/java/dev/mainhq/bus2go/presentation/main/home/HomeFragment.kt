@@ -82,7 +82,7 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentHomeBinding.inflate(inflater)
         return binding.root
     }

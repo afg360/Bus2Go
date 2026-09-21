@@ -67,20 +67,8 @@ class CommonModule(applicationContext: Context) {
 		databaseDownloadScheduler,
 	)
 
-
-	private val databaseController = DatabaseControllerRepositoryImpl(
-		applicationContext.dataDir,
-		applicationContext.cacheDir
-	)
-
-	private val stmDatabase = databaseController.createInstance(applicationContext, DatabaseAgency.STM) as AppDatabaseSTM?
 	private val stmRepository = StmRepositoryImpl(
-		feedInfoDAO = stmDatabase?.feedInfoDao(),
-		calendarDatesDAO = stmDatabase?.calendarDatesDao(),
-		routesDAO = stmDatabase?.routesDao(),
-		stopsDAO = stmDatabase?.stopDao(),
-		stopsInfoDAO = stmDatabase?.stopsInfoDao(),
-		tripsDAO = stmDatabase?.tripsDao()
+		databaseControllerRepository = DatabaseControllerRepositoryImpl.getInstance(applicationContext)
 	)
 
 	private val localKeyStore = LocalKeyStore(applicationContext.filesDir)
@@ -94,12 +82,8 @@ class CommonModule(applicationContext: Context) {
 		stmFavouritesDataStore = applicationContext.stmFavouritesDataStore,
 	)
 
-	private val exoDatabase = databaseController.createInstance(applicationContext, DatabaseAgency.EXO) as AppDatabaseExo?
 	private val exoRepository = ExoRepositoryImpl(
-		calendarDAO = exoDatabase?.calendarDao(),
-		routesDAO = exoDatabase?.routesDao(),
-		stopTimesDAO = exoDatabase?.stopTimesDao(),
-		tripsDAO = exoDatabase?.tripsDao()
+		databaseControllerRepository = DatabaseControllerRepositoryImpl.getInstance(applicationContext)
 	)
 
 	private val exoFavouritesRepository = ExoFavouritesRepositoryImpl(
@@ -108,10 +92,7 @@ class CommonModule(applicationContext: Context) {
 	)
 
 	private val exoTrainRepository = ExoTrainRepositoryImpl(
-		calendarDAO = exoDatabase?.calendarDao(),
-		routesDAO = exoDatabase?.routesDao(),
-		stopTimesDAO = exoDatabase?.stopTimesDao(),
-		tripsDAO = exoDatabase?.tripsDao()
+		databaseControllerRepository = DatabaseControllerRepositoryImpl.getInstance(applicationContext)
 	)
 
 	private val exoTrainFavouritesRepository = ExoTrainFavouritesRepositoryImpl(
@@ -135,7 +116,7 @@ class CommonModule(applicationContext: Context) {
 	)
 
 	val deleteDatabase = DeleteDatabase(
-		databaseController,
+		DatabaseControllerRepositoryImpl.getInstance(applicationContext),
 		appStateRepository
 	)
 
