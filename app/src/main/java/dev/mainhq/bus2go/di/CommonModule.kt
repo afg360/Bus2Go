@@ -5,8 +5,6 @@ import androidx.work.WorkManager
 import dev.mainhq.bus2go.data.backgroundtask.DatabaseDownloadSchedulerImpl
 import dev.mainhq.bus2go.data.core.LoggerImpl
 import dev.mainhq.bus2go.data.data_source.local.LocalKeyStore
-import dev.mainhq.bus2go.data.data_source.local.database.exo.AppDatabaseExo
-import dev.mainhq.bus2go.data.data_source.local.database.stm.AppDatabaseSTM
 import dev.mainhq.bus2go.data.data_source.local.datastore.app_state.appStateDataStore
 import dev.mainhq.bus2go.data.data_source.local.datastore.exo.exoFavouritesDataStore
 import dev.mainhq.bus2go.data.data_source.local.datastore.favourites_position.favouritesPositionDataStore
@@ -26,10 +24,10 @@ import dev.mainhq.bus2go.data.repository.NotificationRepositoryImpl
 import dev.mainhq.bus2go.data.repository.SettingsRepositoryImpl
 import dev.mainhq.bus2go.data.repository.StmFavouritesRepositoryImpl
 import dev.mainhq.bus2go.data.repository.StmRepositoryImpl
-import dev.mainhq.bus2go.domain.entity.DatabaseAgency
 import dev.mainhq.bus2go.domain.use_case.AcceptSelfSignedCertificate
 import dev.mainhq.bus2go.domain.use_case.CancelDownloadDatabaseTask
 import dev.mainhq.bus2go.domain.use_case.CleanUpGarbageFiles
+import dev.mainhq.bus2go.domain.use_case.DeleteSelfSignedCertificates
 import dev.mainhq.bus2go.domain.use_case.ObserveDownloadDatabaseTask
 import dev.mainhq.bus2go.domain.use_case.ScheduleDownloadDatabaseTask
 import dev.mainhq.bus2go.domain.use_case.settings.SaveAllNotifSettings
@@ -73,7 +71,6 @@ class CommonModule(applicationContext: Context) {
 
 	private val localKeyStore = LocalKeyStore(applicationContext.filesDir)
 	val customTrustManager = CustomTrustManager.build(localKeyStore)
-
 
 	private val tagsHandler = TagsHandler.getInstance(applicationContext)
 
@@ -145,6 +142,10 @@ class CommonModule(applicationContext: Context) {
 	val saveAllNotifSettings = SaveAllNotifSettings(settingsRepository, appStateRepository)
 
 	val acceptSelfSignedCertificate = AcceptSelfSignedCertificate(
+		appStateRepository = appStateRepository
+	)
+
+	val deleteSelfSignedCertificates = DeleteSelfSignedCertificates(
 		appStateRepository = appStateRepository
 	)
 

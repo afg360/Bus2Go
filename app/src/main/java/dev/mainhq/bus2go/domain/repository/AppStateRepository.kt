@@ -53,6 +53,7 @@ interface AppStateRepository {
 	suspend fun setIsNotFirstTime()
 
 	suspend fun setSelfSignedCert(cert: X509Certificate)
+	suspend fun removeSelfSignedCerts(): Boolean
 
 	suspend fun deleteDatabase(databaseAgency: DatabaseAgency)
 }

@@ -8,6 +8,7 @@ import dev.mainhq.bus2go.domain.exceptions.ExpiredCertificateException
 import dev.mainhq.bus2go.domain.exceptions.UnpinnedCertificateException
 import dev.mainhq.bus2go.domain.repository.SettingsRepository
 import dev.mainhq.bus2go.domain.use_case.AcceptSelfSignedCertificate
+import dev.mainhq.bus2go.domain.use_case.DeleteSelfSignedCertificates
 import dev.mainhq.bus2go.domain.use_case.settings.CheckIsBus2GoServer
 import dev.mainhq.bus2go.presentation.config.ServerType
 import dev.mainhq.bus2go.presentation.config.WarningType
@@ -27,6 +28,7 @@ class SettingsMainFragmentViewModel(
 	private val settingsRepository: SettingsRepository,
 	private val checkIsBus2GoServer: CheckIsBus2GoServer,
 	val acceptSelfSignedCertificate: AcceptSelfSignedCertificate,
+	val deleteSelfSignedCertificates: DeleteSelfSignedCertificates,
 ): ViewModel() {
 
 	val langChoice = settingsRepository.lang
@@ -147,6 +149,9 @@ class SettingsMainFragmentViewModel(
 						}
 					}
 					is Result.Success<Boolean> -> {
+						if (deleteSelfSignedCertificates.invoke()) {
+							_toastText.emit(Response(true, "Deleted Self Signed certificate", null))
+						}
 						if (res.data){
 							settingsRepository.setBus2GoServer(serverChoice)
 							_toastText.emit(Response(true, "Server Changed Successfully", serverChoice.server))
@@ -161,17 +166,18 @@ class SettingsMainFragmentViewModel(
 		}
 	}
 
-	fun deleteServerEntry() {
-		viewModelScope.launch {
-			settingsRepository.setBus2GoServer(ServerChoice("", _dialogIsSelfHosted.value))
-			//TODO delete selfsigned certificate
-		}
-	}
-
 	fun acceptSelfSignedCert() {
 		viewModelScope.launch {
 			acceptSelfSignedCertificate.invoke(_warnUser.first().cert)
 			submitDialogFields()
+		}
+	}
+
+	fun deleteServerEntry() {
+		viewModelScope.launch {
+			settingsRepository.setBus2GoServer(ServerChoice("", _dialogIsSelfHosted.value))
+			deleteSelfSignedCertificates.invoke()
+			_toastText.emit(Response(true, "Successfully deleted Server", null))
 		}
 	}
 

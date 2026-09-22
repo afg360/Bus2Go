@@ -25,6 +25,7 @@ import dev.mainhq.bus2go.databinding.FragmentSettingsMainBinding
 import dev.mainhq.bus2go.domain.entity.ServerChoice
 import dev.mainhq.bus2go.presentation.core.UiState
 import dev.mainhq.bus2go.utils.launchViewModelCollectLatest
+import dev.mainhq.bus2go.utils.toast
 
 class SettingsMainFragment : Fragment() {
 
@@ -37,7 +38,8 @@ class SettingsMainFragment : Fragment() {
                     SettingsMainFragmentViewModel(
                         it.commonModule.settingsRepository,
                         it.appModule.checkIsBus2GoServer,
-                        it.commonModule.acceptSelfSignedCertificate
+                        it.commonModule.acceptSelfSignedCertificate,
+                        it.commonModule.deleteSelfSignedCertificates
                     ) as T
                 }
             }
@@ -104,9 +106,8 @@ class SettingsMainFragment : Fragment() {
             binding.settingsThemeToggleSwitchView.isChecked = it
         }
 
-        /* Data and Syncing Section */
         /* Config Server */
-        binding.settingsConfigServerTitle.setOnClickListener {
+        binding.settingsConfigServerView.setOnClickListener {
             //FIXME put better toast errors
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Config Server")
@@ -151,20 +152,32 @@ class SettingsMainFragment : Fragment() {
                     viewModel.submitDialogFields()
                     dialogInterface.dismiss()
                 }
-                .setNeutralButton("Delete") { dialogInterface, _ ->
-                    //Set the server to be nothing
-                    MaterialAlertDialogBuilder(requireContext())
-                        .setTitle("Delete Server Entry?")
-                        .setMessage("Are you sure you want to delete the server?")
-                        .setPositiveButton("Yes") { innerDialogInterface, _ ->
-                            viewModel.deleteServerEntry()
-                            innerDialogInterface.dismiss()
-                            dialogInterface.dismiss()
+                .run {
+                    if (viewModel.serverChoice.value is UiState.Success<ServerChoice>) {
+                        if ((viewModel.serverChoice.value as UiState.Success<ServerChoice>).data.server.isNotEmpty()){
+                            setNeutralButton("Delete") { dialogInterface, _ ->
+                                //Set the server to be nothing
+                                MaterialAlertDialogBuilder(requireContext())
+                                    .setTitle("Delete Server Entry?")
+                                    .setMessage("Are you sure you want to delete the server?")
+                                    .setPositiveButton("Yes") { innerDialogInterface, _ ->
+                                        viewModel.deleteServerEntry()
+                                        innerDialogInterface.dismiss()
+                                        dialogInterface.dismiss()
+                                    }
+                                    .setNegativeButton("No") { innerDialogInterface, _ ->
+                                        innerDialogInterface.dismiss()
+                                    }
+                                    .show()
+                            }
                         }
-                        .setNegativeButton("No") { innerDialogInterface, _ ->
-                            innerDialogInterface.dismiss()
+                        else {
+                            this
                         }
-                        .show()
+                    }
+                    else {
+                        this
+                    }
                 }
                 .setNegativeButton("Cancel") { dialogInterface, _ ->
                     val serverChoice = when(val serverChoice = viewModel.serverChoice.value) {
@@ -181,22 +194,27 @@ class SettingsMainFragment : Fragment() {
                 .show()
         }
 
+        //TODO to remove once we implement realtime data updates
+        binding.settingsRealtimeToggleSwitchView.isEnabled = false
+        binding.settingsRealtimeView.setOnClickListener {
+            toast("Not implemented, coming soon!")
+        }
         launchViewModelCollectLatest(viewModel.serverChoice) {
             when(it) {
                 is UiState.Success<ServerChoice> -> {
-                    binding.settingsUpdatesView.isEnabled = true
-                    binding.settingsUpdatesView.children.forEach { child ->
+                    binding.settingsNotificationsView.isEnabled = true
+                    binding.settingsNotificationsView.children.forEach { child ->
                         child.isEnabled = true
                     }
 
-                    binding.settingsRealtimeView.isEnabled = true
+//                    binding.settingsRealtimeView.isEnabled = true
                     binding.settingsRealtimeView.children.forEach { child ->
-                        child.isEnabled = true
+//                        child.isEnabled = true
                     }
                 }
 				is UiState.Error -> {
-                    binding.settingsUpdatesView.isEnabled = false
-                    binding.settingsUpdatesView.children.forEach { child ->
+                    binding.settingsNotificationsView.isEnabled = false
+                    binding.settingsNotificationsView.children.forEach { child ->
                         child.isEnabled = false
                     }
                     binding.settingsRealtimeView.isEnabled = false
@@ -230,9 +248,9 @@ class SettingsMainFragment : Fragment() {
                 .show()
         }
 
-        /* Updates */
-        binding.settingsUpdatesView.setOnClickListener {
-            sharedViewModel.setFragment(FragmentUsed.UPDATES)
+        /* Notifications */
+        binding.settingsNotificationsView.setOnClickListener {
+            sharedViewModel.setFragment(FragmentUsed.NOTIFICATIONS)
         }
 
         /* Manual Database Downloads/Updates */
@@ -250,12 +268,12 @@ class SettingsMainFragment : Fragment() {
         /* Support Section */
         /* Donate */
         binding.settingsDonateView.setOnClickListener {
-            //TODO
+            toast("Not Implemented... Coming Soon")
         }
 
         /* Send Feedback */
         binding.settingsFeedbackView.setOnClickListener {
-            //TODO
+            toast("Not Implemented... Coming Soon")
         }
 
         /* About Section */

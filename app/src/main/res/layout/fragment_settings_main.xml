@@ -148,21 +148,9 @@
         <!-- Data Config Server -->
         <!-- TODO Could change this UI element to be better (show ip/domain below) -->
         
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/settings_config_server_title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackground"
-            android:text="Configure your server"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:paddingHorizontal="70dp"
-            android:paddingVertical="30dp"
-            />
-        
         <!-- Data Syncing Updates (replaces fragment), depends on Config Server -->
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/settings_updates_view"
+            android:id="@+id/settings_config_server_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="?attr/selectableItemBackground"
@@ -170,31 +158,32 @@
             >
             
             <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/settings_updates_title_text_view"
+                android:id="@+id/settings_config_server_title"
                 android:layout_width="250dp"
                 android:layout_height="wrap_content"
-                android:text="Notifications"
+                android:text="Setup Bus2Go Server"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:layout_marginStart="70dp"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toTopOf="@id/settings_updates_descr_text_view"
+                app:layout_constraintBottom_toTopOf="@id/settings_config_descr_text_view"
                 app:layout_constraintStart_toStartOf="parent"
                 />
             
             <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/settings_updates_descr_text_view"
+                android:id="@+id/settings_config_descr_text_view"
                 android:layout_width="250dp"
                 android:layout_height="wrap_content"
-                android:text="Configure notification settings for the application"
+                android:text="Configure the ip address or domain name of a bus2go server"
                 android:lineSpacingExtra="4dp"
                 android:layout_marginStart="70dp"
-                app:layout_constraintTop_toBottomOf="@id/settings_updates_title_text_view"
+                app:layout_constraintTop_toBottomOf="@id/settings_config_server_title"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 />
         
         </androidx.constraintlayout.widget.ConstraintLayout>
+        
         
         <!-- Manual Download -->
         <com.google.android.material.textview.MaterialTextView
@@ -208,6 +197,43 @@
             android:paddingHorizontal="70dp"
             android:paddingVertical="30dp"
             />
+        
+        <!-- Data Syncing Updates (replaces fragment), depends on Config Server -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/settings_notifications_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:paddingVertical="15dp"
+            >
+            
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/settings_notifications_title_text_view"
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:text="Notifications"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_marginStart="70dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/settings_notifications_descr_text_view"
+                app:layout_constraintStart_toStartOf="parent"
+                />
+            
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/settings_notifications_descr_text_view"
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:text="Configure notification settings for the application"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginStart="70dp"
+                app:layout_constraintTop_toBottomOf="@id/settings_notifications_title_text_view"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                />
+        
+        </androidx.constraintlayout.widget.ConstraintLayout>
+        
     
         <!-- Data Real-Time Data Updates (Coming Soon), depends on Config Server  -->
         <androidx.constraintlayout.widget.ConstraintLayout

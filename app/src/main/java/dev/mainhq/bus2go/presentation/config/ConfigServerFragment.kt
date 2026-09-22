@@ -40,7 +40,8 @@ class ConfigServerFragment: Fragment(R.layout.fragment_config_server) {
 						it.commonModule.settingsRepository,
 						it.appModule.checkIsBus2GoServer,
 						it.commonModule.saveAllNotifSettings,
-						it.commonModule.acceptSelfSignedCertificate
+						it.commonModule.acceptSelfSignedCertificate,
+						it.commonModule.deleteSelfSignedCertificates
 					) as T
 				}
 			}

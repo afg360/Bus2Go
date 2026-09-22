@@ -9,6 +9,7 @@ import dev.mainhq.bus2go.domain.exceptions.ExpiredCertificateException
 import dev.mainhq.bus2go.domain.exceptions.UnpinnedCertificateException
 import dev.mainhq.bus2go.domain.repository.SettingsRepository
 import dev.mainhq.bus2go.domain.use_case.AcceptSelfSignedCertificate
+import dev.mainhq.bus2go.domain.use_case.DeleteSelfSignedCertificates
 import dev.mainhq.bus2go.domain.use_case.settings.CheckIsBus2GoServer
 import dev.mainhq.bus2go.domain.use_case.settings.SaveAllNotifSettings
 import dev.mainhq.bus2go.presentation.core.UiState
@@ -18,7 +19,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.security.cert.X509Certificate
@@ -27,7 +27,8 @@ class ConfigServerFragmentViewModel(
 	private val settingsRepository: SettingsRepository,
 	private val checkIsBus2GoServer: CheckIsBus2GoServer,
 	private val saveAllNotifSettings: SaveAllNotifSettings,
-	private val acceptSelfSignedCertificate: AcceptSelfSignedCertificate
+	private val acceptSelfSignedCertificate: AcceptSelfSignedCertificate,
+	private val deleteSelfSignedCertificates: DeleteSelfSignedCertificates
 ): ViewModel(), SettingsSavableViewModel {
 
 	private val _textInputText: MutableStateFlow<UiState<String>> = MutableStateFlow(UiState.Init)
@@ -72,7 +73,24 @@ class ConfigServerFragmentViewModel(
 					_warnUser.emit(WarningType.QuerySelfHosted)
 				}
 				ServerType.WEB -> {
-					checkIsBus2Go()
+					_certificate.update { null }
+					deleteSelfSignedCertificates.invoke()
+					val inputTextString = (_textInputText.value as UiState.Success).data
+					when (val result = checkIsBus2GoServer.invoke(inputTextString, _serverType.value)) {
+						is Result.Error -> {
+							_serverResponse.update { UiState.Error("Unexpected Error occurred: ${result.throwable}") }
+						}
+						is Result.Success<Boolean> -> {
+							//if message is null from server success, then show invalid
+							val serverChoice = ServerChoice(inputTextString, true)
+							if (result.data) {
+								viewModelScope.launch {
+									settingsRepository.setBus2GoServer(serverChoice)
+								}
+							}
+							_serverResponse.update { UiState.Success(result.data) }
+						}
+					}
 				}
 			}
 
@@ -80,9 +98,9 @@ class ConfigServerFragmentViewModel(
 	}
 
 
-	/** Called once the user accepts to query a self hosted potential bus2go server */
+	/** Called once the user accepts to query a self-hosted potential bus2go server */
 	fun checkIsBus2Go() {
-		assert(_serverType.value == ServerType.SELF_HOSTED)
+		//TODO test this with online VPS!!!
 		viewModelScope.launch {
 			val inputTextString = (_textInputText.value as UiState.Success).data
 			when (val result = checkIsBus2GoServer.invoke(inputTextString, _serverType.value)) {
@@ -94,17 +112,21 @@ class ConfigServerFragmentViewModel(
 					}
 					else if (result.throwable?.findCause<ExpiredCertificateException>() != null) {
 						_certificate.update { null }
+						deleteSelfSignedCertificates.invoke()
 						_serverResponse.update { UiState.Error("Server SSL certificate is expired") }
 					}
 					else {
 						//TODO put "Skip option"
 						_certificate.update { null }
+						deleteSelfSignedCertificates.invoke()
 						_serverResponse.update { UiState.Error("Unexpected Error occurred") }
 					}
 				}
 				is Result.Success<Boolean> -> {
 					//if message is null from server success, then show invalid
 					val serverChoice = ServerChoice(inputTextString, true)
+					_certificate.update { null }
+					deleteSelfSignedCertificates.invoke()
 					if (result.data) {
 						viewModelScope.launch {
 							settingsRepository.setBus2GoServer(serverChoice)

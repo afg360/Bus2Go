@@ -11,12 +11,11 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.databinding.FragmentSettingsUpdatesBinding
 import dev.mainhq.bus2go.utils.launchViewModelCollectLatest
 
-class SettingsUpdatesFragment: Fragment() {
+class SettingsNotificationsFragment: Fragment() {
 
 	private val sharedViewModel: SettingsSharedViewModel by activityViewModels()
 
@@ -24,7 +23,7 @@ class SettingsUpdatesFragment: Fragment() {
 		object: ViewModelProvider.Factory{
 			override fun <T : ViewModel> create(modelClass: Class<T>): T {
 				@Suppress("UNCHECKED_CAST")
-				return (this@SettingsUpdatesFragment.requireActivity().application as Bus2GoApplication)
+				return (this@SettingsNotificationsFragment.requireActivity().application as Bus2GoApplication)
 					.let{
 						SettingsUpdatesFragmentViewModel(
 							it.commonModule.settingsRepository,
