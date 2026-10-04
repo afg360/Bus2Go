@@ -130,7 +130,7 @@ abstract class DatabaseDownloadRepositoryAbstractImpl: DatabaseDownloadRepositor
 				protocol = protocol,
 				host = serverChoice.server,
 				port = defaultPort,
-				pathSegments = listOf("api", "download", API_VERSION, "app_version_code_required")
+				pathSegments = listOf("api", "download", API_VERSION, "app-version-code-required")
 			).build(),
 			onError = { Result.Error(null, "Wrong api call") },
 			onSuccess = {
