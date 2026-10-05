@@ -5,8 +5,6 @@ import androidx.work.WorkManager
 import dev.mainhq.bus2go.data.backgroundtask.DatabaseDownloadSchedulerImpl
 import dev.mainhq.bus2go.data.core.LoggerImpl
 import dev.mainhq.bus2go.data.data_source.local.LocalKeyStore
-import dev.mainhq.bus2go.data.data_source.local.database.exo.AppDatabaseExo
-import dev.mainhq.bus2go.data.data_source.local.database.stm.AppDatabaseSTM
 import dev.mainhq.bus2go.data.data_source.local.datastore.app_state.appStateDataStore
 import dev.mainhq.bus2go.data.data_source.local.datastore.exo.exoFavouritesDataStore
 import dev.mainhq.bus2go.data.data_source.local.datastore.favourites_position.favouritesPositionDataStore
@@ -26,9 +24,10 @@ import dev.mainhq.bus2go.data.repository.NotificationRepositoryImpl
 import dev.mainhq.bus2go.data.repository.SettingsRepositoryImpl
 import dev.mainhq.bus2go.data.repository.StmFavouritesRepositoryImpl
 import dev.mainhq.bus2go.data.repository.StmRepositoryImpl
-import dev.mainhq.bus2go.domain.entity.DatabaseAgency
 import dev.mainhq.bus2go.domain.use_case.AcceptSelfSignedCertificate
+import dev.mainhq.bus2go.domain.use_case.CancelDownloadDatabaseTask
 import dev.mainhq.bus2go.domain.use_case.CleanUpGarbageFiles
+import dev.mainhq.bus2go.domain.use_case.DeleteSelfSignedCertificates
 import dev.mainhq.bus2go.domain.use_case.ObserveDownloadDatabaseTask
 import dev.mainhq.bus2go.domain.use_case.ScheduleDownloadDatabaseTask
 import dev.mainhq.bus2go.domain.use_case.settings.SaveAllNotifSettings
@@ -57,29 +56,21 @@ class CommonModule(applicationContext: Context) {
 	private val databaseDownloadScheduler = DatabaseDownloadSchedulerImpl(
 		WorkManager.getInstance(applicationContext)
 	)
+
 	val scheduleDownloadDatabaseTask = ScheduleDownloadDatabaseTask(
 		databaseDownloadScheduler,
 	)
 
-
-	private val databaseController = DatabaseControllerRepositoryImpl(
-		applicationContext.dataDir,
-		applicationContext.cacheDir
+	val cancelDownloadDatabaseTask = CancelDownloadDatabaseTask(
+		databaseDownloadScheduler,
 	)
 
-	private val stmDatabase = databaseController.createInstance(applicationContext, DatabaseAgency.STM) as AppDatabaseSTM?
 	private val stmRepository = StmRepositoryImpl(
-		feedInfoDAO = stmDatabase?.feedInfoDao(),
-		calendarDatesDAO = stmDatabase?.calendarDatesDao(),
-		routesDAO = stmDatabase?.routesDao(),
-		stopsDAO = stmDatabase?.stopDao(),
-		stopsInfoDAO = stmDatabase?.stopsInfoDao(),
-		tripsDAO = stmDatabase?.tripsDao()
+		databaseControllerRepository = DatabaseControllerRepositoryImpl.getInstance(applicationContext)
 	)
 
 	private val localKeyStore = LocalKeyStore(applicationContext.filesDir)
 	val customTrustManager = CustomTrustManager.build(localKeyStore)
-
 
 	private val tagsHandler = TagsHandler.getInstance(applicationContext)
 
@@ -88,12 +79,8 @@ class CommonModule(applicationContext: Context) {
 		stmFavouritesDataStore = applicationContext.stmFavouritesDataStore,
 	)
 
-	private val exoDatabase = databaseController.createInstance(applicationContext, DatabaseAgency.EXO) as AppDatabaseExo?
 	private val exoRepository = ExoRepositoryImpl(
-		calendarDAO = exoDatabase?.calendarDao(),
-		routesDAO = exoDatabase?.routesDao(),
-		stopTimesDAO = exoDatabase?.stopTimesDao(),
-		tripsDAO = exoDatabase?.tripsDao()
+		databaseControllerRepository = DatabaseControllerRepositoryImpl.getInstance(applicationContext)
 	)
 
 	private val exoFavouritesRepository = ExoFavouritesRepositoryImpl(
@@ -102,10 +89,7 @@ class CommonModule(applicationContext: Context) {
 	)
 
 	private val exoTrainRepository = ExoTrainRepositoryImpl(
-		calendarDAO = exoDatabase?.calendarDao(),
-		routesDAO = exoDatabase?.routesDao(),
-		stopTimesDAO = exoDatabase?.stopTimesDao(),
-		tripsDAO = exoDatabase?.tripsDao()
+		databaseControllerRepository = DatabaseControllerRepositoryImpl.getInstance(applicationContext)
 	)
 
 	private val exoTrainFavouritesRepository = ExoTrainFavouritesRepositoryImpl(
@@ -129,7 +113,7 @@ class CommonModule(applicationContext: Context) {
 	)
 
 	val deleteDatabase = DeleteDatabase(
-		databaseController,
+		DatabaseControllerRepositoryImpl.getInstance(applicationContext),
 		appStateRepository
 	)
 
@@ -158,6 +142,10 @@ class CommonModule(applicationContext: Context) {
 	val saveAllNotifSettings = SaveAllNotifSettings(settingsRepository, appStateRepository)
 
 	val acceptSelfSignedCertificate = AcceptSelfSignedCertificate(
+		appStateRepository = appStateRepository
+	)
+
+	val deleteSelfSignedCertificates = DeleteSelfSignedCertificates(
 		appStateRepository = appStateRepository
 	)
 

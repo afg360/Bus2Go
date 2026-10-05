@@ -23,7 +23,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="20dp"
-                android:fontFamily="@font/goli_medium"
                 android:text="Choose one of the available stops"
                 android:textAlignment="center"
                 android:textSize="20sp"

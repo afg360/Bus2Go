@@ -65,22 +65,11 @@ class AlarmCreationChooseBusDialog() : DialogFragment(R.layout.fragment_create_a
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         favouritesViewModel = ViewModelProvider(requireActivity())[FavouritesViewModel::class.java]
-        setStyle(STYLE_NORMAL, R.style.MaterialTheme_Bus2Go)//R.style.MaterialTheme_Bus2Go_Dark)
+        setStyle(STYLE_NORMAL, R.style.Bus2Go_MaterialTheme)//R.style.MaterialTheme_Bus2Go_Dark)
         (context as Activity).also {
             activityResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
                 if (result.resultCode == Activity.RESULT_OK) {
-                    time = if (VERSION.SDK_INT < 33) {
-                        result.data?.getParcelableExtra("TIME")
-                    } else{
-                        result.data?.getParcelableExtra("TIME", Time::class.java)
-                    }
-                    time?.also {time ->
-                        setFragmentResult("requestKey", bundleOf("ALARM_BUS_INFO" to AlarmBusInfo(
-                            ExoBusData(alarmDialogBusStop, alarmDialogBusNum, "", "", ""),
-                            time)
-                        ))
-                        dismiss()
-                    }
+
                 }
                 //TODO do something with the choice and open up the next dialog, obv save the data
             }

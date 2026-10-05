@@ -1,7 +1,11 @@
 package dev.mainhq.bus2go.data.data_source.local.datastore.tags
 
+import com.google.android.material.R as MaterialRes
 import android.content.Context
+import androidx.appcompat.view.ContextThemeWrapper
+import androidx.core.graphics.toColorInt
 import dev.mainhq.bus2go.R
+import dev.mainhq.bus2go.utils.getMaterialColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -38,10 +42,12 @@ class TagsHandler private constructor(private val applicationContext: Context) {
 					try {
 						if (!file.exists()) {
 							file.createNewFile()
+
+							val themeContext = ContextThemeWrapper(applicationContext, R.style.Bus2Go_MaterialTheme)
 							file.writeText(
-								"Stm,${applicationContext.resources.getColor(R.color.basic_blue, null).toString(16)}\n" +
-										"Exo,${applicationContext.resources.getColor(R.color.basic_purple, null).toString(16)}\n" +
-										"Train,${applicationContext.resources.getColor(R.color.orange, null).toString(16)}\n")
+								"Stm,${String.format("#%08X", themeContext.getMaterialColor(MaterialRes.attr.colorPrimary))}\n" +
+										"Exo,${String.format("#%08X", themeContext.getMaterialColor(R.attr.colorCustomColor1Container))}\n" +
+										"Train,${String.format("#%08X", themeContext.getMaterialColor(R.attr.colorCustomColor2Container))}\n")
 						}
 						true
 					}
@@ -63,8 +69,7 @@ class TagsHandler private constructor(private val applicationContext: Context) {
 					applicationContext.openFileInput(filename).bufferedReader().useLines { lines ->
 						lines.filter { it.isNotEmpty() }.toList().map { line ->
 							line.split(",").let {
-								//TODO: parse the color saved in hexa format
-								TagDto(it[0], it[1].toInt(16))
+								TagDto(it[0], it[1].toColorInt())
 							}
 						}
 					}

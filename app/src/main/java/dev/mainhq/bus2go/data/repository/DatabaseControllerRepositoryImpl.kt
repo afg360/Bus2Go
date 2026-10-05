@@ -11,28 +11,46 @@ import dev.mainhq.bus2go.domain.entity.DatabaseAgency
 import dev.mainhq.bus2go.domain.repository.DatabaseControllerRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.time.Duration.Companion.milliseconds
 
 
-class DatabaseControllerRepositoryImpl(
-	private val dataDir: File,
-	private val cacheDir: File,
+class DatabaseControllerRepositoryImpl private constructor(
+	private val applicationContext: Context,
 ): DatabaseControllerRepository {
 
-	private var databaseInstances: ConcurrentHashMap<DatabaseAgency, Bus2GoLocalDatabase> = ConcurrentHashMap()
+	private val dataDir = applicationContext.dataDir
+	private val cacheDir = applicationContext.cacheDir
+	private var databaseInstances = ConcurrentHashMap<DatabaseAgency, MutableStateFlow<Bus2GoLocalDatabase?>>()
 
-	@Synchronized
-	override fun createInstance(context: Context, databaseAgency: DatabaseAgency): Bus2GoLocalDatabase? {
-		return databaseInstances[databaseAgency] ?: _createInstance(context, databaseAgency)?.also {
-			databaseInstances[databaseAgency] = it
+	companion object {
+
+		private var INSTANCE: DatabaseControllerRepositoryImpl? = null
+
+		@Synchronized
+		fun getInstance(applicationContext: Context): DatabaseControllerRepositoryImpl {
+			return INSTANCE ?: DatabaseControllerRepositoryImpl(applicationContext).also { INSTANCE = it }
 		}
 	}
 
-	private fun _createInstance(context: Context, databaseAgency: DatabaseAgency): Bus2GoLocalDatabase? {
+	@Synchronized
+	override fun getDatabaseFlow(databaseAgency: DatabaseAgency): StateFlow<Bus2GoLocalDatabase?> {
+		return databaseInstances[databaseAgency] ?: MutableStateFlow(createInstance(databaseAgency)).also {
+			databaseInstances[databaseAgency] = it
+		}.asStateFlow()
+	}
+
+	/* Is fine to create an instance after having deleted the file, since the db returned will be null */
+	private fun createInstance(databaseAgency: DatabaseAgency): Bus2GoLocalDatabase? {
 		val databaseName = "${databaseAgency.toDatabaseFileNamePrefixString()}.db"
 		val databasePath = "databases/$databaseName"
 		val kclass = when(databaseAgency) {
@@ -40,12 +58,12 @@ class DatabaseControllerRepositoryImpl(
 			DatabaseAgency.EXO -> AppDatabaseExo::class.java
 		}
 
-		val dbFile = context.getDatabasePath(databaseName)
+		val dbFile = applicationContext.getDatabasePath(databaseName)
 		//FIXME this is a hack, better checks need to be performed to determine the correct
 		// db to read
 		try {
 			return if (dbFile.exists() && dbFile.length() > 0) {
-				Room.databaseBuilder(context, kclass, databaseName)
+				Room.databaseBuilder(applicationContext, kclass, databaseName)
 					.apply {
 						when(databaseAgency) {
 							DatabaseAgency.STM -> {
@@ -61,9 +79,9 @@ class DatabaseControllerRepositoryImpl(
 			}
 			//FIXME does it work even if bundled...?
 			//FIXME database or databases???
-			else if (context.assets.list("database")?.contains(databaseName) == true) {
+			else if (applicationContext.assets.list("database")?.contains(databaseName) == true) {
 				//from assets if bundled
-				Room.databaseBuilder(context, kclass, databaseName)
+				Room.databaseBuilder(applicationContext, kclass, databaseName)
 					.createFromAsset(databasePath)
 					.apply {
 						when(databaseAgency) {
@@ -92,8 +110,12 @@ class DatabaseControllerRepositoryImpl(
 
 	@Synchronized
 	override fun deleteDatabase(databaseAgency: DatabaseAgency): Boolean {
-		//FIXME need to lock the map
-		databaseInstances.remove(databaseAgency)?.also {  (it as RoomDatabase).close()  }
+		databaseInstances[databaseAgency]?.also { stateFlow ->
+			stateFlow.update {
+				(it as RoomDatabase?)?.close()
+				null
+			}
+		}
 
 		//FIXME should perhaps instead be using ApplicationContext.closeDatabase + filesDir or dataDir???
 		var allDeleted = true

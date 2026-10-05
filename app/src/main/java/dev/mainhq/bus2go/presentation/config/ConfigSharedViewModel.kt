@@ -9,18 +9,29 @@ import kotlinx.coroutines.flow.update
  * 	the activity when configuration is done */
 class ConfigSharedViewModel : ViewModel() {
 
-	private val _currentFragment: MutableStateFlow<FragmentUsed?> = MutableStateFlow(FragmentUsed.WELCOME)
+	private val _currentFragment: MutableStateFlow<FragmentUsed> = MutableStateFlow(FragmentUsed.WELCOME)
 	val currentFragment = _currentFragment.asStateFlow()
 
-	private val _event = MutableStateFlow(false)
-	val event = _event.asStateFlow()
-
-	fun triggerEvent(startActivity: Boolean) {
-		_event.value = startActivity
-		_currentFragment.update { null }
-	}
+	private val _configButtonState: MutableStateFlow<ConfigButtonState> = MutableStateFlow(ConfigButtonState.Next{})
+	val configButtonState = _configButtonState.asStateFlow()
 
 	fun setFragment(fragment: FragmentUsed){
 		_currentFragment.update { fragment }
+	}
+
+	fun setButtonState(configButtonState: ConfigButtonState) {
+		_configButtonState.update { configButtonState }
+	}
+
+	fun nextFragment() {
+		when(_currentFragment.value) {
+			FragmentUsed.WELCOME -> {
+				_currentFragment.update { FragmentUsed.THEME }
+			}
+			FragmentUsed.THEME -> TODO()
+			FragmentUsed.NOTIFICATIONS -> TODO()
+			FragmentUsed.SERVER -> TODO()
+			FragmentUsed.DATABASES -> TODO()
+		}
 	}
 }

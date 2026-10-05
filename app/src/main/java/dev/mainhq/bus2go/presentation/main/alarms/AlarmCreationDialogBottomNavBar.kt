@@ -20,8 +20,8 @@ class AlarmCreationDialogBottomNavBar : Fragment(R.layout.fragment_create_alarms
     abstract class BottomNavBarAcceptStateChangeListener {
         open fun onAcceptStateChange(view : View){
             view.findViewById<MaterialTextView>(R.id.acceptAlarmCreation).apply {
-               if (tag == UNAVAILABLE) setTextColor(resources.getColor(R.color.grey, null))
-                else if (tag == AVAILABLE) setTextColor(null)
+//               if (tag == UNAVAILABLE) setTextColor(resources.getColor(R.color.grey, null))
+//                else if (tag == AVAILABLE) setTextColor(null)
             }
         }
     }
@@ -42,7 +42,7 @@ class AlarmCreationDialogBottomNavBar : Fragment(R.layout.fragment_create_alarms
         }
         acceptAlarmCreation = view.findViewById(R.id.acceptAlarmCreation)
         acceptAlarmCreation.tag = UNAVAILABLE
-        acceptAlarmCreation.setTextColor(resources.getColor(R.color.grey, null))
+//        acceptAlarmCreation.setTextColor(resources.getColor(R.color.grey, null))
         acceptAlarmCreation.setOnClickListener {
             if (acceptAlarmCreation.tag == AVAILABLE) bottomNavBarListener.onAccept()
         }
@@ -50,10 +50,10 @@ class AlarmCreationDialogBottomNavBar : Fragment(R.layout.fragment_create_alarms
 
     fun activateAcceptAlarmButton(){
         acceptAlarmCreation.tag = AVAILABLE
-        acceptAlarmCreation.setTextColor(resources.getColor(R.color.basic_blue, null))
+//        acceptAlarmCreation.setTextColor(resources.getColor(R.color.basic_blue, null))
     }
     fun deActivateAcceptAlarmButton(){
         acceptAlarmCreation.tag = UNAVAILABLE
-        acceptAlarmCreation.setTextColor(resources.getColor(R.color.grey, null))
+//        acceptAlarmCreation.setTextColor(resources.getColor(R.color.grey, null))
     }
 }

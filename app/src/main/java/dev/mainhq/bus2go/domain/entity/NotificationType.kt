@@ -15,8 +15,6 @@ sealed class NotificationType {
 	data class DbDownloading(val current: Int, val contentLength: Int): NotificationType(), DbOperation
 	data object DbExtracting: NotificationType(), DbOperation
 	data object DbUpdateDone: NotificationType(), DbOperation
+	data object DbUpdateCancelled: NotificationType(), DbOperation
 	data class DbUpdateError(val error: String? = null): NotificationType(), DbOperation
-
-	//used for when in idle states or nothing happens but still need to return something
-	data object Nothing: NotificationType()
 }

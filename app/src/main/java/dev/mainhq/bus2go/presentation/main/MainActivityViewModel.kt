@@ -135,7 +135,9 @@ class MainActivityViewModel(
 							_resp.collectLatest {
 								assert(it is Result.Success)
 								it as Result.Success
-								scheduleDownloadDatabaseTask.invoke(it.data).forEach { workId ->
+								it.data.map { databaseAgency ->
+									scheduleDownloadDatabaseTask.invoke(databaseAgency)
+								}.forEach { workId ->
 									//TODO observe what happens
 								}
 								_updateDbState.update { UpdateDbState.NoShow }

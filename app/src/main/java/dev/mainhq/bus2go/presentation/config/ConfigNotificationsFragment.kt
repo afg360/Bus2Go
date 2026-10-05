@@ -1,6 +1,7 @@
 package dev.mainhq.bus2go.presentation.config
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -17,13 +18,14 @@ import androidx.lifecycle.ViewModelProvider
 import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.databinding.FragmentConfigNotificationsBinding
+import dev.mainhq.bus2go.presentation.main.MainActivity
 import dev.mainhq.bus2go.utils.launchViewModelCollectLatest
 
 //TODO display in the fragment: You are almost all set!
 
 class ConfigNotificationsFragment: Fragment(R.layout.fragment_config_notifications) {
 
-	//private val prevFrag = FragmentUsed.DATABASES
+	private val prevFrag = FragmentUsed.DATABASES
 
 	private val sharedViewModel: ConfigSharedViewModel by activityViewModels()
 	private val viewModel: ConfigNotificationsFragmentViewModel by activityViewModels{
@@ -57,10 +59,9 @@ class ConfigNotificationsFragment: Fragment(R.layout.fragment_config_notificatio
 		inflater: LayoutInflater,
 		container: ViewGroup?,
 		savedInstanceState: Bundle?
-	): View? {
+	): View {
 		_binding = FragmentConfigNotificationsBinding.inflate(layoutInflater)
 		return binding.root
-		//return super.onCreateView(inflater, container, savedInstanceState)
 	}
 
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -74,7 +75,7 @@ class ConfigNotificationsFragment: Fragment(R.layout.fragment_config_notificatio
 			binding.configNotificationSwitchDbUpdates.isChecked = it
 		}
 
-		binding.configNotificationConfirmButton.setOnClickListener {
+		sharedViewModel.setButtonState(ConfigButtonState.Next("Start!") {
 			if (viewModel.isAnyNotifSet()){
 				//must be sure app has post notification permissions
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -88,9 +89,9 @@ class ConfigNotificationsFragment: Fragment(R.layout.fragment_config_notificatio
 				}
 			}
 			viewModel.saveSettings()
-			sharedViewModel.triggerEvent(true)
-		}
-
+			startActivity(Intent(requireContext(), MainActivity::class.java))
+			requireActivity().finish()
+		})
 
 		binding.configNotificationSwitchAppUpdates.setOnCheckedChangeListener { _, boolean ->
 			viewModel.setAppUpdateNotifs(boolean)
@@ -102,7 +103,7 @@ class ConfigNotificationsFragment: Fragment(R.layout.fragment_config_notificatio
 
 		requireActivity().onBackPressedDispatcher.addCallback(object: OnBackPressedCallback(true) {
 			override fun handleOnBackPressed() {
-				//sharedViewModel.setFragment(prevFrag)
+				sharedViewModel.setFragment(prevFrag)
 				//isEnabled = false
 			}
 		})

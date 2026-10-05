@@ -11,11 +11,16 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.databinding.FragmentConfigDatabaseBinding
+import dev.mainhq.bus2go.domain.entity.DatabaseState
+import dev.mainhq.bus2go.presentation.settings.SettingsDownloadDatabasesFragment
 import dev.mainhq.bus2go.utils.launchViewModelCollectLatest
+import dev.mainhq.bus2go.utils.makeVisible
+import dev.mainhq.bus2go.utils.toast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -30,11 +35,13 @@ class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
 		object: ViewModelProvider.Factory{
 			override fun <T : ViewModel> create(modelClass: Class<T>): T {
 				@Suppress("UNCHECKED_CAST")
-				return ConfigDatabasesFragmentViewModel(
-					//TODO this is shit
-					(this@ConfigDatabasesFragment.requireActivity().application as Bus2GoApplication)
-						.commonModule.scheduleDownloadDatabaseTask
-				) as T
+				return (this@ConfigDatabasesFragment.requireActivity().application as Bus2GoApplication).let {
+					ConfigDatabasesFragmentViewModel(
+						it.commonModule.observeDownloadDatabaseTask,
+						it.commonModule.scheduleDownloadDatabaseTask,
+						it.commonModule.cancelDownloadDatabaseTask
+					) as T
+				}
 			}
 		}
 	}
@@ -46,7 +53,7 @@ class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
 		inflater: LayoutInflater,
 		container: ViewGroup?,
 		savedInstanceState: Bundle?
-	): View? {
+	): View {
 		_binding = FragmentConfigDatabaseBinding.inflate(inflater)
 		return binding.root
 	}
@@ -54,67 +61,71 @@ class ConfigDatabasesFragment: Fragment(R.layout.fragment_config_database) {
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 		super.onViewCreated(view, savedInstanceState)
 
+		val linearLayoutManager = LinearLayoutManager(view.context)
+		linearLayoutManager.orientation = LinearLayoutManager.VERTICAL
+		binding.configDownloadDatabaseRecyclerView.layoutManager = linearLayoutManager
+		val adapter = SettingsDownloadDatabasesFragment.MyAdapter(
+			viewModel.databases.value,
+			onDownloadedClickListener = { },
+			onDownloadClickListener = {
+				requireContext().toast("Downloading database $it...")
+			},
+			onDownloadLongClickListener = {
+				MaterialAlertDialogBuilder(requireContext())
+					.setTitle("Are you sure to stop the download of ${it}?")
+					.setPositiveButton("Yes") { dialogInterface, _ ->
+						viewModel.cancelDatabaseDownload(it)
+						requireContext().toast("Download is being cancelled")
+					}
+					.setNegativeButton("No") { dialogInterface, _ ->
+						dialogInterface.dismiss()
+					}
+					.setOnCancelListener { dialogInterface ->
+						dialogInterface.dismiss()
+					}
+					.show()
+			},
+			onDownloadCompletedClickListener = {
+				requireContext().toast("Please restart the app")
+			},
+			deleteDownloadedLongClickListener = { false },
+			onNotDownloadedClickListener = { dbState, linearProgressBar ->
+				dbState as DatabaseState
+				MaterialAlertDialogBuilder(requireContext())
+					.setTitle("Download ${dbState.db}?")
+					.setMessage("Are you sure to download the database for ${dbState.db}?")
+					.setPositiveButton("Download") { dialogInterface, _ ->
+						viewModel.downloadDatabase(dbState.db)
+						linearProgressBar.makeVisible()
+					}
+					.setNegativeButton("Cancel") { dialogInterface, _ ->
+						dialogInterface.dismiss()
+					}
+					.setOnCancelListener { dialogInterface ->
+						dialogInterface.dismiss()
+					}
+					.show()
+			},
+		)
 
-		binding.configStmDatabaseCheckBox.also {
-			it.isChecked = viewModel.isStmChecked()
-			it.setOnCheckedChangeListener { _, _ -> viewModel.toggleStm() }
+		binding.configDownloadDatabaseRecyclerView.adapter = adapter
+
+		launchViewModelCollectLatest(viewModel.databases) {
+			adapter.setList(it)
 		}
 
-		binding.configExoDatabaseCheckBox.also {
-			it.isChecked = viewModel.isExoChecked()
-			it.setOnCheckedChangeListener { _, _ -> viewModel.toggleExo() }
-		}
-
-
-		launchViewModelCollectLatest(viewModel.dbToDownload){
-			binding.configDownloadDatabaseContinueButton.text = if (it.isEmpty()) {
-				"Skip"
-			}
-			else {
-				"Continue"
-			}
-		}
-		requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object: OnBackPressedCallback(true){
-			override fun handleOnBackPressed() {
-				sharedViewModel.setFragment(prevFrag)
-				isEnabled = false
-			}
+		sharedViewModel.setButtonState(ConfigButtonState.Next{
+			sharedViewModel.setFragment(nextFrag)
 		})
 
-		binding.configDownloadDatabaseContinueButton.setOnClickListener {
-			//if none checked, display the skip, and create a dialog for a skip
-			if (binding.configDownloadDatabaseContinueButton.text == "Continue") {
-				//TODO let the user know how much data it may take...
-				MaterialAlertDialogBuilder(requireContext())
-					.setTitle("Confirm")
-					//list packages
-					.setMessage("Are you sure to download the selected packages for download?")
-					.setPositiveButton("Yes"){ dialogInterface, _ ->
-						Log.d("DATABASE-CONFIG", "Initiating download of data")
-						viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
-							dialogInterface.dismiss()
-							//AppThemeState.turnOffDbUpdateChecking()
-							viewModel.scheduleDownloadWork()
-							sharedViewModel.setFragment(nextFrag)
-						}
-					}
-					.setNegativeButton("Cancel"){ dialogInterface, _ -> /*close the dialog*/ dialogInterface.dismiss() }
-					.show()
-			}
-			else {
-				MaterialAlertDialogBuilder(requireContext())
-					.setTitle("Are you sure?")
-					.setMessage("You won't be able to properly use the app without a database installed (you can always download one later)")
-					.setPositiveButton("Yes, skip") { dialogInterface, _ ->
-						dialogInterface.dismiss()
-						sharedViewModel.setFragment(nextFrag)
-					}
-					.setNegativeButton("Cancel"){ dialogInterface, _ ->
-						dialogInterface.dismiss()
-					}
-					.show()
-			}
-		}
+		requireActivity().onBackPressedDispatcher.addCallback(
+			viewLifecycleOwner,
+			object : OnBackPressedCallback(true) {
+				override fun handleOnBackPressed() {
+					sharedViewModel.setFragment(prevFrag)
+					isEnabled = false
+				}
+			})
 	}
 
 	override fun onDestroyView() {

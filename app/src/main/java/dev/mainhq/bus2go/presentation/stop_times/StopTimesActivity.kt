@@ -22,6 +22,7 @@ import dev.mainhq.bus2go.domain.entity.Time
 import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.presentation.core.UiState
 import dev.mainhq.bus2go.presentation.utils.ExtrasTagNames
+import dev.mainhq.bus2go.utils.getMaterialColor
 import dev.mainhq.bus2go.utils.launchViewModelCollectLatest
 import dev.mainhq.bus2go.utils.makeGone
 import dev.mainhq.bus2go.utils.makeInvisible
@@ -73,7 +74,7 @@ class StopTimesActivity : BaseActivity() {
         binding.timeTransitRouteIdTextView.apply {
             text = stopTimesHeaderDisplayModel.routeIdText
             textSize = stopTimesHeaderDisplayModel.routeIdTextSize
-            setTextColor(resources.getColor(stopTimesHeaderDisplayModel.routeIdTextColor, null))
+            setTextColor(getMaterialColor(stopTimesHeaderDisplayModel.routeIdTextColor))
         }
         binding.timeDirectionTextView.text = stopTimesHeaderDisplayModel.directionText
         binding.timeStopNameTextView.text = stopTimesHeaderDisplayModel.stopNameText

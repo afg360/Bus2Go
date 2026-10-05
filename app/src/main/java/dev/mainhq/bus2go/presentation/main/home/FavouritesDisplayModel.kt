@@ -9,9 +9,10 @@ data class FavouritesDisplayModel(
 	val favouriteTransitData: FavouriteTransitData,
 	val directionText: String,
 	//tells us if directionText needs to be truncated bcz of its size
-	val toTruncate: Boolean,
+	val isDirectionTextTruncated: Boolean,
 	val tripHeadsignText: String,
 	val stopNameText: String,
+	val isStopNameTextTruncated: Boolean,
 	//null if the timeRemainingText displays None left
 	val arrivalTimeText: String?,
 	val timeRemainingText: String,

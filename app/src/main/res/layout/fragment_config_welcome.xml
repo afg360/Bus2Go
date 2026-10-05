@@ -25,7 +25,7 @@
         android:id="@+id/config_welcome_description_textView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="We will setup some configurations first before starting"
+        android:text="Let's setup some configurations before starting"
         android:textAlignment="center"
         android:textSize="30sp"
         android:layout_marginTop="50dp"
@@ -34,17 +34,5 @@
         app:layout_constraintTop_toBottomOf="@id/config_welcome_textView"
         />
     
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/config_continue_button"
-        android:layout_width="150dp"
-        android:layout_height="wrap_content"
-        android:text="@string/config_continue"
-        android:textSize="20sp"
-        android:textColor="@color/black"
-        android:layout_marginBottom="200dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

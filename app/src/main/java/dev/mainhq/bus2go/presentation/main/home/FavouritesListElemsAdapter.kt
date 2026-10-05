@@ -6,11 +6,14 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.card.MaterialCardView
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.textview.MaterialTextView
+import com.google.android.material.R as MaterialRes
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.domain.entity.FavouriteTransitData
+import dev.mainhq.bus2go.utils.getMaterialColor
 import dev.mainhq.bus2go.utils.makeGone
 import dev.mainhq.bus2go.utils.makeVisible
 import dev.mainhq.bus2go.utils.swap
@@ -64,8 +67,8 @@ class FavouritesListElemsAdapter(
         val info = list[position]
         setTimeLeft(holder, position)
 
-        holder.stopNameTextView.text = info.stopNameText
-        if (info.toTruncate){
+        holder.cardView.strokeColor = holder.cardView.getMaterialColor(info.dataDisplayColor)
+        if (info.isDirectionTextTruncated){
             holder.directionTextView.text = "${info.directionText.substring(0, FavouritesDisplayModel.DIRECTION_STR_LIMIT)}..."
             holder.directionTextView.setOnClickListener {
                 if (holder.directionTextView.text.contains("...")) {
@@ -79,9 +82,24 @@ class FavouritesListElemsAdapter(
         else {
             holder.directionTextView.text = info.directionText
         }
-        holder.tripHeadsignTextView.text = info.tripHeadsignText
 
-        holder.tripHeadsignTextView.setTextColor(holder.itemView.resources.getColor(info.dataDisplayColor, null))
+        if (info.isStopNameTextTruncated) {
+            holder.stopNameTextView.text = "${info.stopNameText.substring(0, FavouritesDisplayModel.DIRECTION_STR_LIMIT)}..."
+            holder.stopNameTextView.setOnClickListener {
+                if (holder.stopNameTextView.text.contains("...")) {
+                    holder.stopNameTextView.text = info.stopNameText
+                }
+                else {
+                    holder.stopNameTextView.text = "${info.stopNameText.substring(0, FavouritesDisplayModel.DIRECTION_STR_LIMIT)}..."
+                }
+            }
+        }
+        else {
+            holder.stopNameTextView.text = info.stopNameText
+        }
+
+        holder.tripHeadsignTextView.text = info.tripHeadsignText
+        holder.tripHeadsignTextView.setTextColor(holder.itemView.getMaterialColor(info.dataDisplayColor))
 
         if (selectedMode) {
             holder.checkBoxView.makeVisible()
@@ -110,7 +128,7 @@ class FavouritesListElemsAdapter(
         holder.timeRemainingTextView.text = info.timeRemainingText
         if (info.arrivalTimeText == null) {
             holder.timeRemainingTextView.textSize = 20F
-            holder.timeRemainingTextView.setTextColor(holder.itemView.resources.getColor(R.color.light_grey, null))
+            holder.timeRemainingTextView.setTextColor(holder.itemView.getMaterialColor(MaterialRes.attr.colorOnSecondaryContainer))
             holder.arrivalTimeTextView.makeGone()
         }
         else {
@@ -118,6 +136,7 @@ class FavouritesListElemsAdapter(
             holder.arrivalTimeTextView.text = info.arrivalTimeText
             holder.arrivalTimeTextView.makeVisible()
             when (info.urgency){
+                //TODO switch to material style colors
                 Urgency.IMMINENT -> holder.timeRemainingTextView.setTextColor(holder.itemView.resources.getColor(
 					R.color.red, null))
                 Urgency.SOON -> holder.timeRemainingTextView.setTextColor(holder.itemView.resources.getColor(
@@ -167,6 +186,7 @@ class FavouritesListElemsAdapter(
     }
 
     class ViewHolder(view : View) : RecyclerView.ViewHolder(view){
+        val cardView : MaterialCardView = view.findViewById(R.id.favourites_card_view)
         var checkBoxView : MaterialCheckBox = view.findViewById(R.id.favourites_check_box)
         /** Will consist of the routeLongName for exo data */
         val tripHeadsignTextView : MaterialTextView = view.findViewById(R.id.favouritesTripheadsignTextView)

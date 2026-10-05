@@ -6,9 +6,8 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.io.File
 import java.security.KeyStore
+import java.security.KeyStoreException
 import java.security.cert.X509Certificate
-import java.time.Instant
-import java.util.Date
 import java.util.concurrent.ConcurrentHashMap
 
 //TODO Use an EncryptFile from Jetpack to encrypt the KeyStore file
@@ -49,6 +48,21 @@ class LocalKeyStore(
 			}
 		}
 		memory.compute(CERT_ENTRY) { _, _ -> cert }
+	}
+
+	/** @return Whether the entries were successfully deleted or not */
+	suspend fun deleteCertificates(): Boolean {
+		mutex.withLock {
+			try {
+				if (keyStore.isKeyEntry(CERT_ENTRY)) {
+					keyStore.deleteEntry(CERT_ENTRY)
+				}
+				return true
+			}
+			catch (ke: KeyStoreException) {
+				return false
+			}
+		}
 	}
 
 	fun isExpired(cert: X509Certificate): Boolean {

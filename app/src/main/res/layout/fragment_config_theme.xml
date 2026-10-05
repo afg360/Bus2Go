@@ -42,17 +42,4 @@
         android:text="Dark"
         />
     
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/configSelectThemeContinueButton"
-        android:layout_width="150dp"
-        android:layout_height="wrap_content"
-        android:text="@string/config_continue"
-        android:textSize="20sp"
-        android:textColor="@color/black"
-        android:layout_marginBottom="200dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

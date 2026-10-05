@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".presentation.ui.fragments.Map">
+    >
 
     <!-- TODO: Update blank fragment layout -->
     <com.google.android.material.textview.MaterialTextView
@@ -12,7 +12,6 @@
         android:text="Coming soon...
         Maps"
         android:textSize="100sp"
-        android:fontFamily="@font/goli_medium"
         android:textAlignment="center"
         android:gravity="center"
         />

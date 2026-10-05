@@ -6,7 +6,6 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -19,6 +18,8 @@ import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.databinding.FragmentConfigServerBinding
 import dev.mainhq.bus2go.presentation.core.UiState
 import dev.mainhq.bus2go.utils.launchViewModelCollectLatest
+import dev.mainhq.bus2go.utils.toast
+import kotlinx.coroutines.flow.first
 
 //TODO eventually there will either be a special ip address, or a list of available domain names...
 
@@ -39,7 +40,8 @@ class ConfigServerFragment: Fragment(R.layout.fragment_config_server) {
 						it.commonModule.settingsRepository,
 						it.appModule.checkIsBus2GoServer,
 						it.commonModule.saveAllNotifSettings,
-						it.commonModule.acceptSelfSignedCertificate
+						it.commonModule.acceptSelfSignedCertificate,
+						it.commonModule.deleteSelfSignedCertificates
 					) as T
 				}
 			}
@@ -53,7 +55,7 @@ class ConfigServerFragment: Fragment(R.layout.fragment_config_server) {
 		inflater: LayoutInflater,
 		container: ViewGroup?,
 		savedInstanceState: Bundle?
-	): View? {
+	): View {
 		_binding = FragmentConfigServerBinding.inflate(inflater)
 		return binding.root
 	}
@@ -62,28 +64,7 @@ class ConfigServerFragment: Fragment(R.layout.fragment_config_server) {
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 		super.onViewCreated(view, savedInstanceState)
 
-		val progressIndicator = binding.configServerContinueButtonProgressIndicator
 		val textInput = binding.configSelectServerTextInputEditText
-
-		val button = binding.configSelectServerContinueButton
-		button.setOnClickListener{
-			if (viewModel.buttonText.value == "Skip") {
-				MaterialAlertDialogBuilder(requireContext())
-					.setTitle("Skip?")
-					.setMessage("Are you sure you want to skip? (You may configure this later).")
-					.setPositiveButton("Yes"){ dialogInterface, _ ->
-						viewModel.saveSettings()
-						sharedViewModel.triggerEvent(true)
-						dialogInterface.dismiss()
-					}
-					.setNegativeButton("Cancel"){ dialogInterface, _ ->
-						dialogInterface.dismiss()
-					}
-					.show()
-			}
-			else viewModel.verifyUserInputServer()
-		}
-
 		binding.configSelectServerTypeSwitch.setOnClickListener {
 			viewModel.toggleServerType()
 		}
@@ -142,34 +123,25 @@ class ConfigServerFragment: Fragment(R.layout.fragment_config_server) {
 			when(it){
 				is UiState.Error -> {
 					//if device not connected to internet, make a SnackBar and allow retry
-					//FIXME this is not the way to do it
-					progressIndicator.visibility = View.GONE
-					button.text = viewModel.buttonText.value
-					button.isEnabled = true
-					if (it.message == "Not connected to the internet")
-					//TODO add a swippable behaviour bcz this is annoying...
-						Snackbar.make(requireContext(), view, it.message, Snackbar.LENGTH_INDEFINITE)
-							.setAction("Retry"){
+					sharedViewModel.setButtonState(ConfigButtonState.Skip({}))
+					if (it.message == "Not connected to the internet") {
+						//TODO add a swippable behaviour bcz this is annoying...
+						Snackbar
+							.make(requireContext(), view, it.message, Snackbar.LENGTH_INDEFINITE)
+							.setAction("Retry") {
 								//FIXME Button quirks because constantly updated...
 								viewModel.verifyUserInputServer()
-							}
-							.show()
-
+							}.show()
+					}
 					else {
 						textInput.error = "Invalid Server"
-						Toast.makeText(requireContext(), it.message, Toast.LENGTH_SHORT)
-							.show()
+						toast(it.message)
 					}
 				}
 				UiState.Loading -> {
-					button.isEnabled = false
-					button.text = ""
-					progressIndicator.visibility = View.VISIBLE
+					sharedViewModel.setButtonState(ConfigButtonState.Loading)
 				}
 				is UiState.Success<Boolean> -> {
-					progressIndicator.visibility = View.GONE
-					button.text = viewModel.buttonText.value
-					button.isEnabled = true
 					//if the response was valid, go to databases
 					if (it.data) {
 						viewModel.cancelQuery()
@@ -179,19 +151,27 @@ class ConfigServerFragment: Fragment(R.layout.fragment_config_server) {
 					else textInput.error = "Invalid server"
 				}
 				UiState.Init -> {
-					progressIndicator.visibility = View.GONE
-					button.text = viewModel.buttonText.value
-					button.isEnabled = true
+					sharedViewModel.setButtonState(ConfigButtonState.Skip{})
 				}
 			}
 		}
 
 		launchViewModelCollectLatest(viewModel.textInputText){
 			when (it) {
-				is UiState.Error -> textInput.error = "Invalid Url"
+				is UiState.Error -> {
+					textInput.error = "Invalid Url"
+					sharedViewModel.setButtonState(ConfigButtonState.Skip{})
+				}
 				UiState.Init -> textInput.setText("")
 				UiState.Loading -> TODO("Wtf")
-				is UiState.Success<String> -> if (!textInput.hasFocus()) textInput.setText(it.data)
+				is UiState.Success<String> -> {
+					if (!textInput.hasFocus()) {
+						textInput.setText(it.data)
+					}
+					sharedViewModel.setButtonState(ConfigButtonState.Next{
+						viewModel.verifyUserInputServer()
+					})
+				}
 			}
 		}
 
@@ -203,8 +183,6 @@ class ConfigServerFragment: Fragment(R.layout.fragment_config_server) {
 				override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) { }
 				override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) { }
 		})
-
-		launchViewModelCollectLatest(viewModel.buttonText){ button.text = it }
 
 		val mainBackPressCallBack = object: OnBackPressedCallback(true){
 			override fun handleOnBackPressed() {

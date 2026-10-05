@@ -44,6 +44,8 @@ class NotificationRepositoryImpl(
 
 			is NotificationType.DbUpdateDone -> notificationHandler.notifyDbUpdateDone(databaseAgency)
 
+			NotificationType.DbUpdateCancelled -> notificationHandler.notifyDbDownloadCancelled(databaseAgency)
+
 			is NotificationType.DbUpdateError -> notificationHandler.notifyDbDownloadFailed(notificationType.error, databaseAgency)
 		}
 	}

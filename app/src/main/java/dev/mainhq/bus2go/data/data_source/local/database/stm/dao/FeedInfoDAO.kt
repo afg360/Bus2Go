@@ -9,5 +9,5 @@ import java.time.LocalDate
 @Dao
 interface FeedInfoDAO {
 	@Query("SELECT feed_end_date FROM FeedInfo")
-	fun getExpirationDate() : Flow<LocalDate>
+	fun getExpirationDate() : Flow<LocalDate?>
 }

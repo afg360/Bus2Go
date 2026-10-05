@@ -5,11 +5,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textview.MaterialTextView
+import com.google.android.material.R as MaterialRes
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.domain.entity.ExoBusRouteInfo
 import dev.mainhq.bus2go.domain.entity.ExoTrainRouteInfo
 import dev.mainhq.bus2go.domain.entity.RouteInfo
 import dev.mainhq.bus2go.domain.entity.StmBusRouteInfo
+import dev.mainhq.bus2go.utils.getMaterialColor
 
 class SearchQueryListElemsAdapter(
     private var busData: List<RouteInfo>,
@@ -34,20 +36,20 @@ class SearchQueryListElemsAdapter(
         holder.itemView.setOnClickListener{ onClickListener(data) }
 
         val color = when(data){
-            is ExoBusRouteInfo -> R.color.basic_purple
-            is ExoTrainRouteInfo -> R.color.orange
+            is ExoBusRouteInfo -> R.attr.colorCustomColor1
+            is ExoTrainRouteInfo -> R.attr.colorCustomColor2
             is StmBusRouteInfo -> {
                 if (data.routeId.toInt() in 400..499){
-                    R.color.basic_green
+                    R.attr.colorCustomColor3
                 }
                 else {
-                    R.color.basic_blue
+                    MaterialRes.attr.colorPrimary
                 }
             }
         }
 
-        holder.busNumView.setTextColor(holder.itemView.resources.getColor(color, null))
-        holder.busDirView.setTextColor(holder.itemView.resources.getColor(color,  null))
+        holder.busNumView.setTextColor(holder.itemView.getMaterialColor(color))
+        holder.busDirView.setTextColor(holder.itemView.getMaterialColor(color))
     }
 
 	fun updateData(busData: List<RouteInfo>){

@@ -3,9 +3,10 @@ package dev.mainhq.bus2go.presentation.stop_direction.stop
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
+import androidx.appcompat.widget.AppCompatImageButton
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textview.MaterialTextView
+import com.google.android.material.R as MaterialRes
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.domain.entity.ExoBusItem
 import dev.mainhq.bus2go.domain.entity.ExoTrainItem
@@ -13,6 +14,7 @@ import dev.mainhq.bus2go.domain.entity.FavouriteTransitData
 import dev.mainhq.bus2go.domain.entity.StmBusItem
 import dev.mainhq.bus2go.domain.entity.TransitData
 import dev.mainhq.bus2go.domain.entity.compareTransitData
+import dev.mainhq.bus2go.utils.getMaterialColor
 
 
 class StopListElemsAdapter (
@@ -34,19 +36,19 @@ class StopListElemsAdapter (
 
         when(data){
             is ExoBusItem -> holder.stopNameTextView
-                .setTextColor(holder.itemView.resources .getColor(R.color.basic_purple, null))
+                .setTextColor(holder.itemView.getMaterialColor(R.attr.colorCustomColor1))
 
             is ExoTrainItem -> holder.stopNameTextView
-                .setTextColor(holder.itemView.resources.getColor(R.color.orange, null))
+                .setTextColor(holder.itemView.getMaterialColor(R.attr.colorCustomColor2))
 
             is StmBusItem -> holder.stopNameTextView
-                .setTextColor(holder.itemView.resources.getColor(R.color.basic_blue, null))
+                .setTextColor(holder.itemView.getMaterialColor(MaterialRes.attr.colorPrimary))
         }
         holder.favouriteSelectedView.setOnClickListener {
             toggleFavouritesClickListener(it, data)
         }
-        holder.stopNameTextView.setOnClickListener { onClickListener(data) }
         setFavouriteButton(holder, position)
+        holder.itemView.setOnClickListener { onClickListener(data) }
     }
 
     companion object {
@@ -88,7 +90,7 @@ class StopListElemsAdapter (
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         //TODO INSTEAD ADD A COLUMN IN DATABASE TO SET AS FAVOURITE A CERTAIN STOP, AND AFFICHER ONLY THE NEXT STOP
         val stopNameTextView: MaterialTextView = view.findViewById(R.id.stop)
-        val favouriteSelectedView: ImageView = view.findViewById(R.id.favourite_star_selection)
+        val favouriteSelectedView: AppCompatImageButton = view.findViewById(R.id.favourite_star_selection)
 
         init {
             favouriteSelectedView.setBackgroundResource(R.drawable.favourite_drawable_off)

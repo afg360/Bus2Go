@@ -6,8 +6,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.R as MaterialRes
 import dev.mainhq.bus2go.R
 import dev.mainhq.bus2go.domain.entity.Tag
+import dev.mainhq.bus2go.utils.getMaterialColor
 
 class TagsListElemAdapter(
 	private var tags: List<Tag>,
@@ -32,11 +34,11 @@ class TagsListElemAdapter(
 			setOnClickListener(onTagClick)
 			if (text == selectedTag){
 				setBackgroundColor(tags[position].color)
-				setTextColor(holder.itemView.resources.getColor(R.color.dark, null))
-				strokeColor = ColorStateList.valueOf(holder.itemView.resources.getColor(R.color.dark, null))
+				setTextColor(holder.itemView.getMaterialColor(MaterialRes.attr.colorSurface))
+				strokeColor = ColorStateList.valueOf(holder.itemView.getMaterialColor(MaterialRes.attr.colorSurface))
 			}
 			else {
-				setBackgroundColor(holder.itemView.resources.getColor(R.color.dark, null))
+				setBackgroundColor(holder.itemView.getMaterialColor(MaterialRes.attr.colorSurface))
 				setTextColor(tags[position].color)
 				strokeColor = ColorStateList.valueOf(tags[position].color)
 			}

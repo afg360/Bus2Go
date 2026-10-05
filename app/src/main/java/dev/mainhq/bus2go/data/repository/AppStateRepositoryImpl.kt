@@ -242,6 +242,12 @@ class AppStateRepositoryImpl(
 		}
 	}
 
+	override suspend fun removeSelfSignedCerts(): Boolean {
+		return withContext(Dispatchers.IO) {
+			localKeyStore.deleteCertificates()
+		}
+	}
+
 	override suspend fun deleteDatabase(databaseAgency: DatabaseAgency) {
 		withContext(Dispatchers.IO) {
 			appStateDataStore.edit { mutablePreferences ->

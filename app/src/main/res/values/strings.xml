@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name" translatable="false">Bus2Go</string>
     <string name="language">Language</string>
-    <string name="theme">Theme</string>
+    <string name="theme">Dark Mode</string>
     <string name="language_prompt">Choose a language</string>
     <string name="english">English</string>
     <string name="french">French</string>

@@ -99,8 +99,8 @@ class StopFragment : Fragment(R.layout.fragment_choose_stop) {
                 Toast.makeText(requireContext(), "No stops found...", Toast.LENGTH_SHORT).show()
             }
         }
-        launchViewModelCollectLatest(viewModel.favourites){
-            adapter.updateFavourites(it.flatMap { it.value })
+        launchViewModelCollectLatest(viewModel.favourites){ favourites ->
+            adapter.updateFavourites(favourites.flatMap { it.value })
         }
 
         requireActivity().onBackPressedDispatcher.addCallback(
