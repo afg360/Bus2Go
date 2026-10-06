@@ -5,13 +5,12 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
-import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.content.FileProvider
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.R
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -35,6 +34,7 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import java.io.File
+import androidx.core.net.toUri
 
 //TODO not implemented
 /** Manages new app update downloads and installations */
@@ -44,6 +44,8 @@ class UpdateManagerWorker(
 	//FIXME For testing purposes
 	//private val notificationManager: NotificationManager
 	) : CoroutineWorker(context, workerParams ) {
+
+	private val loggerImpl = (context as Bus2GoApplication).appModule.loggerImpl
 
 	companion object {
 		const val TAG = "CHECK-FOR-UPDATES"
@@ -68,7 +70,7 @@ class UpdateManagerWorker(
 		}
 		when (httpResponse.status.value) {
 			in 200..299 -> {
-				Log.d("UPDATES-FETCHING", "Fetched successfully github")
+				loggerImpl?.debug("UPDATES-FETCHING", "Fetched successfully github")
 				//we are getting the latest release,
 				//FIXME includes pre-releases, for development...
 				val latestRelease = Json.decodeFromString(JsonArray.serializer(), httpResponse.body()).toList()[0].jsonObject
@@ -88,7 +90,7 @@ class UpdateManagerWorker(
 				//notificationManager.createNotificationChannel(channel)
 
 				if (localVersionName < tagVersion){
-					Log.d("UPDATES", "Seems that you need to update!")
+					loggerImpl?.debug("UPDATES", "Seems that you need to update!")
 					val isAutoUpdate = false
 //						PreferenceManager.getDefaultSharedPreferences(applicationContext)
 //						.getBoolean("auto-updates", false)
@@ -121,7 +123,7 @@ class UpdateManagerWorker(
 					else{
 						val intent = Intent(
 							Intent.ACTION_VIEW,
-							Uri.parse(downloadLink.jsonPrimitive.content)
+							downloadLink.jsonPrimitive.content.toUri()
 						)
 						val pendingIntent = PendingIntent.getActivity(applicationContext, 0, intent, PendingIntent.FLAG_IMMUTABLE)
 
@@ -139,7 +141,7 @@ class UpdateManagerWorker(
 				}
 				else{
 					//FIXME for testing only, at release comment this
-					Log.d("UPDATES", "Version seems to be up to date")
+					loggerImpl?.debug("UPDATES", "Version seems to be up to date")
 					/*
 					val downloadLink = "https://github.com/afg360/Bus2Go/releases/download/v1.1.0-alpha/bus2go-debug.apk"
 					val intent = Intent(Intent.ACTION_VIEW, Uri.parse(downloadLink))
@@ -161,7 +163,7 @@ class UpdateManagerWorker(
 				return Result.success()
 			}
 			else -> {
-				Log.e("UPDATES", "Error fetching github for new releases. Be sure you are connected to a network and haven't reached the rate limit")
+				loggerImpl?.error("UPDATES", "Error fetching github for new releases. Be sure you are connected to a network and haven't reached the rate limit")
 				return Result.failure()
 			}
 		}
@@ -219,7 +221,7 @@ class UpdateManagerWorker(
 			}
 			catch (ioE: IOException){
 				//TODO finish handling of IO errors
-				Log.e("UPDATE", "IO exception during downloading")
+				loggerImpl?.error("UPDATE", "IO exception during downloading")
 				Toast.makeText(applicationContext, "Error during update download", Toast.LENGTH_SHORT).show()
 				//delete tmp file?
 				tmpFile.delete()

@@ -3,7 +3,6 @@ package dev.mainhq.bus2go.presentation.main.alarms
 import java.util.Calendar
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
@@ -61,7 +60,7 @@ class AlarmCreationDialog() : DialogFragment(R.layout.fragment_create_alarms_dia
                         AlarmCreationChooseBusDialog.AlarmBusInfo::class.java)!!)
                 }
                 alarmCreationViewModel.alarmBusInfo.value?.also {
-                    Log.d("ALARM BUS", it.toString())
+//                    Log.d("ALARM BUS", it.toString())
                     view.findViewById<LinearLayout>(R.id.alarmCreationHiddenThings).visibility = View.VISIBLE
                     view.findViewById<MaterialTextView>(R.id.textViewChooseStop).text = it.busInfo.toString()
 

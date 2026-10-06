@@ -4,6 +4,7 @@ import android.content.Context
 import java.io.File
 
 import dev.mainhq.bus2go.data.data_source.remote.NetworkMonitor
+import dev.mainhq.bus2go.domain.core.Logger
 import dev.mainhq.bus2go.domain.core.Result
 import dev.mainhq.bus2go.domain.entity.AppVersions
 import dev.mainhq.bus2go.domain.entity.DatabaseAgency
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.Flow
 
 class DatabaseDownloadRepositoryImpl(
 	applicationContext: Context,
+	override val logger: Logger?,
 	override val networkMonitor: NetworkMonitor
 ): DatabaseDownloadRepositoryAbstractImpl() {
 
@@ -22,7 +24,6 @@ class DatabaseDownloadRepositoryImpl(
 	override val defaultPort = 443
 	override val tag = ""
 	override val filesDir: File = applicationContext.filesDir
-	override val logger = null
 
 
 	//TODO each function shall check whether it should be self hosted or not and use the correct port?

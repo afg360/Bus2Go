@@ -22,9 +22,8 @@ abstract class BaseBus2GoApplication : Application() {
 	override fun onCreate() {
 		super.onCreate()
 
-		//check if an apk exists, and delete it if useless
-		commonModule = CommonModule(applicationContext)
 		appModule = AppModule(applicationContext)
+		commonModule = CommonModule(applicationContext, appModule.loggerImpl)
 
 		//TODO move logic to use case classes
 		initTagsFiles()

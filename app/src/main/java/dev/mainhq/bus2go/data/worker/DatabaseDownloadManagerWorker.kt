@@ -2,7 +2,6 @@ package dev.mainhq.bus2go.data.worker
 
 import android.content.Context
 import android.os.Build
-import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
@@ -17,7 +16,6 @@ import dev.mainhq.bus2go.domain.entity.DatabaseAgency
 import dev.mainhq.bus2go.domain.entity.NotificationType
 import dev.mainhq.bus2go.domain.entity.Progress
 import dev.mainhq.bus2go.domain.exceptions.NetworkException
-import dev.mainhq.bus2go.utils.findCause
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -49,6 +47,9 @@ class DatabaseDownloadManagerWorker(
 	private val settingsRepository =
 		(applicationContext as Bus2GoApplication).commonModule.settingsRepository
 
+	private val loggerImpl =
+		(applicationContext as Bus2GoApplication).appModule.loggerImpl
+
 	private lateinit var databaseAgency: DatabaseAgency
 
 	private val dbToDownloadString = inputData.getString(KEY) ?: throw IllegalStateException("Expected an input")
@@ -70,7 +71,7 @@ class DatabaseDownloadManagerWorker(
 	}
 
 	override suspend fun doWork(): Result {
-		Log.d("DB WORKER", "Started db download work")
+		loggerImpl?.debug("DB WORKER", "Started db download work")
 
 		//TODO notify when download starts (and show a bar perhaps)
 		// once download done, notify for decompressing
@@ -83,7 +84,7 @@ class DatabaseDownloadManagerWorker(
 				downloadDb()
 			}
 			catch (e: Exception) {
-				Log.e("DB_WORKER", "An exception occurred...\n ${e.message}")
+				loggerImpl?.error("DB_WORKER", "An exception occurred...\n ${e.message}")
 				withContext(Dispatchers.Main){
 					notificationsRepository.notifyDbUpdates(NotificationType.DbUpdateError(e.message), databaseAgency)
 				}
@@ -101,7 +102,7 @@ class DatabaseDownloadManagerWorker(
 			is Bus2GoResult.Error -> throw NetworkException(res.message)
 			is Bus2GoResult.Success<Int> -> {
 				if (!isAppUpToDate()){
-					Log.d("DB_WORKER", "App version not up to date with database")
+					loggerImpl?.debug("DB_WORKER", "App version not up to date with database")
 					withContext(Dispatchers.Main){
 						notificationsRepository.notifyDbUpdates(NotificationType.DbUpdateError(), databaseAgency)
 					}
@@ -152,7 +153,7 @@ class DatabaseDownloadManagerWorker(
 										Result.retry()
 									}
 									else {
-										Log.d("DB_WORKER", "Downloaded successfully")
+										loggerImpl?.debug("DB_WORKER", "Downloaded successfully")
 									}
 								}
 								is Progress.Failed -> {

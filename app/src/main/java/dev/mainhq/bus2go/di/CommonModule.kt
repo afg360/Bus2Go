@@ -3,7 +3,6 @@ package dev.mainhq.bus2go.di
 import android.content.Context
 import androidx.work.WorkManager
 import dev.mainhq.bus2go.data.backgroundtask.DatabaseDownloadSchedulerImpl
-import dev.mainhq.bus2go.data.core.LoggerImpl
 import dev.mainhq.bus2go.data.data_source.local.LocalKeyStore
 import dev.mainhq.bus2go.data.data_source.local.datastore.app_state.appStateDataStore
 import dev.mainhq.bus2go.data.data_source.local.datastore.exo.exoFavouritesDataStore
@@ -12,7 +11,6 @@ import dev.mainhq.bus2go.data.data_source.local.datastore.stm.stmFavouritesDataS
 import dev.mainhq.bus2go.data.data_source.local.datastore.tags.TagsHandler
 import dev.mainhq.bus2go.data.data_source.notifications.NotificationHandler
 import dev.mainhq.bus2go.data.data_source.remote.CustomTrustManager
-import dev.mainhq.bus2go.data.data_source.remote.NetworkMonitor
 import dev.mainhq.bus2go.data.repository.AppStateRepositoryImpl
 import dev.mainhq.bus2go.data.repository.DatabaseControllerRepositoryImpl
 import dev.mainhq.bus2go.data.repository.ExoFavouritesRepositoryImpl
@@ -24,6 +22,7 @@ import dev.mainhq.bus2go.data.repository.NotificationRepositoryImpl
 import dev.mainhq.bus2go.data.repository.SettingsRepositoryImpl
 import dev.mainhq.bus2go.data.repository.StmFavouritesRepositoryImpl
 import dev.mainhq.bus2go.data.repository.StmRepositoryImpl
+import dev.mainhq.bus2go.domain.core.Logger
 import dev.mainhq.bus2go.domain.use_case.AcceptSelfSignedCertificate
 import dev.mainhq.bus2go.domain.use_case.CancelDownloadDatabaseTask
 import dev.mainhq.bus2go.domain.use_case.CleanUpGarbageFiles
@@ -52,7 +51,10 @@ import dev.mainhq.bus2go.domain.use_case.transit.GetStopNames
 import dev.mainhq.bus2go.domain.use_case.transit.GetTransitTime
 import java.io.File
 
-class CommonModule(applicationContext: Context) {
+class CommonModule(
+	applicationContext: Context,
+	logger: Logger?
+) {
 	private val databaseDownloadScheduler = DatabaseDownloadSchedulerImpl(
 		WorkManager.getInstance(applicationContext)
 	)
@@ -65,8 +67,12 @@ class CommonModule(applicationContext: Context) {
 		databaseDownloadScheduler,
 	)
 
+	//FIXME THIS CODE IS SUPER FRAGILE but works for now...
+	private val databaseControllerRepository = DatabaseControllerRepositoryImpl
+		.getInstance(applicationContext, logger)
+
 	private val stmRepository = StmRepositoryImpl(
-		databaseControllerRepository = DatabaseControllerRepositoryImpl.getInstance(applicationContext)
+		databaseControllerRepository
 	)
 
 	private val localKeyStore = LocalKeyStore(applicationContext.filesDir)
@@ -80,7 +86,7 @@ class CommonModule(applicationContext: Context) {
 	)
 
 	private val exoRepository = ExoRepositoryImpl(
-		databaseControllerRepository = DatabaseControllerRepositoryImpl.getInstance(applicationContext)
+		databaseControllerRepository
 	)
 
 	private val exoFavouritesRepository = ExoFavouritesRepositoryImpl(
@@ -89,7 +95,7 @@ class CommonModule(applicationContext: Context) {
 	)
 
 	private val exoTrainRepository = ExoTrainRepositoryImpl(
-		databaseControllerRepository = DatabaseControllerRepositoryImpl.getInstance(applicationContext)
+		databaseControllerRepository
 	)
 
 	private val exoTrainFavouritesRepository = ExoTrainFavouritesRepositoryImpl(
@@ -113,7 +119,7 @@ class CommonModule(applicationContext: Context) {
 	)
 
 	val deleteDatabase = DeleteDatabase(
-		DatabaseControllerRepositoryImpl.getInstance(applicationContext),
+		databaseControllerRepository,
 		appStateRepository
 	)
 
@@ -135,9 +141,6 @@ class CommonModule(applicationContext: Context) {
 
 	private val notificationHandler = NotificationHandler(applicationContext)
 	val notificationsRepository = NotificationRepositoryImpl(notificationHandler)
-
-	val loggerImpl = LoggerImpl()
-	val networkMonitor = NetworkMonitor.getInstance(applicationContext, loggerImpl)
 
 	val saveAllNotifSettings = SaveAllNotifSettings(settingsRepository, appStateRepository)
 

@@ -11,13 +11,14 @@ class Bus2GoApplication(): BaseBus2GoApplication() {
 
 	override fun onCreate() {
 		super.onCreate()
+		//check if an apk exists, and delete it if useless
 		manageApkFiles()
 	}
 
 	//TODO move this code to data layer and use useCases instead, and should only be used in the indep flavour
 	private fun manageApkFiles(){
 		//check if an apk of the app exists in the cache. if it does and current version is newer, delete older version
-		coroutineScope.launch {
+		applicationScope.launch {
 			val file = File(applicationContext.cacheDir, FILE_NAME)
 
 			if (file.exists()) {

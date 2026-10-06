@@ -12,14 +12,16 @@ import dev.mainhq.bus2go.domain.use_case.ScheduleDownloadDatabaseTask
 
 class AppModule(applicationContext: Context) {
 
+	val loggerImpl = LoggerImpl()
+	val networkMonitor = NetworkMonitor.getInstance(applicationContext, loggerImpl)
+
 	val dbDownloadRepository = DebugDatabaseDownloadRepositoryImpl(
 		//may be defined during runtime (from settings in case it is customised)
 		BuildConfig.LOCAL_HOST,
 		applicationContext.filesDir,
-		(applicationContext as Bus2GoApplication).commonModule.networkMonitor,
-		applicationContext.commonModule.loggerImpl
+		networkMonitor,
+		loggerImpl
 	)
 
 	val checkIsBus2GoServer = CheckIsBus2GoServer(dbDownloadRepository)
-
 }

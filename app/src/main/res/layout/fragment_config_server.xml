@@ -43,7 +43,7 @@
             android:id="@+id/config_select_server_textInputLayout"
             android:layout_width="250dp"
             android:layout_height="70dp"
-            android:hint="api.bus2go.app"
+            android:hint="bus2go.app"
             app:helperTextEnabled="true"
             app:helperText="An ip address..."
             android:layout_marginHorizontal="25dp"

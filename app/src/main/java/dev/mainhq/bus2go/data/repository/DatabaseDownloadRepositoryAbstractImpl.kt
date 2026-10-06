@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -59,10 +60,14 @@ abstract class DatabaseDownloadRepositoryAbstractImpl: DatabaseDownloadRepositor
 			onError = { Result.Success(false) },
 			onSuccess = { res ->
 				//before returning success, read the message and compare
+				//sends an IllegalArgumentException if the field does not exist
 				val response = Json.decodeFromString<JsonObject>(res.data.readRemaining().readText())
-				val message = response["message"]?.jsonPrimitive?.content
-				val version = response["version"]?.jsonPrimitive?.content
-				message == EXPECTED_MESSAGE && version == API_VERSION
+//				val message = response["message"]?.jsonPrimitive?.content
+				//get rid of minor version
+				val version = response["version"]?.jsonPrimitive?.content?.substringBefore('.')
+				//get rid of v letter
+				version == API_VERSION.substring(1)
+//				message == EXPECTED_MESSAGE && version == API_VERSION
 			},
 			networkMonitor = networkMonitor,
 			logger = logger,

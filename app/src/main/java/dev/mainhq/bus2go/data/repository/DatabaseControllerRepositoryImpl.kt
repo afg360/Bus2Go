@@ -1,31 +1,28 @@
 package dev.mainhq.bus2go.data.repository
 
 import android.content.Context
-import android.util.Log
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import dev.mainhq.bus2go.Bus2GoApplication
 import dev.mainhq.bus2go.data.data_source.local.database.exo.AppDatabaseExo
 import dev.mainhq.bus2go.data.data_source.local.database.stm.AppDatabaseSTM
 import dev.mainhq.bus2go.domain.core.Bus2GoLocalDatabase
+import dev.mainhq.bus2go.domain.core.Logger
 import dev.mainhq.bus2go.domain.entity.DatabaseAgency
 import dev.mainhq.bus2go.domain.repository.DatabaseControllerRepository
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.time.Duration.Companion.milliseconds
 
 
+//FIXME this is a fragile design using our application class and app module which is supposed to be
 class DatabaseControllerRepositoryImpl private constructor(
 	private val applicationContext: Context,
+	private val loggerImpl: Logger?
 ): DatabaseControllerRepository {
 
 	private val dataDir = applicationContext.dataDir
@@ -37,8 +34,8 @@ class DatabaseControllerRepositoryImpl private constructor(
 		private var INSTANCE: DatabaseControllerRepositoryImpl? = null
 
 		@Synchronized
-		fun getInstance(applicationContext: Context): DatabaseControllerRepositoryImpl {
-			return INSTANCE ?: DatabaseControllerRepositoryImpl(applicationContext).also { INSTANCE = it }
+		fun getInstance(applicationContext: Context, loggerImpl: Logger?): DatabaseControllerRepositoryImpl {
+			return INSTANCE ?: DatabaseControllerRepositoryImpl(applicationContext, loggerImpl).also { INSTANCE = it }
 		}
 	}
 
@@ -102,7 +99,7 @@ class DatabaseControllerRepositoryImpl private constructor(
 		}
 		catch (_: IOException) {
 			//FIXME shouldnt have that logcat here but is convenient @ the moment...
-			Log.e("DATABASES", "$databaseName database not found...")
+			loggerImpl?.error("DATABASES", "$databaseName database not found...")
 			return null
 		}
 	}
@@ -131,7 +128,7 @@ class DatabaseControllerRepositoryImpl private constructor(
 			if (file.exists()) {
 				val deleted = file.delete()
 				if (!deleted) {
-					Log.e("DB_DELETE", "Failed to delete: ${file.name}")
+					loggerImpl?.error("DB_DELETE", "Failed to delete: ${file.name}")
 					allDeleted = false
 				}
 			}
@@ -144,7 +141,7 @@ class DatabaseControllerRepositoryImpl private constructor(
 			if (file.exists()) {
 				val deleted = file.delete()
 				if (!deleted) {
-					Log.e("DB_DELETE", "Failed to delete: ${file.name}")
+					loggerImpl?.error("DB_DELETE", "Failed to delete: ${file.name}")
 					allDeleted = false
 				}
 			}

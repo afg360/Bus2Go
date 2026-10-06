@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -164,11 +163,13 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
 
         launchViewModelCollectLatest(homeFragmentViewModel.searchQuery){ results ->
             when(results){
-                is UiState.Error -> Log.e("DATABASE", "You have jack shit: ${results.message}")
+                is UiState.Error -> {
+                    toast("No database is installed")
+                }
                 UiState.Loading -> throw IllegalStateException("Wtf")
                 is UiState.Success<List<RouteInfo>> ->
                     busListAdapter.updateData(results.data)
-                UiState.Init -> TODO()
+                UiState.Init -> {}
             }
         }
 
