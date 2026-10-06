@@ -36,11 +36,13 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import java.io.File
 
-
-//TODO
+//TODO not implemented
 /** Manages new app update downloads and installations */
-class UpdateManagerWorker(context: Context, workerParams: WorkerParameters,
-                          /*private val notificationManager: NotificationManager */ //FIXME For testing purposes
+class UpdateManagerWorker(
+	context: Context,
+	workerParams: WorkerParameters,
+	//FIXME For testing purposes
+	//private val notificationManager: NotificationManager
 	) : CoroutineWorker(context, workerParams ) {
 
 	companion object {
@@ -58,7 +60,7 @@ class UpdateManagerWorker(context: Context, workerParams: WorkerParameters,
 		val githubReleases = "https://api.github.com/repos/afg360/bus2go/releases"
 
 		//TODO move this to Domain and Data Layer
-		val client = HttpClient(OkHttp){}
+		val client = HttpClient(OkHttp) {}
 		val httpResponse: HttpResponse = client.get(githubReleases) {
 			headers {
 				append(HttpHeaders.Accept, "application/vnd.github+json")
@@ -66,18 +68,23 @@ class UpdateManagerWorker(context: Context, workerParams: WorkerParameters,
 		}
 		when (httpResponse.status.value) {
 			in 200..299 -> {
-				Log.d("UPDATES-FETCHING", "Fetched succesfully github")
+				Log.d("UPDATES-FETCHING", "Fetched successfully github")
 				//we are getting the latest release,
 				//FIXME includes pre-releases, for development...
 				val latestRelease = Json.decodeFromString(JsonArray.serializer(), httpResponse.body()).toList()[0].jsonObject
 				//check tag name, which is essentially version name
-				val tagVersion = VersionName(latestRelease["tag_name"]?.jsonPrimitive?.contentOrNull ?: throw IllegalStateException("Tag name seems to not exist? Either wrong parsing or something shitty happened..."))
+				val tagVersion = VersionName(latestRelease["tag_name"]?.jsonPrimitive?.contentOrNull
+					?: throw IllegalStateException("Tag name seems to not exist? Either wrong parsing or something shitty happened..."))
 				val localVersionName = VersionName(applicationContext.packageManager.getPackageInfo(applicationContext.packageName, 0)
 					.versionName ?: throw IllegalStateException("Cannot have a nulled value version name!"))
 
 				val channelId = "Updates"
 				val notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-				val channel = NotificationChannel(channelId, "Software Updates", NotificationManager.IMPORTANCE_DEFAULT)
+				val channel = NotificationChannel(
+					channelId,
+					"Software Updates",
+					NotificationManager.IMPORTANCE_DEFAULT
+				)
 				//notificationManager.createNotificationChannel(channel)
 
 				if (localVersionName < tagVersion){
@@ -112,7 +119,10 @@ class UpdateManagerWorker(context: Context, workerParams: WorkerParameters,
 						autoUpdate(client, downloadLink.jsonPrimitive.content, notificationManager, channelId)
 					}
 					else{
-						val intent = Intent(Intent.ACTION_VIEW, Uri.parse(downloadLink.jsonPrimitive.content))
+						val intent = Intent(
+							Intent.ACTION_VIEW,
+							Uri.parse(downloadLink.jsonPrimitive.content)
+						)
 						val pendingIntent = PendingIntent.getActivity(applicationContext, 0, intent, PendingIntent.FLAG_IMMUTABLE)
 
 						val notification = NotificationCompat.Builder(applicationContext, channelId)
@@ -164,7 +174,7 @@ class UpdateManagerWorker(context: Context, workerParams: WorkerParameters,
 
 		//do not redownload apk if already downloaded correctly
 		if (!file.exists()){
-			val tmpFile = withContext(Dispatchers.IO){
+			val tmpFile = withContext(Dispatchers.IO) {
 				File(applicationContext.cacheDir, "$FILE_NAME.part")
 			}
 
@@ -242,7 +252,7 @@ class UpdateManagerWorker(context: Context, workerParams: WorkerParameters,
 			.setFullScreenIntent(pendingIntent, true)
 			.setAutoCancel(true)
 			.build()
-		withContext(Dispatchers.Main){
+		withContext(Dispatchers.Main) {
 			notificationManager.cancel(NOTIF_ID)
 			notificationManager.notify(NOTIF_ID, updatedNotification)
 		}

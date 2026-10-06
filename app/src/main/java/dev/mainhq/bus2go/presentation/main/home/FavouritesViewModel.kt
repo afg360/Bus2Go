@@ -174,7 +174,7 @@ class FavouritesViewModel(
 					}
 				}
 		)
-	}.stateIn(viewModelScope, started = SharingStarted.Companion.WhileSubscribed(5000), initialValue = UiState.Loading)
+	}.stateIn(viewModelScope, started = SharingStarted.WhileSubscribed(5000), initialValue = UiState.Loading)
 
     fun selectTag(tag: String){
         _selectedTag.update { tag }

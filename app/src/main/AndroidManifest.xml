@@ -5,7 +5,6 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
 
     <application
         android:name=".Bus2GoApplication"
@@ -19,49 +18,46 @@
         android:theme="@style/Bus2Go.MaterialTheme"
         tools:targetApi="31"
         >
-        <!-- Used for FileProvider class, to install the downloaded update apk -->
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.provider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/provider_paths" />
-        </provider>
+        
         <receiver android:name=".presentation.main.alarms.AlarmReceiver" />
         <activity
             android:name=".presentation.config.ConfigActivity"
-            android:exported="false"/>
+            android:exported="false"
+            />
         <activity
             android:name=".presentation.stop_direction.StopDirectionActivity"
             android:exported="false"
             >
 
         </activity>
-        <activity android:name=".presentation.stop_times.StopTimesActivity"
-            android:exported="false">
+        <activity
+            android:name=".presentation.stop_times.StopTimesActivity"
+            android:exported="false"
+            >
 
         </activity>
-        <activity android:name=".presentation.launcher.LauncherActivity"
-            android:exported="true">
+        <activity
+            android:name=".presentation.launcher.LauncherActivity"
+            android:exported="true"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         
-        <!-- Need to change the android:theme attr -->
         <activity
             android:name=".presentation.main.MainActivity"
-            android:exported="true">
+            android:exported="true"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
         <activity
             android:name=".presentation.settings.SettingsActivity"
-            android:exported="false">
+            android:exported="false"
+            >
         </activity>
     </application>
 

@@ -24,16 +24,16 @@ android {
         }
     }
     
-    flavorDimensions += [ "dbPackaging" ]
+    flavorDimensions += [ "distribution" ]
     productFlavors {
-        liteDb {
+        fdroid {
             isDefault true
-            dimension "dbPackaging"
-            applicationIdSuffix ".lite"
+            dimension "distribution"
+            applicationIdSuffix ".fdroid"
         }
-        bundledDb {
-            dimension "dbPackaging"
-            applicationIdSuffix ".bundled"
+        indep {
+            dimension "distribution"
+            applicationIdSuffix ".indep"
         }
     }
     
