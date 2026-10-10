@@ -81,6 +81,17 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         
+        applicationVariants.all { variant ->
+            variant.outputs.all { output ->
+                def appName = "bus2go"
+                def flavor = variant.flavorName ? "-${variant.flavorName}" : ""
+                def buildType = (variant.buildType.name != "release") ? "-${variant.buildType.name}" : ""
+                def versionName = variant.versionName
+                
+                outputFileName = "${appName}${flavor}${buildType}-v${versionName}.apk"
+            }
+        }
+        
     }
     
     //TODO add lint option to fail build if unused imports ONLY FOR RELEASE BUILDS
