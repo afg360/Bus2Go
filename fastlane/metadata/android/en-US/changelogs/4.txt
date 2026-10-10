@@ -1,0 +1,11 @@
+New
+* Local data will be reset because of an internal database structure change
+* First-time setup configuration screen
+* Independent database downloads via foo-backend
+* bus2go.app website is released and available to be used with the app
+
+Improved
+* Warning when searching routes without a downloaded database
+* Home screen category filters and text truncation
+* Refined UI styling and direction selection animations
+* Bug fixes

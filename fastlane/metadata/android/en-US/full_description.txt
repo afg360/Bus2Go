@@ -1,0 +1,1 @@
+Bus2Go is a free and open-source Android app providing direct access to public transit data without location tracking, analytics, or third-party ad networks.
