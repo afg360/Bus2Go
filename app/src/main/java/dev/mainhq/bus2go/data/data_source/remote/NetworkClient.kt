@@ -12,7 +12,6 @@ import io.ktor.client.request.prepareGet
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.Url
 import io.ktor.utils.io.ByteReadChannel
-import java.io.File
 import java.io.IOException
 import java.net.ConnectException
 import java.util.concurrent.TimeUnit

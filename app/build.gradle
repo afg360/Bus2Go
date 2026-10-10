@@ -42,16 +42,12 @@ android {
     localProperties.load(new FileInputStream(rootProject.file("local.properties")))
     
     signingConfigs {
-        alpha {
-            storeFile rootProject.file("bus2go.jks")
-            storePassword localProperties.getProperty("STORE_PASSWORD")
-            keyAlias localProperties.getProperty("KEY_ALPHA")
-            keyPassword localProperties.getProperty("KEY_ALPHA_PASSWORD")
-        }
+        def bus2goStoreFile = rootProject.file("bus2go.pkcs12")
+        def bus2goStoreFilePassword = localProperties.getProperty("STORE_PASSWORD")
         
         release {
-            storeFile rootProject.file("bus2go.jks")
-            storePassword localProperties.getProperty("STORE_PASSWORD")
+            storeFile bus2goStoreFile
+            storePassword bus2goStoreFilePassword
             keyAlias localProperties.getProperty("KEY_RELEASE")
             keyPassword localProperties.getProperty("KEY_RELEASE_PASSWORD")
         }
@@ -60,9 +56,6 @@ android {
     sourceSets {
         androidTest.assets.srcDirs += files("$projectDir/schemas".toString())
         
-        alpha {
-            java.srcDirs 'src/release/kotlin'
-        }
         release {
             java.srcDirs 'src/release/kotlin'
         }
@@ -80,16 +73,8 @@ android {
             buildConfigField "int", "DEFAULT_PORT", "${localProperties.getProperty('DEFAULT_PORT', '8000')}"
         }
         
-        alpha {
-            applicationIdSuffix ".alpha"
-            versionNameSuffix "-alpha"
-            debuggable true
-            minifyEnabled false
-            signingConfig signingConfigs.alpha
-            //proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-        
         release {
+            versionNameSuffix "-alpha" //TODO can be removed when upgrading to a fully non alpha version
             debuggable false
             minifyEnabled true
             signingConfig signingConfigs.release
@@ -106,9 +91,11 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_1_8
     }
+    
     buildFeatures {
         viewBinding true
     }
@@ -135,8 +122,6 @@ dependencies {
     def work_version = "2.9.1"
     implementation "androidx.work:work-runtime-ktx:$work_version"
     
-    //runtimeOnly 'io.mockk:mockk-android:1.13.17'
-    
     def data_store_version = "1.1.1"
     //DataStore
     implementation "androidx.datastore:datastore-preferences:$data_store_version"
@@ -150,7 +135,6 @@ dependencies {
 
     def room_version = "2.6.1"
     implementation "androidx.room:room-runtime:$room_version"
-    implementation "androidx.room:room-testing:$room_version"
 
     // To use Kotlin annotation processing tool (kapt)
     ksp "androidx.room:room-compiler:$room_version"
@@ -160,12 +144,10 @@ dependencies {
     // Ktor Core
     def ktor_version = "2.0.3"
     implementation "io.ktor:ktor-client-core:$ktor_version"
-    implementation "io.ktor:ktor-client-core-jvm:$ktor_version"
     implementation "io.ktor:ktor-client-websockets:$ktor_version"
 
     // Ktor HTTP client dependencies
     implementation "io.ktor:ktor-client-okhttp:$ktor_version"
-    implementation "io.ktor:ktor-client-cio:$ktor_version"
     
     def mockWebServer_version = "1.2.1"
     //Unit Testing

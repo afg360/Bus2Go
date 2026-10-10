@@ -19,4 +19,5 @@ local.properties
 *.norg
 **/.env
 *.jks
+*.pkcs12
 .claude/
