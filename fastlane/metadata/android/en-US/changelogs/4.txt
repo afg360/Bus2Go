@@ -1,7 +1,10 @@
-New
+Notes
+* Exo database is not ready yet
 * Local data will be reset because of an internal database structure change
+
+New
 * First-time setup configuration screen
-* Independent database downloads via foo-backend
+* Independent database downloads via bus2go-backend
 * bus2go.app website is released and available to be used with the app
 
 Improved
