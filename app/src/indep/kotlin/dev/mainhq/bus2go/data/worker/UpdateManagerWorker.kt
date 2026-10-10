@@ -1,4 +1,4 @@
-package dev.mainhq.bus2go.data.worker
+package dev.mainhq.android.data.worker
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -10,7 +10,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.FileProvider
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import dev.mainhq.bus2go.Bus2GoApplication
+import dev.mainhq.android.Bus2GoApplication
 import dev.mainhq.bus2go.R
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body

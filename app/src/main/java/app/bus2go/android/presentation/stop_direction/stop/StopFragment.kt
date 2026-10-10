@@ -1,0 +1,146 @@
+package app.bus2go.android.presentation.stop_direction.stop
+
+import android.content.Intent
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
+import app.bus2go.android.Bus2GoApplication
+import app.bus2go.android.R
+import app.bus2go.android.databinding.FragmentChooseStopBinding
+import app.bus2go.android.domain.entity.getSameFavouriteItem
+import app.bus2go.android.presentation.stop_direction.AnimationDirection
+import app.bus2go.android.presentation.stop_direction.StopDirectionViewModel
+import app.bus2go.android.presentation.stop_times.StopTimesActivity
+import app.bus2go.android.presentation.utils.ExtrasTagNames
+import app.bus2go.android.utils.launchViewModelCollectLatest
+
+//todo
+//instead of doing a huge query on getting the time, we could first retrieve
+//all the possible stations (ordered by id, and prob based on localisation? -> not privacy friendly
+//and once the user clicks, either new activity OR new fragment? -> in the latter case need to implement onback
+//todo add possibility of searching amongst all the stops
+class StopFragment : Fragment(R.layout.fragment_choose_stop) {
+
+    private val viewModel : StopFragmentViewModel by activityViewModels {
+        object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                @Suppress("UNCHECKED_CAST")
+                return (this@StopFragment.requireActivity().application as Bus2GoApplication)
+                    .let {
+                        StopFragmentViewModel(
+                            addFavourite = it.commonModule.addFavourite,
+                            removeFavourite = it.commonModule.removeFavourite,
+                            getFavourites = it.commonModule.getFavourites,
+                        ) as T
+                    }
+            }
+        }
+    }
+
+    private val sharedActivityViewModel: StopDirectionViewModel by activityViewModels()
+
+    private var _binding: FragmentChooseStopBinding? = null
+    private val binding get() = _binding!!
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
+    ): View? {
+        _binding = FragmentChooseStopBinding.inflate(inflater)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+		//TODO retrieve the StopName and the direction, and display it in the view
+        val adapter = StopListElemsAdapter(
+            viewModel.stopNames.value,
+            viewModel.favourites.value.flatMap { it.value },
+            //TODO update the little star
+            toggleFavouritesClickListener = { view, innerTransitData ->
+                val favouriteItem = viewModel.favourites.value.flatMap { it.value }.getSameFavouriteItem(innerTransitData)
+                if (favouriteItem != null){
+                    viewModel.removeFavourite(favouriteItem)
+                    view.findViewById<ImageView>(R.id.favourite_star_selection)
+                        .setBackgroundResource(R.drawable.favourite_drawable_off)
+                }
+                else {
+                    viewModel.addFavourite(innerTransitData)
+                    view.findViewById<ImageView>(R.id.favourite_star_selection)
+                        .setBackgroundResource(R.drawable.favourite_drawable_on)
+                }
+            },
+            onClickListener = {
+                sharedActivityViewModel.toTimesActivity()
+                val intent = Intent(requireContext(), StopTimesActivity::class.java)
+                //FIXME send another class model instead
+                intent.putExtra(ExtrasTagNames.TRANSIT_DATA, it)
+                startActivity(intent)
+            }
+        )
+        binding.chooseStopRecycleView.layoutManager = LinearLayoutManager(requireContext())
+        binding.chooseStopRecycleView.adapter = adapter
+
+        launchViewModelCollectLatest(viewModel.stopNames){
+            adapter.updateTransitData(it)
+            if (it.isEmpty()) {
+                Toast.makeText(requireContext(), "No stops found...", Toast.LENGTH_SHORT).show()
+            }
+        }
+        launchViewModelCollectLatest(viewModel.favourites){ favourites ->
+            adapter.updateFavourites(favourites.flatMap { it.value })
+        }
+
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner,
+            object: OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    if (sharedActivityViewModel.previousAnimationDirection.value != null){
+                        val cachedValue = sharedActivityViewModel.previousAnimationDirection.value
+                        sharedActivityViewModel.resetCache()
+                        when(cachedValue){
+                            AnimationDirection.TO_TOP -> sharedActivityViewModel.setAnimationDirection(AnimationDirection.FROM_TOP)
+                            AnimationDirection.TO_BOTTOM -> sharedActivityViewModel.setAnimationDirection(AnimationDirection.FROM_BOTTOM)
+                            else -> {
+                                Toast.makeText(requireContext(), "Wtf...", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                    else {
+                        when (sharedActivityViewModel.animationDirection.value) {
+                            AnimationDirection.TO_TOP -> sharedActivityViewModel.setAnimationDirection(
+                                AnimationDirection.FROM_TOP
+                            )
+
+                            AnimationDirection.TO_BOTTOM -> sharedActivityViewModel.setAnimationDirection(
+                                AnimationDirection.FROM_BOTTOM
+                            )
+
+                            else -> {
+                                Toast.makeText(requireContext(), "Wtf...", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
+                        }
+                    }
+                    isEnabled = false
+                }
+            }
+        )
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+}

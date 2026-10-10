@@ -9,11 +9,11 @@ plugins {
 }
 
 android {
-    namespace 'dev.mainhq.bus2go'
+    namespace 'app.bus2go.android'
     compileSdk 34
     
     defaultConfig {
-        applicationId "dev.mainhq.bus2go"
+        applicationId "app.bus2go.android"
         minSdk 26
         targetSdk 34
         versionCode 4

@@ -1,0 +1,262 @@
+package app.bus2go.android.data.repository
+
+import app.bus2go.android.data.data_source.remote.NetworkClient
+import app.bus2go.android.data.data_source.remote.NetworkMonitor
+import app.bus2go.android.domain.core.Logger
+import app.bus2go.android.domain.repository.DatabaseDownloadRepository
+import app.bus2go.android.domain.core.Result
+import app.bus2go.android.domain.entity.AppVersions
+import app.bus2go.android.domain.entity.DatabaseAgency
+import app.bus2go.android.domain.entity.Progress
+import app.bus2go.android.domain.entity.ServerChoice
+import app.bus2go.android.domain.exceptions.NetworkException
+import io.ktor.client.call.body
+import io.ktor.http.URLBuilder
+import io.ktor.http.URLProtocol
+import io.ktor.utils.io.ByteReadChannel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.int
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.IOException
+import java.util.zip.GZIPInputStream
+
+abstract class DatabaseDownloadRepositoryAbstractImpl: DatabaseDownloadRepository {
+	protected abstract val protocol : URLProtocol
+	protected abstract val defaultPort : Int
+	protected abstract val filesDir: File
+	protected abstract val networkMonitor: NetworkMonitor
+	protected abstract val logger: Logger?
+	protected abstract val tag: String
+
+	override val DB_NAME_STM = "stm_data"
+	override val DB_NAME_EXO = "exo_data"
+
+	companion object {
+		const val COMPRESSION_EXT = "gz"
+		private const val EXPECTED_MESSAGE = "This is a Bus2Go server... potentially"
+		private const val API_VERSION = "v1"
+	}
+
+	protected suspend fun _getIsBus2Go(str: String, isLocal: Boolean): Result<Boolean> {
+		//TODO eventually also set a header to send to prove perhaps identity from client
+		return NetworkClient.call(
+			URLBuilder(
+				protocol = protocol,
+				host = str,
+				port = defaultPort,
+				pathSegments = listOf("api", "version")
+			).build(),
+			onError = { Result.Success(false) },
+			onSuccess = { res ->
+				//before returning success, read the message and compare
+				//sends an IllegalArgumentException if the field does not exist
+				val response = Json.decodeFromString<JsonObject>(res.data.readRemaining().readText())
+//				val message = response["message"]?.jsonPrimitive?.content
+				//get rid of minor version
+				val version = response["version"]?.jsonPrimitive?.content?.substringBefore('.')
+				//get rid of v letter
+				version == API_VERSION.substring(1)
+//				message == EXPECTED_MESSAGE && version == API_VERSION
+			},
+			networkMonitor = networkMonitor,
+			logger = logger,
+			tag = tag,
+			isLocal = isLocal
+		)
+	}
+
+
+	protected suspend fun _getDbUpToDateVersion(serverChoice: ServerChoice, databaseAgency: DatabaseAgency): Result<Int> {
+		return NetworkClient.call(
+			URLBuilder(
+				protocol = protocol,
+				host = serverChoice.server,
+				port = defaultPort,
+				pathSegments = listOf("api", "download", API_VERSION, databaseAgency.name.lowercase(), "version")
+			).build(),
+			onError = { Result.Error(it, "Wrong call to api...?") },
+			onSuccess = { res ->
+				Json.decodeFromString<JsonObject>(res.data.readRemaining().readText())["version"]
+					?.jsonPrimitive?.int ?: -1
+			},
+			networkMonitor = networkMonitor,
+			logger = logger,
+			tag = tag,
+			isLocal = serverChoice.isSelfHosted
+		)
+	}
+
+	protected suspend fun _getAllDbUpToDateVersion(serverChoice: ServerChoice): Result<Map<DatabaseAgency, Int>> {
+		return NetworkClient.call(
+			URLBuilder(
+				protocol = protocol,
+				host = serverChoice.server,
+				port = defaultPort,
+				//FIXME needs to be replaced since "all" is not a valid endpoint
+				pathSegments = listOf("api", "download", API_VERSION, "versions")
+			).build(),
+			onError = { Result.Error(null, "Wrong call to api...?") },
+			onSuccess = { res ->
+				Json.decodeFromString<JsonArray>(res.data.readRemaining().readText())
+					.flatMap {
+						when(it.jsonObject["database"]?.jsonPrimitive?.toString()) {
+							"stm" -> {
+								listOf(DatabaseAgency.STM to (it.jsonObject["version"]?.jsonPrimitive?.int ?: -1))
+							}
+							"exo" -> {
+								listOf(DatabaseAgency.EXO to (it.jsonObject["version"]?.jsonPrimitive?.int ?: -1))
+							}
+							else -> { listOf() }
+						}
+					}
+					.toMap()
+			},
+			networkMonitor = networkMonitor,
+			logger = logger,
+			tag = tag,
+			isLocal = serverChoice.isSelfHosted
+		)
+	}
+
+	protected suspend fun _getAppVersionCodeRequired(serverChoice: ServerChoice): Result<AppVersions> {
+		return NetworkClient.call(
+			url = URLBuilder(
+				protocol = protocol,
+				host = serverChoice.server,
+				port = defaultPort,
+				pathSegments = listOf("api", "download", API_VERSION, "app-version-code-required")
+			).build(),
+			onError = { Result.Error(null, "Wrong api call") },
+			onSuccess = {
+				Json.decodeFromString<AppVersions>(it.data.readRemaining().readText())
+			},
+			networkMonitor = networkMonitor,
+			logger = logger,
+			tag = tag,
+			isLocal = serverChoice.isSelfHosted
+		)
+	}
+
+	protected fun _getDb(serverChoice: ServerChoice, databaseAgency: DatabaseAgency, versionNeeded: Int): Flow<Progress> {
+		return flow {
+			emit(Progress.Idle)
+			val url = URLBuilder(
+				protocol = protocol,
+				host = serverChoice.server,
+				port = defaultPort,
+				pathSegments = when(databaseAgency){
+					DatabaseAgency.STM -> listOf("api", "download", API_VERSION, "stm")//"debug", "sample_data", "stm")
+					DatabaseAgency.EXO -> listOf("api", "download", API_VERSION, "exo")
+				}
+			).build()
+
+			//saves the file in the filesDir, needs to be moved to the databases dir
+			val dbNameList = when(databaseAgency){
+				DatabaseAgency.STM -> listOf(DB_NAME_STM)
+				DatabaseAgency.EXO -> listOf(DB_NAME_EXO)
+			}
+
+			NetworkClient.getAndExecute(url, serverChoice.isSelfHosted){
+				var tmpCompressedFile: File? = null
+				try {
+					val contentLength = it.headers["content-length"]?.toInt()
+						?: throw NetworkException("Content-Length HTTP header not set by server...")
+					val channel = it.body<ByteReadChannel>()
+					//FIXME better parsing should happen here in case quotes and other garbage is added...
+					val fileName = it.headers["content-disposition"]?.substringAfter("attachment; filename=")
+						?: throw NetworkException("Content-Disposition HTTP header needed for file name not set by server...")
+					logger?.debug(tag, fileName)
+					tmpCompressedFile = File(filesDir, "$fileName.part")
+					var lastNotifTime = System.currentTimeMillis()
+					var totalDownloaded = 0
+
+					emit(Progress.Downloading(0, contentLength))
+					//download of compressed databases
+					FileOutputStream(tmpCompressedFile).use { outputStream ->
+						val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+						while (!channel.isClosedForRead){
+							val bytesRead = channel.readAvailable(buffer, 0, buffer.size)
+							if (bytesRead <= 0) break
+							outputStream.write(buffer, 0, bytesRead)
+							totalDownloaded += bytesRead
+
+							//show a new notification only every 1.5 secs...
+							val currentTime = System.currentTimeMillis()
+							if ((currentTime - lastNotifTime) > 1500L) {
+								lastNotifTime = currentTime
+								emit(Progress.Downloading(totalDownloaded, contentLength))
+							}
+						}
+					}
+
+					val compressedFile = File(filesDir, "${dbNameList.first()}_${versionNeeded}.db.gz")
+					//FIXME how to find name if it is variable...
+					if (!tmpCompressedFile.renameTo(compressedFile))
+						throw IOException("Failed to rename downloaded file to a compressed file")
+					emit(Progress.Completed(totalDownloaded >= contentLength))
+
+					//also, should probably simply perform a hashing thing to be sure it has been done correctly
+				}
+				catch (ne: NetworkException){
+					emit(Progress.Failed("A network exception occured", ne))
+					tmpCompressedFile?.delete()
+				}
+				catch (ioe: IOException){
+					emit(Progress.Failed("IOException...", ioe))
+					tmpCompressedFile?.delete()
+				}
+				catch (e: Exception){
+					emit(Progress.Failed("Exception...", e))
+					tmpCompressedFile?.delete()
+				}
+			}
+		}.flowOn(Dispatchers.IO)
+	}
+
+	override fun decompressFile(dbPath: String, dbName: String, version: Int): Flow<Progress> {
+		return flow {
+			//FIXMe for now the final file name doesnt contain db version, add it eventually (see abstrack Room classes)
+			// or store it directly inside the db inside a config/metadata table
+			val destFile = File(dbPath, "$dbName.db").also { it.parentFile?.mkdirs() }
+
+			val compressedFile = File(filesDir, "${dbName}_${version}.db.gz")
+			if (destFile.exists()) destFile.delete()
+
+			logger?.debug(tag, "Decompressing")
+			FileInputStream(compressedFile).use { fileIn ->
+				GZIPInputStream(fileIn).use { zstdIn ->
+					FileOutputStream(destFile).use { fileOut ->
+						emit(Progress.Idle)
+						val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+						var bytesRead: Int
+						try{
+							while (zstdIn.read(buffer).also { bytesRead = it } != -1) {
+								fileOut.write(buffer, 0, bytesRead)
+							}
+							emit(Progress.Completed(true))
+						}
+						catch (ioe: IOException){
+							logger?.error(tag, ioe.message.toString())
+							//delete garbage/corrupted files
+							if (compressedFile.exists()) compressedFile.delete()
+							if (destFile.exists()) destFile.delete()
+							emit(Progress.Completed(false))
+						}
+					}
+				}
+			}
+		}.flowOn(Dispatchers.IO)
+	}
+
+
+}

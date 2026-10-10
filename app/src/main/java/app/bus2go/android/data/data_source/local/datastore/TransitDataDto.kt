@@ -1,0 +1,14 @@
+package app.bus2go.android.data.data_source.local.datastore
+
+import android.os.Parcelable
+import app.bus2go.android.data.data_source.local.datastore.tags.TagDto
+import kotlinx.serialization.Serializable
+
+@Serializable
+abstract class TransitDataDto: Parcelable {
+	abstract val id: String
+	abstract val routeId : String
+	abstract val stopName : String
+	abstract val direction : String
+	abstract val tags: List<TagDto>
+}
