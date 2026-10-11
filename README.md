@@ -18,7 +18,7 @@ This is normal, give the app about 10 seconds so that it has time to cache the d
 The application works in sync with the [Bus2Go-Backend](https://github.com/afg360/bus2go-backend),
 which you can self-host. More information is available on the projects GitHub page or at
 [https://bus2go.app](https://bus2go.app).
-This is the server used generate agency data files suitable for Bus2Go, and is also the application
+This is the server used to generate agency data files suitable for Bus2Go, and is also the application
 that will be used for the realtime data implementation.
 
 # Coming Soon
@@ -27,11 +27,34 @@ that will be used for the realtime data implementation.
 - Alarms → implement alarms that the user could set to notify him to get ready to get to the bus
 
 # Building from source
-To build from source, you can run 
+First clone the repo:
+```bash
+git clone "https://github.com/afg360/bus2go"
+cd bus2go
 ```
-./gradlew build
+Create a keystore file using the keytool utility used for signing the app:
+```bash
+keytool -genkeypair -v \
+  -keystore bus2go.pkcs12 \
+  -alias my-alias \
+  -keyalg RSA \
+  -keysize 2048 \
+  -validity 10000 \
+  -storetype PKCS12
 ```
-to build it.
+
+Create the `local.properties` file containing the keystore information:
+```bash
+echo -ne "STORE_PASSWORD=<your-keystore-password>\nKEY_RELEASE=release\nKEY_PASSWORD=<your-key-password>" > local.properties
+```
+
+`<your-keystore-password>` and `<your-key-password>` should be the same.
+
+You can finally generate the apk by running:
+```bash
+./gradlew assembleFdroidRelease
+```
+which will be located at `./app/build/outputs/apk/fdroid/release`.
 
 # Disclaimer
 The application is still in alpha version. It is not fully completed and may contain bugs. 
